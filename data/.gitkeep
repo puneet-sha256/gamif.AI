@@ -1,0 +1,2 @@
+# This file ensures the data directory is included in Git
+# while the actual JSON files with user data are excluded for privacy

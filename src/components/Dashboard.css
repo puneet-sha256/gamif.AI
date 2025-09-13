@@ -1,0 +1,291 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+.dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+  color: white;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: rgba(15, 15, 25, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.welcome-text {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  color: #8a2be2;
+  font-weight: 600;
+}
+
+.dashboard-logo h1 {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.8rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #8a2be2, #4169e1, #00bfff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+  text-shadow: 0 0 30px rgba(138, 43, 226, 0.5);
+}
+
+.dashboard-logo .subtitle {
+  font-size: 0.8rem;
+  color: #8a2be2;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+
+.logout-button {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #8a2be2, #4169e1);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.logout-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+}
+
+.dashboard-content {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.welcome-section h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.5rem;
+  margin: 0 0 10px 0;
+  background: linear-gradient(135deg, #8a2be2, #4169e1);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.welcome-section p {
+  font-size: 1.2rem;
+  color: #888;
+  margin: 0;
+}
+
+.profile-section,
+.goals-section {
+  margin-bottom: 40px;
+}
+
+.profile-card,
+.goals-card {
+  background: rgba(15, 15, 25, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(138, 43, 226, 0.1);
+}
+
+.profile-card h3,
+.goals-card h3 {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.5rem;
+  margin: 0 0 20px 0;
+  background: linear-gradient(135deg, #8a2be2, #4169e1);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.profile-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+}
+
+.profile-item:last-child {
+  border-bottom: none;
+}
+
+.profile-item .label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  color: #8a2be2;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.profile-item .value {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  color: white;
+  font-weight: 600;
+}
+
+.goals-display {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.goal-item {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(138, 43, 226, 0.2);
+  transition: all 0.3s ease;
+}
+
+.goal-item:hover {
+  border-color: rgba(138, 43, 226, 0.4);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.goal-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.goal-header .attribute-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #8a2be2, #4169e1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+}
+
+.goal-header h4 {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  color: white;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.goal-text {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  color: #ccc;
+  line-height: 1.6;
+  margin: 0;
+  padding: 10px 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: rgba(15, 15, 25, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  border-radius: 15px;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(138, 43, 226, 0.2);
+  border-color: rgba(138, 43, 226, 0.5);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #8a2be2, #4169e1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
+}
+
+.stat-info h3 {
+  margin: 0 0 5px 0;
+  font-size: 1rem;
+  color: #8a2be2;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  font-family: 'Orbitron', monospace;
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: 15px 20px;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .dashboard-logo h1 {
+    font-size: 1.5rem;
+  }
+  
+  .dashboard-content {
+    padding: 20px;
+  }
+  
+  .welcome-section h2 {
+    font-size: 2rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
