@@ -153,14 +153,14 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
             )}
 
             <div className="input-group">
-              <label htmlFor="email">{isLogin ? 'Hunter ID' : 'Email'}</label>
+              <label htmlFor="email">Email</label>
               <input
                 type="email"
                 id="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                placeholder={isLogin ? "Enter your hunter ID" : "Enter your email"}
+                placeholder="Enter your email"
                 required
               />
             </div>

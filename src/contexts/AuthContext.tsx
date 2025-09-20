@@ -8,6 +8,8 @@ interface AuthContextType {
   register: (userData: UserRegistration) => Promise<{ success: boolean; message: string }>
   logout: () => Promise<void>
   updateUser: (updates: Partial<User>) => Promise<boolean>
+  saveProfileData: (profileData: any) => Promise<boolean>
+  saveGoalsData: (goalsData: any) => Promise<boolean>
   isLoading: boolean
 }
 
@@ -92,12 +94,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return success
   }
 
+  const saveProfileData = async (profileData: any): Promise<boolean> => {
+    if (!user) return false
+
+    const success = await userDatabase.updateUser(user.id, { profileData })
+    if (success) {
+      setUser(prev => prev ? { ...prev, profileData } : null)
+    }
+    return success
+  }
+
+  const saveGoalsData = async (goalsData: any): Promise<boolean> => {
+    if (!user) return false
+
+    const success = await userDatabase.updateUser(user.id, { goalsData })
+    if (success) {
+      setUser(prev => prev ? { ...prev, goalsData } : null)
+    }
+    return success
+  }
+
   const value: AuthContextType = {
     user,
     login,
     register,
     logout,
     updateUser,
+    saveProfileData,
+    saveGoalsData,
     isLoading
   }
 
