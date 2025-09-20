@@ -8,28 +8,21 @@ interface GoalsSetupProps {
 }
 
 export interface GoalsData {
-  strengthGoal: string
-  intelligenceGoal: string
-  charismaGoal: string
+  longTermGoals: string
 }
 
 const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
   const [formData, setFormData] = useState<GoalsData>({
-    strengthGoal: '',
-    intelligenceGoal: '',
-    charismaGoal: ''
+    longTermGoals: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
   const { saveGoalsData } = useAuth()
 
-  const handleTextChange = (attribute: keyof GoalsData, value: string) => {
-    console.log('🔄 GoalsSetup: Goal changed:', attribute, '=', value.length > 0 ? `"${value.substring(0, 50)}..."` : 'empty')
-    setFormData(prev => ({
-      ...prev,
-      [attribute]: value
-    }))
+  const handleTextChange = (value: string) => {
+    console.log('🔄 GoalsSetup: Goals updated, length:', value.length)
+    setFormData({ longTermGoals: value })
     if (error) {
       console.log('✅ GoalsSetup: Clearing error state')
       setError('')
@@ -38,16 +31,18 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('🔄 GoalsSetup: Form submitted with goals:', {
-      strengthGoal: formData.strengthGoal ? 'set' : 'empty',
-      intelligenceGoal: formData.intelligenceGoal ? 'set' : 'empty', 
-      charismaGoal: formData.charismaGoal ? 'set' : 'empty'
-    })
+    console.log('🔄 GoalsSetup: Form submitted with goals length:', formData.longTermGoals.length)
     
     // Validation
-    if (!formData.strengthGoal.trim() && !formData.intelligenceGoal.trim() && !formData.charismaGoal.trim()) {
-      console.log('❌ GoalsSetup: Validation failed - at least one goal required')
-      setError('Please set at least one goal to continue')
+    if (!formData.longTermGoals.trim()) {
+      console.log('❌ GoalsSetup: Validation failed - goals are required')
+      setError('Please describe your long-term goals to continue')
+      return
+    }
+    
+    if (formData.longTermGoals.trim().length < 50) {
+      console.log('❌ GoalsSetup: Validation failed - goals too short')
+      setError('Please provide a more detailed description of your goals (at least 50 characters)')
       return
     }
     
@@ -81,9 +76,7 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
   }
 
   const isFormValid = () => {
-    return formData.strengthGoal.trim().length > 0 &&
-           formData.intelligenceGoal.trim().length > 0 &&
-           formData.charismaGoal.trim().length > 0
+    return formData.longTermGoals.trim().length >= 50
   }
 
   return (
@@ -118,78 +111,41 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
               </div>
             )}
 
-            <div className="attributes-section">
-              <div className="attribute-group">
-                <div className="attribute-header">
-                  <div className="attribute-icon">💪</div>
-                  <div className="attribute-info">
-                    <h3>Strength Goals</h3>
-                    <p>Physical power, fitness, and endurance objectives</p>
+            <div className="goals-section">
+              <div className="goals-group">
+                <div className="goals-header">
+                  <div className="goals-icon">🎯</div>
+                  <div className="goals-info">
+                    <h3>Long-Term Goals</h3>
+                    <p>Describe your comprehensive development objectives across all areas of life</p>
                   </div>
                 </div>
                 <div className="goal-input-container">
                   <textarea
-                    placeholder="Describe your strength and fitness goals... (e.g., 'I want to build muscle mass, improve my deadlift to 200lbs, run a 5K in under 25 minutes, and develop better overall physical endurance for daily activities.')"
-                    value={formData.strengthGoal}
-                    onChange={(e) => handleTextChange('strengthGoal', e.target.value)}
-                    className="goal-textarea"
-                    rows={4}
-                    required
-                    minLength={10}
-                    maxLength={500}
-                  />
-                  <div className="character-count">
-                    {formData.strengthGoal.length}/500
-                  </div>
-                </div>
-              </div>
+                    placeholder="Describe your long-term goals in detail. Feel free to use bullet points to organize your thoughts. Consider areas like:
+• Physical fitness and health
+• Learning and skill development
+• Career and professional growth
+• Social and interpersonal skills
+• Personal projects and hobbies
+• Financial objectives
+• Mental and emotional well-being
 
-              <div className="attribute-group">
-                <div className="attribute-header">
-                  <div className="attribute-icon">🧠</div>
-                  <div className="attribute-info">
-                    <h3>Intelligence Goals</h3>
-                    <p>Learning, skill development, and mental growth objectives</p>
-                  </div>
-                </div>
-                <div className="goal-input-container">
-                  <textarea
-                    placeholder="Describe your intelligence and learning goals... (e.g., 'I want to learn a new programming language, read 12 books this year, improve my problem-solving skills, and develop expertise in data analysis.')"
-                    value={formData.intelligenceGoal}
-                    onChange={(e) => handleTextChange('intelligenceGoal', e.target.value)}
+Example: 
+• Build muscle mass and improve cardiovascular health through consistent gym routine
+• Learn JavaScript and Python to advance my programming career
+• Develop better communication skills for leadership roles
+• Start a side business in digital marketing"
+                    value={formData.longTermGoals}
+                    onChange={(e) => handleTextChange(e.target.value)}
                     className="goal-textarea"
-                    rows={4}
+                    rows={12}
                     required
-                    minLength={10}
-                    maxLength={500}
+                    minLength={50}
+                    maxLength={2000}
                   />
                   <div className="character-count">
-                    {formData.intelligenceGoal.length}/500
-                  </div>
-                </div>
-              </div>
-
-              <div className="attribute-group">
-                <div className="attribute-header">
-                  <div className="attribute-icon">✨</div>
-                  <div className="attribute-info">
-                    <h3>Charisma Goals</h3>
-                    <p>Social skills, leadership, and interpersonal objectives</p>
-                  </div>
-                </div>
-                <div className="goal-input-container">
-                  <textarea
-                    placeholder="Describe your charisma and social goals... (e.g., 'I want to improve my public speaking skills, build stronger relationships, develop leadership abilities, and become more confident in social situations.')"
-                    value={formData.charismaGoal}
-                    onChange={(e) => handleTextChange('charismaGoal', e.target.value)}
-                    className="goal-textarea"
-                    rows={4}
-                    required
-                    minLength={10}
-                    maxLength={500}
-                  />
-                  <div className="character-count">
-                    {formData.charismaGoal.length}/500
+                    {formData.longTermGoals.length}/2000
                   </div>
                 </div>
               </div>
