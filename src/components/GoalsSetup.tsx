@@ -1,14 +1,11 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import type { GoalsData } from '../types'
 import './GoalsSetup.css'
 
 interface GoalsSetupProps {
   onComplete: (goalsData: GoalsData) => void
   onBack: () => void
-}
-
-export interface GoalsData {
-  longTermGoals: string
 }
 
 const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {

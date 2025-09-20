@@ -1,31 +1,7 @@
-export interface User {
-  id: string
-  username: string
-  email: string
-  createdAt: string
-  lastLogin?: string
-  profileData?: any
-  goalsData?: any
-  stats?: {
-    level: number
-    experience: number
-    strength: number
-    agility: number
-    intelligence: number
-    endurance: number
-  }
-}
+import type { User, UserRegistration, UserLogin, ProfileData, GoalsData } from '../types'
 
-export interface UserRegistration {
-  username: string
-  email: string
-  password: string
-}
-
-export interface UserLogin {
-  email: string
-  password: string
-}
+// Re-export types for backward compatibility
+export type { User, UserRegistration, UserLogin, ProfileData, GoalsData }
 
 const API_BASE_URL = 'http://localhost:3001/api'
 const SESSION_KEY = 'solo_leveling_session_id'

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { userDatabase } from '../services/fileUserDatabase'
-import type { User, UserRegistration, UserLogin } from '../services/fileUserDatabase'
+import type { User, UserRegistration, UserLogin, ProfileData, GoalsData } from '../types'
 
 interface AuthContextType {
   user: User | null
@@ -8,8 +8,8 @@ interface AuthContextType {
   register: (userData: UserRegistration) => Promise<{ success: boolean; message: string }>
   logout: () => Promise<void>
   updateUser: (updates: Partial<User>) => Promise<boolean>
-  saveProfileData: (profileData: any) => Promise<boolean>
-  saveGoalsData: (goalsData: any) => Promise<boolean>
+  saveProfileData: (profileData: ProfileData) => Promise<boolean>
+  saveGoalsData: (goalsData: GoalsData) => Promise<boolean>
   isLoading: boolean
 }
 
@@ -173,7 +173,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  const saveProfileData = async (profileData: any): Promise<boolean> => {
+  const saveProfileData = async (profileData: ProfileData): Promise<boolean> => {
     console.log('🔄 AuthContext: Saving profile data:', { 
       name: profileData.name, 
       age: profileData.age, 
@@ -202,11 +202,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  const saveGoalsData = async (goalsData: any): Promise<boolean> => {
+  const saveGoalsData = async (goalsData: GoalsData): Promise<boolean> => {
     console.log('🔄 AuthContext: Saving goals data:', {
-      strengthGoal: goalsData.strengthGoal ? 'set' : 'empty',
-      intelligenceGoal: goalsData.intelligenceGoal ? 'set' : 'empty',
-      charismaGoal: goalsData.charismaGoal ? 'set' : 'empty'
+      longTermGoals: goalsData.longTermGoals ? `${goalsData.longTermGoals.length} characters` : 'empty'
     })
     
     if (!user) {

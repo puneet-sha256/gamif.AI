@@ -1,16 +1,10 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import type { ProfileData } from '../types'
 import './ProfileSetup.css'
 
 interface ProfileSetupProps {
   onComplete: (profileData: ProfileData) => void
-}
-
-export interface ProfileData {
-  name: string
-  age: number
-  monthlyLimit: number
-  currency: string
 }
 
 const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
