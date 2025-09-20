@@ -1,5 +1,6 @@
 import './Dashboard.css'
 import { useAuth } from '../contexts/AuthContext'
+import { useEffect } from 'react'
 
 interface DashboardProps {
   onLogout: () => void
@@ -8,12 +9,29 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const { user, logout } = useAuth()
 
+  useEffect(() => {
+    console.log('🎯 Dashboard: Component mounted')
+    if (user) {
+      console.log('✅ Dashboard: User data loaded:', {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        hasProfile: !!user.profileData,
+        hasGoals: !!user.goalsData
+      })
+    } else {
+      console.log('⚠️ Dashboard: No user data available')
+    }
+  }, [user])
+
   const handleLogout = async () => {
+    console.log('🔄 Dashboard: Logout initiated by user')
     try {
       await logout()
+      console.log('✅ Dashboard: Logout successful, navigating away')
       onLogout()
     } catch (error) {
-      console.error('Error during logout:', error)
+      console.error('❌ Dashboard: Error during logout:', error)
     }
   }
 
@@ -27,6 +45,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
   const profileData = user?.profileData
   const goalsData = user?.goalsData
+
+  console.log('🎯 Dashboard: Rendering with data:', {
+    hasProfileData: !!profileData,
+    hasGoalsData: !!goalsData,
+    profileName: profileData?.name,
+    currency: profileData?.currency
+  })
+
+  if (!user) {
+    console.log('⚠️ Dashboard: No user data, cannot render dashboard')
+    return <div>Loading user data...</div>
+  }
 
   return (
     <div className="dashboard-container">

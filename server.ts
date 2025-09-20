@@ -11,6 +11,27 @@ const PORT = 3001
 app.use(cors())
 app.use(express.json())
 
+// Request logging middleware
+app.use((req, res, next) => {
+  const timestamp = new Date().toISOString()
+  console.log(`🌐 Server: ${timestamp} - ${req.method} ${req.path}`)
+  if (req.body && Object.keys(req.body).length > 0) {
+    // Log body but hide sensitive data
+    const safeBody = { ...req.body }
+    if (safeBody.password) safeBody.password = '[HIDDEN]'
+    console.log(`📥 Server: Request body:`, safeBody)
+  }
+  
+  // Log response
+  const originalSend = res.send
+  res.send = function(data) {
+    console.log(`📤 Server: ${req.method} ${req.path} - Status: ${res.statusCode}`)
+    return originalSend.call(this, data)
+  }
+  
+  next()
+})
+
 // Data file paths
 const DATA_DIR = path.join(process.cwd(), 'data')
 const USERS_FILE = path.join(DATA_DIR, 'users.json')
@@ -53,28 +74,41 @@ async function initializeData() {
 
     // Initialize users.json if it doesn't exist
     if (!(await fs.pathExists(USERS_FILE))) {
+      console.log('📄 Server: Creating users.json file...')
       await fs.writeJson(USERS_FILE, [], { spaces: 2 })
-      console.log('Created users.json')
+      console.log('✅ Server: Created users.json')
+    } else {
+      console.log('✅ Server: users.json already exists')
     }
 
     // Initialize sessions.json if it doesn't exist
     if (!(await fs.pathExists(SESSIONS_FILE))) {
+      console.log('📄 Server: Creating sessions.json file...')
       await fs.writeJson(SESSIONS_FILE, [], { spaces: 2 })
-      console.log('Created sessions.json')
+      console.log('✅ Server: Created sessions.json')
+    } else {
+      console.log('✅ Server: sessions.json already exists')
     }
 
-    console.log('Data directory initialized')
+    console.log('✅ Server: Data directory initialized')
+    console.log(`📁 Server: Data directory: ${DATA_DIR}`)
+    console.log(`👥 Server: Users file: ${USERS_FILE}`)
+    console.log(`🔐 Server: Sessions file: ${SESSIONS_FILE}`)
   } catch (error) {
-    console.error('Error initializing data directory:', error)
+    console.error('❌ Server: Error initializing data directory:', error)
+    throw error
   }
 }
 
 // Helper functions
 async function loadUsers(): Promise<User[]> {
+  console.log('🔄 Server: Loading users from file...')
   try {
-    return await fs.readJson(USERS_FILE)
+    const users = await fs.readJson(USERS_FILE)
+    console.log(`✅ Server: Loaded ${users.length} users`)
+    return users
   } catch (error) {
-    console.error('Error loading users:', error)
+    console.error('❌ Server: Error loading users:', error)
     return []
   }
 }

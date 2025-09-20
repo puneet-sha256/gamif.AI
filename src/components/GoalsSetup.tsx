@@ -25,27 +25,59 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
   const { saveGoalsData } = useAuth()
 
   const handleTextChange = (attribute: keyof GoalsData, value: string) => {
+    console.log('🔄 GoalsSetup: Goal changed:', attribute, '=', value.length > 0 ? `"${value.substring(0, 50)}..."` : 'empty')
     setFormData(prev => ({
       ...prev,
       [attribute]: value
     }))
-    if (error) setError('')
+    if (error) {
+      console.log('✅ GoalsSetup: Clearing error state')
+      setError('')
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('🔄 GoalsSetup: Form submitted with goals:', {
+      strengthGoal: formData.strengthGoal ? 'set' : 'empty',
+      intelligenceGoal: formData.intelligenceGoal ? 'set' : 'empty', 
+      charismaGoal: formData.charismaGoal ? 'set' : 'empty'
+    })
+    
+    // Validation
+    if (!formData.strengthGoal.trim() && !formData.intelligenceGoal.trim() && !formData.charismaGoal.trim()) {
+      console.log('❌ GoalsSetup: Validation failed - at least one goal required')
+      setError('Please set at least one goal to continue')
+      return
+    }
+    
+    console.log('✅ GoalsSetup: Form validation passed')
     setIsSubmitting(true)
     setError('')
     
     try {
-      await saveGoalsData(formData)
-      onComplete(formData)
+      console.log('🔄 GoalsSetup: Saving goals data...')
+      const success = await saveGoalsData(formData)
+      
+      if (success) {
+        console.log('✅ GoalsSetup: Goals saved successfully, proceeding to dashboard')
+        onComplete(formData)
+      } else {
+        console.log('❌ GoalsSetup: Failed to save goals data')
+        setError('Failed to save goals. Please try again.')
+      }
     } catch (error: any) {
-      console.error('Error saving goals:', error)
+      console.error('❌ GoalsSetup: Error saving goals:', error)
       setError('Failed to save goals. Please try again.')
     } finally {
       setIsSubmitting(false)
+      console.log('✅ GoalsSetup: Form submission complete')
     }
+  }
+
+  const handleBackClick = () => {
+    console.log('🔄 GoalsSetup: Back button clicked, returning to profile setup')
+    onBack()
   }
 
   const isFormValid = () => {
@@ -167,7 +199,7 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
               <button 
                 type="button" 
                 className="back-button"
-                onClick={onBack}
+                onClick={handleBackClick}
                 disabled={isSubmitting}
               >
                 Back
