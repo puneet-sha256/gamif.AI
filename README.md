@@ -5,10 +5,10 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 ## 🌟 Features
 
 - **🔐 User Authentication** - Secure registration and login system
-- **👤 Hunter Profile Setup** - Create your personalized character profile
-- **🎯 RPG-Style Goal Setting** - Set goals in Strength, Intelligence, and Charisma categories
-- **📊 Progress Dashboard** - Track your real-life character progression
-- **🎨 Solo Leveling Theme** - Immersive UI with anime-inspired design
+- **👤 Player Profile Setup** - Create your personalized character profile
+- **🎯 Goal Setting** - Define comprehensive long-term development objectives
+- **📊 Progress Dashboard** - Track your level, experience shards, and profile data
+- **🎨 Clean Modern Theme** - Light, motivating design with blue accents
 - **💾 File-Based Database** - Persistent data storage with JSON files
 - **🔄 Real-Time Updates** - Hot module reloading for smooth development
 
@@ -92,21 +92,21 @@ Registration → Profile Setup → Goals Setup → Dashboard
    - Solo Leveling themed interface
 
 2. **👤 Profile Setup**
-   - Enter Hunter name and age
+   - Enter Player name and age
    - Set monthly expenditure limit
    - Choose preferred currency
    - Progress: Step 1 of 2
 
 3. **🎯 Goals Setup**
-   - Define Strength goals (fitness, physical activities)
-   - Set Intelligence goals (learning, skills)
-   - Create Charisma goals (social, communication)
+   - Define comprehensive long-term development objectives
+   - Cover areas like fitness, learning, career, social skills, hobbies, finances, and well-being
+   - Detailed goal descriptions with AI-powered task creation
    - Progress: Step 2 of 2
 
 4. **📊 Dashboard**
-   - View Hunter Profile
-   - Track goal progress
-   - Monitor character stats
+   - View Player Profile (name, age, currency)
+   - Track character level and experience shards
+   - Clean, motivating interface design
    - Access all features
 
 ## 📁 Project Structure
@@ -149,12 +149,13 @@ The application uses a **file-based database** system:
 
 ## 🎨 Theme & Design
 
-Inspired by the **Solo Leveling** manhwa/anime:
-- Dark theme with purple/blue gradients
+Modern, clean interface designed for motivation:
+- Light theme with blue gradient accents
 - Futuristic fonts (Orbitron, Rajdhani)
-- Animated backgrounds and effects
-- Hunter System terminology
-- RPG-style progression elements
+- Subtle animations and effects
+- Player System terminology
+- Gamification elements with level progression
+- High contrast for excellent readability
 
 ## 🔒 Security Features
 

@@ -44,7 +44,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
     // Validation
     if (!formData.name.trim()) {
       console.log('❌ ProfileSetup: Name validation failed')
-      setError('Hunter name is required')
+      setError('Player name is required')
       return
     }
     
@@ -105,7 +105,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
         <div className="profile-setup-card">
           <div className="setup-header">
             <div className="setup-logo">
-              <h1>HUNTER REGISTRATION</h1>
+              <h1>PLAYER REGISTRATION</h1>
               <div className="subtitle">Complete Your Profile</div>
             </div>
             <div className="progress-indicator">
@@ -127,14 +127,14 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
               <h3>Personal Information</h3>
               
               <div className="input-group">
-                <label htmlFor="name">Hunter Name</label>
+                <label htmlFor="name">Player Name</label>
                 <input
                   type="text"
                   id="name"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  placeholder="Enter your hunter name"
+                  placeholder="Enter your player name"
                   required
                   minLength={2}
                   maxLength={50}

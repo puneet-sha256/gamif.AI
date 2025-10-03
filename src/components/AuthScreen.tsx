@@ -47,7 +47,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
 
     if (!isLogin && !formData.username.trim()) {
       console.log('❌ AuthScreen: Username missing for registration')
-      setError('Hunter name is required')
+      setError('Player name is required')
       return
     }
 
@@ -123,7 +123,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
           <div className="auth-header">
             <div className="solo-leveling-logo">
               <h1>SOLO LEVELING</h1>
-              <div className="subtitle">Hunter System</div>
+              <div className="subtitle">Player System</div>
             </div>
           </div>
 
@@ -157,14 +157,14 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
 
             {!isLogin && (
               <div className="input-group">
-                <label htmlFor="username">Hunter Name</label>
+                <label htmlFor="username">Player Name</label>
                 <input
                   type="text"
                   id="username"
                   name="username"
                   value={formData.username}
                   onChange={handleInputChange}
-                  placeholder="Enter your hunter name"
+                  placeholder="Enter your player name"
                   required
                 />
               </div>
@@ -219,14 +219,14 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
               {isLoading ? (
                 <span className="loading-spinner"></span>
               ) : (
-                isLogin ? 'Enter System' : 'Register Hunter'
+                isLogin ? 'Enter System' : 'Register Player'
               )}
             </button>
           </form>
 
           <div className="auth-footer">
             <p>
-              {isLogin ? "New hunter? " : "Already registered? "}
+              {isLogin ? "New player? " : "Already registered? "}
               <button 
                 type="button" 
                 className="link-button"

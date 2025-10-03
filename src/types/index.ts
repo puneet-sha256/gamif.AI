@@ -14,10 +14,7 @@ export interface GoalsData {
 export interface UserStats {
   level: number
   experience: number
-  strength: number
-  agility: number
-  intelligence: number
-  endurance: number
+  shards: number
 }
 
 export interface User {

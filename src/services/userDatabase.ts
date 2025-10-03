@@ -84,8 +84,8 @@ class UserDatabase {
       return {
         success: false,
         message: existingUser.email.toLowerCase() === userData.email.toLowerCase() 
-          ? 'Hunter with this email already exists' 
-          : 'Hunter name already taken'
+          ? 'Player with this email already exists' 
+          : 'Player name already taken'
       }
     }
 
@@ -111,7 +111,7 @@ class UserDatabase {
 
     return {
       success: true,
-      message: 'Hunter registered successfully!',
+      message: 'Player registered successfully!',
       user: { ...newUser, passwordHash: undefined } as any
     }
   }
@@ -122,7 +122,7 @@ class UserDatabase {
     if (!user) {
       return {
         success: false,
-        message: 'Hunter not found in the system'
+        message: 'Player not found in the system'
       }
     }
 
@@ -144,7 +144,7 @@ class UserDatabase {
 
     return {
       success: true,
-      message: 'Welcome back, Hunter!',
+      message: 'Welcome back, Player!',
       user: userWithoutPassword as any
     }
   }

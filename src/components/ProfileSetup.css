@@ -7,7 +7,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
 }
 
 .profile-setup-background {
@@ -17,9 +17,9 @@
   width: 100%;
   height: 100%;
   background: 
-    radial-gradient(circle at 20% 20%, rgba(72, 61, 139, 0.2) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(25, 25, 112, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 40% 60%, rgba(138, 43, 226, 0.1) 0%, transparent 50%);
+    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 60%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
   z-index: 1;
 }
 
@@ -31,10 +31,10 @@
   width: 100%;
   height: 100%;
   background-image: 
-    linear-gradient(45deg, rgba(255, 255, 255, 0.02) 25%, transparent 25%),
-    linear-gradient(-45deg, rgba(255, 255, 255, 0.02) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.02) 75%),
-    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.02) 75%);
+    linear-gradient(45deg, rgba(59, 130, 246, 0.02) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(59, 130, 246, 0.02) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(59, 130, 246, 0.02) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(59, 130, 246, 0.02) 75%);
   background-size: 20px 20px;
   background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
   animation: grid-move 20s linear infinite;
@@ -46,7 +46,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="shadow" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23shadow)"/></svg>');
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="shadow" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%233b82f6" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23shadow)"/></svg>');
   animation: float 6s ease-in-out infinite;
 }
 
@@ -69,15 +69,15 @@
 }
 
 .profile-setup-card {
-  background: rgba(15, 15, 25, 0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(138, 43, 226, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 15px;
   padding: 40px;
   box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.3),
-    0 0 60px rgba(138, 43, 226, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 20px 40px rgba(0, 0, 0, 0.08),
+    0 0 60px rgba(59, 130, 246, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   animation: card-entrance 0.8s ease-out;
 }
 
@@ -101,22 +101,33 @@
   font-family: 'Orbitron', monospace;
   font-size: 2.2rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #8a2be2, #4169e1, #00bfff);
+  background: linear-gradient(135deg, #3b82f6, #06b6d4, #10b981);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin: 0 0 5px 0;
-  text-shadow: 0 0 30px rgba(138, 43, 226, 0.5);
+  margin: 0;
+  text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+  animation: glow-pulse 2s ease-in-out infinite alternate;
 }
 
-.setup-logo .subtitle {
+.setup-subtitle {
   font-family: 'Rajdhani', sans-serif;
   font-size: 1rem;
-  color: #8a2be2;
+  color: #3b82f6;
   font-weight: 600;
   letter-spacing: 2px;
-  margin-bottom: 20px;
+  margin-top: 8px;
   text-transform: uppercase;
+}
+
+@keyframes glow-pulse {
+  0% { text-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
+  100% { text-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
+}
+
+.setup-header {
+  text-align: center;
+  margin-bottom: 40px;
 }
 
 .progress-indicator {
@@ -125,78 +136,43 @@
 
 .progress-bar {
   width: 100%;
-  height: 6px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 3px;
+  height: 8px;
+  background: rgba(59, 130, 246, 0.2);
+  border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(135deg, #8a2be2, #4169e1);
-  border-radius: 3px;
-  transition: width 0.5s ease;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  border-radius: 4px;
+  transition: width 0.3s ease;
 }
 
 .progress-text {
   font-family: 'Rajdhani', sans-serif;
   font-size: 0.9rem;
-  color: #888;
-  font-weight: 500;
-}
-
-.setup-form {
-  margin-bottom: 20px;
-}
-
-.error-message {
-  background: rgba(255, 107, 107, 0.1);
-  border: 1px solid rgba(255, 107, 107, 0.3);
-  border-radius: 8px;
-  padding: 12px 15px;
-  margin-bottom: 20px;
-  color: #ff6b6b;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-align: center;
-  animation: error-shake 0.5s ease-in-out;
-}
-
-@keyframes error-shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
-}
-
-.form-section {
-  margin-bottom: 30px;
-}
-
-.form-section h3 {
-  font-family: 'Orbitron', monospace;
-  font-size: 1.2rem;
-  color: #8a2be2;
-  margin-bottom: 20px;
+  font-weight: 600;
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
+.profile-form {
+  margin-bottom: 30px;
+}
+
+.form-group,
 .input-group {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
-.input-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
-}
-
+.form-group label,
 .input-group label {
   display: block;
   margin-bottom: 8px;
-  color: #8a2be2;
+  color: #3b82f6;
   font-family: 'Rajdhani', sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
@@ -204,46 +180,74 @@
   letter-spacing: 1px;
 }
 
+.form-group input,
+.form-group select,
 .input-group input,
 .input-group select {
   width: 100%;
   padding: 15px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(138, 43, 226, 0.3);
+  background: rgba(248, 250, 252, 0.8);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 8px;
-  color: white;
+  color: #1e293b;
   font-family: 'Rajdhani', sans-serif;
   font-size: 1rem;
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
 
+.form-group input:focus,
+.form-group select:focus,
 .input-group input:focus,
 .input-group select:focus {
   outline: none;
-  border-color: #8a2be2;
-  box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
-  background: rgba(0, 0, 0, 0.6);
+  border-color: #3b82f6;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+  background: rgba(255, 255, 255, 0.9);
 }
 
+.form-group input::placeholder,
 .input-group input::placeholder {
-  color: #666;
+  color: #64748b;
 }
 
-.input-group select {
-  cursor: pointer;
+.form-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(248, 250, 252, 0.6);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
 }
 
-.input-group select option {
-  background: #1a1a2e;
-  color: white;
-  padding: 10px;
+.form-section h3 {
+  margin: 0 0 20px 0;
+  color: #1e293b;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.2);
 }
 
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.profile-button,
 .setup-button {
   width: 100%;
   padding: 18px;
-  background: linear-gradient(135deg, #8a2be2, #4169e1);
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
   border: none;
   border-radius: 8px;
   color: white;
@@ -258,21 +262,49 @@
   overflow: hidden;
 }
 
+.profile-button:hover:not(:disabled),
 .setup-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(138, 43, 226, 0.4);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
 }
 
-.setup-button:active {
+.profile-button:disabled,
+.setup-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.setup-button.loading {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+.setup-button .loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.profile-button:active {
   transform: translateY(0);
 }
 
-.setup-button:disabled {
+.profile-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
 
-.setup-button.loading {
+.profile-button.loading {
   color: transparent;
 }
 
@@ -294,6 +326,68 @@
   100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
+.message {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+  text-align: center;
+  animation: messageSlide 0.3s ease-out;
+}
+
+.error-message {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.success-message {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10b981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+@keyframes messageSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.character-preview {
+  background: rgba(248, 250, 252, 0.6);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.character-preview h4 {
+  color: #3b82f6;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.2rem;
+  margin: 0 0 15px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.preview-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  color: #64748b;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+}
+
 @media (max-width: 768px) {
   .profile-setup-content {
     max-width: 90%;
@@ -307,8 +401,7 @@
     font-size: 1.8rem;
   }
   
-  .input-row {
+  .form-row {
     grid-template-columns: 1fr;
-    gap: 15px;
   }
 }

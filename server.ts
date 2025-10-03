@@ -183,8 +183,8 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({
         success: false,
         message: existingUser.email.toLowerCase() === email.toLowerCase() 
-          ? 'Hunter with this email already exists' 
-          : 'Hunter name already taken'
+          ? 'Player with this email already exists' 
+          : 'Player name already taken'
       })
     }
 
@@ -212,7 +212,7 @@ app.post('/api/register', async (req, res) => {
     const { passwordHash, ...userWithoutPassword } = newUser
     res.json({
       success: true,
-      message: 'Hunter registered successfully!',
+      message: 'Player registered successfully!',
       user: userWithoutPassword
     })
 
@@ -235,7 +235,7 @@ app.post('/api/login', async (req, res) => {
     const user = users.find(u => u.email.toLowerCase() === email.toLowerCase())
 
     if (!user) {
-      return res.status(400).json({ success: false, message: 'Hunter not found in the system' })
+      return res.status(400).json({ success: false, message: 'Player not found in the system' })
     }
 
     const hashedPassword = hashPassword(password)
@@ -263,7 +263,7 @@ app.post('/api/login', async (req, res) => {
     const { passwordHash, ...userWithoutPassword } = user
     res.json({
       success: true,
-      message: 'Welcome back, Hunter!',
+      message: 'Welcome back, Player!',
       user: userWithoutPassword,
       sessionId
     })

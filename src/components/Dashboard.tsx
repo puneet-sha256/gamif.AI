@@ -63,7 +63,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       <div className="dashboard-header">
         <div className="dashboard-logo">
           <h1>SOLO LEVELING</h1>
-          <div className="subtitle">Hunter System Dashboard</div>
+          <div className="subtitle">Player System Dashboard</div>
         </div>
         <div className="user-info">
           {profileData && (
@@ -77,7 +77,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       
       <div className="dashboard-content">
         <div className="welcome-section">
-          <h2>Hunter Profile</h2>
+          <h2>Player Profile</h2>
           <p>Your journey in the Shadow realm continues...</p>
         </div>
         
@@ -87,7 +87,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               <h3>Personal Information</h3>
               <div className="profile-grid">
                 <div className="profile-item">
-                  <span className="label">Hunter Name:</span>
+                  <span className="label">Player Name:</span>
                   <span className="value">{profileData.name}</span>
                 </div>
                 <div className="profile-item">
@@ -109,75 +109,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           </div>
         )}
 
-        {goalsData && (
-          <div className="goals-section">
-            <div className="goals-card">
-              <h3>Your Attribute Goals</h3>
-              <div className="goals-display">
-                <div className="goal-item">
-                  <div className="goal-header">
-                    <div className="attribute-icon">💪</div>
-                    <h4>Strength Goals</h4>
-                  </div>
-                  <div className="goal-text">
-                    {goalsData.strengthGoal}
-                  </div>
-                </div>
-                
-                <div className="goal-item">
-                  <div className="goal-header">
-                    <div className="attribute-icon">🧠</div>
-                    <h4>Intelligence Goals</h4>
-                  </div>
-                  <div className="goal-text">
-                    {goalsData.intelligenceGoal}
-                  </div>
-                </div>
-                
-                <div className="goal-item">
-                  <div className="goal-header">
-                    <div className="attribute-icon">✨</div>
-                    <h4>Charisma Goals</h4>
-                  </div>
-                  <div className="goal-text">
-                    {goalsData.charismaGoal}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-icon">⚔️</div>
             <div className="stat-info">
               <h3>Level</h3>
-              <div className="stat-value">1</div>
-            </div>
-          </div>
-          
-          <div className="stat-card">
-            <div className="stat-icon">🛡️</div>
-            <div className="stat-info">
-              <h3>Rank</h3>
-              <div className="stat-value">E</div>
+              <div className="stat-value">{user?.stats?.level || 1}</div>
             </div>
           </div>
           
           <div className="stat-card">
             <div className="stat-icon">💎</div>
             <div className="stat-info">
-              <h3>Magic Power</h3>
-              <div className="stat-value">10</div>
-            </div>
-          </div>
-          
-          <div className="stat-card">
-            <div className="stat-icon">👥</div>
-            <div className="stat-info">
-              <h3>Guild</h3>
-              <div className="stat-value">None</div>
+              <h3>Shards</h3>
+              <div className="stat-value">{user?.stats?.experience || 0}</div>
             </div>
           </div>
         </div>

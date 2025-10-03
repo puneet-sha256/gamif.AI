@@ -10,7 +10,7 @@ const LoadingScreen: React.FC = () => {
       <div className="loading-content">
         <div className="loading-logo">
           <h1>SOLO LEVELING</h1>
-          <div className="subtitle">Hunter System</div>
+          <div className="subtitle">Player System</div>
         </div>
         
         <div className="loading-spinner-container">
