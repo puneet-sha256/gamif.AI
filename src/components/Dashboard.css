@@ -553,6 +553,7 @@
 .nav-tabs {
   display: flex;
   gap: 0;
+  width: calc(100% - 80px);
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -560,6 +561,7 @@
 .nav-tab {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 20px 30px;
   background: none;
@@ -574,6 +576,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  flex: 1;
 }
 
 .nav-tab:hover {

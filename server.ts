@@ -251,11 +251,11 @@ app.post('/api/register', async (req, res) => {
       passwordHash: hashPassword(password),
       createdAt: new Date().toISOString(),
       stats: {
-        experience: 30,
+        experience: 0,
         shards: 0,
-        strength: 10,
-        intelligence: 10,
-        charisma: 10
+        strength: 0,
+        intelligence: 0,
+        charisma: 0
       }
     }
 
