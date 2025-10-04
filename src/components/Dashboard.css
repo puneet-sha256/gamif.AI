@@ -594,6 +594,35 @@
   font-size: 1.2rem;
 }
 
+.nav-tab.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.nav-tab.disabled:hover {
+  color: #64748b;
+  background: none;
+}
+
+.tab-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.coming-soon {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 2px 6px;
+  border-radius: 8px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 /* Tab Content Styles */
 .tab-content {
   animation: fadeIn 0.3s ease-in-out;

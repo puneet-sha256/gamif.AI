@@ -401,64 +401,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     </div>
   )
 
-  const renderInventoryTab = () => (
-    <div className="tab-content">
-      <div className="inventory-header">
-        <h2>Inventory</h2>
-        <p>Your collected items and achievements</p>
-      </div>
-      
-      <div className="inventory-grid">
-        <div className="inventory-section">
-          <h3>🎖️ Achievements</h3>
-          <div className="achievement-list">
-            <div className="achievement-item unlocked">
-              <div className="achievement-icon">🏃</div>
-              <div className="achievement-info">
-                <h4>First Steps</h4>
-                <p>Complete your first task</p>
-              </div>
-            </div>
-            
-            <div className="achievement-item locked">
-              <div className="achievement-icon">⭐</div>
-              <div className="achievement-info">
-                <h4>Rising Star</h4>
-                <p>Reach level 5</p>
-              </div>
-            </div>
-            
-            <div className="achievement-item locked">
-              <div className="achievement-icon">💪</div>
-              <div className="achievement-info">
-                <h4>Dedicated Learner</h4>
-                <p>Complete 10 learning tasks</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="items-section">
-          <h3>🎁 Items</h3>
-          <div className="items-grid">
-            <div className="item-slot empty">
-              <span>Empty Slot</span>
-            </div>
-            <div className="item-slot empty">
-              <span>Empty Slot</span>
-            </div>
-            <div className="item-slot empty">
-              <span>Empty Slot</span>
-            </div>
-            <div className="item-slot empty">
-              <span>Empty Slot</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
   const renderShopTab = () => (
     <div className="tab-content">
       <div className="shop-header">
@@ -550,7 +492,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       case 'tasks':
         return renderTasksTab()
       case 'inventory':
-        return renderInventoryTab()
+        // Inventory is disabled, redirect to profile
+        setActiveTab('profile')
+        return renderProfileTab()
       case 'shop':
         return renderShopTab()
       default:
@@ -592,11 +536,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             Tasks & Challenges
           </button>
           <button 
-            className={`nav-tab ${activeTab === 'inventory' ? 'active' : ''}`}
-            onClick={() => setActiveTab('inventory')}
+            className={`nav-tab ${activeTab === 'inventory' ? 'active' : ''} disabled`}
+            onClick={() => {}} // Disabled, no action
+            disabled
           >
             <span className="tab-icon">🎒</span>
-            Inventory
+            <div className="tab-text">
+              <span>Inventory</span>
+              <span className="coming-soon">Coming Soon</span>
+            </div>
           </button>
           <button 
             className={`nav-tab ${activeTab === 'shop' ? 'active' : ''}`}
