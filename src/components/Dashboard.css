@@ -291,3 +291,491 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Tab Navigation Styles */
+.dashboard-navigation {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+  padding: 0 40px;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 30px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #64748b;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-tab:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.nav-tab.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.tab-icon {
+  font-size: 1.2rem;
+}
+
+/* Tab Content Styles */
+.tab-content {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-overview {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.profile-overview h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.5rem;
+  margin: 0 0 10px 0;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.profile-overview p {
+  font-size: 1.2rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.goals-text {
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  color: #64748b;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Tasks Tab Styles */
+.tasks-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.tasks-header h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.5rem;
+  margin: 0 0 10px 0;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tasks-header p {
+  font-size: 1.2rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.tasks-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.task-section,
+.challenge-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.task-section h3,
+.challenge-section h3 {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.5rem;
+  margin: 0 0 20px 0;
+  color: #1e293b;
+}
+
+.task-item,
+.challenge-item {
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-info h4,
+.challenge-info h4 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.1rem;
+  margin: 0 0 5px 0;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.task-info p,
+.challenge-info p {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 10px 0;
+}
+
+.task-progress,
+.challenge-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress-bar {
+  width: 150px;
+  height: 8px;
+  background: rgba(59, 130, 246, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.task-rewards,
+.challenge-rewards {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.xp-reward,
+.shard-reward {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+/* Inventory Tab Styles */
+.inventory-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.inventory-header h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.5rem;
+  margin: 0 0 10px 0;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.inventory-header p {
+  font-size: 1.2rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.inventory-section,
+.items-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.inventory-section h3,
+.items-section h3 {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.5rem;
+  margin: 0 0 20px 0;
+  color: #1e293b;
+}
+
+.achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.achievement-item.unlocked {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.achievement-item.locked {
+  background: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.3);
+  opacity: 0.6;
+}
+
+.achievement-icon {
+  font-size: 2rem;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.achievement-info h4 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.1rem;
+  margin: 0 0 5px 0;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.achievement-info p {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.item-slot {
+  aspect-ratio: 1;
+  border: 2px dashed rgba(148, 163, 184, 0.3);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+}
+
+.item-slot.empty {
+  background: rgba(248, 250, 252, 0.5);
+}
+
+/* Shop Tab Styles */
+.shop-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.shop-header h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.5rem;
+  margin: 0 0 10px 0;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.shop-header p {
+  font-size: 1.2rem;
+  color: #64748b;
+  margin: 0 0 20px 0;
+}
+
+.currency-display {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  padding: 15px 25px;
+  display: inline-block;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.currency-amount {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.shop-grid {
+  display: grid;
+  gap: 30px;
+}
+
+.shop-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.shop-section h3 {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.5rem;
+  margin: 0 0 20px 0;
+  color: #1e293b;
+}
+
+.shop-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.shop-item {
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.shop-item:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(248, 250, 252, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.item-image {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.item-info h4 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.2rem;
+  margin: 0 0 10px 0;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.item-info p {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 15px 0;
+  line-height: 1.4;
+}
+
+.item-price {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #3b82f6;
+  margin-bottom: 15px;
+}
+
+.buy-button {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.buy-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+}
+
+.buy-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive Design for Tabs */
+@media (max-width: 768px) {
+  .dashboard-navigation {
+    padding: 0 20px;
+  }
+  
+  .nav-tabs {
+    flex-wrap: wrap;
+  }
+  
+  .nav-tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 15px 10px;
+    font-size: 0.9rem;
+  }
+  
+  .tasks-grid,
+  .inventory-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .shop-items {
+    grid-template-columns: 1fr;
+  }
+}
