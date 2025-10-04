@@ -1,6 +1,11 @@
 import './Dashboard.css'
 import { useAuth } from '../contexts/AuthContext'
 import { useEffect, useState } from 'react'
+import StatCard from './StatCard'
+import TaskItem from './TaskItem'
+import ShopItem from './ShopItem'
+import ProgressBar from './ProgressBar'
+import DailyActivityModal from './DailyActivityModal'
 
 interface DashboardProps {
   onLogout: () => void
@@ -257,40 +262,23 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
         <div className="player-stats-section">
           <div className="stats-row">
-            <div className="stat-card level-card">
-              <div className="stat-icon">⚔️</div>
-              <div className="stat-info">
-                {(() => {
-                  const progress = calculateLevelProgress(
-                    user?.stats?.experience || 0
-                  )
-                  return (
-                    <>
-                      <h3>Level {progress.actualLevel}</h3>
-                      <div className="level-progress">
-                        <div className="exp-bar">
-                          <div 
-                            className="exp-fill" 
-                            style={{ width: `${progress.percentage}%` }}
-                          ></div>
-                        </div>
-                        <div className="exp-text">
-                          {progress.current} / {progress.needed} XP
-                        </div>
-                      </div>
-                    </>
-                  )
-                })()}
-              </div>
-            </div>
+            <StatCard 
+              icon="⚔️" 
+              title={`Level ${calculateLevelProgress(user?.stats?.experience || 0).actualLevel}`}
+              className="level-card"
+            >
+              <ProgressBar
+                current={calculateLevelProgress(user?.stats?.experience || 0).current}
+                max={calculateLevelProgress(user?.stats?.experience || 0).needed}
+                percentage={calculateLevelProgress(user?.stats?.experience || 0).percentage}
+              />
+            </StatCard>
             
-            <div className="stat-card">
-              <div className="stat-icon">💎</div>
-              <div className="stat-info">
-                <h3>Shards</h3>
-                <div className="stat-value">{user?.stats?.shards || 0}</div>
-              </div>
-            </div>
+            <StatCard 
+              icon="💎" 
+              title="Shards"
+              value={user?.stats?.shards || 0}
+            />
           </div>
         </div>
 
@@ -424,67 +412,44 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         <div className="task-section">
           <h3>🎯 Active Tasks</h3>
           <div className="task-list">
-            <div className="task-item enhanced">
-              <div className="task-icon">💪</div>
-              <div className="task-content">
-                <div className="task-info">
-                  <p className="task-description">Complete 30 minutes of physical activity</p>
-                  <span className="task-category">Fitness</span>
-                </div>
-                <div className="task-rewards">
-                  <span className="xp-reward">+50 XP</span>
-                  <span className="shard-reward">+10 💎</span>
-                </div>
-              </div>
-            </div>
+            <TaskItem
+              icon="💪"
+              description="Complete 30 minutes of physical activity"
+              category="Fitness"
+              xpReward={50}
+              shardReward={10}
+            />
             
-            <div className="task-item enhanced">
-              <div className="task-icon">🧠</div>
-              <div className="task-content">
-                <div className="task-info">
-                  <p className="task-description">Spend 1 hour learning a new skill</p>
-                  <span className="task-category">Learning</span>
-                </div>
-                <div className="task-rewards">
-                  <span className="xp-reward">+75 XP</span>
-                  <span className="shard-reward">+15 💎</span>
-                </div>
-              </div>
-            </div>
+            <TaskItem
+              icon="🧠"
+              description="Spend 1 hour learning a new skill"
+              category="Learning"
+              xpReward={75}
+              shardReward={15}
+            />
             
-            <div className="task-item enhanced">
-              <div className="task-icon">📚</div>
-              <div className="task-content">
-                <div className="task-info">
-                  <p className="task-description">Read for 45 minutes</p>
-                  <span className="task-category">Knowledge</span>
-                </div>
-                <div className="task-rewards">
-                  <span className="xp-reward">+40 XP</span>
-                  <span className="shard-reward">+8 💎</span>
-                </div>
-              </div>
-            </div>
+            <TaskItem
+              icon="📚"
+              description="Read for 45 minutes"
+              category="Knowledge"
+              xpReward={40}
+              shardReward={8}
+            />
           </div>
         </div>
 
         <div className="challenge-section">
           <h3>🏆 Weekly Challenges</h3>
           <div className="challenge-list">
-            <div className="challenge-item enhanced">
-              <div className="challenge-icon">🎯</div>
-              <div className="task-content">
-                <div className="challenge-info">
-                  <p className="task-description">Complete daily tasks for 7 days straight</p>
-                  <span className="task-category">Consistency</span>
-                </div>
-                <div className="challenge-rewards">
-                  <span className="xp-reward">+200 XP</span>
-                  <span className="shard-reward">+50 💎</span>
-                </div>
-              </div>
-              <div className="challenge-progress">3/7 days</div>
-            </div>
+            <TaskItem
+              icon="🎯"
+              description="Complete daily tasks for 7 days straight"
+              category="Consistency"
+              xpReward={200}
+              shardReward={50}
+              isChallenge={true}
+              progress="3/7 days"
+            />
           </div>
         </div>
         
@@ -502,75 +467,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           </button>
         </div>
         
-        {/* Daily Activity Modal */}
-        {showDailyInput && (
-          <div className="modal-overlay" onClick={() => setShowDailyInput(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>🤖 Daily Activity Analysis</h3>
-                <button 
-                  className="modal-close"
-                  onClick={() => setShowDailyInput(false)}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <div className="modal-body">
-                <p className="modal-description">
-                  Tell me what you accomplished today and I'll calculate your XP rewards based on your activities!
-                </p>
-                
-                <div className="activity-examples">
-                  <h4>Examples of activities I can recognize:</h4>
-                  <div className="example-tags">
-                    <span className="example-tag">💪 Exercise, workout, gym</span>
-                    <span className="example-tag">🧠 Reading, studying, coding</span>
-                    <span className="example-tag">🗣️ Meetings, presentations</span>
-                    <span className="example-tag">🤝 Helping others, teaching</span>
-                  </div>
-                </div>
-                
-                <textarea
-                  className="activity-input-modal"
-                  value={dailyActivity}
-                  onChange={(e) => setDailyActivity(e.target.value)}
-                  placeholder="Today I went for a 30-minute run, spent 2 hours coding a new feature, had a productive team meeting, and helped a colleague debug their code..."
-                  rows={5}
-                />
-              </div>
-              
-              <div className="modal-footer">
-                <button 
-                  className="modal-btn-secondary"
-                  onClick={() => {
-                    setShowDailyInput(false)
-                    setDailyActivity('')
-                  }}
-                >
-                  Cancel
-                </button>
-                <button 
-                  className="modal-btn-primary" 
-                  onClick={analyzeDailyActivity}
-                  disabled={isAnalyzing || !dailyActivity.trim()}
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <span className="loading-spinner"></span>
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <span>✨</span>
-                      Analyze & Earn XP
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <DailyActivityModal
+          isOpen={showDailyInput}
+          onClose={() => setShowDailyInput(false)}
+          dailyActivity={dailyActivity}
+          setDailyActivity={setDailyActivity}
+          isAnalyzing={isAnalyzing}
+          onAnalyze={analyzeDailyActivity}
+        />
       </div>
     </div>
   )
@@ -589,70 +493,50 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         <div className="shop-section">
           <h3>💝 Rewards</h3>
           <div className="shop-items">
-            <div className="shop-item">
-              <div className="item-image">🎮</div>
-              <div className="item-info">
-                <h4>Gaming Session</h4>
-                <p>Unlock 2 hours of guilt-free gaming</p>
-                <div className="item-price">50 💎</div>
-              </div>
-              <button className="buy-button" disabled={!user?.stats?.shards || user.stats.shards < 50}>
-                Buy
-              </button>
-            </div>
+            <ShopItem
+              image="🎮"
+              title="Gaming Session"
+              description="Unlock 2 hours of guilt-free gaming"
+              price={50}
+              userShards={user?.stats?.shards || 0}
+            />
             
-            <div className="shop-item">
-              <div className="item-image">🍕</div>
-              <div className="item-info">
-                <h4>Treat Yourself</h4>
-                <p>Order your favorite meal</p>
-                <div className="item-price">75 💎</div>
-              </div>
-              <button className="buy-button" disabled={!user?.stats?.shards || user.stats.shards < 75}>
-                Buy
-              </button>
-            </div>
+            <ShopItem
+              image="🍕"
+              title="Treat Yourself"
+              description="Order your favorite meal"
+              price={75}
+              userShards={user?.stats?.shards || 0}
+            />
             
-            <div className="shop-item">
-              <div className="item-image">📚</div>
-              <div className="item-info">
-                <h4>Book Purchase</h4>
-                <p>Buy that book you've been wanting</p>
-                <div className="item-price">100 💎</div>
-              </div>
-              <button className="buy-button" disabled={!user?.stats?.shards || user.stats.shards < 100}>
-                Buy
-              </button>
-            </div>
+            <ShopItem
+              image="📚"
+              title="Book Purchase"
+              description="Buy that book you've been wanting"
+              price={100}
+              userShards={user?.stats?.shards || 0}
+            />
           </div>
         </div>
 
         <div className="shop-section">
           <h3>⚡ Power-ups</h3>
           <div className="shop-items">
-            <div className="shop-item">
-              <div className="item-image">🔥</div>
-              <div className="item-info">
-                <h4>XP Booster</h4>
-                <p>Double XP for 24 hours</p>
-                <div className="item-price">30 💎</div>
-              </div>
-              <button className="buy-button" disabled={!user?.stats?.shards || user.stats.shards < 30}>
-                Buy
-              </button>
-            </div>
+            <ShopItem
+              image="🔥"
+              title="XP Booster"
+              description="Double XP for 24 hours"
+              price={30}
+              userShards={user?.stats?.shards || 0}
+            />
             
-            <div className="shop-item">
-              <div className="item-image">⏰</div>
-              <div className="item-info">
-                <h4>Task Extension</h4>
-                <p>Extra day to complete tasks</p>
-                <div className="item-price">25 💎</div>
-              </div>
-              <button className="buy-button" disabled={!user?.stats?.shards || user.stats.shards < 25}>
-                Buy
-              </button>
-            </div>
+            <ShopItem
+              image="⏰"
+              title="Task Extension"
+              description="Extra day to complete tasks"
+              price={25}
+              userShards={user?.stats?.shards || 0}
+            />
           </div>
         </div>
       </div>
