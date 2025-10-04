@@ -38,32 +38,9 @@ const USERS_FILE = path.join(DATA_DIR, 'users.json')
 const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json')
 const BACKUP_DIR = path.join(DATA_DIR, 'backup')
 
-// User interface
-interface User {
-  id: string
-  username: string
-  email: string
-  passwordHash: string
-  createdAt: string
-  lastLogin?: string
-  profileData?: any
-  goalsData?: any
-  stats?: {
-    level: number
-    experience: number
-    strength: number
-    agility: number
-    intelligence: number
-    endurance: number
-  }
-}
+import type { User, Session, UserRegistration, UserLogin, AuthResponse } from './src/shared/types'
 
-interface Session {
-  userId: string
-  sessionId: string
-  createdAt: string
-  lastAccess: string
-}
+// Server-specific imports
 
 // Initialize data directory and files
 async function initializeData() {
@@ -198,10 +175,7 @@ app.post('/api/register', async (req, res) => {
       stats: {
         level: 1,
         experience: 0,
-        strength: 10,
-        agility: 10,
-        intelligence: 10,
-        endurance: 10
+        shards: 0
       }
     }
 

@@ -1,17 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { userDatabase } from '../services/fileUserDatabase'
-import type { User, UserRegistration, UserLogin, ProfileData, GoalsData } from '../types'
-
-interface AuthContextType {
-  user: User | null
-  login: (credentials: UserLogin) => Promise<{ success: boolean; message: string }>
-  register: (userData: UserRegistration) => Promise<{ success: boolean; message: string }>
-  logout: () => Promise<void>
-  updateUser: (updates: Partial<User>) => Promise<boolean>
-  saveProfileData: (profileData: ProfileData) => Promise<boolean>
-  saveGoalsData: (goalsData: GoalsData) => Promise<boolean>
-  isLoading: boolean
-}
+import type { AuthContextType, User, UserLogin, UserRegistration, ProfileData, GoalsData } from '../shared/types'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 

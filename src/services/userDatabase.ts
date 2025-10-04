@@ -1,32 +1,4 @@
-export interface User {
-  id: string
-  username: string
-  email: string
-  passwordHash: string
-  createdAt: string
-  lastLogin?: string
-  profileData?: any
-  goalsData?: any
-  stats?: {
-    level: number
-    experience: number
-    strength: number
-    agility: number
-    intelligence: number
-    endurance: number
-  }
-}
-
-export interface UserRegistration {
-  username: string
-  email: string
-  password: string
-}
-
-export interface UserLogin {
-  email: string
-  password: string
-}
+import type { User, UserRegistration, UserLogin } from '../shared/types'
 
 class UserDatabase {
   private users: User[] = []
@@ -99,10 +71,7 @@ class UserDatabase {
       stats: {
         level: 1,
         experience: 0,
-        strength: 10,
-        agility: 10,
-        intelligence: 10,
-        endurance: 10
+        shards: 0
       }
     }
 
