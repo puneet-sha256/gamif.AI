@@ -11,6 +11,9 @@ type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const { user, logout } = useAuth()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
+  const [showDailyInput, setShowDailyInput] = useState(false)
+  const [dailyActivity, setDailyActivity] = useState('')
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   useEffect(() => {
     console.log('🎯 Dashboard: Component mounted')
@@ -44,6 +47,84 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       'KRW': '₩', 'INR': '₹', 'CAD': 'C$', 'AUD': 'A$'
     }
     return currencies[code] || code
+  }
+
+  const analyzeDailyActivity = async () => {
+    if (!dailyActivity.trim()) return
+    
+    setIsAnalyzing(true)
+    
+    try {
+      // Simple AI-like analysis (would be replaced with actual AI service)
+      const activities = dailyActivity.toLowerCase()
+      let totalXP = 0
+      let strengthXP = 0
+      let intelligenceXP = 0
+      let charismaXP = 0
+      let shards = 0
+      
+      // Fitness activities
+      if (activities.includes('exercise') || activities.includes('workout') || activities.includes('gym') || activities.includes('run')) {
+        strengthXP += 30
+        shards += 8
+      }
+      if (activities.includes('walk') || activities.includes('jog') || activities.includes('bike')) {
+        strengthXP += 20
+        shards += 5
+      }
+      
+      // Learning activities
+      if (activities.includes('read') || activities.includes('book') || activities.includes('study')) {
+        intelligenceXP += 25
+        shards += 6
+      }
+      if (activities.includes('learn') || activities.includes('course') || activities.includes('tutorial')) {
+        intelligenceXP += 35
+        shards += 8
+      }
+      if (activities.includes('code') || activities.includes('program') || activities.includes('develop')) {
+        intelligenceXP += 40
+        shards += 10
+      }
+      
+      // Social activities
+      if (activities.includes('meeting') || activities.includes('presentation') || activities.includes('speak')) {
+        charismaXP += 30
+        shards += 7
+      }
+      if (activities.includes('help') || activities.includes('teach') || activities.includes('mentor')) {
+        charismaXP += 25
+        shards += 6
+      }
+      
+      totalXP = strengthXP + intelligenceXP + charismaXP
+      
+      if (totalXP > 0) {
+        // Here you would call your actual API to update XP and shards
+        console.log('🎯 Daily Activity Analysis:', {
+          strengthXP,
+          intelligenceXP, 
+          charismaXP,
+          totalXP,
+          shards
+        })
+        
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        
+        alert(`Amazing work today! 🎉\n\nXP Earned:\n• Strength: +${strengthXP}\n• Intelligence: +${intelligenceXP}\n• Charisma: +${charismaXP}\n• Shards: +${shards} 💎\n\nTotal XP: +${totalXP}`)
+      } else {
+        alert('Keep going! Try mentioning specific activities like exercise, reading, coding, or social interactions to earn XP! 💪')
+      }
+      
+      setDailyActivity('')
+      setShowDailyInput(false)
+    } catch (error) {
+      console.error('Error analyzing daily activity:', error)
+      alert('Sorry, there was an error analyzing your activity. Please try again.')
+    } finally {
+      setIsAnalyzing(false)
+    }
   }
 
   const profileData = user?.profileData
@@ -406,6 +487,90 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             </div>
           </div>
         </div>
+        
+        {/* Daily Activity Input Section */}
+        <div className="daily-activity-section">
+          <button 
+            className="daily-activity-btn"
+            onClick={() => setShowDailyInput(true)}
+          >
+            <span className="btn-icon">🤖</span>
+            <div className="btn-content">
+              <span className="btn-title">Log Daily Activities</span>
+              <span className="btn-subtitle">Let AI analyze your day and award XP!</span>
+            </div>
+          </button>
+        </div>
+        
+        {/* Daily Activity Modal */}
+        {showDailyInput && (
+          <div className="modal-overlay" onClick={() => setShowDailyInput(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>🤖 Daily Activity Analysis</h3>
+                <button 
+                  className="modal-close"
+                  onClick={() => setShowDailyInput(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="modal-body">
+                <p className="modal-description">
+                  Tell me what you accomplished today and I'll calculate your XP rewards based on your activities!
+                </p>
+                
+                <div className="activity-examples">
+                  <h4>Examples of activities I can recognize:</h4>
+                  <div className="example-tags">
+                    <span className="example-tag">💪 Exercise, workout, gym</span>
+                    <span className="example-tag">🧠 Reading, studying, coding</span>
+                    <span className="example-tag">🗣️ Meetings, presentations</span>
+                    <span className="example-tag">🤝 Helping others, teaching</span>
+                  </div>
+                </div>
+                
+                <textarea
+                  className="activity-input-modal"
+                  value={dailyActivity}
+                  onChange={(e) => setDailyActivity(e.target.value)}
+                  placeholder="Today I went for a 30-minute run, spent 2 hours coding a new feature, had a productive team meeting, and helped a colleague debug their code..."
+                  rows={5}
+                />
+              </div>
+              
+              <div className="modal-footer">
+                <button 
+                  className="modal-btn-secondary"
+                  onClick={() => {
+                    setShowDailyInput(false)
+                    setDailyActivity('')
+                  }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="modal-btn-primary" 
+                  onClick={analyzeDailyActivity}
+                  disabled={isAnalyzing || !dailyActivity.trim()}
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <span className="loading-spinner"></span>
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <span>✨</span>
+                      Analyze & Earn XP
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
