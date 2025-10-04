@@ -50,18 +50,46 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const goalsData = user?.goalsData
 
   // Calculate experience progress for next level
-  const calculateLevelProgress = (experience: number, level: number) => {
-    // Each level requires 100 * level experience points
-    const currentLevelExp = (level - 1) * 100
-    const nextLevelExp = level * 100
-    const expInCurrentLevel = experience - currentLevelExp
-    const expNeededForNextLevel = nextLevelExp - currentLevelExp
+  const calculateLevelProgress = (experience: number) => {
+    // New formula: xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50
+    const xpForLevel = (n: number) => 100 + Math.floor((n - 1) / 10) * 50
+    
+    // Calculate what level the user should actually be at based on total experience
+    const calculateActualLevel = (totalExp: number): number => {
+      let level = 1
+      let expUsed = 0
+      
+      while (true) {
+        const expNeededForNextLevel = xpForLevel(level)
+        if (expUsed + expNeededForNextLevel > totalExp) {
+          break
+        }
+        expUsed += expNeededForNextLevel
+        level++
+      }
+      
+      return level
+    }
+    
+    const actualLevel = calculateActualLevel(experience)
+    
+    // Calculate total XP needed up to the start of actual level
+    let totalExpForCurrentLevel = 0
+    for (let i = 1; i < actualLevel; i++) {
+      totalExpForCurrentLevel += xpForLevel(i)
+    }
+    
+    const expNeededForNextLevel = xpForLevel(actualLevel)
+    
+    // Calculate progress within current level
+    const expInCurrentLevel = Math.max(0, experience - totalExpForCurrentLevel)
     const progressPercentage = Math.min((expInCurrentLevel / expNeededForNextLevel) * 100, 100)
     
     return {
-      current: Math.max(expInCurrentLevel, 0),
+      current: expInCurrentLevel,
       needed: expNeededForNextLevel,
-      percentage: Math.max(progressPercentage, 0)
+      percentage: progressPercentage,
+      actualLevel: actualLevel
     }
   }
 
@@ -151,15 +179,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             <div className="stat-card level-card">
               <div className="stat-icon">⚔️</div>
               <div className="stat-info">
-                <h3>Level {user?.stats?.level || 1}</h3>
-                <div className="level-progress">
-                  {(() => {
-                    const progress = calculateLevelProgress(
-                      user?.stats?.experience || 0, 
-                      user?.stats?.level || 1
-                    )
-                    return (
-                      <>
+                {(() => {
+                  const progress = calculateLevelProgress(
+                    user?.stats?.experience || 0
+                  )
+                  return (
+                    <>
+                      <h3>Level {progress.actualLevel}</h3>
+                      <div className="level-progress">
                         <div className="exp-bar">
                           <div 
                             className="exp-fill" 
@@ -169,10 +196,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                         <div className="exp-text">
                           {progress.current} / {progress.needed} XP
                         </div>
-                      </>
-                    )
-                  })()}
-                </div>
+                      </div>
+                    </>
+                  )
+                })()}
               </div>
             </div>
             

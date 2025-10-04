@@ -69,9 +69,11 @@ class UserDatabase {
       passwordHash: this.hashPassword(userData.password),
       createdAt: new Date().toISOString(),
       stats: {
-        level: 1,
         experience: 0,
-        shards: 0
+        shards: 0,
+        strength: 0,
+        intelligence: 0,
+        charisma: 0
       }
     }
 

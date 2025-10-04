@@ -173,7 +173,6 @@ app.post('/api/register', async (req, res) => {
       passwordHash: hashPassword(password),
       createdAt: new Date().toISOString(),
       stats: {
-        level: 1,
         experience: 30,
         shards: 0,
         strength: 10,
