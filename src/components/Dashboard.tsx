@@ -65,6 +65,39 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
   }
 
+  // Calculate attribute distribution from total experience
+  const calculateAttributeDistribution = () => {
+    const totalExp = user?.stats?.experience || 0
+    const strength = user?.stats?.strength || 0
+    const intelligence = user?.stats?.intelligence || 0
+    const charisma = user?.stats?.charisma || 0
+    
+    // If attributes don't sum to total experience, show as percentage distribution
+    const attributeSum = strength + intelligence + charisma
+    
+    if (attributeSum === 0 || totalExp === 0) {
+      return { 
+        strength: 0, 
+        intelligence: 0, 
+        charisma: 0, 
+        total: 0,
+        strengthPercent: 0,
+        intelligencePercent: 0,
+        charismaPercent: 0
+      }
+    }
+    
+    return {
+      strength: strength,
+      intelligence: intelligence,
+      charisma: charisma,
+      total: totalExp,
+      strengthPercent: (strength / totalExp * 100),
+      intelligencePercent: (intelligence / totalExp * 100),
+      charismaPercent: (charisma / totalExp * 100)
+    }
+  }
+
   console.log('🎯 Dashboard: Rendering with data:', {
     hasProfileData: !!profileData,
     hasGoalsData: !!goalsData,
@@ -84,68 +117,188 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         <p>Your journey in the development realm continues...</p>
       </div>
       
-      {profileData && (
-        <div className="profile-section">
-          <div className="profile-card">
-            <h3>Personal Information</h3>
-            <div className="profile-grid">
-              <div className="profile-item">
-                <span className="label">Player Name:</span>
-                <span className="value">{profileData.name}</span>
-              </div>
-              <div className="profile-item">
-                <span className="label">Age:</span>
-                <span className="value">{profileData.age} years</span>
-              </div>
-              <div className="profile-item">
-                <span className="label">Monthly Limit:</span>
-                <span className="value">
-                  {getCurrency(profileData.currency)}{profileData.monthlyLimit.toLocaleString()}
-                </span>
-              </div>
-              <div className="profile-item">
-                <span className="label">Currency:</span>
-                <span className="value">{profileData.currency}</span>
+      <div className="profile-content">
+        {profileData && (
+          <div className="profile-info-section">
+            <div className="profile-card">
+              <h3>Personal Information</h3>
+              <div className="profile-details">
+                <div className="profile-item">
+                  <span className="label">Player Name:</span>
+                  <span className="value">{profileData.name}</span>
+                </div>
+                <div className="profile-item">
+                  <span className="label">Age:</span>
+                  <span className="value">{profileData.age} years</span>
+                </div>
+                <div className="profile-item">
+                  <span className="label">Monthly Limit:</span>
+                  <span className="value">
+                    {getCurrency(profileData.currency)}{profileData.monthlyLimit.toLocaleString()}
+                  </span>
+                </div>
+                <div className="profile-item">
+                  <span className="label">Currency:</span>
+                  <span className="value">{profileData.currency}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="stats-grid">
-        <div className="stat-card level-card">
-          <div className="stat-icon">⚔️</div>
-          <div className="stat-info">
-            <h3>Level {user?.stats?.level || 1}</h3>
-            <div className="level-progress">
-              {(() => {
-                const progress = calculateLevelProgress(
-                  user?.stats?.experience || 0, 
-                  user?.stats?.level || 1
-                )
-                return (
-                  <>
-                    <div className="exp-bar">
-                      <div 
-                        className="exp-fill" 
-                        style={{ width: `${progress.percentage}%` }}
-                      ></div>
-                    </div>
-                    <div className="exp-text">
-                      {progress.current} / {progress.needed} XP
-                    </div>
-                  </>
-                )
-              })()}
+        <div className="player-stats-section">
+          <div className="stats-row">
+            <div className="stat-card level-card">
+              <div className="stat-icon">⚔️</div>
+              <div className="stat-info">
+                <h3>Level {user?.stats?.level || 1}</h3>
+                <div className="level-progress">
+                  {(() => {
+                    const progress = calculateLevelProgress(
+                      user?.stats?.experience || 0, 
+                      user?.stats?.level || 1
+                    )
+                    return (
+                      <>
+                        <div className="exp-bar">
+                          <div 
+                            className="exp-fill" 
+                            style={{ width: `${progress.percentage}%` }}
+                          ></div>
+                        </div>
+                        <div className="exp-text">
+                          {progress.current} / {progress.needed} XP
+                        </div>
+                      </>
+                    )
+                  })()}
+                </div>
+              </div>
+            </div>
+            
+            <div className="stat-card">
+              <div className="stat-icon">💎</div>
+              <div className="stat-info">
+                <h3>Shards</h3>
+                <div className="stat-value">{user?.stats?.shards || 0}</div>
+              </div>
             </div>
           </div>
         </div>
-        
-        <div className="stat-card">
-          <div className="stat-icon">💎</div>
-          <div className="stat-info">
-            <h3>Shards</h3>
-            <div className="stat-value">{user?.stats?.shards || 0}</div>
+
+        <div className="experience-section">
+          <div className="experience-card">
+            <h3>Experience Distribution</h3>
+            {(() => {
+              const distribution = calculateAttributeDistribution()
+              const { strength, intelligence, charisma, total } = distribution
+              
+              if (total === 0) {
+                return (
+                  <div className="no-experience">
+                    <span>No experience earned yet</span>
+                  </div>
+                )
+              }
+
+              // Calculate angles for the ring segments
+              const strengthAngle = (strength / total) * 360
+              const intelligenceAngle = (intelligence / total) * 360
+              const charismaAngle = (charisma / total) * 360
+
+              const radius = 70
+              const strokeWidth = 18
+              const normalizedRadius = radius - strokeWidth * 0.5
+              const circumference = normalizedRadius * 2 * Math.PI
+
+              // Calculate stroke dash arrays for each segment
+              const strengthDash = (strengthAngle / 360) * circumference
+              const intelligenceDash = (intelligenceAngle / 360) * circumference
+              const charismaDash = (charismaAngle / 360) * circumference
+
+              return (
+                <div className="experience-content">
+                  <div className="ring-chart-wrapper">
+                    <svg height={radius * 2} width={radius * 2}>
+                      {/* Background circle */}
+                      <circle
+                        cx={radius}
+                        cy={radius}
+                        r={normalizedRadius}
+                        stroke="rgba(148, 163, 184, 0.2)"
+                        strokeWidth={strokeWidth}
+                        fill="transparent"
+                      />
+                      
+                      {/* Strength segment */}
+                      <circle
+                        cx={radius}
+                        cy={radius}
+                        r={normalizedRadius}
+                        stroke="#ef4444"
+                        strokeWidth={strokeWidth}
+                        fill="transparent"
+                        strokeDasharray={`${strengthDash} ${circumference}`}
+                        strokeDashoffset={0}
+                        transform={`rotate(-90 ${radius} ${radius})`}
+                        className="strength-segment"
+                      />
+                      
+                      {/* Intelligence segment */}
+                      <circle
+                        cx={radius}
+                        cy={radius}
+                        r={normalizedRadius}
+                        stroke="#3b82f6"
+                        strokeWidth={strokeWidth}
+                        fill="transparent"
+                        strokeDasharray={`${intelligenceDash} ${circumference}`}
+                        strokeDashoffset={-strengthDash}
+                        transform={`rotate(-90 ${radius} ${radius})`}
+                        className="intelligence-segment"
+                      />
+                      
+                      {/* Charisma segment */}
+                      <circle
+                        cx={radius}
+                        cy={radius}
+                        r={normalizedRadius}
+                        stroke="#8b5cf6"
+                        strokeWidth={strokeWidth}
+                        fill="transparent"
+                        strokeDasharray={`${charismaDash} ${circumference}`}
+                        strokeDashoffset={-(strengthDash + intelligenceDash)}
+                        transform={`rotate(-90 ${radius} ${radius})`}
+                        className="charisma-segment"
+                      />
+                    </svg>
+                    
+                    <div className="ring-center-text">
+                      <div className="total-exp">{total}</div>
+                      <div className="exp-label">Total XP</div>
+                    </div>
+                  </div>
+                  
+                  <div className="experience-legend">
+                    <div className="legend-row">
+                      <div className="legend-color strength-color"></div>
+                      <span className="legend-label">💪 Strength</span>
+                      <span className="legend-stats">{strength} XP ({distribution.strengthPercent.toFixed(1)}%)</span>
+                    </div>
+                    <div className="legend-row">
+                      <div className="legend-color intelligence-color"></div>
+                      <span className="legend-label">🧠 Intelligence</span>
+                      <span className="legend-stats">{intelligence} XP ({distribution.intelligencePercent.toFixed(1)}%)</span>
+                    </div>
+                    <div className="legend-row">
+                      <div className="legend-color charisma-color"></div>
+                      <span className="legend-label">✨ Charisma</span>
+                      <span className="legend-stats">{charisma} XP ({distribution.charismaPercent.toFixed(1)}%)</span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         </div>
       </div>

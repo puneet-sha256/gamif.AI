@@ -174,8 +174,11 @@ app.post('/api/register', async (req, res) => {
       createdAt: new Date().toISOString(),
       stats: {
         level: 1,
-        experience: 0,
-        shards: 0
+        experience: 30,
+        shards: 0,
+        strength: 10,
+        intelligence: 10,
+        charisma: 10
       }
     }
 

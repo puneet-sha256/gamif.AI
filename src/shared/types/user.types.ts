@@ -14,6 +14,9 @@ export interface UserStats {
   level: number
   experience: number
   shards: number
+  strength: number
+  intelligence: number
+  charisma: number
 }
 
 export interface User {
