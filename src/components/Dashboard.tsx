@@ -343,37 +343,45 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         <div className="task-section">
           <h3>🎯 Active Tasks</h3>
           <div className="task-list">
-            <div className="task-item">
-              <div className="task-info">
-                <h4>Daily Exercise</h4>
-                <p>Complete 30 minutes of physical activity</p>
-                <div className="task-progress">
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: '60%' }}></div>
-                  </div>
-                  <span>60% Complete</span>
+            <div className="task-item enhanced">
+              <div className="task-icon">💪</div>
+              <div className="task-content">
+                <div className="task-info">
+                  <p className="task-description">Complete 30 minutes of physical activity</p>
+                  <span className="task-category">Fitness</span>
                 </div>
-              </div>
-              <div className="task-rewards">
-                <span className="xp-reward">+50 XP</span>
-                <span className="shard-reward">+10 💎</span>
+                <div className="task-rewards">
+                  <span className="xp-reward">+50 XP</span>
+                  <span className="shard-reward">+10 💎</span>
+                </div>
               </div>
             </div>
             
-            <div className="task-item">
-              <div className="task-info">
-                <h4>Learn Something New</h4>
-                <p>Spend 1 hour learning a new skill</p>
-                <div className="task-progress">
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: '25%' }}></div>
-                  </div>
-                  <span>25% Complete</span>
+            <div className="task-item enhanced">
+              <div className="task-icon">🧠</div>
+              <div className="task-content">
+                <div className="task-info">
+                  <p className="task-description">Spend 1 hour learning a new skill</p>
+                  <span className="task-category">Learning</span>
+                </div>
+                <div className="task-rewards">
+                  <span className="xp-reward">+75 XP</span>
+                  <span className="shard-reward">+15 💎</span>
                 </div>
               </div>
-              <div className="task-rewards">
-                <span className="xp-reward">+75 XP</span>
-                <span className="shard-reward">+15 💎</span>
+            </div>
+            
+            <div className="task-item enhanced">
+              <div className="task-icon">📚</div>
+              <div className="task-content">
+                <div className="task-info">
+                  <p className="task-description">Read for 45 minutes</p>
+                  <span className="task-category">Knowledge</span>
+                </div>
+                <div className="task-rewards">
+                  <span className="xp-reward">+40 XP</span>
+                  <span className="shard-reward">+8 💎</span>
+                </div>
               </div>
             </div>
           </div>
@@ -382,18 +390,19 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         <div className="challenge-section">
           <h3>🏆 Weekly Challenges</h3>
           <div className="challenge-list">
-            <div className="challenge-item">
-              <div className="challenge-info">
-                <h4>Consistency Champion</h4>
-                <p>Complete daily tasks for 7 days straight</p>
-                <div className="challenge-progress">
-                  <span>Progress: 3/7 days</span>
+            <div className="challenge-item enhanced">
+              <div className="challenge-icon">🎯</div>
+              <div className="task-content">
+                <div className="challenge-info">
+                  <p className="task-description">Complete daily tasks for 7 days straight</p>
+                  <span className="task-category">Consistency</span>
+                </div>
+                <div className="challenge-rewards">
+                  <span className="xp-reward">+200 XP</span>
+                  <span className="shard-reward">+50 💎</span>
                 </div>
               </div>
-              <div className="challenge-rewards">
-                <span className="xp-reward">+200 XP</span>
-                <span className="shard-reward">+50 💎</span>
-              </div>
+              <div className="challenge-progress">3/7 days</div>
             </div>
           </div>
         </div>
