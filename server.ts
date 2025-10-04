@@ -38,7 +38,7 @@ const USERS_FILE = path.join(DATA_DIR, 'users.json')
 const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json')
 const BACKUP_DIR = path.join(DATA_DIR, 'backup')
 
-import type { User, Session, UserRegistration, UserLogin, AuthResponse } from './src/shared/types'
+import type { User, Session, UserRegistration, UserLogin, AuthResponse, UserStats } from './src/shared/types'
 
 // Server-specific imports
 
@@ -332,6 +332,85 @@ app.get('/api/user/session/:sessionId', async (req, res) => {
 
   } catch (error) {
     console.error('Get user by session error:', error)
+    res.status(500).json({ success: false, message: 'Internal server error' })
+  }
+})
+
+// Update experience points for attributes
+app.patch('/api/user/experience', async (req, res) => {
+  try {
+    const { sessionId, strengthDelta, intelligenceDelta, charismaDelta } = req.body
+
+    // Validate input
+    if (!sessionId) {
+      return res.status(400).json({ success: false, message: 'Session ID is required' })
+    }
+
+    const strengthChange = parseInt(strengthDelta) || 0
+    const intelligenceChange = parseInt(intelligenceDelta) || 0
+    const charismaChange = parseInt(charismaDelta) || 0
+
+    // Verify session
+    const sessions = await loadSessions()
+    const session = sessions.find(s => s.sessionId === sessionId)
+
+    if (!session) {
+      return res.status(401).json({ success: false, message: 'Invalid session' })
+    }
+
+    // Load and find user
+    const users = await loadUsers()
+    const userIndex = users.findIndex(u => u.id === session.userId)
+
+    if (userIndex === -1) {
+      return res.status(404).json({ success: false, message: 'User not found' })
+    }
+
+    const user = users[userIndex]
+
+    // Ensure user has stats
+    if (!user.stats) {
+      user.stats = {
+        experience: 0,
+        shards: 0,
+        strength: 0,
+        intelligence: 0,
+        charisma: 0
+      }
+    }
+
+    // Calculate new attribute values
+    const newStrength = Math.max(0, (user.stats.strength || 0) + strengthChange)
+    const newIntelligence = Math.max(0, (user.stats.intelligence || 0) + intelligenceChange)
+    const newCharisma = Math.max(0, (user.stats.charisma || 0) + charismaChange)
+
+    // Update stats
+    user.stats.strength = newStrength
+    user.stats.intelligence = newIntelligence
+    user.stats.charisma = newCharisma
+    
+    // Total experience is sum of all attributes
+    user.stats.experience = newStrength + newIntelligence + newCharisma
+
+    // Save updated user data
+    await saveUsers(users)
+
+    // Return updated stats
+    const { passwordHash, ...userWithoutPassword } = user
+    res.json({
+      success: true,
+      message: 'Experience updated successfully',
+      user: userWithoutPassword,
+      changes: {
+        strengthChange,
+        intelligenceChange,
+        charismaChange,
+        totalExperienceChange: strengthChange + intelligenceChange + charismaChange
+      }
+    })
+
+  } catch (error) {
+    console.error('Update experience error:', error)
     res.status(500).json({ success: false, message: 'Internal server error' })
   }
 })

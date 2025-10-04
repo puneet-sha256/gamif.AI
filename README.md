@@ -215,6 +215,146 @@ xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50
 | `npm run lint` | Run ESLint |
 | `npm run dev:full` | Run frontend and backend concurrently |
 
+## 🌐 API Documentation
+
+### **Authentication Endpoints**
+
+#### Login
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "string",
+  "password": "string"
+}
+```
+
+#### Register
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "username": "string", 
+  "password": "string"
+}
+```
+
+#### Logout
+```http
+POST /api/auth/logout
+Content-Type: application/json
+
+{
+  "sessionId": "string"
+}
+```
+
+### **User Management Endpoints**
+
+#### Update Profile
+```http
+PATCH /api/user/profile
+Content-Type: application/json
+
+{
+  "sessionId": "string",
+  "profile": {
+    "name": "string",
+    "age": number,
+    "monthlyBudget": number,
+    "currency": "string"
+  }
+}
+```
+
+#### Update Goals
+```http
+PATCH /api/user/goals
+Content-Type: application/json
+
+{
+  "sessionId": "string", 
+  "goals": ["string"]
+}
+```
+
+### **Experience Management Endpoints**
+
+#### Update Experience Points
+```http
+PATCH /api/user/experience
+Content-Type: application/json
+
+{
+  "sessionId": "string",
+  "strengthDelta": number,      // Can be positive or negative
+  "intelligenceDelta": number,  // Can be positive or negative  
+  "charismaDelta": number      // Can be positive or negative
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Experience updated successfully",
+  "user": {
+    "id": "string",
+    "username": "string", 
+    "profile": { ... },
+    "stats": {
+      "experience": number,    // Total: strength + intelligence + charisma
+      "shards": number,
+      "strength": number,
+      "intelligence": number,
+      "charisma": number
+    }
+  },
+  "changes": {
+    "strengthChange": number,
+    "intelligenceChange": number, 
+    "charismaChange": number,
+    "totalExperienceChange": number
+  }
+}
+```
+
+**Usage Examples:**
+```bash
+# Add 10 XP to strength only
+curl -X PATCH "http://localhost:3001/api/user/experience" \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId":"...", "strengthDelta":10, "intelligenceDelta":0, "charismaDelta":0}'
+
+# Add XP to all attributes
+curl -X PATCH "http://localhost:3001/api/user/experience" \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId":"...", "strengthDelta":5, "intelligenceDelta":3, "charismaDelta":2}'
+
+# Subtract XP (penalties)
+curl -X PATCH "http://localhost:3001/api/user/experience" \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId":"...", "strengthDelta":-2, "intelligenceDelta":0, "charismaDelta":0}'
+```
+
+### **Utility Endpoints**
+
+#### Health Check
+```http
+GET /api/health
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Server is running",
+  "timestamp": "2025-10-04T09:00:52.997Z"
+}
+```
+
 ## 💾 Data Storage & Architecture
 
 ### **File-Based Database System**
