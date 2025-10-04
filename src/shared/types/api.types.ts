@@ -23,6 +23,12 @@ export interface ExperienceUpdateRequest {
   charismaDelta?: number;
 }
 
+export interface ShardsUpdateRequest {
+  sessionId: string;
+  shardsDelta: number; // Can be positive (add) or negative (subtract)
+  reason?: string; // Optional reason for the change (e.g., "Task completion", "Shop purchase")
+}
+
 export interface UpdateProfileRequest {
   sessionId: string;
   profile: {
@@ -93,5 +99,14 @@ export interface ExperienceUpdateResponse extends ApiSuccessResponse {
     intelligenceChange: number;
     charismaChange: number;
     totalExperienceChange: number;
+  };
+}
+
+// Shards Update Response
+export interface ShardsUpdateResponse extends ApiSuccessResponse {
+  changes: {
+    shardsChange: number;
+    newShardsBalance: number;
+    reason?: string;
   };
 }

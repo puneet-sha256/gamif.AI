@@ -339,6 +339,66 @@ curl -X PATCH "http://localhost:3001/api/user/experience" \
   -d '{"sessionId":"...", "strengthDelta":-2, "intelligenceDelta":0, "charismaDelta":0}'
 ```
 
+#### Update Shards (In-Game Currency)
+```http
+PATCH /api/user/shards
+Content-Type: application/json
+
+{
+  "sessionId": "string",
+  "shardsDelta": number,      // Positive to add, negative to subtract
+  "reason": "string"          // Optional reason for the change
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Shards updated successfully: Task completion",
+  "user": {
+    "id": "string",
+    "username": "string", 
+    "profile": { ... },
+    "stats": {
+      "experience": number,
+      "shards": number,        // Updated shards balance
+      "strength": number,
+      "intelligence": number,
+      "charisma": number
+    }
+  },
+  "changes": {
+    "shardsChange": number,      // The delta applied
+    "newShardsBalance": number,  // Current shards after update
+    "reason": "string"           // Reason provided (if any)
+  }
+}
+```
+
+**Usage Examples:**
+```bash
+# Add 50 shards for task completion
+curl -X PATCH "http://localhost:3001/api/user/shards" \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId":"...", "shardsDelta":50, "reason":"Task completion"}'
+
+# Subtract 25 shards for shop purchase
+curl -X PATCH "http://localhost:3001/api/user/shards" \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId":"...", "shardsDelta":-25, "reason":"Purchased power-up"}'
+
+# Add shards without reason
+curl -X PATCH "http://localhost:3001/api/user/shards" \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId":"...", "shardsDelta":10}'
+```
+
+**Error Handling:**
+- Returns 400 if insufficient shards for subtraction
+- Prevents negative shard balances
+- Validates session and user existence
+
 ### **Utility Endpoints**
 
 #### Health Check

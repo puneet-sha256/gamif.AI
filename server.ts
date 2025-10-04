@@ -49,6 +49,7 @@ import type {
   LoginRequest,
   LogoutRequest,
   ExperienceUpdateRequest,
+  ShardsUpdateRequest,
   ApiSuccessResponse,
   ApiErrorResponse,
   ApiResponse
@@ -92,6 +93,14 @@ function validateExperienceUpdateRequest(body: any): body is ExperienceUpdateReq
     (body.strengthDelta === undefined || isValidNumber(body.strengthDelta)) &&
     (body.intelligenceDelta === undefined || isValidNumber(body.intelligenceDelta)) &&
     (body.charismaDelta === undefined || isValidNumber(body.charismaDelta))
+  );
+}
+
+function validateShardsUpdateRequest(body: any): body is ShardsUpdateRequest {
+  return (
+    isValidString(body.sessionId) &&
+    isValidNumber(body.shardsDelta) &&
+    (body.reason === undefined || isValidString(body.reason))
   );
 }
 
@@ -527,6 +536,106 @@ app.patch('/api/user/experience', async (req, res) => {
 
   } catch (error) {
     console.error('Update experience error:', error)
+    const response: ApiErrorResponse = {
+      success: false,
+      message: 'Internal server error'
+    }
+    res.status(500).json(response)
+  }
+})
+
+// Update shards (in-game currency)
+app.patch('/api/user/shards', async (req, res) => {
+  try {
+    // Validate request body
+    if (!validateShardsUpdateRequest(req.body)) {
+      const response: ApiErrorResponse = {
+        success: false,
+        message: 'Invalid request. Session ID and shards delta (number) are required'
+      }
+      return res.status(400).json(response)
+    }
+
+    const { sessionId, shardsDelta, reason }: ShardsUpdateRequest = req.body
+
+    // Verify session
+    const sessions = await loadSessions()
+    const session = sessions.find(s => s.sessionId === sessionId)
+
+    if (!session) {
+      const response: ApiErrorResponse = {
+        success: false,
+        message: 'Invalid session'
+      }
+      return res.status(401).json(response)
+    }
+
+    // Load and find user
+    const users = await loadUsers()
+    const userIndex = users.findIndex(u => u.id === session.userId)
+
+    if (userIndex === -1) {
+      const response: ApiErrorResponse = {
+        success: false,
+        message: 'User not found'
+      }
+      return res.status(404).json(response)
+    }
+
+    const user = users[userIndex]
+
+    // Ensure user has stats
+    if (!user.stats) {
+      user.stats = {
+        experience: 0,
+        shards: 0,
+        strength: 0,
+        intelligence: 0,
+        charisma: 0
+      } as UserStats
+    }
+
+    // Calculate new shards value (prevent negative shards)
+    const currentShards = user.stats.shards || 0
+    const newShards = Math.max(0, currentShards + shardsDelta)
+    
+    // Check if user has enough shards for subtraction
+    if (shardsDelta < 0 && currentShards + shardsDelta < 0) {
+      const response: ApiErrorResponse = {
+        success: false,
+        message: `Insufficient shards. Current balance: ${currentShards}, attempted to subtract: ${Math.abs(shardsDelta)}`
+      }
+      return res.status(400).json(response)
+    }
+
+    // Update shards
+    user.stats.shards = newShards
+
+    // Update session last access
+    session.lastAccess = new Date().toISOString()
+    await saveSessions(sessions)
+
+    // Save updated user data
+    await saveUsers(users)
+
+    // Return updated stats
+    const { passwordHash, ...userWithoutPassword } = user
+    const response: ApiSuccessResponse = {
+      success: true,
+      message: reason 
+        ? `Shards updated successfully: ${reason}` 
+        : `Shards ${shardsDelta >= 0 ? 'added' : 'subtracted'} successfully`,
+      user: userWithoutPassword,
+      changes: {
+        shardsChange: shardsDelta,
+        newShardsBalance: newShards,
+        reason
+      }
+    }
+    res.json(response)
+
+  } catch (error) {
+    console.error('Update shards error:', error)
     const response: ApiErrorResponse = {
       success: false,
       message: 'Internal server error'
