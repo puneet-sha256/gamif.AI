@@ -49,6 +49,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const profileData = user?.profileData
   const goalsData = user?.goalsData
 
+  // Calculate experience progress for next level
+  const calculateLevelProgress = (experience: number, level: number) => {
+    // Each level requires 100 * level experience points
+    const currentLevelExp = (level - 1) * 100
+    const nextLevelExp = level * 100
+    const expInCurrentLevel = experience - currentLevelExp
+    const expNeededForNextLevel = nextLevelExp - currentLevelExp
+    const progressPercentage = Math.min((expInCurrentLevel / expNeededForNextLevel) * 100, 100)
+    
+    return {
+      current: Math.max(expInCurrentLevel, 0),
+      needed: expNeededForNextLevel,
+      percentage: Math.max(progressPercentage, 0)
+    }
+  }
+
   console.log('🎯 Dashboard: Rendering with data:', {
     hasProfileData: !!profileData,
     hasGoalsData: !!goalsData,
@@ -97,11 +113,31 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       )}
 
       <div className="stats-grid">
-        <div className="stat-card">
+        <div className="stat-card level-card">
           <div className="stat-icon">⚔️</div>
           <div className="stat-info">
-            <h3>Level</h3>
-            <div className="stat-value">{user?.stats?.level || 1}</div>
+            <h3>Level {user?.stats?.level || 1}</h3>
+            <div className="level-progress">
+              {(() => {
+                const progress = calculateLevelProgress(
+                  user?.stats?.experience || 0, 
+                  user?.stats?.level || 1
+                )
+                return (
+                  <>
+                    <div className="exp-bar">
+                      <div 
+                        className="exp-fill" 
+                        style={{ width: `${progress.percentage}%` }}
+                      ></div>
+                    </div>
+                    <div className="exp-text">
+                      {progress.current} / {progress.needed} XP
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
           </div>
         </div>
         
@@ -112,26 +148,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             <div className="stat-value">{user?.stats?.shards || 0}</div>
           </div>
         </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">🎯</div>
-          <div className="stat-info">
-            <h3>Experience</h3>
-            <div className="stat-value">{user?.stats?.experience || 0}</div>
-          </div>
-        </div>
       </div>
-
-      {goalsData && (
-        <div className="goals-section">
-          <div className="goals-card">
-            <h3>Your Goals</h3>
-            <div className="goals-text">
-              {goalsData.longTermGoals}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 
