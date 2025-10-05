@@ -1,4 +1,4 @@
-import type { User, UserRegistration, UserLogin, ProfileData, GoalsData } from '../types'
+import type { User, UserRegistration, UserLogin, ProfileData, GoalsData } from '../../types'
 
 // Re-export types for backward compatibility
 export type { User, UserRegistration, UserLogin, ProfileData, GoalsData }

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { userDatabase } from '../services/fileUserDatabase'
+import { userDatabase } from '../client/services/fileUserDatabase'
 import type { AuthContextType, User, UserLogin, UserRegistration, ProfileData, GoalsData } from '../shared/types'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)

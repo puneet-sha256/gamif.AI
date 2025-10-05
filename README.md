@@ -4,6 +4,12 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 
 ## 🌟 Features
 
+### 🤖 **AI-Powered Goal Analysis**
+- **Azure OpenAI Integration** - Advanced AI agent for goal processing
+- **Personalized Task Generation** - AI creates custom daily tasks from user goals
+- **Intelligent Insights** - AI provides goal analysis and recommendations
+- **Smart Categorization** - Automatic goal classification and prioritization
+
 ### 🔐 **Authentication & Profile System**
 - Secure user registration and login system
 - Personalized player profile creation
@@ -45,6 +51,7 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 - **Node.js** - Runtime environment
 - **Express.js** - Web application framework
 - **TypeScript** - Type-safe server development
+- **Azure OpenAI** - AI agent for goal analysis and task generation
 - **File-based Storage** - JSON data persistence
 
 ### Development Tools
@@ -121,6 +128,7 @@ Registration → Profile Setup → Goals Setup → Dashboard (4 Tabs)
    - Define comprehensive long-term development objectives
    - Cover areas like fitness, learning, career, social skills, hobbies, finances, and well-being
    - Detailed goal descriptions for motivation
+   - **AI Analysis** - Azure OpenAI agent automatically analyzes goals and generates personalized tasks
    - Progress: Step 2 of 2
 
 4. **📊 Main Dashboard - 4 Sections**
@@ -175,32 +183,47 @@ xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50
 
 ```
 ├── src/
-│   ├── components/              # React components
-│   │   ├── AuthScreen.tsx       # Login/Registration
-│   │   ├── ProfileSetup.tsx     # Profile creation
-│   │   ├── GoalsSetup.tsx       # Goal setting
-│   │   ├── Dashboard.tsx        # Main tabbed dashboard
-│   │   ├── LoadingScreen.tsx    # Loading states
-│   │   └── *.css               # Component styling
-│   ├── contexts/               # React Context providers
-│   │   └── AuthContext.tsx     # Authentication state management
-│   ├── services/               # API and data services
-│   │   ├── userDatabase.ts     # User data operations
-│   │   └── fileUserDatabase.ts # File-based storage
-│   ├── shared/                 # Shared type definitions
-│   │   └── types/              # TypeScript interfaces
+│   ├── client/                 # Frontend services
+│   │   └── services/          # Client-side API services
+│   │       ├── fileUserDatabase.ts  # Frontend API client
+│   │       └── userDatabase.ts      # Abstract database interface
+│   ├── server/                # Backend code
+│   │   ├── routes/            # Express route handlers
+│   │   │   ├── authRoutes.ts  # Authentication endpoints
+│   │   │   ├── userRoutes.ts  # User management endpoints
+│   │   │   ├── healthRoutes.ts # Health check endpoints
+│   │   │   └── aiRoutes.ts    # Azure AI integration endpoints
+│   │   ├── services/          # Server-side business logic
+│   │   │   └── azureAIService.ts # Azure OpenAI integration
+│   │   ├── utils/             # Server utilities
+│   │   │   ├── dataOperations.ts    # Database operations
+│   │   │   ├── validation.ts        # Request validation
+│   │   │   ├── authUtils.ts         # Authentication utilities
+│   │   │   └── responseHelpers.ts   # API response helpers
+│   │   └── ai/                # AI-related backend code (future expansion)
+│   ├── components/            # React components
+│   │   ├── AuthScreen.tsx     # Login/Registration
+│   │   ├── ProfileSetup.tsx   # Profile creation
+│   │   ├── GoalsSetup.tsx     # Goal setting with AI integration
+│   │   ├── Dashboard.tsx      # Main tabbed dashboard
+│   │   ├── LoadingScreen.tsx  # Loading states
+│   │   └── *.css             # Component styling
+│   ├── contexts/             # React Context providers
+│   │   └── AuthContext.tsx   # Authentication state management
+│   ├── shared/               # Shared type definitions
+│   │   └── types/            # TypeScript interfaces
 │   │       ├── user.types.ts   # User and stats interfaces
 │   │       ├── auth.types.ts   # Authentication types
 │   │       ├── api.types.ts    # API response types
 │   │       ├── context.types.ts # Context types
 │   │       └── index.ts        # Unified exports
-│   └── assets/                 # Static resources
-├── data/                       # JSON data storage
-│   ├── users.json             # User accounts and progress
-│   └── sessions.json          # Active user sessions
-├── server.ts                  # Express backend server
-├── public/                    # Static assets
-└── package.json              # Dependencies and scripts
+│   └── assets/               # Static resources
+├── data/                     # JSON data storage
+│   ├── users.json           # User accounts and progress
+│   └── sessions.json        # Active user sessions
+├── server.ts                # Express backend server
+├── public/                  # Static assets
+└── package.json            # Dependencies and scripts
 ```
 
 ## 🔧 Available Scripts
@@ -415,6 +438,108 @@ GET /api/health
 }
 ```
 
+#### AI Health Check
+```http
+GET /api/ai/health
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "AI health check completed",
+  "data": {
+    "azureAI": {
+      "success": true,
+      "message": "Successfully connected to agent: DailyTaskAgent"
+    },
+    "timestamp": "2025-10-05T11:00:00.000Z"
+  }
+}
+```
+
+### **AI Integration Endpoints**
+
+#### Analyze Goals with Azure AI
+```http
+POST /api/ai/analyze-goals
+Content-Type: application/json
+
+{
+  "sessionId": "string",
+  "goals": {
+    "longTermGoals": "string"    // Multi-line goals description
+  },
+  "userProfile": {
+    "name": "string",
+    "age": number,
+    "currency": "string"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Goals analyzed successfully",
+  "data": {
+    "tasks": [
+      {
+        "title": "Morning Workout Routine",
+        "description": "Complete 30-minute strength training session",
+        "category": "fitness",
+        "difficulty": "medium",
+        "estimatedTime": "30 minutes",
+        "xpReward": 75
+      }
+    ],
+    "insights": [
+      "Your goals show a strong focus on physical and professional development",
+      "Consider balancing skill development with relationship building"
+    ],
+    "recommendations": [
+      "Start with 2-3 daily tasks to build momentum",
+      "Track progress weekly to maintain motivation"
+    ],
+    "goalAnalysis": {
+      "strengths": ["Clear fitness objectives", "Professional growth mindset"],
+      "challenges": ["Time management", "Consistency"],
+      "priorities": ["Health improvement", "Skill development"]
+    }
+  },
+  "metadata": {
+    "processingTime": 2340,
+    "agentUsed": "azure-openai-foundry"
+  }
+}
+```
+
+**Usage Example:**
+```bash
+curl -X POST "http://localhost:3001/api/ai/analyze-goals" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sessionId": "your-session-id",
+    "goals": {
+      "longTermGoals": "• Build muscle mass through consistent gym routine\n• Learn JavaScript and Python for career advancement\n• Develop better communication skills"
+    },
+    "userProfile": {
+      "name": "John Doe",
+      "age": 28,
+      "currency": "USD"
+    }
+  }'
+```
+
+**Features:**
+- Automatically called when users complete goals setup
+- Generates 5-8 personalized daily tasks based on goals
+- Provides AI insights about goal patterns and motivations
+- Offers actionable recommendations for goal achievement
+- Categorizes tasks by difficulty and estimated time
+- Assigns appropriate XP rewards (easy: 25-50, medium: 75-100, hard: 125-150, expert: 175-200)
+
 ## 💾 Data Storage & Architecture
 
 ### **File-Based Database System**
@@ -514,11 +639,12 @@ This project is licensed under the MIT License.
 - [ ] **Leaderboards** - Community rankings and competitions
 - [ ] **Progress Analytics** - Detailed charts and insights
 
-### **Phase 3 - AI Integration**
-- [ ] **Smart Task Generation** - AI-powered personalized challenges
+### **Phase 3 - Advanced AI Features**
+- [x] **Smart Task Generation** - AI-powered personalized challenges ✅ **IMPLEMENTED**
+- [x] **Goal Analysis** - AI insights and recommendations ✅ **IMPLEMENTED** 
 - [ ] **Progress Predictions** - ML-based goal achievement forecasting
 - [ ] **Adaptive Difficulty** - Dynamic XP requirements based on user behavior
-- [ ] **Intelligent Recommendations** - Personalized development suggestions
+- [ ] **Advanced Recommendations** - Context-aware development suggestions
 
 ### **Phase 4 - Mobile & Extended Platforms**
 - [ ] **React Native App** - Native mobile experience

@@ -1,4 +1,4 @@
-import type { User, UserRegistration, UserLogin } from '../shared/types'
+import type { User, UserRegistration, UserLogin } from '../../shared/types'
 
 class UserDatabase {
   private users: User[] = []
