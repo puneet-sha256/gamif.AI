@@ -202,12 +202,74 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     try {
+      // First save the goals data to user profile
       const success = await userDatabase.updateUser(user.id, { goalsData })
       console.log('📡 AuthContext: Save goals API response:', { success, userId: user.id })
       
       if (success) {
         console.log('✅ AuthContext: Goals data saved successfully')
         setUser(prev => prev ? { ...prev, goalsData } : null)
+        
+        // Now call Azure AI agent to analyze the goals
+        try {
+          console.log('🤖 AuthContext: Starting Azure AI goals analysis...')
+          
+          // Get current session ID from userDatabase
+          const sessionId = userDatabase.getSessionId()
+          if (!sessionId) {
+            console.log('⚠️ AuthContext: No session ID available for AI analysis')
+            return true // Goals saved successfully, AI analysis skipped
+          }
+          
+          // Call Azure AI agent
+          const aiResponse = await fetch('/api/ai/analyze-goals', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              sessionId,
+              goals: goalsData,
+              userProfile: user.profileData
+            })
+          })
+          
+          if (aiResponse.ok) {
+            const aiResult = await aiResponse.json()
+            console.log('🤖 AuthContext: Azure AI analysis completed successfully:', {
+              processingTime: aiResult.metadata?.processingTime,
+              tasksGenerated: aiResult.data?.tasks?.length || 0,
+              insights: aiResult.data?.insights?.length || 0,
+              recommendations: aiResult.data?.recommendations?.length || 0
+            })
+            
+            // TODO: Store AI analysis results in user profile or display them
+            // This could include:
+            // - Personalized task recommendations from Azure AI
+            // - Goal categorization and insights
+            // - AI-generated daily tasks
+            // - Progress tracking suggestions
+            
+            // For now, just log the results
+            if (aiResult.data?.tasks) {
+              console.log('🎯 AuthContext: AI Generated Tasks:', aiResult.data.tasks.map((task: any) => task.title))
+            }
+            if (aiResult.data?.insights) {
+              console.log('💡 AuthContext: AI Insights:', aiResult.data.insights)
+            }
+            if (aiResult.data?.recommendations) {
+              console.log('📋 AuthContext: AI Recommendations:', aiResult.data.recommendations)
+            }
+            
+          } else {
+            const errorData = await aiResponse.json()
+            console.log('⚠️ AuthContext: Azure AI analysis failed:', errorData.message)
+            // Don't fail the entire operation if AI analysis fails
+          }
+        } catch (aiError) {
+          console.error('⚠️ AuthContext: Azure AI analysis error (non-critical):', aiError)
+          // Don't fail the entire operation if AI analysis fails
+        }
       } else {
         console.log('❌ AuthContext: Failed to save goals data')
       }

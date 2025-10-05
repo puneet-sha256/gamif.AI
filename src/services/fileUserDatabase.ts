@@ -272,6 +272,11 @@ class FileUserDatabase {
     }
   }
 
+  // Get current session ID
+  getSessionId(): string | null {
+    return this.sessionId
+  }
+
   // Legacy methods for compatibility (these now warn about localStorage usage)
   getAllUsers(): User[] {
     console.warn('getAllUsers() is not available with file-based storage for security reasons')
