@@ -166,3 +166,26 @@ export async function removeSession(sessionId: string): Promise<void> {
   const filteredSessions = sessions.filter(session => session.sessionId !== sessionId)
   await saveSessions(filteredSessions)
 }
+
+// Update user's generated tasks
+export async function updateUserGeneratedTasks(userId: string, generatedTasks: import('../../shared/types').GeneratedTasks): Promise<void> {
+  console.log('🔄 Server: Updating generated tasks for user:', userId)
+  const users = await loadUsers()
+  const user = users.find(u => u.id === userId)
+  
+  if (user) {
+    // Update generated tasks directly on user object
+    user.generatedTasks = generatedTasks
+    
+    await saveUsers(users)
+    console.log('✅ Server: Generated tasks updated successfully for user:', userId)
+  } else {
+    console.log('❌ Server: User not found for updating generated tasks:', userId)
+  }
+}
+
+// Get user's generated tasks
+export async function getUserGeneratedTasks(userId: string): Promise<import('../../shared/types').GeneratedTasks | null> {
+  const user = await findUserById(userId)
+  return user?.generatedTasks || null
+}

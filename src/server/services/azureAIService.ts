@@ -1,5 +1,5 @@
 import { AzureOpenAI } from "openai";
-import type { GoalsData, ProfileData } from '../../types';
+import type { GoalsData, ProfileData, GeneratedTasks } from '../../types';
 
 // Azure OpenAI configuration
 const endpoint = "https://gamifai-resource.cognitiveservices.azure.com/";
@@ -10,21 +10,7 @@ const apiVersion = "2024-04-01-preview";
 export interface TaskGenerationResult {
   success: boolean;
   data?: {
-    tasks: Array<{
-      title: string;
-      description: string;
-      category: string;
-      difficulty: string;
-      estimatedTime: string;
-      xpReward: number;
-    }>;
-    insights: string[];
-    recommendations: string[];
-    goalAnalysis: {
-      strengths: string[];
-      challenges: string[];
-      priorities: string[];
-    };
+    generatedTasks?: GeneratedTasks;
     rawResponse?: string; // Raw response from Azure AI agent
   };
   error?: string;
@@ -112,20 +98,29 @@ class AzureAIService {
       console.log(agentResponse);
       console.log('='.repeat(50));
 
+      // Try to parse the JSON response
+      let parsedTasks: GeneratedTasks | undefined;
+      try {
+        const jsonMatch = agentResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const jsonStr = jsonMatch[0];
+          parsedTasks = JSON.parse(jsonStr) as GeneratedTasks;
+          parsedTasks.lastUpdated = new Date().toISOString();
+          console.log('✅ Successfully parsed Azure AI response to JSON:', parsedTasks);
+        } else {
+          console.log('⚠️ No JSON found in Azure AI response');
+        }
+      } catch (parseError) {
+        console.log('⚠️ Failed to parse Azure AI response as JSON:', parseError);
+      }
+
       console.log('✅ Azure OpenAI task generation completed successfully');
       
-      // Return simple structure with raw response
+      // Return structure with parsed tasks
       return {
         success: true,
         data: {
-          tasks: [],
-          insights: [],
-          recommendations: [],
-          goalAnalysis: {
-            strengths: [],
-            challenges: [],
-            priorities: []
-          },
+          generatedTasks: parsedTasks,
           rawResponse: agentResponse // Store the actual agent response here
         },
         processingTimeMs: Date.now() - startTime

@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import { azureAIService } from '../services/azureAIService'
-import { findSessionById, findUserById, updateSessionLastAccess } from '../utils/dataOperations'
+import { findSessionById, findUserById, updateSessionLastAccess, updateUserGeneratedTasks } from '../utils/dataOperations'
 import {
   createSuccessResponse,
   createErrorResponse,
@@ -43,6 +43,12 @@ export async function generateTasks(req: Request, res: Response) {
     if (taskGenerationResult.success) {
       // Update session last access
       await updateSessionLastAccess(sessionId)
+
+      // Store generated tasks in user profile if successfully parsed
+      if (taskGenerationResult.data?.generatedTasks) {
+        await updateUserGeneratedTasks(user.id, taskGenerationResult.data.generatedTasks)
+        console.log('✅ Server: Generated tasks stored in user profile')
+      }
 
       console.log('✅ Server: Azure AI task generation completed successfully')
       console.log('🎯 Generated Tasks:', taskGenerationResult.data)
