@@ -68,21 +68,3 @@ export async function generateTasks(req: Request, res: Response) {
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
-
-// Get Azure AI health status
-export async function getAIHealth(_req: Request, res: Response) {
-  try {
-    const connectionTest = await azureAIService.testConnection()
-    
-    res.json(createSuccessResponse(
-      'AI health check completed',
-      {
-        azureAI: connectionTest,
-        timestamp: new Date().toISOString()
-      }
-    ))
-  } catch (error) {
-    console.error('❌ Server: AI health check error:', error)
-    res.status(500).json(createErrorResponse('AI health check failed'))
-  }
-}

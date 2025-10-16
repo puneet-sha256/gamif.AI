@@ -53,7 +53,6 @@ app.patch('/api/user/shards', updateShards)
 
 // Azure AI routes
 app.post('/api/ai/generate-tasks', generateTasks)
-app.get('/api/ai/health', getAIHealth)
 
 // Initialize and start server
 async function startServer() {
