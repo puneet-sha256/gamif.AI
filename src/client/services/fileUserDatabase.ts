@@ -1,4 +1,4 @@
-import type { User, UserRegistration, UserLogin, ProfileData, GoalsData } from '../../types'
+import type { User, UserRegistration, UserLogin, ProfileData, GoalsData, GeneratedTasks } from '../../types'
 
 // Re-export types for backward compatibility
 export type { User, UserRegistration, UserLogin, ProfileData, GoalsData }
@@ -269,6 +269,42 @@ class FileUserDatabase {
         success: false,
         message: 'Backup creation failed'
       }
+    }
+  }
+
+  // Get user's generated tasks
+  async getUserTasks(): Promise<GeneratedTasks | null> {
+    if (!this.sessionId) {
+      console.log('❌ Database: No session available for getUserTasks')
+      return null
+    }
+
+    console.log('🔄 Database: Fetching user generated tasks...')
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/tasks/${this.sessionId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const result = await response.json()
+      console.log('📡 Database: Get user tasks response:', { 
+        status: response.status, 
+        success: result.success,
+        hasData: !!result.data
+      })
+
+      if (response.ok && result.success) {
+        console.log('✅ Database: Generated tasks fetched successfully')
+        return result.data.generatedTasks || null
+      } else {
+        console.log('❌ Database: Failed to fetch generated tasks:', result.message)
+        return null
+      }
+    } catch (error) {
+      console.error('❌ Database: Error fetching generated tasks:', error)
+      return null
     }
   }
 

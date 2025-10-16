@@ -6,6 +6,14 @@ import TaskItem from './TaskItem'
 import ShopItem from './ShopItem'
 import ProgressBar from './ProgressBar'
 import DailyActivityModal from './DailyActivityModal'
+import { 
+  mapGeneratedTasksToTaskItems, 
+  groupMappedTasksByCategory, 
+  hasGeneratedTasks,
+  TASK_CATEGORIES,
+  type MappedTaskItem
+} from '../utils/taskMapping'
+import type { GeneratedTasks } from '../types'
 
 interface DashboardProps {
   onLogout: () => void
@@ -14,11 +22,13 @@ interface DashboardProps {
 type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
-  const { user, logout } = useAuth()
+  const { user, logout, getUserTasks } = useAuth()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
   const [showDailyInput, setShowDailyInput] = useState(false)
   const [dailyActivity, setDailyActivity] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [generatedTasks, setGeneratedTasks] = useState<GeneratedTasks | null>(null)
+  const [isLoadingTasks, setIsLoadingTasks] = useState(false)
 
   useEffect(() => {
     console.log('🎯 Dashboard: Component mounted')
@@ -28,12 +38,34 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         username: user.username,
         email: user.email,
         hasProfile: !!user.profileData,
-        hasGoals: !!user.goalsData
+        hasGoals: !!user.goalsData,
+        hasGeneratedTasks: !!user.generatedTasks
       })
+      
+      // Set generated tasks from user data
+      setGeneratedTasks(user.generatedTasks || null)
     } else {
       console.log('⚠️ Dashboard: No user data available')
     }
   }, [user])
+
+  // Function to load fresh generated tasks
+  const loadGeneratedTasks = async () => {
+    setIsLoadingTasks(true)
+    try {
+      const tasks = await getUserTasks()
+      setGeneratedTasks(tasks)
+      console.log('✅ Dashboard: Generated tasks loaded:', {
+        hasStrength: !!tasks?.Strength?.length,
+        hasIntelligence: !!tasks?.Intelligence?.length,
+        hasCharisma: !!tasks?.Charisma?.length
+      })
+    } catch (error) {
+      console.error('❌ Dashboard: Error loading generated tasks:', error)
+    } finally {
+      setIsLoadingTasks(false)
+    }
+  }
 
   const handleLogout = async () => {
     console.log('🔄 Dashboard: Logout initiated by user')
@@ -401,41 +433,121 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     </div>
   )
 
-  const renderTasksTab = () => (
-    <div className="tab-content">
-      <div className="tasks-header">
-        <h2>Tasks & Challenges</h2>
-        <p>Complete tasks to earn experience and shards</p>
-      </div>
-      
-      <div className="tasks-grid">
-        <div className="task-section">
-          <h3>🎯 Active Tasks</h3>
-          <div className="task-list">
-            <TaskItem
-              icon="💪"
-              description="Complete 30 minutes of physical activity"
-              category="Fitness"
-              xpReward={50}
-              shardReward={10}
-            />
-            
-            <TaskItem
-              icon="🧠"
-              description="Spend 1 hour learning a new skill"
-              category="Learning"
-              xpReward={75}
-              shardReward={15}
-            />
-            
-            <TaskItem
-              icon="📚"
-              description="Read for 45 minutes"
-              category="Knowledge"
-              xpReward={40}
-              shardReward={8}
-            />
+  const renderTasksTab = () => {
+    // Check if we have generated tasks
+    const hasUserTasks = hasGeneratedTasks(generatedTasks)
+    
+    if (isLoadingTasks) {
+      return (
+        <div className="tab-content">
+          <div className="tasks-header">
+            <h2>Tasks & Challenges</h2>
+            <p>Loading your personalized tasks...</p>
           </div>
+          <div className="loading-tasks">⏳ Loading...</div>
+        </div>
+      )
+    }
+
+    if (!hasUserTasks) {
+      return (
+        <div className="tab-content">
+          <div className="tasks-header">
+            <h2>Tasks & Challenges</h2>
+            <p>Complete tasks to earn experience and shards</p>
+          </div>
+          
+          <div className="no-tasks-message">
+            <div className="no-tasks-content">
+              <h3>🎯 No Tasks Generated Yet</h3>
+              <p>Complete your profile and goals setup to get personalized daily tasks!</p>
+              <button 
+                onClick={loadGeneratedTasks}
+                className="refresh-tasks-btn"
+              >
+                🔄 Load Tasks
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Convert generated tasks to mappable format
+    const mappedTasks = mapGeneratedTasksToTaskItems(generatedTasks!)
+    const groupedTasks = groupMappedTasksByCategory(mappedTasks)
+
+    return (
+      <div className="tab-content">
+        <div className="tasks-header">
+          <h2>Tasks & Challenges</h2>
+          <p>Complete your personalized AI-generated tasks to earn experience and shards</p>
+          <button 
+            onClick={loadGeneratedTasks}
+            className="refresh-tasks-btn small"
+            disabled={isLoadingTasks}
+          >
+            🔄 Refresh
+          </button>
+        </div>
+        
+        <div className="tasks-grid">
+          {/* Strength Tasks */}
+          {groupedTasks.Strength.length > 0 && (
+            <div className="task-section">
+              <h3>{TASK_CATEGORIES.Strength.icon} Strength Tasks</h3>
+              <div className="task-list">
+                {groupedTasks.Strength.map((task: MappedTaskItem) => (
+                  <TaskItem
+                    key={task.id}
+                    icon={task.icon}
+                    description={task.description}
+                    category={task.category}
+                    xpReward={task.xpReward}
+                    shardReward={task.shardReward}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Intelligence Tasks */}
+          {groupedTasks.Intelligence.length > 0 && (
+            <div className="task-section">
+              <h3>{TASK_CATEGORIES.Intelligence.icon} Intelligence Tasks</h3>
+              <div className="task-list">
+                {groupedTasks.Intelligence.map((task: MappedTaskItem) => (
+                  <TaskItem
+                    key={task.id}
+                    icon={task.icon}
+                    description={task.description}
+                    category={task.category}
+                    xpReward={task.xpReward}
+                    shardReward={task.shardReward}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Charisma Tasks */}
+          {groupedTasks.Charisma.length > 0 && (
+            <div className="task-section">
+              <h3>{TASK_CATEGORIES.Charisma.icon} Charisma Tasks</h3>
+              <div className="task-list">
+                {groupedTasks.Charisma.map((task: MappedTaskItem) => (
+                  <TaskItem
+                    key={task.id}
+                    icon={task.icon}
+                    description={task.description}
+                    category={task.category}
+                    xpReward={task.xpReward}
+                    shardReward={task.shardReward}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="challenge-section">
@@ -476,8 +588,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           onAnalyze={analyzeDailyActivity}
         />
       </div>
-    </div>
-  )
+    )
+  }
 
   const renderShopTab = () => (
     <div className="tab-content">

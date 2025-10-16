@@ -1,4 +1,4 @@
-import type { User, UserLogin, UserRegistration, ProfileData, GoalsData } from './user.types'
+import type { User, UserLogin, UserRegistration, ProfileData, GoalsData, GeneratedTasks } from './user.types'
 
 // Frontend-specific context types
 export interface AuthContextType {
@@ -9,5 +9,7 @@ export interface AuthContextType {
   updateUser: (updates: Partial<User>) => Promise<boolean>
   saveProfileData: (profileData: ProfileData) => Promise<boolean>
   saveGoalsData: (goalsData: GoalsData) => Promise<boolean>
+  getUserTasks: () => Promise<GeneratedTasks | null>
+  refreshUserTasks: () => Promise<void>
   isLoading: boolean
 }

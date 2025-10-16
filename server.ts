@@ -3,9 +3,9 @@ import express from 'express'
 import cors from 'cors'
 import { initializeData, DATA_DIR, USERS_FILE, SESSIONS_FILE } from './src/server/utils/dataOperations'
 import { registerUser, loginUser, logoutUser } from './src/server/routes/authRoutes'
-import { getCurrentUser, updateUserData, updateExperience, updateShards } from './src/server/routes/userRoutes'
+import { getCurrentUser, updateUserData, updateExperience, updateShards, getUserTasks } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
-import { generateTasks, getAIHealth } from './src/server/routes/aiRoutes'
+import { generateTasks } from './src/server/routes/aiRoutes'
 
 const app = express()
 const PORT = 3001
@@ -45,6 +45,7 @@ app.post('/api/logout', logoutUser)
 
 // User management routes
 app.get('/api/user/session/:sessionId', getCurrentUser)
+app.get('/api/user/tasks/:sessionId', getUserTasks)
 app.put('/api/user/:userId', updateUserData)
 
 // Game mechanics routes

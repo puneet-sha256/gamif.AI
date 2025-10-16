@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { userDatabase } from '../client/services/fileUserDatabase'
-import type { AuthContextType, User, UserLogin, UserRegistration, ProfileData, GoalsData } from '../shared/types'
+import type { AuthContextType, User, UserLogin, UserRegistration, ProfileData, GoalsData, GeneratedTasks } from '../shared/types'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -280,6 +280,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  // Get user's generated tasks
+  const getUserTasks = async (): Promise<GeneratedTasks | null> => {
+    console.log('🔄 AuthContext: Fetching user generated tasks...')
+    try {
+      const tasks = await userDatabase.getUserTasks()
+      console.log('✅ AuthContext: Generated tasks fetched:', {
+        hasStrength: !!tasks?.Strength?.length,
+        hasIntelligence: !!tasks?.Intelligence?.length,
+        hasCharisma: !!tasks?.Charisma?.length,
+        lastUpdated: tasks?.lastUpdated
+      })
+      return tasks
+    } catch (error) {
+      console.error('❌ AuthContext: Error fetching generated tasks:', error)
+      return null
+    }
+  }
+
+  // Refresh user's generated tasks and update user state
+  const refreshUserTasks = async (): Promise<void> => {
+    if (!user) return
+    
+    console.log('🔄 AuthContext: Refreshing user tasks and user data...')
+    try {
+      // Fetch fresh user data to get updated tasks
+      const freshUser = await userDatabase.getCurrentUser()
+      if (freshUser) {
+        console.log('✅ AuthContext: User data refreshed with updated tasks')
+        setUser(freshUser)
+      }
+    } catch (error) {
+      console.error('❌ AuthContext: Error refreshing user tasks:', error)
+    }
+  }
+
   const value: AuthContextType = {
     user,
     login,
@@ -288,6 +323,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     updateUser,
     saveProfileData,
     saveGoalsData,
+    getUserTasks,
+    refreshUserTasks,
     isLoading
   }
 

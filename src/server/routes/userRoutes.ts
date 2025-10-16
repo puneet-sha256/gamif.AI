@@ -7,7 +7,8 @@ import {
   findSessionById,
   findUserById,
   updateUser,
-  updateSessionLastAccess
+  updateSessionLastAccess,
+  getUserGeneratedTasks
 } from '../utils/dataOperations'
 import {
   createSuccessResponse,
@@ -225,6 +226,44 @@ export async function updateShards(req: Request, res: Response) {
 
   } catch (error) {
     console.error('Update shards error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Get user's generated tasks
+export async function getUserTasks(req: Request, res: Response) {
+  try {
+    const { sessionId } = req.params
+
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    // Update session last access
+    await updateSessionLastAccess(sessionId)
+
+    // Get generated tasks
+    const generatedTasks = await getUserGeneratedTasks(user.id)
+
+    res.json(createSuccessResponse(
+      'Generated tasks retrieved successfully',
+      { generatedTasks },
+      undefined,
+      undefined,
+      {
+        hasGeneratedTasks: !!generatedTasks,
+        tasksLastUpdated: generatedTasks?.lastUpdated
+      }
+    ))
+
+  } catch (error) {
+    console.error('Get user tasks error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
