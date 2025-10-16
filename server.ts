@@ -1,10 +1,11 @@
+import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import { initializeData, DATA_DIR, USERS_FILE, SESSIONS_FILE } from './src/server/utils/dataOperations'
 import { registerUser, loginUser, logoutUser } from './src/server/routes/authRoutes'
 import { getCurrentUser, updateUserData, updateExperience, updateShards } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
-import { analyzeGoals, getAIHealth } from './src/server/routes/aiRoutes'
+import { generateTasks, getAIHealth } from './src/server/routes/aiRoutes'
 
 const app = express()
 const PORT = 3001
@@ -51,7 +52,7 @@ app.patch('/api/user/experience', updateExperience)
 app.patch('/api/user/shards', updateShards)
 
 // Azure AI routes
-app.post('/api/ai/analyze-goals', analyzeGoals)
+app.post('/api/ai/generate-tasks', generateTasks)
 app.get('/api/ai/health', getAIHealth)
 
 // Initialize and start server

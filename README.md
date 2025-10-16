@@ -64,6 +64,7 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 ### Prerequisites
 - **Node.js** (v18 or higher)
 - **npm** or **yarn**
+- **Azure OpenAI API Key** - Required for AI-powered task generation
 
 ### Installation
 
@@ -78,7 +79,16 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
    npm install
    ```
 
-3. **Start the application**
+3. **Configure Azure OpenAI**
+   ```bash
+   # Copy the environment template
+   cp .env.example .env
+   
+   # Edit .env and add your Azure OpenAI API key
+   AZURE_OPENAI_API_KEY=your-azure-openai-api-key-here
+   ```
+
+4. **Start the application**
    ```bash
    npm run start
    ```
@@ -86,6 +96,16 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
    This command runs both the backend server and frontend client concurrently:
    - **Frontend**: http://localhost:5173/
    - **Backend API**: http://localhost:3001/
+
+### Azure OpenAI Configuration
+
+The application uses Azure OpenAI with the following configuration:
+- **Endpoint**: `https://gamifai-resource.cognitiveservices.azure.com/`
+- **Model**: `gpt-4o-mini`
+- **Deployment**: `daily-task-agent`
+- **API Version**: `2024-04-01-preview`
+
+The AI agent receives user goals in the format: `"User Goals: <longTermGoals>"` and generates personalized task recommendations.
 
 ### Alternative Start Methods
 

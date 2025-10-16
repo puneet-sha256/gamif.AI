@@ -212,17 +212,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         // Now call Azure AI agent to analyze the goals
         try {
-          console.log('🤖 AuthContext: Starting Azure AI goals analysis...')
+          console.log('🤖 AuthContext: Starting Azure AI task generation...')
           
           // Get current session ID from userDatabase
           const sessionId = userDatabase.getSessionId()
           if (!sessionId) {
-            console.log('⚠️ AuthContext: No session ID available for AI analysis')
-            return true // Goals saved successfully, AI analysis skipped
+            console.log('⚠️ AuthContext: No session ID available for task generation')
+            return true // Goals saved successfully, task generation skipped
           }
           
-          // Call Azure AI agent
-          const aiResponse = await fetch('/api/ai/analyze-goals', {
+          // Call Azure AI agent for task generation
+          const aiResponse = await fetch('/api/ai/generate-tasks', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -236,7 +236,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           
           if (aiResponse.ok) {
             const aiResult = await aiResponse.json()
-            console.log('🤖 AuthContext: Azure AI analysis completed successfully:', {
+            console.log('🤖 AuthContext: Azure AI task generation completed successfully:', {
               processingTime: aiResult.metadata?.processingTime,
               tasksGenerated: aiResult.data?.tasks?.length || 0,
               insights: aiResult.data?.insights?.length || 0,

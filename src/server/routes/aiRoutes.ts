@@ -8,8 +8,8 @@ import {
 } from '../utils/responseHelpers'
 import type { GoalsData, ProfileData } from '../../types'
 
-// Analyze user goals using Azure AI
-export async function analyzeGoals(req: Request, res: Response) {
+// Generate tasks using Azure AI
+export async function generateTasks(req: Request, res: Response) {
   try {
     const { sessionId, goals, userProfile } = req.body
 
@@ -32,37 +32,39 @@ export async function analyzeGoals(req: Request, res: Response) {
       return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
     }
 
-    console.log('🤖 Server: Starting Azure AI goals analysis for user:', user.username)
+    console.log('🤖 Server: Starting Azure AI task generation for user:', user.username)
 
     // Call Azure AI service
-    const analysisResult = await azureAIService.analyzeGoals(
+    const taskGenerationResult = await azureAIService.generateTasks(
       goals as GoalsData,
       userProfile as ProfileData
     )
 
-    if (analysisResult.success) {
+    if (taskGenerationResult.success) {
       // Update session last access
       await updateSessionLastAccess(sessionId)
 
-      console.log('✅ Server: Azure AI analysis completed successfully')
+      console.log('✅ Server: Azure AI task generation completed successfully')
+      console.log('🎯 Generated Tasks:', taskGenerationResult.data)
+      
       res.json(createSuccessResponse(
-        'Goals analyzed successfully',
-        analysisResult.data,
+        'Tasks generated successfully',
+        taskGenerationResult.data,
         undefined,
         undefined,
         {
-          processingTime: analysisResult.processingTimeMs,
+          processingTime: taskGenerationResult.processingTimeMs,
           agentUsed: 'azure-openai-foundry'
         }
       ))
     } else {
-      console.log('❌ Server: Azure AI analysis failed:', analysisResult.error)
+      console.log('❌ Server: Azure AI task generation failed:', taskGenerationResult.error)
       res.status(500).json(createErrorResponse(
-        analysisResult.error || 'AI analysis failed'
+        taskGenerationResult.error || 'Task generation failed'
       ))
     }
   } catch (error) {
-    console.error('❌ Server: AI analysis error:', error)
+    console.error('❌ Server: Task generation error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
