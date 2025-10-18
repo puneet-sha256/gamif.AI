@@ -222,7 +222,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
           
           // Call Azure AI agent for task generation
-          const aiResponse = await fetch('/api/ai/generate-tasks', {
+          const aiResponse = await fetch('http://localhost:3001/api/ai/generate-tasks', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -238,27 +238,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const aiResult = await aiResponse.json()
             console.log('🤖 AuthContext: Azure AI task generation completed successfully:', {
               processingTime: aiResult.metadata?.processingTime,
-              tasksGenerated: aiResult.data?.tasks?.length || 0,
-              insights: aiResult.data?.insights?.length || 0,
-              recommendations: aiResult.data?.recommendations?.length || 0
+              hasGeneratedTasks: !!aiResult.data?.generatedTasks,
+              rawResponse: !!aiResult.data?.rawResponse
             })
             
-            // TODO: Store AI analysis results in user profile or display them
-            // This could include:
-            // - Personalized task recommendations from Azure AI
-            // - Goal categorization and insights
-            // - AI-generated daily tasks
-            // - Progress tracking suggestions
+            // If tasks were generated and stored, refresh user data to get updated tasks
+            if (aiResult.success && aiResult.data?.generatedTasks) {
+              console.log('🔄 AuthContext: Refreshing user data to get generated tasks...')
+              const freshUser = await userDatabase.getCurrentUser()
+              if (freshUser) {
+                setUser(freshUser)
+                console.log('✅ AuthContext: User data refreshed with generated tasks')
+              }
+            }
             
-            // For now, just log the results
-            if (aiResult.data?.tasks) {
-              console.log('🎯 AuthContext: AI Generated Tasks:', aiResult.data.tasks.map((task: any) => task.title))
-            }
-            if (aiResult.data?.insights) {
-              console.log('💡 AuthContext: AI Insights:', aiResult.data.insights)
-            }
-            if (aiResult.data?.recommendations) {
-              console.log('📋 AuthContext: AI Recommendations:', aiResult.data.recommendations)
+            // Log the generated tasks
+            if (aiResult.data?.generatedTasks) {
+              const tasks = aiResult.data.generatedTasks
+              console.log('🎯 AuthContext: Generated Tasks:', {
+                strengthTasks: tasks.Strength?.length || 0,
+                intelligenceTasks: tasks.Intelligence?.length || 0,
+                charismaTasks: tasks.Charisma?.length || 0,
+                lastUpdated: tasks.lastUpdated
+              })
             }
             
           } else {

@@ -14,6 +14,7 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [taskGenerationStatus, setTaskGenerationStatus] = useState('')
 
   const { saveGoalsData } = useAuth()
 
@@ -49,18 +50,26 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
     
     try {
       console.log('🔄 GoalsSetup: Saving goals data...')
+      setTaskGenerationStatus('Saving your goals...')
+      
       const success = await saveGoalsData(formData)
       
       if (success) {
-        console.log('✅ GoalsSetup: Goals saved successfully, proceeding to dashboard')
-        onComplete(formData)
+        console.log('✅ GoalsSetup: Goals saved and AI tasks generated successfully, proceeding to dashboard')
+        setTaskGenerationStatus('Goals saved and AI tasks generated! Redirecting...')
+        // Small delay to show the success message
+        setTimeout(() => {
+          onComplete(formData)
+        }, 1000)
       } else {
         console.log('❌ GoalsSetup: Failed to save goals data')
         setError('Failed to save goals. Please try again.')
+        setTaskGenerationStatus('')
       }
     } catch (error: any) {
       console.error('❌ GoalsSetup: Error saving goals:', error)
-      setError('Failed to save goals. Please try again.')
+      setError('Failed to save goals and generate tasks. Please try again.')
+      setTaskGenerationStatus('')
     } finally {
       setIsSubmitting(false)
       console.log('✅ GoalsSetup: Form submission complete')
@@ -105,6 +114,13 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
             {error && (
               <div className="error-message">
                 {error}
+              </div>
+            )}
+            
+            {taskGenerationStatus && (
+              <div className="status-message">
+                <div className="status-icon">🤖</div>
+                <div className="status-text">{taskGenerationStatus}</div>
               </div>
             )}
 
@@ -164,9 +180,12 @@ Example:
                 disabled={isSubmitting || !isFormValid()}
               >
                 {isSubmitting ? (
-                  <span className="loading-spinner"></span>
+                  <div className="loading-content">
+                    <span className="loading-spinner"></span>
+                    <span>Generating AI Tasks...</span>
+                  </div>
                 ) : (
-                  'Complete Setup'
+                  'Complete Setup & Generate Tasks'
                 )}
               </button>
             </div>
