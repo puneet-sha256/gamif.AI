@@ -49,6 +49,7 @@ export interface UpdateTaskRequest {
   taskId: string;
   category: 'Strength' | 'Intelligence' | 'Charisma';
   updates: {
+    title?: string;
     description?: string;
     xp?: number;
     shards?: number;
@@ -59,6 +60,15 @@ export interface DeleteTaskRequest {
   sessionId: string;
   taskId: string;
   category: 'Strength' | 'Intelligence' | 'Charisma';
+}
+
+export interface AddTaskRequest {
+  sessionId: string;
+  title: string; // User-provided title for the task
+  description: string;
+  category: 'Strength' | 'Intelligence' | 'Charisma';
+  xp: number;
+  shards: number;
 }
 
 // API Response Types

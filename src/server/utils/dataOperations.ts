@@ -195,7 +195,7 @@ export async function updateTaskInGeneratedTasks(
   userId: string,
   taskId: string,
   category: 'Strength' | 'Intelligence' | 'Charisma',
-  updates: { description?: string; xp?: number; shards?: number }
+  updates: { title?: string; description?: string; xp?: number; shards?: number }
 ): Promise<boolean> {
   console.log('🔄 Server: Updating task', taskId, 'in category', category, 'for user:', userId)
   const users = await loadUsers()
@@ -219,6 +219,15 @@ export async function updateTaskInGeneratedTasks(
   }
   
   // Update task properties
+  if (updates.title !== undefined) {
+    if (updates.title === '') {
+      // Empty string means remove the title (convert custom task back to AI-generated)
+      delete tasks[taskIndex].title
+    } else {
+      // Non-empty string means set/update the title
+      tasks[taskIndex].title = updates.title
+    }
+  }
   if (updates.description !== undefined) {
     tasks[taskIndex].description = updates.description
   }
@@ -266,5 +275,51 @@ export async function deleteTaskFromGeneratedTasks(
   
   await saveUsers(users)
   console.log('✅ Server: Task deleted successfully')
+  return true
+}
+// Add a task to user's generated tasks (supports both AI and user-created tasks)
+export async function addTaskToGeneratedTasks(
+  userId: string,
+  task: {
+    title?: string; // Optional title for user-created tasks
+    description: string;
+    category: 'Strength' | 'Intelligence' | 'Charisma';
+    xp: number;
+    shards: number;
+  }
+): Promise<boolean> {
+  console.log(' Server: Adding task for user:', userId)
+  const users = await loadUsers()
+  const user = users.find(u => u.id === userId)
+  
+  if (!user) {
+    console.log(' Server: User not found')
+    return false
+  }
+  
+  // Initialize generatedTasks if it doesn't exist
+  if (!user.generatedTasks) {
+    user.generatedTasks = {}
+  }
+  
+  // Initialize category array if it doesn't exist
+  if (!user.generatedTasks[task.category]) {
+    user.generatedTasks[task.category] = []
+  }
+  
+  // Create the task with ID
+  const newTask = {
+    id: `${task.title ? 'custom' : 'ai'}-${task.category.toLowerCase()}-${Date.now()}`,
+    ...(task.title && { title: task.title }), // Only add title if provided
+    description: task.description,
+    xp: task.xp,
+    shards: task.shards
+  }
+  
+  // Add task to category
+  user.generatedTasks[task.category]!.push(newTask)
+  
+  await saveUsers(users)
+  console.log(' Server: Task added successfully')
   return true
 }

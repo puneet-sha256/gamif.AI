@@ -18,10 +18,10 @@ export interface UserStats {
   charisma: number
 }
 
-// Task structure from Azure AI
+// Task structure from Azure AI and user-created tasks
 export interface GeneratedTask {
   id: string // Unique identifier for the task
-  title: string
+  title?: string // Optional: present for user-created tasks, absent for AI tasks
   description: string
   xp: number
   shards: number

@@ -1698,8 +1698,33 @@
   margin-bottom: 30px;
 }
 
-.tasks-header .refresh-tasks-btn.small {
+.tasks-header-buttons {
+  display: flex;
+  gap: 12px;
   margin-left: auto;
+}
+
+.tasks-header .refresh-tasks-btn.small {
+  margin-left: 0;
+}
+
+.add-task-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.add-task-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
 .no-tasks-message {

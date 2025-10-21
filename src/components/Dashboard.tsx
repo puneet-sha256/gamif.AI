@@ -6,7 +6,7 @@ import TaskItem from './TaskItem'
 import ShopItem from './ShopItem'
 import ProgressBar from './ProgressBar'
 import DailyActivityModal from './DailyActivityModal'
-import EditTaskModal from './EditTaskModal'
+import TaskModal from './TaskModal'
 import { 
   mapGeneratedTasksToTaskItems, 
   groupMappedTasksByCategory, 
@@ -14,7 +14,7 @@ import {
   TASK_CATEGORIES,
   type MappedTaskItem
 } from '../utils/taskMapping'
-import type { GeneratedTasks } from '../types'
+import type { GeneratedTasks, GeneratedTask } from '../types'
 
 interface DashboardProps {
   onLogout: () => void
@@ -23,7 +23,7 @@ interface DashboardProps {
 type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
-  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask } = useAuth()
+  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask } = useAuth()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
   const [showDailyInput, setShowDailyInput] = useState(false)
   const [dailyActivity, setDailyActivity] = useState('')
@@ -31,15 +31,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const [generatedTasks, setGeneratedTasks] = useState<GeneratedTasks | null>(null)
   const [isLoadingTasks, setIsLoadingTasks] = useState(false)
   
-  // Edit task modal state
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [editingTask, setEditingTask] = useState<{
-    id: string
-    category: 'Strength' | 'Intelligence' | 'Charisma'
-    description: string
-    xp: number
-    shards: number
-  } | null>(null)
+  // Task modal state (unified for add and edit)
+  const [showTaskModal, setShowTaskModal] = useState(false)
+  const [editingTask, setEditingTask] = useState<GeneratedTask & { category: string } | null>(null)
 
   useEffect(() => {
     console.log('🎯 Dashboard: Component mounted')
@@ -78,7 +72,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
   }
 
-  // Handle task edit
+  // Handle task edit - opens modal with task data
   const handleEditTask = (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma') => {
     if (!generatedTasks) return
     
@@ -87,13 +81,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     
     if (task) {
       setEditingTask({
-        id: taskId,
-        category,
-        description: task.description,
-        xp: task.xp,
-        shards: task.shards
+        ...task,
+        category
       })
-      setShowEditModal(true)
+      setShowTaskModal(true)
     }
   }
 
@@ -108,18 +99,52 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
   }
 
-  // Handle task edit save
-  const handleSaveEdit = async (updates: { description?: string; xp?: number; shards?: number }) => {
-    if (!editingTask) return
-    
-    const success = await editGeneratedTask(editingTask.id, editingTask.category, updates)
-    if (success) {
-      // Refresh tasks
-      await loadGeneratedTasks()
-      setShowEditModal(false)
-      setEditingTask(null)
+  // Unified handler for both add and edit task
+  const handleSaveTask = async (task: {
+    title?: string
+    description: string
+    category?: 'Strength' | 'Intelligence' | 'Charisma'
+    xp: number
+    shards: number
+  }) => {
+    if (editingTask) {
+      // Edit mode - use category from editingTask
+      const updates: { title?: string; description?: string; xp?: number; shards?: number } = {
+        title: task.title, // Always include title (can be empty or filled)
+        description: task.description,
+        xp: task.xp,
+        shards: task.shards
+      }
+      
+      const success = await editGeneratedTask(editingTask.id, editingTask.category as 'Strength' | 'Intelligence' | 'Charisma', updates)
+      if (success) {
+        await loadGeneratedTasks()
+        setShowTaskModal(false)
+        setEditingTask(null)
+      } else {
+        throw new Error('Failed to update task')
+      }
     } else {
-      throw new Error('Failed to update task')
+      // Add mode - category is required
+      if (!task.title) {
+        throw new Error('Title is required for new tasks')
+      }
+      if (!task.category) {
+        throw new Error('Category is required for new tasks')
+      }
+      const success = await addUserTask({
+        title: task.title,
+        description: task.description,
+        category: task.category,
+        xp: task.xp,
+        shards: task.shards
+      })
+      if (success) {
+        await loadGeneratedTasks()
+        setShowTaskModal(false)
+      } else {
+        throw new Error('Failed to add task')
+      }
     }
   }
 
@@ -538,13 +563,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         <div className="tasks-header">
           <h2>Tasks & Challenges</h2>
           <p>Complete your personalized AI-generated tasks to earn experience and shards</p>
-          <button 
-            onClick={loadGeneratedTasks}
-            className="refresh-tasks-btn small"
-            disabled={isLoadingTasks}
-          >
-            🔄 Refresh
-          </button>
+          <div className="tasks-header-buttons">
+            <button 
+              onClick={() => {
+                setEditingTask(null)
+                setShowTaskModal(true)
+              }}
+              className="add-task-btn"
+            >
+              ➕ Add Task
+            </button>
+            <button 
+              onClick={loadGeneratedTasks}
+              className="refresh-tasks-btn small"
+              disabled={isLoadingTasks}
+            >
+              🔄 Refresh
+            </button>
+          </div>
         </div>
         
         <div className="tasks-grid">
@@ -557,8 +593,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                   <TaskItem
                     key={task.id}
                     icon={task.icon}
-                    description={task.description}
-                    category={task.category}
+                    description={task.originalTask.title ? `${task.originalTask.title}: ${task.description}` : task.description}
+                    category={task.category + (task.originalTask.title ? ' ✨' : '')}
                     xpReward={task.xpReward}
                     shardReward={task.shardReward}
                     taskId={task.originalTask.id}
@@ -580,8 +616,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                   <TaskItem
                     key={task.id}
                     icon={task.icon}
-                    description={task.description}
-                    category={task.category}
+                    description={task.originalTask.title ? `${task.originalTask.title}: ${task.description}` : task.description}
+                    category={task.category + (task.originalTask.title ? ' ✨' : '')}
                     xpReward={task.xpReward}
                     shardReward={task.shardReward}
                     taskId={task.originalTask.id}
@@ -603,8 +639,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                   <TaskItem
                     key={task.id}
                     icon={task.icon}
-                    description={task.description}
-                    category={task.category}
+                    description={task.originalTask.title ? `${task.originalTask.title}: ${task.description}` : task.description}
+                    category={task.category + (task.originalTask.title ? ' ✨' : '')}
                     xpReward={task.xpReward}
                     shardReward={task.shardReward}
                     taskId={task.originalTask.id}
@@ -656,23 +692,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           onAnalyze={analyzeDailyActivity}
         />
 
-        {/* Edit Task Modal */}
-        {editingTask && (
-          <EditTaskModal
-            isOpen={showEditModal}
-            onClose={() => {
-              setShowEditModal(false)
-              setEditingTask(null)
-            }}
-            onSave={handleSaveEdit}
-            taskData={{
-              description: editingTask.description,
-              xp: editingTask.xp,
-              shards: editingTask.shards,
-              category: editingTask.category
-            }}
-          />
-        )}
+        {/* Unified Task Modal (for both add and edit) */}
+        <TaskModal
+          isOpen={showTaskModal}
+          onClose={() => {
+            setShowTaskModal(false)
+            setEditingTask(null)
+          }}
+          onSave={handleSaveTask}
+          taskData={editingTask}
+        />
       </div>
     )
   }

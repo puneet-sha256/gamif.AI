@@ -10,7 +10,8 @@ import {
   updateSessionLastAccess,
   getUserGeneratedTasks,
   updateTaskInGeneratedTasks,
-  deleteTaskFromGeneratedTasks
+  deleteTaskFromGeneratedTasks,
+  addTaskToGeneratedTasks
 } from '../utils/dataOperations'
 import {
   createSuccessResponse,
@@ -380,6 +381,66 @@ export async function deleteGeneratedTask(req: Request, res: Response) {
 
   } catch (error) {
     console.error('Delete generated task error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+// Add a user-created task
+export async function addUserTask(req: Request, res: Response) {
+  try {
+    const { sessionId, title, description, category, xp, shards } = req.body
+
+    // Validate required fields
+    if (!sessionId || !title || !description || !category || xp === undefined || shards === undefined) {
+      return res.status(400).json(createErrorResponse(
+        'Missing required fields: sessionId, title, description, category, xp, and shards are required'
+      ))
+    }
+
+    // Validate category
+    if (!['Strength', 'Intelligence', 'Charisma'].includes(category)) {
+      return res.status(400).json(createErrorResponse(
+        'Invalid category. Must be Strength, Intelligence, or Charisma'
+      ))
+    }
+
+    // Verify session
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    // Find user
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    // Add the task
+    const success = await addTaskToGeneratedTasks(user.id, {
+      title,
+      description,
+      category,
+      xp,
+      shards
+    })
+
+    if (!success) {
+      return res.status(500).json(createErrorResponse('Failed to add task'))
+    }
+
+    // Update session last access
+    await updateSessionLastAccess(sessionId)
+
+    // Get updated tasks
+    const updatedTasks = await getUserGeneratedTasks(user.id)
+
+    res.json(createSuccessResponse(
+      'Task added successfully',
+      { generatedTasks: updatedTasks }
+    ))
+
+  } catch (error) {
+    console.error('Add user task error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }

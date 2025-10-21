@@ -417,6 +417,57 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  // Add a user-created task
+  const addUserTask = async (task: {
+    title: string
+    description: string
+    category: 'Strength' | 'Intelligence' | 'Charisma'
+    xp: number
+    shards: number
+  }): Promise<boolean> => {
+    console.log('🔄 AuthContext: Adding user task:', task.title)
+    
+    if (!user) {
+      console.log('❌ AuthContext: Cannot add task - no user logged in')
+      return false
+    }
+
+    try {
+      const sessionId = userDatabase.getSessionId()
+      if (!sessionId) {
+        console.log('❌ AuthContext: No session ID available')
+        return false
+      }
+
+      const response = await fetch('http://localhost:3001/api/user/tasks/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          ...task
+        })
+      })
+
+      if (response.ok) {
+        await response.json()
+        console.log('✅ AuthContext: Task added successfully')
+        
+        // Refresh user data
+        await refreshUserTasks()
+        return true
+      } else {
+        const errorData = await response.json()
+        console.log('❌ AuthContext: Failed to add task:', errorData.message)
+        return false
+      }
+    } catch (error) {
+      console.error('❌ AuthContext: Error adding task:', error)
+      return false
+    }
+  }
+
   const value: AuthContextType = {
     user,
     login,
@@ -429,6 +480,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     refreshUserTasks,
     editGeneratedTask,
     deleteGeneratedTask,
+    addUserTask,
     isLoading
   }
 
