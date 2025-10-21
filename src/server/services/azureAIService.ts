@@ -105,6 +105,27 @@ class AzureAIService {
         if (jsonMatch) {
           const jsonStr = jsonMatch[0];
           parsedTasks = JSON.parse(jsonStr) as GeneratedTasks;
+          
+          // Add unique IDs to each task
+          if (parsedTasks.Strength) {
+            parsedTasks.Strength = parsedTasks.Strength.map((task, index) => ({
+              ...task,
+              id: `strength-${Date.now()}-${index}`
+            }));
+          }
+          if (parsedTasks.Intelligence) {
+            parsedTasks.Intelligence = parsedTasks.Intelligence.map((task, index) => ({
+              ...task,
+              id: `intelligence-${Date.now()}-${index}`
+            }));
+          }
+          if (parsedTasks.Charisma) {
+            parsedTasks.Charisma = parsedTasks.Charisma.map((task, index) => ({
+              ...task,
+              id: `charisma-${Date.now()}-${index}`
+            }));
+          }
+          
           parsedTasks.lastUpdated = new Date().toISOString();
           console.log('✅ Successfully parsed Azure AI response to JSON:', parsedTasks);
         } else {

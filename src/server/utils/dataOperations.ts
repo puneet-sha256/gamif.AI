@@ -189,3 +189,82 @@ export async function getUserGeneratedTasks(userId: string): Promise<import('../
   const user = await findUserById(userId)
   return user?.generatedTasks || null
 }
+
+// Update a specific task in user's generated tasks
+export async function updateTaskInGeneratedTasks(
+  userId: string,
+  taskId: string,
+  category: 'Strength' | 'Intelligence' | 'Charisma',
+  updates: { description?: string; xp?: number; shards?: number }
+): Promise<boolean> {
+  console.log('🔄 Server: Updating task', taskId, 'in category', category, 'for user:', userId)
+  const users = await loadUsers()
+  const user = users.find(u => u.id === userId)
+  
+  if (!user || !user.generatedTasks) {
+    console.log('❌ Server: User or generated tasks not found')
+    return false
+  }
+  
+  const tasks = user.generatedTasks[category]
+  if (!tasks) {
+    console.log('❌ Server: Category not found in generated tasks')
+    return false
+  }
+  
+  const taskIndex = tasks.findIndex(t => t.id === taskId)
+  if (taskIndex === -1) {
+    console.log('❌ Server: Task not found in category')
+    return false
+  }
+  
+  // Update task properties
+  if (updates.description !== undefined) {
+    tasks[taskIndex].description = updates.description
+  }
+  if (updates.xp !== undefined) {
+    tasks[taskIndex].xp = updates.xp
+  }
+  if (updates.shards !== undefined) {
+    tasks[taskIndex].shards = updates.shards
+  }
+  
+  await saveUsers(users)
+  console.log('✅ Server: Task updated successfully')
+  return true
+}
+
+// Delete a specific task from user's generated tasks
+export async function deleteTaskFromGeneratedTasks(
+  userId: string,
+  taskId: string,
+  category: 'Strength' | 'Intelligence' | 'Charisma'
+): Promise<boolean> {
+  console.log('🔄 Server: Deleting task', taskId, 'from category', category, 'for user:', userId)
+  const users = await loadUsers()
+  const user = users.find(u => u.id === userId)
+  
+  if (!user || !user.generatedTasks) {
+    console.log('❌ Server: User or generated tasks not found')
+    return false
+  }
+  
+  const tasks = user.generatedTasks[category]
+  if (!tasks) {
+    console.log('❌ Server: Category not found in generated tasks')
+    return false
+  }
+  
+  const taskIndex = tasks.findIndex(t => t.id === taskId)
+  if (taskIndex === -1) {
+    console.log('❌ Server: Task not found in category')
+    return false
+  }
+  
+  // Remove the task from the array
+  tasks.splice(taskIndex, 1)
+  
+  await saveUsers(users)
+  console.log('✅ Server: Task deleted successfully')
+  return true
+}

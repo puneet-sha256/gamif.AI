@@ -44,6 +44,23 @@ export interface UpdateGoalsRequest {
   goals: string[];
 }
 
+export interface UpdateTaskRequest {
+  sessionId: string;
+  taskId: string;
+  category: 'Strength' | 'Intelligence' | 'Charisma';
+  updates: {
+    description?: string;
+    xp?: number;
+    shards?: number;
+  };
+}
+
+export interface DeleteTaskRequest {
+  sessionId: string;
+  taskId: string;
+  category: 'Strength' | 'Intelligence' | 'Charisma';
+}
+
 // API Response Types
 export interface ApiSuccessResponse<T = any> {
   success: true;

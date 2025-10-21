@@ -317,6 +317,106 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  // Edit a generated task
+  const editGeneratedTask = async (
+    taskId: string,
+    category: 'Strength' | 'Intelligence' | 'Charisma',
+    updates: { description?: string; xp?: number; shards?: number }
+  ): Promise<boolean> => {
+    console.log('🔄 AuthContext: Editing task:', taskId, 'in category:', category)
+    
+    if (!user) {
+      console.log('❌ AuthContext: Cannot edit task - no user logged in')
+      return false
+    }
+
+    try {
+      const sessionId = userDatabase.getSessionId()
+      if (!sessionId) {
+        console.log('❌ AuthContext: No session ID available')
+        return false
+      }
+
+      const response = await fetch('http://localhost:3001/api/user/tasks/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          taskId,
+          category,
+          updates
+        })
+      })
+
+      if (response.ok) {
+        await response.json()
+        console.log('✅ AuthContext: Task edited successfully')
+        
+        // Refresh user data to get updated tasks
+        await refreshUserTasks()
+        return true
+      } else {
+        const errorData = await response.json()
+        console.log('❌ AuthContext: Failed to edit task:', errorData.message)
+        return false
+      }
+    } catch (error) {
+      console.error('❌ AuthContext: Error editing task:', error)
+      return false
+    }
+  }
+
+  // Delete a generated task
+  const deleteGeneratedTask = async (
+    taskId: string,
+    category: 'Strength' | 'Intelligence' | 'Charisma'
+  ): Promise<boolean> => {
+    console.log('🔄 AuthContext: Deleting task:', taskId, 'from category:', category)
+    
+    if (!user) {
+      console.log('❌ AuthContext: Cannot delete task - no user logged in')
+      return false
+    }
+
+    try {
+      const sessionId = userDatabase.getSessionId()
+      if (!sessionId) {
+        console.log('❌ AuthContext: No session ID available')
+        return false
+      }
+
+      const response = await fetch('http://localhost:3001/api/user/tasks/delete', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          taskId,
+          category
+        })
+      })
+
+      if (response.ok) {
+        await response.json()
+        console.log('✅ AuthContext: Task deleted successfully')
+        
+        // Refresh user data to get updated tasks
+        await refreshUserTasks()
+        return true
+      } else {
+        const errorData = await response.json()
+        console.log('❌ AuthContext: Failed to delete task:', errorData.message)
+        return false
+      }
+    } catch (error) {
+      console.error('❌ AuthContext: Error deleting task:', error)
+      return false
+    }
+  }
+
   const value: AuthContextType = {
     user,
     login,
@@ -327,6 +427,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     saveGoalsData,
     getUserTasks,
     refreshUserTasks,
+    editGeneratedTask,
+    deleteGeneratedTask,
     isLoading
   }
 

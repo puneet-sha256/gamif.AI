@@ -1,18 +1,3 @@
-// Task structure from Azure AI
-export interface GeneratedTask {
-  title: string
-  description: string
-  xp: number
-  shards: number
-}
-
-export interface GeneratedTasks {
-  Strength?: GeneratedTask[]
-  Intelligence?: GeneratedTask[]
-  Charisma?: GeneratedTask[]
-  lastUpdated?: string
-}
-
 // Core user-related interfaces
 export interface ProfileData {
   name: string
@@ -31,6 +16,22 @@ export interface UserStats {
   strength: number
   intelligence: number
   charisma: number
+}
+
+// Task structure from Azure AI
+export interface GeneratedTask {
+  id: string // Unique identifier for the task
+  title: string
+  description: string
+  xp: number
+  shards: number
+}
+
+export interface GeneratedTasks {
+  Strength?: GeneratedTask[]
+  Intelligence?: GeneratedTask[]
+  Charisma?: GeneratedTask[]
+  lastUpdated?: string
 }
 
 export interface User {

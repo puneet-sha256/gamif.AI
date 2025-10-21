@@ -8,7 +8,9 @@ import {
   findUserById,
   updateUser,
   updateSessionLastAccess,
-  getUserGeneratedTasks
+  getUserGeneratedTasks,
+  updateTaskInGeneratedTasks,
+  deleteTaskFromGeneratedTasks
 } from '../utils/dataOperations'
 import {
   createSuccessResponse,
@@ -264,6 +266,120 @@ export async function getUserTasks(req: Request, res: Response) {
 
   } catch (error) {
     console.error('Get user tasks error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Update a specific generated task
+export async function updateGeneratedTask(req: Request, res: Response) {
+  try {
+    const { sessionId, taskId, category, updates } = req.body
+
+    // Validate required fields
+    if (!sessionId || !taskId || !category || !updates) {
+      return res.status(400).json(createErrorResponse(
+        'Session ID, task ID, category, and updates are required'
+      ))
+    }
+
+    // Validate category
+    if (!['Strength', 'Intelligence', 'Charisma'].includes(category)) {
+      return res.status(400).json(createErrorResponse(
+        'Invalid category. Must be Strength, Intelligence, or Charisma'
+      ))
+    }
+
+    // Verify session
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    // Find user
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    // Update the task
+    const success = await updateTaskInGeneratedTasks(user.id, taskId, category, updates)
+
+    if (!success) {
+      return res.status(404).json(createErrorResponse(
+        'Task not found or could not be updated'
+      ))
+    }
+
+    // Update session last access
+    await updateSessionLastAccess(sessionId)
+
+    // Get updated tasks
+    const updatedTasks = await getUserGeneratedTasks(user.id)
+
+    res.json(createSuccessResponse(
+      'Task updated successfully',
+      { generatedTasks: updatedTasks }
+    ))
+
+  } catch (error) {
+    console.error('Update generated task error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Delete a specific generated task
+export async function deleteGeneratedTask(req: Request, res: Response) {
+  try {
+    const { sessionId, taskId, category } = req.body
+
+    // Validate required fields
+    if (!sessionId || !taskId || !category) {
+      return res.status(400).json(createErrorResponse(
+        'Session ID, task ID, and category are required'
+      ))
+    }
+
+    // Validate category
+    if (!['Strength', 'Intelligence', 'Charisma'].includes(category)) {
+      return res.status(400).json(createErrorResponse(
+        'Invalid category. Must be Strength, Intelligence, or Charisma'
+      ))
+    }
+
+    // Verify session
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    // Find user
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    // Delete the task
+    const success = await deleteTaskFromGeneratedTasks(user.id, taskId, category)
+
+    if (!success) {
+      return res.status(404).json(createErrorResponse(
+        'Task not found or could not be deleted'
+      ))
+    }
+
+    // Update session last access
+    await updateSessionLastAccess(sessionId)
+
+    // Get updated tasks
+    const updatedTasks = await getUserGeneratedTasks(user.id)
+
+    res.json(createSuccessResponse(
+      'Task deleted successfully',
+      { generatedTasks: updatedTasks }
+    ))
+
+  } catch (error) {
+    console.error('Delete generated task error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }

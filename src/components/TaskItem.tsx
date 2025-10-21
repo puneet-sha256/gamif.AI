@@ -9,6 +9,11 @@ interface TaskItemProps {
   isChallenge?: boolean
   progress?: string
   className?: string
+  taskId?: string // Task ID for editing/deleting
+  taskCategory?: 'Strength' | 'Intelligence' | 'Charisma' // Category for task operations
+  onEdit?: (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma') => void
+  onDelete?: (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma') => void
+  onComplete?: () => void
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({
@@ -19,8 +24,36 @@ const TaskItem: React.FC<TaskItemProps> = ({
   shardReward,
   isChallenge = false,
   progress,
-  className = ''
+  className = '',
+  taskId,
+  taskCategory,
+  onEdit,
+  onDelete,
+  onComplete
 }) => {
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (taskId && taskCategory && onEdit) {
+      onEdit(taskId, taskCategory)
+    }
+  }
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (taskId && taskCategory && onDelete) {
+      if (confirm(`Are you sure you want to delete this task?\n\n"${description}"`)) {
+        onDelete(taskId, taskCategory)
+      }
+    }
+  }
+
+  const handleComplete = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (onComplete) {
+      onComplete()
+    }
+  }
+
   return (
     <div className={`${isChallenge ? 'challenge-item' : 'task-item'} enhanced ${className}`}>
       <div className={`${isChallenge ? 'challenge-icon' : 'task-icon'}`}>
@@ -38,6 +71,37 @@ const TaskItem: React.FC<TaskItemProps> = ({
       </div>
       {isChallenge && progress && (
         <div className="challenge-progress">{progress}</div>
+      )}
+      {!isChallenge && taskId && taskCategory && (
+        <div className="task-actions">
+          {onComplete && (
+            <button 
+              className="task-action-btn complete-btn" 
+              onClick={handleComplete}
+              title="Complete task"
+            >
+              ✓
+            </button>
+          )}
+          {onEdit && (
+            <button 
+              className="task-action-btn edit-btn" 
+              onClick={handleEdit}
+              title="Edit task"
+            >
+              ✏️
+            </button>
+          )}
+          {onDelete && (
+            <button 
+              className="task-action-btn delete-btn" 
+              onClick={handleDelete}
+              title="Delete task"
+            >
+              🗑️
+            </button>
+          )}
+        </div>
       )}
     </div>
   )
