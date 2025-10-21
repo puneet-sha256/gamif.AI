@@ -849,14 +849,26 @@
 
 /* Tasks Tab Styles */
 .tasks-header {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 40px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.tasks-header-content {
+  flex: 1;
 }
 
 .tasks-header h2 {
   font-family: 'Orbitron', monospace;
-  font-size: 2.5rem;
-  margin: 0 0 10px 0;
+  font-size: 2rem;
+  margin: 0 0 8px 0;
   background: linear-gradient(135deg, #3b82f6, #06b6d4);
   background-clip: text;
   -webkit-background-clip: text;
@@ -864,15 +876,37 @@
 }
 
 .tasks-header p {
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #64748b;
   margin: 0;
+  line-height: 1.5;
+}
+
+.add-task-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  white-space: nowrap;
+  min-width: 140px;
+}
+
+.add-task-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
 .tasks-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  grid-template-columns: 1fr;
+  gap: 25px;
 }
 
 .task-section,
@@ -880,7 +914,7 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 15px;
+  border-radius: 20px;
   padding: 30px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
@@ -888,21 +922,36 @@
 .task-section h3,
 .challenge-section h3 {
   font-family: 'Orbitron', monospace;
-  font-size: 1.5rem;
-  margin: 0 0 20px 0;
+  font-size: 1.4rem;
+  margin: 0 0 24px 0;
   color: #1e293b;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.15);
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .task-item,
 .challenge-item {
-  background: rgba(248, 250, 252, 0.8);
+  background: rgba(248, 250, 252, 0.9);
   border-radius: 12px;
   padding: 20px;
   border: 1px solid rgba(59, 130, 246, 0.15);
-  margin-bottom: 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: all 0.3s ease;
+}
+
+.task-item:hover,
+.challenge-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 /* Enhanced task styling */
@@ -1691,40 +1740,10 @@
   transform: none;
 }
 
-.tasks-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-}
-
 .tasks-header-buttons {
   display: flex;
   gap: 12px;
   margin-left: auto;
-}
-
-.tasks-header .refresh-tasks-btn.small {
-  margin-left: 0;
-}
-
-.add-task-btn {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 10px 20px;
-  font-family: 'Orbitron', monospace;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-}
-
-.add-task-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
 .no-tasks-message {
@@ -1775,12 +1794,17 @@
   
   .tasks-header {
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
     text-align: center;
+    padding: 24px;
   }
   
-  .refresh-tasks-btn.small {
-    margin: 0;
+  .tasks-header-content {
+    width: 100%;
+  }
+  
+  .add-task-btn {
+    width: 100%;
   }
 }
 

@@ -26,13 +26,13 @@
 
 .modal-content {
   background: linear-gradient(135deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.95));
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 0;
   max-width: 600px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
   border: 2px solid rgba(59, 130, 246, 0.3);
   animation: slideUp 0.3s ease-out;
 }
@@ -52,13 +52,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30px 30px 20px;
+  padding: 32px 32px 24px;
   border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(6, 182, 212, 0.05));
 }
 
 .modal-header h2 {
   font-family: 'Orbitron', monospace;
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   margin: 0;
   background: linear-gradient(135deg, #3b82f6, #06b6d4);
   background-clip: text;
@@ -87,32 +88,38 @@
   color: #ef4444;
 }
 
-.edit-task-form {
-  padding: 30px;
+.edit-task-form,
+.task-form {
+  padding: 32px;
 }
 
 .error-message {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: #dc2626;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 24px;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .form-group {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+}
+
+.form-group:last-of-type {
+  margin-bottom: 32px;
 }
 
 .form-group label {
   display: block;
   font-family: 'Rajdhani', sans-serif;
-  font-weight: 600;
-  font-size: 1rem;
+  font-weight: 700;
+  font-size: 1.05rem;
   color: #1e293b;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -120,12 +127,12 @@
 .form-input,
 .form-textarea {
   width: 100%;
-  padding: 12px 16px;
+  padding: 14px 18px;
   border: 2px solid rgba(59, 130, 246, 0.2);
-  border-radius: 10px;
+  border-radius: 12px;
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1rem;
-  background: rgba(255, 255, 255, 0.8);
+  font-size: 1.05rem;
+  background: rgba(255, 255, 255, 0.9);
   color: #1e293b;
   transition: all 0.2s ease;
   box-sizing: border-box;
@@ -136,85 +143,90 @@
   outline: none;
   border-color: #3b82f6;
   background: white;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .form-input.disabled {
-  background: rgba(148, 163, 184, 0.1);
+  background: rgba(148, 163, 184, 0.15);
   color: #64748b;
   cursor: not-allowed;
+  border-color: rgba(148, 163, 184, 0.3);
 }
 
 .form-textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
+  line-height: 1.6;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 24px;
 }
 
 .modal-actions {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   justify-content: flex-end;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 2px solid rgba(59, 130, 246, 0.1);
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid rgba(59, 130, 246, 0.15);
 }
 
 .btn {
-  padding: 12px 24px;
+  padding: 14px 28px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.05rem;
   cursor: pointer;
   transition: all 0.2s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
+  min-width: 120px;
 }
 
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none !important;
 }
 
 .btn-primary {
   background: linear-gradient(135deg, #3b82f6, #06b6d4);
   color: white;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45);
 }
 
 .btn-secondary {
-  background: rgba(148, 163, 184, 0.2);
+  background: rgba(148, 163, 184, 0.15);
   color: #475569;
   border: 2px solid rgba(148, 163, 184, 0.3);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.25);
   border-color: rgba(148, 163, 184, 0.4);
+  transform: translateY(-1px);
 }
 
 /* Form Select Styles */
 .form-select {
   width: 100%;
-  padding: 12px 40px 12px 16px;
+  padding: 14px 44px 14px 18px;
   border: 2px solid rgba(59, 130, 246, 0.2);
-  border-radius: 10px;
+  border-radius: 12px;
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.9);
   color: #1e293b;
   transition: all 0.2s ease;
   box-sizing: border-box;
@@ -222,19 +234,19 @@
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 20px;
+  background-position: right 14px center;
+  background-size: 22px;
 }
 
 .form-select:focus {
   outline: none;
   border-color: #3b82f6;
   background: white;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .form-select option {
-  padding: 12px;
+  padding: 14px;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 600;
 }
@@ -242,8 +254,9 @@
 /* Form Hint Styles */
 .form-hint {
   display: block;
-  margin-top: 6px;
-  font-size: 0.85rem;
+  margin-top: 8px;
+  font-size: 0.9rem;
   color: #64748b;
   font-style: italic;
+  line-height: 1.5;
 }

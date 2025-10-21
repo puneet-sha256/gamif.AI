@@ -561,26 +561,19 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     return (
       <div className="tab-content">
         <div className="tasks-header">
-          <h2>Tasks & Challenges</h2>
-          <p>Complete your personalized AI-generated tasks to earn experience and shards</p>
-          <div className="tasks-header-buttons">
-            <button 
-              onClick={() => {
-                setEditingTask(null)
-                setShowTaskModal(true)
-              }}
-              className="add-task-btn"
-            >
-              ➕ Add Task
-            </button>
-            <button 
-              onClick={loadGeneratedTasks}
-              className="refresh-tasks-btn small"
-              disabled={isLoadingTasks}
-            >
-              🔄 Refresh
-            </button>
+          <div className="tasks-header-content">
+            <h2>Tasks & Challenges</h2>
+            <p>Complete your personalized AI-generated tasks to earn experience and shards</p>
           </div>
+          <button 
+            onClick={() => {
+              setEditingTask(null)
+              setShowTaskModal(true)
+            }}
+            className="add-task-btn"
+          >
+            ➕ Add Task
+          </button>
         </div>
         
         <div className="tasks-grid">
