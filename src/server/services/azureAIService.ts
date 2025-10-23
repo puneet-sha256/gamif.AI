@@ -1,9 +1,11 @@
 import { AzureOpenAI } from "openai";
 import type { GoalsData, ProfileData, GeneratedTasks } from '../../types';
+import { promptManager } from './promptManager';
+import { AI_CONFIGS, AIPromptType } from '../config/aiConfigs';
+import type { AIPromptConfig } from '../config/aiConfigs';
 
 // Azure OpenAI configuration
 const endpoint = "https://gamifai-resource.cognitiveservices.azure.com/";
-const modelName = "gpt-4o-mini";
 const deployment = "daily-task-agent";
 const apiVersion = "2024-04-01-preview";
 
@@ -11,7 +13,25 @@ export interface TaskGenerationResult {
   success: boolean;
   data?: {
     generatedTasks?: GeneratedTasks;
-    rawResponse?: string; // Raw response from Azure AI agent
+    rawResponse?: string;
+  };
+  error?: string;
+  processingTimeMs?: number;
+}
+
+export interface CompletionOptions {
+  /** Override the system message from the prompt file */
+  systemMessageOverride?: string;
+  /** Override the temperature from config */
+  temperature?: number;
+  /** Override the max tokens from config */
+  maxTokens?: number;
+}
+
+export interface CompletionResult {
+  success: boolean;
+  data?: {
+    content: string;
   };
   error?: string;
   processingTimeMs?: number;
@@ -52,6 +72,89 @@ class AzureAIService {
     }
   }
 
+  /**
+   * Generic method to generate AI completions based on prompt type
+   * @param promptType - The type of prompt to use (from AIPromptType)
+   * @param userMessage - The user message/input
+   * @param options - Optional overrides for system message, temperature, etc.
+   */
+  async generateCompletion(
+    promptType: AIPromptType,
+    userMessage: string,
+    options?: CompletionOptions
+  ): Promise<CompletionResult> {
+    const startTime = Date.now();
+    
+    if (!this.initialized || !this.client) {
+      return {
+        success: false,
+        error: 'Azure OpenAI Service not initialized'
+      };
+    }
+
+    try {
+      // Get configuration for this prompt type
+      const config: AIPromptConfig = AI_CONFIGS[promptType];
+      if (!config) {
+        throw new Error(`No configuration found for prompt type: ${promptType}`);
+      }
+
+      console.log(`🤖 Starting Azure OpenAI completion for: ${promptType}`);
+      console.log(`📋 Model: ${config.modelName}`);
+
+      // Load the prompt file
+      const systemMessage = options?.systemMessageOverride || promptManager.loadPrompt(config.promptFile);
+
+      // Call the chat completion API
+      const response = await this.client.chat.completions.create({
+        messages: [
+          { role: "system", content: systemMessage },
+          { role: "user", content: userMessage }
+        ],
+        max_tokens: options?.maxTokens ?? config.maxTokens ?? 4096,
+        temperature: options?.temperature ?? config.temperature ?? 1,
+        top_p: 1,
+        model: config.modelName
+      });
+
+      if (!response?.choices?.[0]?.message?.content) {
+        return {
+          success: false,
+          error: 'No response received from Azure OpenAI',
+          processingTimeMs: Date.now() - startTime
+        };
+      }
+
+      const aiResponse = response.choices[0].message.content;
+
+      console.log('🎯 Azure OpenAI Response:');
+      console.log('='.repeat(50));
+      console.log(aiResponse);
+      console.log('='.repeat(50));
+      console.log('✅ Azure OpenAI completion completed successfully');
+
+      return {
+        success: true,
+        data: {
+          content: aiResponse
+        },
+        processingTimeMs: Date.now() - startTime
+      };
+
+    } catch (error) {
+      console.error('❌ Azure OpenAI completion error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        processingTimeMs: Date.now() - startTime
+      };
+    }
+  }
+
+  /**
+   * Generate daily tasks based on user goals
+   * @deprecated Use generateCompletion(AIPromptType.TASK_GENERATION, ...) instead
+   */
   async generateTasks(
     goals: GoalsData,
     _userProfile?: ProfileData
@@ -68,35 +171,22 @@ class AzureAIService {
     try {
       console.log('🤖 Starting Azure OpenAI task generation...');
 
-      // Simple message with just the goals - let the deployed agent handle the system prompt
+      // Use the new generateCompletion method
       const userMessage = `User Goals: ${goals.longTermGoals}`;
+      const completionResult = await this.generateCompletion(
+        AIPromptType.TASK_GENERATION,
+        userMessage
+      );
 
-      // Call the chat completion API
-      const response = await this.client.chat.completions.create({
-        messages: [
-          { role: "system", content: "You are the Daily Task Generation Agent for a gamified productivity app called Gamif.AI.\n\nYour goal is to generate structured JSON output of daily tasks based on the user's goals.\n\n---\n\n### RULES:\n\n1. Analyze the user’s goals and map them to the following 3 possible categories:\n   - **Strength** → physical, health, or discipline-related goals.\n   - **Intelligence** → learning, problem-solving, or career development goals.\n   - **Charisma** → communication, social, or confidence-building goals.\n\n2. For each relevant category (present in the user’s goals):\n   - Generate **at least 3 daily tasks** that help build consistency in that domain.\n   - Tasks should be practical and repeatable (not one-time or overly complex).\n\n3. If a category is **not mentioned or implied** by the user’s goals, omit that category from the JSON output entirely.\n\n4. For each task:\n   - Include:\n     - `title`: short name of the task\n     - `description`: what the user should do\n     - `xp`: integer between 0–25 (represents experience points)\n     - `shards`: integer between 0–50 (represents reward points)\n\n5. Rewards scale with difficulty. Simple tasks get lower XP/shards; effortful tasks get higher ones.\n\n6. Output must be **strict JSON only** (no markdown, no text, no explanations).\n\n7. Keep responses deterministic and consistent — avoid randomness or creativity beyond practical variation.\n\n---\n\n### Example Input\nUser Goals: I want to build muscle, improve my communication skills, and learn advanced data structures and algorithms.\n\n### Example Output\n{\n  \"Strength\": [\n    {\n      \"title\": \"Workout Session\",\n      \"description\": \"Do a 45-minute strength or resistance workout.\",\n      \"xp\": 20,\n      \"shards\": 40\n    },\n    {\n      \"title\": \"Cold Shower\",\n      \"description\": \"Take a cold shower to build resilience and recovery.\",\n      \"xp\": 10,\n      \"shards\": 25\n    },\n    {\n      \"title\": \"Morning Walk\",\n      \"description\": \"Go for a brisk 20-minute walk to stay active.\",\n      \"xp\": 8,\n      \"shards\": 15\n    }\n  ],\n  \"Intelligence\": [\n    {\n      \"title\": \"Leetcode Practice\",\n      \"description\": \"Solve 2 medium-level coding problems.\",\n      \"xp\": 20,\n      \"shards\": 40\n    },\n    {\n      \"title\": \"System Design Study\",\n      \"description\": \"Learn one new system design component or pattern.\",\n      \"xp\": 15,\n      \"shards\": 30\n    },\n    {\n      \"title\": \"Tech Article Reading\",\n      \"description\": \"Read one article about an advanced data structure or concept.\",\n      \"xp\": 10,\n      \"shards\": 20\n    }\n  ],\n  \"Charisma\": [\n    {\n      \"title\": \"Start a Conversation\",\n      \"description\": \"Initiate a chat with someone new or a colleague.\",\n      \"xp\": 10,\n      \"shards\": 20\n    },\n    {\n      \"title\": \"Mirror Talk\",\n      \"description\": \"Speak for 3 minutes in front of the mirror to improve confidence.\",\n      \"xp\": 5,\n      \"shards\": 10\n    },\n    {\n      \"title\": \"Positive Feedback\",\n      \"description\": \"Give one person a genuine compliment or appreciation.\",\n      \"xp\": 8,\n      \"shards\": 15\n    }\n  ]\n}\n" },
-          { role: "user", content: userMessage }
-        ],
-        max_tokens: 4096,
-        temperature: 1,
-        top_p: 1,
-        model: modelName
-      });
-
-      if (!response?.choices?.[0]?.message?.content) {
+      if (!completionResult.success || !completionResult.data) {
         return {
           success: false,
-          error: 'No response received from Azure OpenAI',
+          error: completionResult.error || 'No response received',
           processingTimeMs: Date.now() - startTime
         };
       }
 
-      const agentResponse = response.choices[0].message.content;
-
-      console.log('🎯 Azure OpenAI Agent Response:');
-      console.log('='.repeat(50));
-      console.log(agentResponse);
-      console.log('='.repeat(50));
+      const agentResponse = completionResult.data.content;
 
       // Try to parse the JSON response
       let parsedTasks: GeneratedTasks | undefined;
@@ -142,7 +232,7 @@ class AzureAIService {
         success: true,
         data: {
           generatedTasks: parsedTasks,
-          rawResponse: agentResponse // Store the actual agent response here
+          rawResponse: agentResponse
         },
         processingTimeMs: Date.now() - startTime
       };
