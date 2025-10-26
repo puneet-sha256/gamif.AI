@@ -103,37 +103,58 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
     console.log('🤖 Server: Starting Azure AI daily activity analysis for user:', user.username)
     console.log('📝 User Activity:', dailyActivity)
 
-    // Build the user message with activity and tasks
-    let userMessage = `**User's Daily Activity:**\n${dailyActivity}\n\n`
+    // Format daily planned tasks as a JSON array
+    const plannedTasks: Array<{ title: string; description: string; xp: number; shards: number }> = []
     
     if (currentTasks) {
-      userMessage += `**Current Tasks:**\n`
-      
       if (currentTasks.Strength && currentTasks.Strength.length > 0) {
-        userMessage += `- Strength:\n`
-        currentTasks.Strength.forEach((task: { description: string; xp: number; shards: number }) => {
-          userMessage += `  * "${task.description}" (${task.xp} XP, ${task.shards} shards)\n`
+        currentTasks.Strength.forEach((task: { id: string; description: string; xp: number; shards: number }) => {
+          plannedTasks.push({
+            title: task.description,
+            description: task.description,
+            xp: task.xp,
+            shards: task.shards
+          })
         })
       }
       
       if (currentTasks.Intelligence && currentTasks.Intelligence.length > 0) {
-        userMessage += `- Intelligence:\n`
-        currentTasks.Intelligence.forEach((task: { description: string; xp: number; shards: number }) => {
-          userMessage += `  * "${task.description}" (${task.xp} XP, ${task.shards} shards)\n`
+        currentTasks.Intelligence.forEach((task: { id: string; description: string; xp: number; shards: number }) => {
+          plannedTasks.push({
+            title: task.description,
+            description: task.description,
+            xp: task.xp,
+            shards: task.shards
+          })
         })
       }
       
       if (currentTasks.Charisma && currentTasks.Charisma.length > 0) {
-        userMessage += `- Charisma:\n`
-        currentTasks.Charisma.forEach((task: { description: string; xp: number; shards: number }) => {
-          userMessage += `  * "${task.description}" (${task.xp} XP, ${task.shards} shards)\n`
+        currentTasks.Charisma.forEach((task: { id: string; description: string; xp: number; shards: number }) => {
+          plannedTasks.push({
+            title: task.description,
+            description: task.description,
+            xp: task.xp,
+            shards: task.shards
+          })
         })
       }
-    } else {
-      userMessage += `**Current Tasks:** None provided\n`
     }
 
-    console.log('📋 Formatted message for AI:', userMessage)
+    // Get user's long-term goals
+    const longTermGoals = user.goalsData?.longTermGoals || 'No specific goals set'
+
+    // Build the formatted message for the AI as a JSON object
+    const inputData = {
+      daily_planned_tasks: plannedTasks,
+      long_term_goals: longTermGoals,
+      user_daily_update: dailyActivity
+    }
+
+    const userMessage = JSON.stringify(inputData, null, 2)
+
+    console.log('📋 Formatted JSON input for AI:')
+    console.log(userMessage)
 
     // Call Azure AI service
     const analysisResult = await azureAIService.generateCompletion(
@@ -146,15 +167,38 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
       await updateSessionLastAccess(sessionId)
 
       console.log('✅ Server: Azure AI activity analysis completed successfully')
-      console.log('🎯 AI Response:')
+      console.log('🎯 AI Response (JSON):')
       console.log('='.repeat(80))
       console.log(analysisResult.data.content)
       console.log('='.repeat(80))
+
+      // Parse the JSON response (should be clean JSON with json_object mode)
+      let parsedMatches = null
+      try {
+        parsedMatches = JSON.parse(analysisResult.data.content)
+        console.log('✅ Successfully parsed activity matches')
+        console.log('📊 Matches found:', parsedMatches.matches?.length || 0)
+      } catch (parseError) {
+        console.error('❌ Failed to parse AI response as JSON:', parseError)
+        console.log('Raw response:', analysisResult.data.content)
+        
+        // Fallback: try to extract JSON if wrapped in markdown
+        try {
+          const jsonMatch = analysisResult.data.content.match(/\{[\s\S]*\}/)
+          if (jsonMatch) {
+            parsedMatches = JSON.parse(jsonMatch[0])
+            console.log('✅ Extracted and parsed JSON from markdown')
+          }
+        } catch (fallbackError) {
+          console.error('❌ Fallback parsing also failed:', fallbackError)
+        }
+      }
       
       res.json(createSuccessResponse(
         'Daily activity analyzed successfully',
         {
-          aiResponse: analysisResult.data.content,
+          matches: parsedMatches?.matches || [],
+          rawResponse: analysisResult.data.content,
           processingTime: analysisResult.processingTimeMs
         },
         undefined,

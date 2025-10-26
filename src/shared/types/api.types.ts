@@ -140,9 +140,21 @@ export interface ShardsUpdateResponse extends ApiSuccessResponse {
 }
 
 // Daily Activity Analysis Response
+export interface ActivityMatch {
+  name: string; // Activity name from user update
+  match_type: 'exact' | 'similar' | 'goal-aligned' | 'unrelated';
+  matched_task: string | null; // Task title if exact/similar match
+  goal_link: string | null; // Goal description if goal-aligned
+  similarity_score: number | null; // 0.0-1.0 for similar matches
+  alignment_factor: number | null; // 0.4-0.8 for goal-aligned activities
+  effort_ratio: number; // 0.0-2.0
+  notes: string; // Brief reasoning
+}
+
 export interface AnalyzeDailyActivityResponse extends ApiSuccessResponse {
   data: {
-    aiResponse: string; // The raw AI response for logging/debugging
+    matches: ActivityMatch[]; // Structured activity matches
+    rawResponse: string; // The raw AI response for debugging
     processingTime?: number;
   };
 }

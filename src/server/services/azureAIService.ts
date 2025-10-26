@@ -105,8 +105,8 @@ class AzureAIService {
       // Load the prompt file
       const systemMessage = options?.systemMessageOverride || promptManager.loadPrompt(config.promptFile);
 
-      // Call the chat completion API
-      const response = await this.client.chat.completions.create({
+      // Build the completion request
+      const completionRequest: any = {
         messages: [
           { role: "system", content: systemMessage },
           { role: "user", content: userMessage }
@@ -115,7 +115,16 @@ class AzureAIService {
         temperature: options?.temperature ?? config.temperature ?? 1,
         top_p: 1,
         model: config.modelName
-      });
+      }
+
+      // Enable JSON mode if specified in config
+      if (config.responseFormat === 'json') {
+        completionRequest.response_format = { type: "json_object" }
+        console.log('🔧 JSON response mode enabled')
+      }
+
+      // Call the chat completion API
+      const response = await this.client.chat.completions.create(completionRequest);
 
       if (!response?.choices?.[0]?.message?.content) {
         return {

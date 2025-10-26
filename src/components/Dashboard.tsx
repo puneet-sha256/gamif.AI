@@ -223,13 +223,59 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
       if (result.success && result.data) {
         console.log('✅ AI Analysis completed successfully')
-        console.log('🎯 AI Response:')
+        console.log('🎯 Activity Matches:')
         console.log('='.repeat(80))
-        console.log(result.data.aiResponse)
+        
+        if (result.data.matches && result.data.matches.length > 0) {
+          result.data.matches.forEach((match: any, index: number) => {
+            console.log(`\n${index + 1}. ${match.name}`)
+            console.log(`   Match Type: ${match.match_type}`)
+            console.log(`   Matched Task: ${match.matched_task || 'N/A'}`)
+            console.log(`   Goal Link: ${match.goal_link || 'N/A'}`)
+            console.log(`   Similarity Score: ${match.similarity_score ?? 'N/A'}`)
+            console.log(`   Alignment Factor: ${match.alignment_factor ?? 'N/A'}`)
+            console.log(`   Effort Ratio: ${match.effort_ratio}`)
+            console.log(`   Notes: ${match.notes}`)
+          })
+        } else {
+          console.log('No matches found in response')
+        }
+        
+        console.log('='.repeat(80))
+        console.log('\n📋 Raw AI Response:')
+        console.log(result.data.rawResponse)
         console.log('='.repeat(80))
 
-        // Show the AI response to the user
-        alert(`AI Analysis:\n\n${result.data.aiResponse}`)
+        // Format a summary for the user
+        let summary = '📊 Activity Analysis Results:\n\n'
+        
+        if (result.data.matches && result.data.matches.length > 0) {
+          result.data.matches.forEach((match: any) => {
+            const typeEmoji: { [key: string]: string } = {
+              'exact': '✅',
+              'similar': '🔄',
+              'goal-aligned': '🎯',
+              'unrelated': '❓'
+            }
+            const emoji = typeEmoji[match.match_type] || '•'
+            
+            summary += `${emoji} ${match.name}\n`
+            summary += `   Type: ${match.match_type}\n`
+            if (match.matched_task) {
+              summary += `   Matched: ${match.matched_task}\n`
+            }
+            if (match.goal_link) {
+              summary += `   Goal: ${match.goal_link}\n`
+            }
+            summary += `   Effort: ${match.effort_ratio.toFixed(2)}x\n`
+            summary += `   ${match.notes}\n\n`
+          })
+        } else {
+          summary += 'No activities were identified in your update.\n'
+        }
+
+        // Show the formatted summary to the user
+        alert(summary)
         
         setDailyActivity('')
         setShowDailyInput(false)

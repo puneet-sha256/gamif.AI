@@ -23,6 +23,8 @@ export interface AIPromptConfig {
   temperature?: number;
   /** Maximum tokens to generate */
   maxTokens?: number;
+  /** Enable JSON response format */
+  responseFormat?: 'json' | 'text';
 }
 
 /**
@@ -44,6 +46,7 @@ export const AI_CONFIGS: Record<AIPromptType, AIPromptConfig> = {
     promptFile: 'activity-analysis.prompt.md',
     modelName: 'gpt-4o-mini',
     temperature: 0.7,
-    maxTokens: 2048
+    maxTokens: 2048,
+    responseFormat: 'json'
   },
 };
