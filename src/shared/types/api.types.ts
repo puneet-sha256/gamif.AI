@@ -89,15 +89,6 @@ export interface ApiErrorResponse {
 
 export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse;
 
-// Legacy response interfaces (for backward compatibility)
-export interface LegacyApiResponse<T = any> {
-  success: boolean
-  message: string
-  data?: T
-  user?: User
-  sessionId?: string
-}
-
 // Authentication response specifically
 export interface AuthResponse {
   success: boolean
