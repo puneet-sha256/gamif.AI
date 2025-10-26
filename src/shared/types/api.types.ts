@@ -71,6 +71,16 @@ export interface AddTaskRequest {
   shards: number;
 }
 
+export interface AnalyzeDailyActivityRequest {
+  sessionId: string;
+  dailyActivity: string; // User's description of what they did today
+  currentTasks?: {
+    Strength?: Array<{ id: string; description: string; xp: number; shards: number }>;
+    Intelligence?: Array<{ id: string; description: string; xp: number; shards: number }>;
+    Charisma?: Array<{ id: string; description: string; xp: number; shards: number }>;
+  };
+}
+
 // API Response Types
 export interface ApiSuccessResponse<T = any> {
   success: true;
@@ -126,5 +136,13 @@ export interface ShardsUpdateResponse extends ApiSuccessResponse {
     shardsChange: number;
     newShardsBalance: number;
     reason?: string;
+  };
+}
+
+// Daily Activity Analysis Response
+export interface AnalyzeDailyActivityResponse extends ApiSuccessResponse {
+  data: {
+    aiResponse: string; // The raw AI response for logging/debugging
+    processingTime?: number;
   };
 }

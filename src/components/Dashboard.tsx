@@ -15,6 +15,7 @@ import {
   type MappedTaskItem
 } from '../utils/taskMapping'
 import type { GeneratedTasks, GeneratedTask } from '../types'
+import { userDatabase } from '../client/services/fileUserDatabase'
 
 interface DashboardProps {
   onLogout: () => void
@@ -173,72 +174,71 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     setIsAnalyzing(true)
     
     try {
-      // Simple AI-like analysis (would be replaced with actual AI service)
-      const activities = dailyActivity.toLowerCase()
-      let totalXP = 0
-      let strengthXP = 0
-      let intelligenceXP = 0
-      let charismaXP = 0
-      let shards = 0
-      
-      // Fitness activities
-      if (activities.includes('exercise') || activities.includes('workout') || activities.includes('gym') || activities.includes('run')) {
-        strengthXP += 30
-        shards += 8
+      const sessionId = userDatabase.getSessionId()
+      if (!sessionId) {
+        alert('Session expired. Please log in again.')
+        return
       }
-      if (activities.includes('walk') || activities.includes('jog') || activities.includes('bike')) {
-        strengthXP += 20
-        shards += 5
-      }
-      
-      // Learning activities
-      if (activities.includes('read') || activities.includes('book') || activities.includes('study')) {
-        intelligenceXP += 25
-        shards += 6
-      }
-      if (activities.includes('learn') || activities.includes('course') || activities.includes('tutorial')) {
-        intelligenceXP += 35
-        shards += 8
-      }
-      if (activities.includes('code') || activities.includes('program') || activities.includes('develop')) {
-        intelligenceXP += 40
-        shards += 10
-      }
-      
-      // Social activities
-      if (activities.includes('meeting') || activities.includes('presentation') || activities.includes('speak')) {
-        charismaXP += 30
-        shards += 7
-      }
-      if (activities.includes('help') || activities.includes('teach') || activities.includes('mentor')) {
-        charismaXP += 25
-        shards += 6
-      }
-      
-      totalXP = strengthXP + intelligenceXP + charismaXP
-      
-      if (totalXP > 0) {
-        // Here you would call your actual API to update XP and shards
-        console.log('🎯 Daily Activity Analysis:', {
-          strengthXP,
-          intelligenceXP, 
-          charismaXP,
-          totalXP,
-          shards
-        })
+
+      // Prepare current tasks data to send to the AI
+      const currentTasks = generatedTasks ? {
+        Strength: generatedTasks.Strength?.map(task => ({
+          id: task.id,
+          description: task.title || task.description,
+          xp: task.xp,
+          shards: task.shards
+        })),
+        Intelligence: generatedTasks.Intelligence?.map(task => ({
+          id: task.id,
+          description: task.title || task.description,
+          xp: task.xp,
+          shards: task.shards
+        })),
+        Charisma: generatedTasks.Charisma?.map(task => ({
+          id: task.id,
+          description: task.title || task.description,
+          xp: task.xp,
+          shards: task.shards
+        }))
+      } : undefined
+
+      console.log('🤖 Sending daily activity to AI for analysis...')
+      console.log('📝 Activity:', dailyActivity)
+      console.log('📋 Current Tasks:', currentTasks)
+
+      // Call the API endpoint
+      const response = await fetch('http://localhost:3001/api/ai/analyze-activity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          dailyActivity,
+          currentTasks
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success && result.data) {
+        console.log('✅ AI Analysis completed successfully')
+        console.log('🎯 AI Response:')
+        console.log('='.repeat(80))
+        console.log(result.data.aiResponse)
+        console.log('='.repeat(80))
+
+        // Show the AI response to the user
+        alert(`AI Analysis:\n\n${result.data.aiResponse}`)
         
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        
-        alert(`Amazing work today! 🎉\n\nXP Earned:\n• Strength: +${strengthXP}\n• Intelligence: +${intelligenceXP}\n• Charisma: +${charismaXP}\n• Shards: +${shards} 💎\n\nTotal XP: +${totalXP}`)
+        setDailyActivity('')
+        setShowDailyInput(false)
       } else {
-        alert('Keep going! Try mentioning specific activities like exercise, reading, coding, or social interactions to earn XP! 💪')
+        console.error('❌ AI Analysis failed:', result.message)
+        alert(`Failed to analyze activity: ${result.message}`)
       }
-      
-      setDailyActivity('')
-      setShowDailyInput(false)
     } catch (error) {
-      console.error('Error analyzing daily activity:', error)
+      console.error('❌ Error analyzing daily activity:', error)
       alert('Sorry, there was an error analyzing your activity. Please try again.')
     } finally {
       setIsAnalyzing(false)

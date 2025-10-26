@@ -7,6 +7,7 @@ import {
   ErrorMessages
 } from '../utils/responseHelpers'
 import type { GoalsData, ProfileData } from '../../types'
+import { AIPromptType } from '../config/aiConfigs'
 
 // Generate tasks using Azure AI
 export async function generateTasks(req: Request, res: Response) {
@@ -71,6 +72,106 @@ export async function generateTasks(req: Request, res: Response) {
     }
   } catch (error) {
     console.error('❌ Server: Task generation error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Analyze daily activity using Azure AI
+export async function analyzeDailyActivity(req: Request, res: Response) {
+  try {
+    const { sessionId, dailyActivity, currentTasks } = req.body
+
+    // Validate required fields
+    if (!sessionId || !dailyActivity) {
+      return res.status(400).json(createErrorResponse(
+        'Session ID and daily activity description are required'
+      ))
+    }
+
+    // Verify session
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    // Find user
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    console.log('🤖 Server: Starting Azure AI daily activity analysis for user:', user.username)
+    console.log('📝 User Activity:', dailyActivity)
+
+    // Build the user message with activity and tasks
+    let userMessage = `**User's Daily Activity:**\n${dailyActivity}\n\n`
+    
+    if (currentTasks) {
+      userMessage += `**Current Tasks:**\n`
+      
+      if (currentTasks.Strength && currentTasks.Strength.length > 0) {
+        userMessage += `- Strength:\n`
+        currentTasks.Strength.forEach((task: { description: string; xp: number; shards: number }) => {
+          userMessage += `  * "${task.description}" (${task.xp} XP, ${task.shards} shards)\n`
+        })
+      }
+      
+      if (currentTasks.Intelligence && currentTasks.Intelligence.length > 0) {
+        userMessage += `- Intelligence:\n`
+        currentTasks.Intelligence.forEach((task: { description: string; xp: number; shards: number }) => {
+          userMessage += `  * "${task.description}" (${task.xp} XP, ${task.shards} shards)\n`
+        })
+      }
+      
+      if (currentTasks.Charisma && currentTasks.Charisma.length > 0) {
+        userMessage += `- Charisma:\n`
+        currentTasks.Charisma.forEach((task: { description: string; xp: number; shards: number }) => {
+          userMessage += `  * "${task.description}" (${task.xp} XP, ${task.shards} shards)\n`
+        })
+      }
+    } else {
+      userMessage += `**Current Tasks:** None provided\n`
+    }
+
+    console.log('📋 Formatted message for AI:', userMessage)
+
+    // Call Azure AI service
+    const analysisResult = await azureAIService.generateCompletion(
+      AIPromptType.ACTIVITY_ANALYSIS,
+      userMessage
+    )
+
+    if (analysisResult.success && analysisResult.data) {
+      // Update session last access
+      await updateSessionLastAccess(sessionId)
+
+      console.log('✅ Server: Azure AI activity analysis completed successfully')
+      console.log('🎯 AI Response:')
+      console.log('='.repeat(80))
+      console.log(analysisResult.data.content)
+      console.log('='.repeat(80))
+      
+      res.json(createSuccessResponse(
+        'Daily activity analyzed successfully',
+        {
+          aiResponse: analysisResult.data.content,
+          processingTime: analysisResult.processingTimeMs
+        },
+        undefined,
+        undefined,
+        {
+          processingTime: analysisResult.processingTimeMs,
+          agentUsed: 'azure-openai-foundry'
+        }
+      ))
+    } else {
+      console.log('❌ Server: Azure AI activity analysis failed:', analysisResult.error)
+      res.status(500).json(createErrorResponse(
+        analysisResult.error || 'Activity analysis failed'
+      ))
+    }
+  } catch (error) {
+    console.error('❌ Server: Activity analysis error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }

@@ -5,7 +5,7 @@ import { initializeData, DATA_DIR, USERS_FILE, SESSIONS_FILE } from './src/serve
 import { registerUser, loginUser, logoutUser } from './src/server/routes/authRoutes'
 import { getCurrentUser, updateUserData, updateExperience, updateShards, getUserTasks, updateGeneratedTask, deleteGeneratedTask, addUserTask } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
-import { generateTasks } from './src/server/routes/aiRoutes'
+import { generateTasks, analyzeDailyActivity } from './src/server/routes/aiRoutes'
 
 const app = express()
 const PORT = 3001
@@ -59,6 +59,7 @@ app.patch('/api/user/shards', updateShards)
 
 // Azure AI routes
 app.post('/api/ai/generate-tasks', generateTasks)
+app.post('/api/ai/analyze-activity', analyzeDailyActivity)
 
 // Initialize and start server
 async function startServer() {

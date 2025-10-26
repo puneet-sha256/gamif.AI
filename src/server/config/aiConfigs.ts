@@ -9,6 +9,7 @@
 
 export const AIPromptType = {
   TASK_GENERATION: 'task-generation',
+  ACTIVITY_ANALYSIS: 'activity-analysis',
 } as const;
 
 export type AIPromptType = typeof AIPromptType[keyof typeof AIPromptType];
@@ -38,5 +39,11 @@ export const AI_CONFIGS: Record<AIPromptType, AIPromptConfig> = {
     modelName: 'gpt-4o-mini',
     temperature: 1,
     maxTokens: 4096
+  },
+  [AIPromptType.ACTIVITY_ANALYSIS]: {
+    promptFile: 'activity-analysis.prompt.md',
+    modelName: 'gpt-4o-mini',
+    temperature: 0.7,
+    maxTokens: 2048
   },
 };
