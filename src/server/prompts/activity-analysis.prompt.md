@@ -14,8 +14,9 @@ You will receive a JSON object with three fields:
 {
   "daily_planned_tasks": [
     {
-      "title": "string",
-      "description": "string",
+      "title": "string (short task name)",
+      "description": "string (detailed task description)",
+      "category": "Strength|Intelligence|Charisma",
       "xp": number,
       "shards": number
     }
@@ -68,6 +69,8 @@ For each distinct activity mentioned in the user's daily update:
 
 6. **Provide notes**: Brief explanation of your reasoning
 
+7. **Include category**: For all activities, determine which category it belongs to (Strength, Intelligence, or Charisma)
+
 ---
 
 ### OUTPUT FORMAT:
@@ -80,6 +83,7 @@ Return ONLY this JSON structure (no markdown, no ```json blocks, no extra text):
       "name": "string (activity name from user update)",
       "match_type": "exact|similar|goal-aligned|unrelated",
       "matched_task": "string|null (task title if exact/similar)",
+      "category": "Strength|Intelligence|Charisma (activity category)",
       "goal_link": "string|null (goal description if goal-aligned)",
       "similarity_score": "number|null (0.0-1.0 for similar matches)",
       "alignment_factor": "number|null (0.4-0.8 for goal-aligned)",
@@ -111,12 +115,22 @@ Return ONLY this JSON structure (no markdown, no ```json blocks, no extra text):
     {
       "title": "Morning Workout",
       "description": "Do a 45-minute strength or resistance workout",
+      "category": "Strength",
       "xp": 20,
       "shards": 40
     },
     {
       "title": "Leetcode Practice",
       "description": "Solve 2 medium-level coding problems",
+      "category": "Intelligence",
+      "xp": 20,
+      "shards": 40
+    }
+  ],
+  "long_term_goals": "I want to build muscle, improve my communication skills, and learn advanced data structures and algorithms.",
+  "user_daily_update": "Today I went for a 30-minute run, spent 2 hours coding a new feature for my project, and had a productive team meeting where I presented my ideas."
+}
+```
       "xp": 20,
       "shards": 40
     }
@@ -134,6 +148,7 @@ Return ONLY this JSON structure (no markdown, no ```json blocks, no extra text):
       "name": "30-minute run",
       "match_type": "similar",
       "matched_task": "Morning Workout",
+      "category": "Strength",
       "goal_link": null,
       "similarity_score": 0.75,
       "alignment_factor": null,
@@ -144,6 +159,7 @@ Return ONLY this JSON structure (no markdown, no ```json blocks, no extra text):
       "name": "2 hours coding a new feature",
       "match_type": "goal-aligned",
       "matched_task": null,
+      "category": "Intelligence",
       "goal_link": "learn advanced data structures and algorithms",
       "similarity_score": null,
       "alignment_factor": 0.7,
@@ -154,6 +170,7 @@ Return ONLY this JSON structure (no markdown, no ```json blocks, no extra text):
       "name": "team meeting presentation",
       "match_type": "goal-aligned",
       "matched_task": null,
+      "category": "Charisma",
       "goal_link": "improve my communication skills",
       "similarity_score": null,
       "alignment_factor": 0.8,

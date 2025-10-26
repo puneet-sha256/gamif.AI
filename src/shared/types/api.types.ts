@@ -75,9 +75,30 @@ export interface AnalyzeDailyActivityRequest {
   sessionId: string;
   dailyActivity: string; // User's description of what they did today
   currentTasks?: {
-    Strength?: Array<{ id: string; description: string; xp: number; shards: number }>;
-    Intelligence?: Array<{ id: string; description: string; xp: number; shards: number }>;
-    Charisma?: Array<{ id: string; description: string; xp: number; shards: number }>;
+    Strength?: Array<{ 
+      id: string; 
+      title?: string;
+      description: string; 
+      category: string;
+      xp: number; 
+      shards: number 
+    }>;
+    Intelligence?: Array<{ 
+      id: string; 
+      title?: string;
+      description: string; 
+      category: string;
+      xp: number; 
+      shards: number 
+    }>;
+    Charisma?: Array<{ 
+      id: string; 
+      title?: string;
+      description: string; 
+      category: string;
+      xp: number; 
+      shards: number 
+    }>;
   };
 }
 
@@ -144,6 +165,7 @@ export interface ActivityMatch {
   name: string; // Activity name from user update
   match_type: 'exact' | 'similar' | 'goal-aligned' | 'unrelated';
   matched_task: string | null; // Task title if exact/similar match
+  category: 'Strength' | 'Intelligence' | 'Charisma'; // Activity category
   goal_link: string | null; // Goal description if goal-aligned
   similarity_score: number | null; // 0.0-1.0 for similar matches
   alignment_factor: number | null; // 0.4-0.8 for goal-aligned activities

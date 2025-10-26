@@ -104,14 +104,28 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
     console.log('📝 User Activity:', dailyActivity)
 
     // Format daily planned tasks as a JSON array
-    const plannedTasks: Array<{ title: string; description: string; xp: number; shards: number }> = []
+    const plannedTasks: Array<{ 
+      title: string; 
+      description: string; 
+      category: string;
+      xp: number; 
+      shards: number 
+    }> = []
     
     if (currentTasks) {
       if (currentTasks.Strength && currentTasks.Strength.length > 0) {
-        currentTasks.Strength.forEach((task: { id: string; description: string; xp: number; shards: number }) => {
+        currentTasks.Strength.forEach((task: { 
+          id: string; 
+          title?: string;
+          description: string; 
+          category: string;
+          xp: number; 
+          shards: number 
+        }) => {
           plannedTasks.push({
-            title: task.description,
+            title: task.title || task.description,
             description: task.description,
+            category: task.category || 'Strength',
             xp: task.xp,
             shards: task.shards
           })
@@ -119,10 +133,18 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
       }
       
       if (currentTasks.Intelligence && currentTasks.Intelligence.length > 0) {
-        currentTasks.Intelligence.forEach((task: { id: string; description: string; xp: number; shards: number }) => {
+        currentTasks.Intelligence.forEach((task: { 
+          id: string; 
+          title?: string;
+          description: string; 
+          category: string;
+          xp: number; 
+          shards: number 
+        }) => {
           plannedTasks.push({
-            title: task.description,
+            title: task.title || task.description,
             description: task.description,
+            category: task.category || 'Intelligence',
             xp: task.xp,
             shards: task.shards
           })
@@ -130,10 +152,18 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
       }
       
       if (currentTasks.Charisma && currentTasks.Charisma.length > 0) {
-        currentTasks.Charisma.forEach((task: { id: string; description: string; xp: number; shards: number }) => {
+        currentTasks.Charisma.forEach((task: { 
+          id: string; 
+          title?: string;
+          description: string; 
+          category: string;
+          xp: number; 
+          shards: number 
+        }) => {
           plannedTasks.push({
-            title: task.description,
+            title: task.title || task.description,
             description: task.description,
+            category: task.category || 'Charisma',
             xp: task.xp,
             shards: task.shards
           })

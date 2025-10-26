@@ -184,19 +184,25 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       const currentTasks = generatedTasks ? {
         Strength: generatedTasks.Strength?.map(task => ({
           id: task.id,
-          description: task.title || task.description,
+          title: task.title || '',
+          description: task.description,
+          category: 'Strength' as const,
           xp: task.xp,
           shards: task.shards
         })),
         Intelligence: generatedTasks.Intelligence?.map(task => ({
           id: task.id,
-          description: task.title || task.description,
+          title: task.title || '',
+          description: task.description,
+          category: 'Intelligence' as const,
           xp: task.xp,
           shards: task.shards
         })),
         Charisma: generatedTasks.Charisma?.map(task => ({
           id: task.id,
-          description: task.title || task.description,
+          title: task.title || '',
+          description: task.description,
+          category: 'Charisma' as const,
           xp: task.xp,
           shards: task.shards
         }))
@@ -229,6 +235,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         if (result.data.matches && result.data.matches.length > 0) {
           result.data.matches.forEach((match: any, index: number) => {
             console.log(`\n${index + 1}. ${match.name}`)
+            console.log(`   Category: ${match.category}`)
             console.log(`   Match Type: ${match.match_type}`)
             console.log(`   Matched Task: ${match.matched_task || 'N/A'}`)
             console.log(`   Goal Link: ${match.goal_link || 'N/A'}`)
@@ -259,7 +266,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             }
             const emoji = typeEmoji[match.match_type] || '•'
             
-            summary += `${emoji} ${match.name}\n`
+            const categoryEmoji: { [key: string]: string } = {
+              'Strength': '💪',
+              'Intelligence': '🧠',
+              'Charisma': '✨'
+            }
+            const catEmoji = categoryEmoji[match.category] || '📌'
+            
+            summary += `${emoji} ${match.name} ${catEmoji}\n`
+            summary += `   Category: ${match.category}\n`
             summary += `   Type: ${match.match_type}\n`
             if (match.matched_task) {
               summary += `   Matched: ${match.matched_task}\n`
