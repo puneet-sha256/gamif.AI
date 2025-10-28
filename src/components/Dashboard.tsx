@@ -229,68 +229,72 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
       if (result.success && result.data) {
         console.log('✅ AI Analysis completed successfully')
-        console.log('🎯 Activity Matches:')
-        console.log('='.repeat(80))
-        
-        if (result.data.matches && result.data.matches.length > 0) {
-          result.data.matches.forEach((match: any, index: number) => {
-            console.log(`\n${index + 1}. ${match.name}`)
-            console.log(`   Category: ${match.category}`)
-            console.log(`   Match Type: ${match.match_type}`)
-            console.log(`   Matched Task: ${match.matched_task || 'N/A'}`)
-            console.log(`   Goal Link: ${match.goal_link || 'N/A'}`)
-            console.log(`   Similarity Score: ${match.similarity_score ?? 'N/A'}`)
-            console.log(`   Alignment Factor: ${match.alignment_factor ?? 'N/A'}`)
-            console.log(`   Effort Ratio: ${match.effort_ratio}`)
-            console.log(`   Notes: ${match.notes}`)
-          })
-        } else {
-          console.log('No matches found in response')
-        }
-        
-        console.log('='.repeat(80))
-        console.log('\n📋 Raw AI Response:')
-        console.log(result.data.rawResponse)
-        console.log('='.repeat(80))
+        console.log('🎯 Activity Matches:', result.data.matches)
+        console.log('💰 Rewards:', result.data.rewards)
 
-        // Format a summary for the user
-        let summary = '📊 Activity Analysis Results:\n\n'
-        
-        if (result.data.matches && result.data.matches.length > 0) {
-          result.data.matches.forEach((match: any) => {
+        // Build a comprehensive message combining all information
+        let fullMessage = ''
+
+        // Add processed activities
+        if (result.data.rewards?.activityRewards && result.data.rewards.activityRewards.length > 0) {
+          fullMessage += '🎯 PROCESSED ACTIVITIES:\n' + '='.repeat(40) + '\n\n'
+          
+          result.data.rewards.activityRewards.forEach((reward: any, index: number) => {
             const typeEmoji: { [key: string]: string } = {
               'exact': '✅',
               'similar': '🔄',
-              'goal-aligned': '🎯',
-              'unrelated': '❓'
+              'goal-aligned': '🎯'
             }
-            const emoji = typeEmoji[match.match_type] || '•'
+            const emoji = typeEmoji[reward.matchType] || '•'
             
             const categoryEmoji: { [key: string]: string } = {
               'Strength': '💪',
               'Intelligence': '🧠',
               'Charisma': '✨'
             }
-            const catEmoji = categoryEmoji[match.category] || '📌'
-            
-            summary += `${emoji} ${match.name} ${catEmoji}\n`
-            summary += `   Category: ${match.category}\n`
-            summary += `   Type: ${match.match_type}\n`
-            if (match.matched_task) {
-              summary += `   Matched: ${match.matched_task}\n`
+            const catEmoji = categoryEmoji[reward.category] || '📌'
+
+            fullMessage += `${index + 1}. ${emoji} ${reward.activityName} ${catEmoji}\n`
+            fullMessage += `   Match: ${reward.matchType}\n`
+            if (reward.matchedTask) {
+              fullMessage += `   Task: ${reward.matchedTask}\n`
             }
-            if (match.goal_link) {
-              summary += `   Goal: ${match.goal_link}\n`
-            }
-            summary += `   Effort: ${match.effort_ratio.toFixed(2)}x\n`
-            summary += `   ${match.notes}\n\n`
+            fullMessage += `   Rewards: +${reward.xpEarned} XP, +${reward.shardsEarned} shards\n\n`
           })
-        } else {
-          summary += 'No activities were identified in your update.\n'
+
+          // Add summary
+          fullMessage += '\n' + '='.repeat(40) + '\n'
+          fullMessage += `🎉 SUMMARY\n`
+          fullMessage += '='.repeat(40) + '\n'
+          fullMessage += `💰 Total XP: +${result.data.rewards.totalXP}\n`
+          fullMessage += `💎 Total Shards: +${result.data.rewards.totalShards}\n\n`
+          fullMessage += `� By Category:\n`
+          fullMessage += `  💪 Strength: ${result.data.rewards.categoryBreakdown.Strength.xp} XP\n`
+          fullMessage += `  🧠 Intelligence: ${result.data.rewards.categoryBreakdown.Intelligence.xp} XP\n`
+          fullMessage += `  ✨ Charisma: ${result.data.rewards.categoryBreakdown.Charisma.xp} XP\n\n`
+          fullMessage += `✅ Processed: ${result.data.rewards.processedCount}\n`
+          fullMessage += `⏭️ Skipped: ${result.data.rewards.skippedCount}\n`
         }
 
-        // Show the formatted summary to the user
-        alert(summary)
+        // Add skipped activities if any
+        if (result.data.rewards?.skippedActivities && result.data.rewards.skippedActivities.length > 0) {
+          fullMessage += '\n' + '='.repeat(40) + '\n'
+          fullMessage += '⏭️ SKIPPED (Unrelated to Goals):\n'
+          fullMessage += '='.repeat(40) + '\n\n'
+          
+          result.data.rewards.skippedActivities.forEach((skipped: any, index: number) => {
+            fullMessage += `${index + 1}. ${skipped.activityName}\n`
+            fullMessage += `   ${skipped.reason}\n`
+            fullMessage += `   ${skipped.notes}\n\n`
+          })
+        }
+
+        // Show single comprehensive alert
+        if (fullMessage) {
+          alert(fullMessage)
+        } else {
+          alert('No activities were identified in your update.')
+        }
         
         setDailyActivity('')
         setShowDailyInput(false)

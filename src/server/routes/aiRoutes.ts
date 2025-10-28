@@ -8,6 +8,7 @@ import {
 } from '../utils/responseHelpers'
 import type { GoalsData, ProfileData } from '../../types'
 import { AIPromptType } from '../config/aiConfigs'
+import { calculateRewardsFromAnalysis } from '../utils/rewardCalculation'
 
 // Generate tasks using Azure AI
 export async function generateTasks(req: Request, res: Response) {
@@ -197,7 +198,7 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
       await updateSessionLastAccess(sessionId)
 
       console.log('✅ Server: Azure AI activity analysis completed successfully')
-      console.log('🎯 AI Response (JSON):')
+      console.log('🎯 Raw AI Response:')
       console.log('='.repeat(80))
       console.log(analysisResult.data.content)
       console.log('='.repeat(80))
@@ -206,8 +207,15 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
       let parsedMatches = null
       try {
         parsedMatches = JSON.parse(analysisResult.data.content)
-        console.log('✅ Successfully parsed activity matches')
-        console.log('📊 Matches found:', parsedMatches.matches?.length || 0)
+        console.log('✅ Successfully parsed activity matches as object')
+        console.log('📊 Total matches found:', parsedMatches.matches?.length || 0)
+        
+        // Log the parsed object structure
+        console.log('\n📦 Parsed Activity Analysis Object:')
+        console.log('='.repeat(80))
+        console.log(JSON.stringify(parsedMatches, null, 2))
+        console.log('='.repeat(80))
+        
       } catch (parseError) {
         console.error('❌ Failed to parse AI response as JSON:', parseError)
         console.log('Raw response:', analysisResult.data.content)
@@ -223,11 +231,22 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
           console.error('❌ Fallback parsing also failed:', fallbackError)
         }
       }
+
+      // Calculate rewards from the parsed matches
+      let rewardCalculation = null
+      if (parsedMatches?.matches) {
+        console.log('\n💰 Calculating rewards from activity matches...')
+        rewardCalculation = calculateRewardsFromAnalysis(
+          parsedMatches.matches,
+          currentTasks
+        )
+      }
       
       res.json(createSuccessResponse(
         'Daily activity analyzed successfully',
         {
           matches: parsedMatches?.matches || [],
+          rewards: rewardCalculation,
           rawResponse: analysisResult.data.content,
           processingTime: analysisResult.processingTimeMs
         },

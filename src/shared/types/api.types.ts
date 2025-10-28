@@ -173,9 +173,43 @@ export interface ActivityMatch {
   notes: string; // Brief reasoning
 }
 
+export interface ActivityReward {
+  activityName: string;
+  matchType: string;
+  category: string;
+  matchedTask?: string;
+  goalLink?: string;
+  effortRatio: number;
+  xpEarned: number;
+  shardsEarned: number;
+  calculationNotes: string;
+}
+
+export interface SkippedActivity {
+  activityName: string;
+  category: string;
+  reason: string;
+  notes: string;
+}
+
+export interface RewardCalculationResult {
+  totalXP: number;
+  totalShards: number;
+  categoryBreakdown: {
+    Strength: { xp: number; shards: number };
+    Intelligence: { xp: number; shards: number };
+    Charisma: { xp: number; shards: number };
+  };
+  activityRewards: ActivityReward[];
+  skippedActivities: SkippedActivity[];
+  processedCount: number;
+  skippedCount: number;
+}
+
 export interface AnalyzeDailyActivityResponse extends ApiSuccessResponse {
   data: {
     matches: ActivityMatch[]; // Structured activity matches
+    rewards: RewardCalculationResult | null; // Calculated rewards
     rawResponse: string; // The raw AI response for debugging
     processingTime?: number;
   };
