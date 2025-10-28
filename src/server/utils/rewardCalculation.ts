@@ -1,5 +1,6 @@
 import type { ActivityMatch } from '../../shared/types/api.types'
 import type { GeneratedTask } from '../../shared/types/user.types'
+import { logger } from '../../utils/logger'
 
 /**
  * Reward breakdown for a single activity
@@ -152,7 +153,7 @@ export function calculateRewardsFromAnalysis(
 
   // If no tasks provided, skip all activities
   if (!userTasks) {
-    console.log('⚠️ No user tasks provided for reward calculation')
+    logger.warn('No user tasks provided for reward calculation')
     matches.forEach(match => {
       result.skippedActivities.push({
         activityName: match.name,
@@ -172,17 +173,17 @@ export function calculateRewardsFromAnalysis(
     ...(userTasks.Charisma?.map(t => ({ ...t, category: 'Charisma' as const })) || [])
   ]
 
-  console.log('💰 Starting reward calculation...')
-  console.log(`📋 Total tasks available: ${allTasks.length}`)
-  console.log(`🎯 Activities to process: ${matches.length}`)
+  logger.custom('💰', 'Starting reward calculation...')
+  logger.info(`Total tasks available: ${allTasks.length}`)
+  logger.info(`Activities to process: ${matches.length}`)
 
   // Process each activity match
   matches.forEach((match, index) => {
-    console.log(`\n[${index + 1}/${matches.length}] Processing: ${match.name}`)
+    logger.info(`[${index + 1}/${matches.length}] Processing: ${match.name}`)
     
     // Skip unrelated activities
     if (match.match_type === 'unrelated') {
-      console.log(`  ⏭️ Skipping (unrelated)`)
+      logger.custom('⏭️', 'Skipping (unrelated)')
       result.skippedActivities.push({
         activityName: match.name,
         category: match.category,
@@ -208,9 +209,9 @@ export function calculateRewardsFromAnalysis(
           xpEarned = matchedTask.xp * match.effort_ratio
           shardsEarned = matchedTask.shards * match.effort_ratio
           calculationNotes = `Exact match: ${matchedTask.xp} XP × ${match.effort_ratio} effort = ${xpEarned.toFixed(1)} XP`
-          console.log(`  ✅ Exact match found: ${matchedTask.title || matchedTask.description}`)
+          logger.success(`Exact match found: ${matchedTask.title || matchedTask.description}`)
         } else {
-          console.log(`  ⚠️ Exact match task not found, treating as goal-aligned`)
+          logger.warn('Exact match task not found, treating as goal-aligned')
           // Fallback to category average
           const avg = calculateCategoryAverage(allTasks, category)
           xpEarned = avg.avgXP * match.effort_ratio
@@ -228,9 +229,9 @@ export function calculateRewardsFromAnalysis(
           xpEarned = matchedTask.xp * 0.8 * match.effort_ratio
           shardsEarned = matchedTask.shards * 0.8 * match.effort_ratio
           calculationNotes = `Similar match (80%): ${matchedTask.xp} XP × 0.8 × ${match.effort_ratio} effort = ${xpEarned.toFixed(1)} XP`
-          console.log(`  🔄 Similar task found: ${matchedTask.title || matchedTask.description}`)
+          logger.custom('🔄', `Similar task found: ${matchedTask.title || matchedTask.description}`)
         } else {
-          console.log(`  ⚠️ Similar match task not found, treating as goal-aligned`)
+          logger.warn('Similar match task not found, treating as goal-aligned')
           // Fallback to category average
           const avg = calculateCategoryAverage(allTasks, category)
           xpEarned = avg.avgXP * match.effort_ratio
@@ -246,7 +247,7 @@ export function calculateRewardsFromAnalysis(
         xpEarned = avg.avgXP * match.effort_ratio
         shardsEarned = avg.avgShards * match.effort_ratio
         calculationNotes = `Goal-aligned (category avg): ${avg.avgXP.toFixed(1)} XP × ${match.effort_ratio} effort = ${xpEarned.toFixed(1)} XP`
-        console.log(`  🎯 Using ${category} category average`)
+        logger.custom('🎯', `Using ${category} category average`)
         break
       }
     }
@@ -255,7 +256,7 @@ export function calculateRewardsFromAnalysis(
     xpEarned = Math.floor(xpEarned)
     shardsEarned = Math.round(shardsEarned * 10) / 10
 
-    console.log(`  💰 Earned: ${xpEarned} XP, ${shardsEarned} shards`)
+    logger.custom('💰', `Earned: ${xpEarned} XP, ${shardsEarned} shards`)
 
     // Add to totals
     result.totalXP += xpEarned
@@ -283,18 +284,18 @@ export function calculateRewardsFromAnalysis(
   result.totalXP = Math.floor(result.totalXP)
   result.totalShards = Math.round(result.totalShards * 10) / 10
 
-  console.log('\n' + '='.repeat(80))
-  console.log('💰 REWARD CALCULATION SUMMARY')
-  console.log('='.repeat(80))
-  console.log(`✅ Processed: ${result.processedCount} activities`)
-  console.log(`⏭️ Skipped: ${result.skippedCount} activities`)
-  console.log(`🎁 Total XP: ${result.totalXP}`)
-  console.log(`💎 Total Shards: ${result.totalShards}`)
-  console.log('\n📊 Category Breakdown:')
-  console.log(`  💪 Strength: ${result.categoryBreakdown.Strength.xp} XP, ${result.categoryBreakdown.Strength.shards} shards`)
-  console.log(`  🧠 Intelligence: ${result.categoryBreakdown.Intelligence.xp} XP, ${result.categoryBreakdown.Intelligence.shards} shards`)
-  console.log(`  ✨ Charisma: ${result.categoryBreakdown.Charisma.xp} XP, ${result.categoryBreakdown.Charisma.shards} shards`)
-  console.log('='.repeat(80))
+  logger.custom('💰', '='.repeat(80))
+  logger.custom('💰', 'REWARD CALCULATION SUMMARY')
+  logger.custom('💰', '='.repeat(80))
+  logger.success(`Processed: ${result.processedCount} activities`)
+  logger.custom('⏭️', `Skipped: ${result.skippedCount} activities`)
+  logger.custom('🎁', `Total XP: ${result.totalXP}`)
+  logger.custom('💎', `Total Shards: ${result.totalShards}`)
+  logger.info('Category Breakdown:')
+  logger.custom('💪', `Strength: ${result.categoryBreakdown.Strength.xp} XP, ${result.categoryBreakdown.Strength.shards} shards`)
+  logger.custom('🧠', `Intelligence: ${result.categoryBreakdown.Intelligence.xp} XP, ${result.categoryBreakdown.Intelligence.shards} shards`)
+  logger.custom('✨', `Charisma: ${result.categoryBreakdown.Charisma.xp} XP, ${result.categoryBreakdown.Charisma.shards} shards`)
+  logger.custom('💰', '='.repeat(80))
 
   return result
 }

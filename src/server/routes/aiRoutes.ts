@@ -9,6 +9,7 @@ import {
 import type { GoalsData, ProfileData } from '../../types'
 import { AIPromptType } from '../config/aiConfigs'
 import { calculateRewardsFromAnalysis } from '../utils/rewardCalculation'
+import { logger } from '../../utils/logger'
 
 // Generate tasks using Azure AI
 export async function generateTasks(req: Request, res: Response) {
@@ -34,7 +35,7 @@ export async function generateTasks(req: Request, res: Response) {
       return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
     }
 
-    console.log('🤖 Server: Starting Azure AI task generation for user:', user.username)
+    logger.custom('🤖', `Starting Azure AI task generation for user: ${user.username}`)
 
     // Call Azure AI service
     const taskGenerationResult = await azureAIService.generateTasks(
@@ -49,11 +50,11 @@ export async function generateTasks(req: Request, res: Response) {
       // Store generated tasks in user profile if successfully parsed
       if (taskGenerationResult.data?.generatedTasks) {
         await updateUserGeneratedTasks(user.id, taskGenerationResult.data.generatedTasks)
-        console.log('✅ Server: Generated tasks stored in user profile')
+        logger.success('Generated tasks stored in user profile')
       }
 
-      console.log('✅ Server: Azure AI task generation completed successfully')
-      console.log('🎯 Generated Tasks:', taskGenerationResult.data)
+      logger.success('Azure AI task generation completed successfully')
+      logger.custom('🎯', 'Generated Tasks:', taskGenerationResult.data)
       
       res.json(createSuccessResponse(
         'Tasks generated successfully',
@@ -66,13 +67,13 @@ export async function generateTasks(req: Request, res: Response) {
         }
       ))
     } else {
-      console.log('❌ Server: Azure AI task generation failed:', taskGenerationResult.error)
+      logger.error('Azure AI task generation failed:', taskGenerationResult.error)
       res.status(500).json(createErrorResponse(
         taskGenerationResult.error || 'Task generation failed'
       ))
     }
   } catch (error) {
-    console.error('❌ Server: Task generation error:', error)
+    logger.error('Task generation error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
@@ -101,8 +102,8 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
       return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
     }
 
-    console.log('🤖 Server: Starting Azure AI daily activity analysis for user:', user.username)
-    console.log('📝 User Activity:', dailyActivity)
+    logger.custom('🤖', `Starting Azure AI daily activity analysis for user: ${user.username}`)
+    logger.custom('📝', 'User Activity:', dailyActivity)
 
     // Format daily planned tasks as a JSON array
     const plannedTasks: Array<{ 
@@ -184,8 +185,8 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
 
     const userMessage = JSON.stringify(inputData, null, 2)
 
-    console.log('📋 Formatted JSON input for AI:')
-    console.log(userMessage)
+    logger.custom('📋', 'Formatted JSON input for AI:')
+    logger.debug(userMessage)
 
     // Call Azure AI service
     const analysisResult = await azureAIService.generateCompletion(
@@ -197,45 +198,45 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
       // Update session last access
       await updateSessionLastAccess(sessionId)
 
-      console.log('✅ Server: Azure AI activity analysis completed successfully')
-      console.log('🎯 Raw AI Response:')
-      console.log('='.repeat(80))
-      console.log(analysisResult.data.content)
-      console.log('='.repeat(80))
+      logger.success('Azure AI activity analysis completed successfully')
+      logger.custom('🎯', 'Raw AI Response:')
+      logger.debug('='.repeat(80))
+      logger.debug(analysisResult.data.content)
+      logger.debug('='.repeat(80))
 
       // Parse the JSON response (should be clean JSON with json_object mode)
       let parsedMatches = null
       try {
         parsedMatches = JSON.parse(analysisResult.data.content)
-        console.log('✅ Successfully parsed activity matches as object')
-        console.log('📊 Total matches found:', parsedMatches.matches?.length || 0)
+        logger.success('Successfully parsed activity matches as object')
+        logger.custom('📊', `Total matches found: ${parsedMatches.matches?.length || 0}`)
         
         // Log the parsed object structure
-        console.log('\n📦 Parsed Activity Analysis Object:')
-        console.log('='.repeat(80))
-        console.log(JSON.stringify(parsedMatches, null, 2))
-        console.log('='.repeat(80))
+        logger.custom('📦', 'Parsed Activity Analysis Object:')
+        logger.debug('='.repeat(80))
+        logger.debug(JSON.stringify(parsedMatches, null, 2))
+        logger.debug('='.repeat(80))
         
       } catch (parseError) {
-        console.error('❌ Failed to parse AI response as JSON:', parseError)
-        console.log('Raw response:', analysisResult.data.content)
+        logger.error('Failed to parse AI response as JSON:', parseError)
+        logger.debug('Raw response:', analysisResult.data.content)
         
         // Fallback: try to extract JSON if wrapped in markdown
         try {
           const jsonMatch = analysisResult.data.content.match(/\{[\s\S]*\}/)
           if (jsonMatch) {
             parsedMatches = JSON.parse(jsonMatch[0])
-            console.log('✅ Extracted and parsed JSON from markdown')
+            logger.success('Extracted and parsed JSON from markdown')
           }
         } catch (fallbackError) {
-          console.error('❌ Fallback parsing also failed:', fallbackError)
+          logger.error('Fallback parsing also failed:', fallbackError)
         }
       }
 
       // Calculate rewards from the parsed matches
       let rewardCalculation = null
       if (parsedMatches?.matches) {
-        console.log('\n💰 Calculating rewards from activity matches...')
+        logger.custom('💰', 'Calculating rewards from activity matches...')
         rewardCalculation = calculateRewardsFromAnalysis(
           parsedMatches.matches,
           currentTasks
@@ -258,13 +259,13 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
         }
       ))
     } else {
-      console.log('❌ Server: Azure AI activity analysis failed:', analysisResult.error)
+      logger.error('Azure AI activity analysis failed:', analysisResult.error)
       res.status(500).json(createErrorResponse(
         analysisResult.error || 'Activity analysis failed'
       ))
     }
   } catch (error) {
-    console.error('❌ Server: Activity analysis error:', error)
+    logger.error('Activity analysis error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
