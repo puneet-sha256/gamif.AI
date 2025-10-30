@@ -47,6 +47,8 @@ const DailyActivityModal: React.FC<DailyActivityModalProps> = ({
   }
 
   const handleAnalyze = () => {
+    // TODO: Pass selectedDate to backend when implementing actual date-based activity tracking
+    // For now, logging to console as per requirements
     console.log('📅 Selected Date:', selectedDate)
     console.log('📝 Daily Activity:', dailyActivity)
     onAnalyze()
