@@ -59,14 +59,55 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   // Function to load fresh generated tasks
   const loadGeneratedTasks = async () => {
     setIsLoadingTasks(true)
+    console.log('🔄 Dashboard: Loading generated tasks...')
     try {
       const tasks = await getUserTasks()
       setGeneratedTasks(tasks)
-      console.log('✅ Dashboard: Generated tasks loaded:', {
-        hasStrength: !!tasks?.Strength?.length,
-        hasIntelligence: !!tasks?.Intelligence?.length,
-        hasCharisma: !!tasks?.Charisma?.length
-      })
+      
+      if (tasks && hasGeneratedTasks(tasks)) {
+        console.log('✅ Dashboard: Generated tasks loaded:', {
+          hasStrength: !!tasks?.Strength?.length,
+          hasIntelligence: !!tasks?.Intelligence?.length,
+          hasCharisma: !!tasks?.Charisma?.length
+        })
+      } else {
+        console.log('ℹ️ Dashboard: No tasks found in database.')
+        
+        // Check if user has goals data to generate tasks from
+        if (user?.goalsData && user?.profileData) {
+          console.log('🤖 Dashboard: User has goals and profile. Attempting to generate tasks...')
+          
+          const sessionId = userDatabase.getSessionId()
+          if (sessionId) {
+            try {
+              const result = await aiService.generateTasks(
+                sessionId,
+                user.goalsData,
+                user.profileData
+              )
+              
+              if (result.success && result.data?.generatedTasks) {
+                console.log('✅ Dashboard: Tasks generated successfully via AI')
+                setGeneratedTasks(result.data.generatedTasks)
+                
+                // Refresh user data to sync with backend
+                const freshTasks = await getUserTasks()
+                if (freshTasks) {
+                  setGeneratedTasks(freshTasks)
+                }
+              } else {
+                console.log('⚠️ Dashboard: Task generation failed:', result.message)
+              }
+            } catch (error) {
+              console.error('❌ Dashboard: Error generating tasks:', error)
+            }
+          } else {
+            console.log('⚠️ Dashboard: No session ID available for task generation')
+          }
+        } else {
+          console.log('ℹ️ Dashboard: User needs to complete Goals Setup to generate tasks.')
+        }
+      }
     } catch (error) {
       console.error('❌ Dashboard: Error loading generated tasks:', error)
     } finally {
@@ -583,7 +624,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             <h2>Tasks & Challenges</h2>
             <p>Loading your personalized tasks...</p>
           </div>
-          <div className="loading-tasks">⏳ Loading...</div>
+          <div className="loading-tasks">⏳ Thinking...</div>
         </div>
       )
     }
@@ -603,8 +644,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               <button 
                 onClick={loadGeneratedTasks}
                 className="refresh-tasks-btn"
+                disabled={isLoadingTasks}
               >
-                🔄 Load Tasks
+                {isLoadingTasks ? (
+                  <>
+                    <span className="loading-spinner"></span>
+                    Thinking...
+                  </>
+                ) : (
+                  <>🔄 Generate Tasks</>
+                )}
               </button>
             </div>
           </div>
