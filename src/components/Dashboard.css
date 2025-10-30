@@ -1289,8 +1289,12 @@
 
 /* Shop Tab Styles */
 .shop-header {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .shop-header h2 {
@@ -1425,6 +1429,42 @@
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+}
+
+.shop-item-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.shop-item-actions .buy-button {
+  flex: 1;
+}
+
+.delete-button {
+  padding: 10px 15px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.delete-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+}
+
+.shop-header-content {
+  flex: 1;
+}
+
+.shop-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 /* Responsive Design for Tabs */

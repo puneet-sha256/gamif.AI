@@ -324,3 +324,84 @@ export async function addTaskToGeneratedTasks(
   logger.success('Task added successfully')
   return true
 }
+
+// Shop item operations
+export async function addShopItem(
+  userId: string,
+  item: {
+    title: string;
+    description?: string;
+    price: number;
+    image?: string;
+  }
+): Promise<boolean> {
+  logger.info(`Adding shop item for user: ${userId}`)
+  const users = await loadUsers()
+  const user = users.find(u => u.id === userId)
+  
+  if (!user) {
+    logger.error('User not found')
+    return false
+  }
+  
+  // Initialize shopItems if it doesn't exist
+  if (!user.shopItems) {
+    user.shopItems = []
+  }
+  
+  // Create the shop item with ID
+  const newItem = {
+    id: `shop-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+    title: item.title,
+    description: item.description,
+    price: item.price,
+    image: item.image || '🎁',
+    createdAt: new Date().toISOString()
+  }
+  
+  // Add item to shop
+  user.shopItems.push(newItem)
+  
+  await saveUsers(users)
+  logger.success('Shop item added successfully')
+  return true
+}
+
+export async function deleteShopItem(
+  userId: string,
+  itemId: string
+): Promise<boolean> {
+  logger.info(`Deleting shop item ${itemId} for user: ${userId}`)
+  const users = await loadUsers()
+  const user = users.find(u => u.id === userId)
+  
+  if (!user || !user.shopItems) {
+    logger.error('User not found or no shop items')
+    return false
+  }
+  
+  const initialLength = user.shopItems.length
+  user.shopItems = user.shopItems.filter(item => item.id !== itemId)
+  
+  if (user.shopItems.length === initialLength) {
+    logger.error('Shop item not found')
+    return false
+  }
+  
+  await saveUsers(users)
+  logger.success('Shop item deleted successfully')
+  return true
+}
+
+export async function getUserShopItems(userId: string) {
+  logger.info(`Getting shop items for user: ${userId}`)
+  const users = await loadUsers()
+  const user = users.find(u => u.id === userId)
+  
+  if (!user) {
+    logger.error('User not found')
+    return null
+  }
+  
+  return user.shopItems || []
+}

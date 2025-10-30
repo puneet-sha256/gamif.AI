@@ -3,7 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import { initializeData, DATA_DIR, USERS_FILE, SESSIONS_FILE } from './src/server/utils/dataOperations'
 import { registerUser, loginUser, logoutUser } from './src/server/routes/authRoutes'
-import { getCurrentUser, updateUserData, updateExperience, updateShards, getUserTasks, updateGeneratedTask, deleteGeneratedTask, addUserTask } from './src/server/routes/userRoutes'
+import { getCurrentUser, updateUserData, updateExperience, updateShards, getUserTasks, updateGeneratedTask, deleteGeneratedTask, addUserTask, addUserShopItem, deleteUserShopItem, getUserShopItemsList } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
 import { generateTasks, analyzeDailyActivity } from './src/server/routes/aiRoutes'
 
@@ -58,6 +58,11 @@ app.put('/api/user/:userId', updateUserData)
 app.post('/api/user/tasks/add', addUserTask)
 app.put('/api/user/tasks/update', updateGeneratedTask)
 app.delete('/api/user/tasks/delete', deleteGeneratedTask)
+
+// Shop item management routes
+app.post('/api/user/shop/add', addUserShopItem)
+app.delete('/api/user/shop/delete', deleteUserShopItem)
+app.get('/api/user/shop/:sessionId', getUserShopItemsList)
 
 // Game mechanics routes
 app.patch('/api/user/experience', updateExperience)

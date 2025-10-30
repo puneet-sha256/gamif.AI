@@ -7,6 +7,7 @@ import ShopItem from './ShopItem'
 import ProgressBar from './ProgressBar'
 import DailyActivityModal from './DailyActivityModal'
 import TaskModal from './TaskModal'
+import ShopItemModal from './ShopItemModal'
 import { 
   mapGeneratedTasksToTaskItems, 
   groupMappedTasksByCategory, 
@@ -25,7 +26,7 @@ interface DashboardProps {
 type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
-  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask } = useAuth()
+  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems } = useAuth()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
   const [showDailyInput, setShowDailyInput] = useState(false)
   const [dailyActivity, setDailyActivity] = useState('')
@@ -36,6 +37,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   // Task modal state (unified for add and edit)
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [editingTask, setEditingTask] = useState<GeneratedTask & { category: string } | null>(null)
+
+  // Shop modal state
+  const [showShopItemModal, setShowShopItemModal] = useState(false)
 
   useEffect(() => {
     console.log('🎯 Dashboard: Component mounted')
@@ -187,6 +191,31 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         setShowTaskModal(false)
       } else {
         throw new Error('Failed to add task')
+      }
+    }
+  }
+
+  // Handler for adding shop items
+  const handleAddShopItem = async (item: {
+    title: string
+    description?: string
+    price: number
+    image?: string
+  }) => {
+    const success = await addShopItem(item)
+    if (success) {
+      setShowShopItemModal(false)
+    } else {
+      throw new Error('Failed to add shop item')
+    }
+  }
+
+  // Handler for deleting shop items
+  const handleDeleteShopItem = async (itemId: string) => {
+    if (confirm('Are you sure you want to delete this item?')) {
+      const success = await deleteShopItem(itemId)
+      if (!success) {
+        alert('Failed to delete shop item. Please try again.')
       }
     }
   }
@@ -806,69 +835,111 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     )
   }
 
-  const renderShopTab = () => (
-    <div className="tab-content">
-      <div className="shop-header">
-        <h2>Shop</h2>
-        <p>Spend your shards on rewards and upgrades</p>
-        <div className="currency-display">
-          <span className="currency-amount">{user?.stats?.shards || 0} 💎 Shards</span>
+  const renderShopTab = () => {
+    const userShopItems = getShopItems()
+
+    return (
+      <div className="tab-content">
+        <div className="shop-header">
+          <div className="shop-header-content">
+            <h2>Shop</h2>
+            <p>Spend your shards on rewards and upgrades</p>
+          </div>
+          <div className="shop-header-actions">
+            <div className="currency-display">
+              <span className="currency-amount">{user?.stats?.shards || 0} 💎 Shards</span>
+            </div>
+            <button 
+              onClick={() => setShowShopItemModal(true)}
+              className="add-task-btn"
+            >
+              ➕ Add Item
+            </button>
+          </div>
         </div>
-      </div>
-      
-      <div className="shop-grid">
-        <div className="shop-section">
-          <h3>💝 Rewards</h3>
-          <div className="shop-items">
-            <ShopItem
-              image="🎮"
-              title="Gaming Session"
-              description="Unlock 2 hours of guilt-free gaming"
-              price={50}
-              userShards={user?.stats?.shards || 0}
-            />
-            
-            <ShopItem
-              image="🍕"
-              title="Treat Yourself"
-              description="Order your favorite meal"
-              price={75}
-              userShards={user?.stats?.shards || 0}
-            />
-            
-            <ShopItem
-              image="📚"
-              title="Book Purchase"
-              description="Buy that book you've been wanting"
-              price={100}
-              userShards={user?.stats?.shards || 0}
-            />
+        
+        <div className="shop-grid">
+          {/* User's Custom Items */}
+          {userShopItems.length > 0 && (
+            <div className="shop-section">
+              <h3>🎯 My Wish List</h3>
+              <div className="shop-items">
+                {userShopItems.map((item) => (
+                  <ShopItem
+                    key={item.id}
+                    image={item.image || '🎁'}
+                    title={item.title}
+                    description={item.description || 'Custom reward'}
+                    price={item.price}
+                    userShards={user?.stats?.shards || 0}
+                    isUserItem={true}
+                    onDelete={() => handleDeleteShopItem(item.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="shop-section">
+            <h3>💝 Rewards</h3>
+            <div className="shop-items">
+              <ShopItem
+                image="🎮"
+                title="Gaming Session"
+                description="Unlock 2 hours of guilt-free gaming"
+                price={50}
+                userShards={user?.stats?.shards || 0}
+              />
+              
+              <ShopItem
+                image="🍕"
+                title="Treat Yourself"
+                description="Order your favorite meal"
+                price={75}
+                userShards={user?.stats?.shards || 0}
+              />
+              
+              <ShopItem
+                image="📚"
+                title="Book Purchase"
+                description="Buy that book you've been wanting"
+                price={100}
+                userShards={user?.stats?.shards || 0}
+              />
+            </div>
+          </div>
+
+          <div className="shop-section">
+            <h3>⚡ Power-ups</h3>
+            <div className="shop-items">
+              <ShopItem
+                image="🔥"
+                title="XP Booster"
+                description="Double XP for 24 hours"
+                price={30}
+                userShards={user?.stats?.shards || 0}
+              />
+              
+              <ShopItem
+                image="⏰"
+                title="Task Extension"
+                description="Extra day to complete tasks"
+                price={25}
+                userShards={user?.stats?.shards || 0}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="shop-section">
-          <h3>⚡ Power-ups</h3>
-          <div className="shop-items">
-            <ShopItem
-              image="🔥"
-              title="XP Booster"
-              description="Double XP for 24 hours"
-              price={30}
-              userShards={user?.stats?.shards || 0}
-            />
-            
-            <ShopItem
-              image="⏰"
-              title="Task Extension"
-              description="Extra day to complete tasks"
-              price={25}
-              userShards={user?.stats?.shards || 0}
-            />
-          </div>
-        </div>
+        {/* Shop Item Modal */}
+        <ShopItemModal
+          isOpen={showShopItemModal}
+          onClose={() => setShowShopItemModal(false)}
+          onSave={handleAddShopItem}
+        />
       </div>
-    </div>
-  )
+    )
+  }
 
   const renderTabContent = () => {
     switch (activeTab) {

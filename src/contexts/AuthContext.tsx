@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react'
 import { userDatabase } from '../client/services/fileUserDatabase'
 import { aiService } from '../client/services/aiService'
 import { taskService } from '../client/services/taskService'
-import type { AuthContextType, User, UserLogin, UserRegistration, ProfileData, GoalsData, GeneratedTasks } from '../shared/types'
+import { shopService } from '../client/services/shopService'
+import type { AuthContextType, User, UserLogin, UserRegistration, ProfileData, GoalsData, GeneratedTasks, ShopItem } from '../shared/types'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -408,6 +409,88 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  // Add a shop item
+  const addShopItem = async (item: {
+    title: string
+    description?: string
+    price: number
+    image?: string
+  }): Promise<boolean> => {
+    console.log('🔄 AuthContext: Adding shop item:', item.title)
+    
+    if (!user) {
+      console.log('❌ AuthContext: Cannot add shop item - no user logged in')
+      return false
+    }
+
+    try {
+      const sessionId = userDatabase.getSessionId()
+      if (!sessionId) {
+        console.log('❌ AuthContext: No session ID available')
+        return false
+      }
+
+      const result = await shopService.addShopItem(sessionId, item)
+      
+      if (result.success) {
+        console.log('✅ AuthContext: Shop item added successfully')
+        
+        // Refresh user data to get updated shop items
+        const freshUser = await userDatabase.getCurrentUser()
+        if (freshUser) {
+          setUser(freshUser)
+        }
+        return true
+      }
+      
+      return false
+    } catch (error) {
+      console.error('❌ AuthContext: Error adding shop item:', error)
+      return false
+    }
+  }
+
+  // Delete a shop item
+  const deleteShopItem = async (itemId: string): Promise<boolean> => {
+    console.log('🔄 AuthContext: Deleting shop item:', itemId)
+    
+    if (!user) {
+      console.log('❌ AuthContext: Cannot delete shop item - no user logged in')
+      return false
+    }
+
+    try {
+      const sessionId = userDatabase.getSessionId()
+      if (!sessionId) {
+        console.log('❌ AuthContext: No session ID available')
+        return false
+      }
+
+      const result = await shopService.deleteShopItem(sessionId, itemId)
+      
+      if (result.success) {
+        console.log('✅ AuthContext: Shop item deleted successfully')
+        
+        // Refresh user data to get updated shop items
+        const freshUser = await userDatabase.getCurrentUser()
+        if (freshUser) {
+          setUser(freshUser)
+        }
+        return true
+      }
+      
+      return false
+    } catch (error) {
+      console.error('❌ AuthContext: Error deleting shop item:', error)
+      return false
+    }
+  }
+
+  // Get shop items
+  const getShopItems = (): ShopItem[] => {
+    return user?.shopItems || []
+  }
+
   const value: AuthContextType = {
     user,
     login,
@@ -421,6 +504,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     editGeneratedTask,
     deleteGeneratedTask,
     addUserTask,
+    addShopItem,
+    deleteShopItem,
+    getShopItems,
     isLoading
   }
 

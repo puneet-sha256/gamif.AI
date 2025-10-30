@@ -11,7 +11,10 @@ import {
   getUserGeneratedTasks,
   updateTaskInGeneratedTasks,
   deleteTaskFromGeneratedTasks,
-  addTaskToGeneratedTasks
+  addTaskToGeneratedTasks,
+  addShopItem,
+  deleteShopItem,
+  getUserShopItems
 } from '../utils/dataOperations'
 import {
   createSuccessResponse,
@@ -442,6 +445,150 @@ export async function addUserTask(req: Request, res: Response) {
 
   } catch (error) {
     logger.error('Add user task error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Add a shop item
+export async function addUserShopItem(req: Request, res: Response) {
+  try {
+    const { sessionId, title, description, price, image } = req.body
+
+    // Validate required fields
+    if (!sessionId || !title || price === undefined) {
+      return res.status(400).json(createErrorResponse(
+        'Missing required fields: sessionId, title, and price are required'
+      ))
+    }
+
+    // Validate price is a positive number
+    if (typeof price !== 'number' || price < 0) {
+      return res.status(400).json(createErrorResponse(
+        'Price must be a non-negative number'
+      ))
+    }
+
+    // Verify session
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    // Find user
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    // Add the shop item
+    const success = await addShopItem(user.id, {
+      title,
+      description,
+      price,
+      image
+    })
+
+    if (!success) {
+      return res.status(500).json(createErrorResponse('Failed to add shop item'))
+    }
+
+    // Update session last access
+    await updateSessionLastAccess(sessionId)
+
+    // Get updated shop items
+    const updatedItems = await getUserShopItems(user.id)
+
+    res.json(createSuccessResponse(
+      'Shop item added successfully',
+      { shopItems: updatedItems }
+    ))
+
+  } catch (error) {
+    logger.error('Add shop item error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Delete a shop item
+export async function deleteUserShopItem(req: Request, res: Response) {
+  try {
+    const { sessionId, itemId } = req.body
+
+    // Validate required fields
+    if (!sessionId || !itemId) {
+      return res.status(400).json(createErrorResponse(
+        'Session ID and item ID are required'
+      ))
+    }
+
+    // Verify session
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    // Find user
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    // Delete the shop item
+    const success = await deleteShopItem(user.id, itemId)
+
+    if (!success) {
+      return res.status(404).json(createErrorResponse(
+        'Shop item not found or could not be deleted'
+      ))
+    }
+
+    // Update session last access
+    await updateSessionLastAccess(sessionId)
+
+    // Get updated shop items
+    const updatedItems = await getUserShopItems(user.id)
+
+    res.json(createSuccessResponse(
+      'Shop item deleted successfully',
+      { shopItems: updatedItems }
+    ))
+
+  } catch (error) {
+    logger.error('Delete shop item error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Get user's shop items
+export async function getUserShopItemsList(req: Request, res: Response) {
+  try {
+    const { sessionId } = req.params
+
+    // Verify session
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    // Find user
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    // Update session last access
+    await updateSessionLastAccess(sessionId)
+
+    // Get shop items
+    const shopItems = await getUserShopItems(user.id)
+
+    res.json(createSuccessResponse(
+      'Shop items retrieved successfully',
+      { shopItems }
+    ))
+
+  } catch (error) {
+    logger.error('Get shop items error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }

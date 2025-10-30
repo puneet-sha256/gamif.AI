@@ -34,6 +34,16 @@ export interface GeneratedTasks {
   lastUpdated?: string
 }
 
+// Shop item structure for user-created shop items
+export interface ShopItem {
+  id: string // Unique identifier for the shop item
+  title: string // Name of the item
+  description?: string // Optional description
+  price: number // Price in shards
+  image?: string // Optional emoji or image
+  createdAt: string // When the item was added
+}
+
 export interface User {
   id: string
   username: string
@@ -45,6 +55,7 @@ export interface User {
   goalsData?: GoalsData
   stats?: UserStats
   generatedTasks?: GeneratedTasks
+  shopItems?: ShopItem[] // User's custom shop items
 }
 
 export interface UserRegistration {

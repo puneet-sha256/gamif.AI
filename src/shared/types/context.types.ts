@@ -1,4 +1,4 @@
-import type { User, UserLogin, UserRegistration, ProfileData, GoalsData, GeneratedTasks } from './user.types'
+import type { User, UserLogin, UserRegistration, ProfileData, GoalsData, GeneratedTasks, ShopItem } from './user.types'
 
 // Frontend-specific context types
 export interface AuthContextType {
@@ -14,5 +14,8 @@ export interface AuthContextType {
   editGeneratedTask: (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma', updates: { title?: string; description?: string; xp?: number; shards?: number }) => Promise<boolean>
   deleteGeneratedTask: (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma') => Promise<boolean>
   addUserTask: (task: { title: string; description: string; category: 'Strength' | 'Intelligence' | 'Charisma'; xp: number; shards: number }) => Promise<boolean>
+  addShopItem: (item: { title: string; description?: string; price: number; image?: string }) => Promise<boolean>
+  deleteShopItem: (itemId: string) => Promise<boolean>
+  getShopItems: () => ShopItem[]
   isLoading: boolean
 }
