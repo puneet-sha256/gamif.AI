@@ -10,9 +10,14 @@ import { generateTasks, analyzeDailyActivity } from './src/server/routes/aiRoute
 const app = express()
 const PORT = 3001
 
+// Get allowed origins from environment variable or use defaults
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ["http://localhost:5173", "http://localhost:5174"]
+
 // Middleware
 app.use(cors({
-  origin: ["http://localhost:5173", "https://turbo-couscous-4v94xq5rg6xfjpgg-5173.app.github.dev"], // Support both local and Codespaces
+  origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
