@@ -61,6 +61,25 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 
 ## 🚀 Getting Started
 
+### Environment Setup
+
+Before starting the application, configure the API base URL for your environment:
+
+1. **Open `.env` in the project root.**
+2. Set the API base URL for your backend:
+   - **Local development:**
+     ```env
+     VITE_API_BASE_URL=http://localhost:3001/api
+     ```
+   - **Codespaces or remote:**
+     ```env
+     VITE_API_BASE_URL=https://<your-codespaces-backend-url>/api
+     ```
+     Replace `<your-codespaces-backend-url>` with your actual Codespaces backend URL.
+3. **Restart the Vite dev server** after changing `.env`.
+
+If `VITE_API_BASE_URL` is not set, the frontend will default to `/api`, which works if your backend is served from the same origin or proxied by Vite.
+
 ### Prerequisites
 - **Node.js** (v18 or higher)
 - **npm** or **yarn**
