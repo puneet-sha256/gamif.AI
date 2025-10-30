@@ -3,6 +3,7 @@ import type { GoalsData, ProfileData, GeneratedTasks } from '../../types';
 import { promptManager } from './promptManager';
 import { AI_CONFIGS, AIPromptType } from '../config/aiConfigs';
 import type { AIPromptConfig } from '../config/aiConfigs';
+import { logger } from '../../utils/logger';
 
 // Azure OpenAI configuration
 const endpoint = "https://gamifai-resource.cognitiveservices.azure.com/";
@@ -48,8 +49,8 @@ class AzureAIService {
       this.apiKey = process.env.AZURE_OPENAI_API_KEY || "";
       
       if (!this.apiKey) {
-        console.error('❌ Azure OpenAI API key not found in environment variables');
-        console.error('Please set AZURE_OPENAI_API_KEY environment variable');
+        logger.error('Azure OpenAI API key not found in environment variables');
+        logger.error('Please set AZURE_OPENAI_API_KEY environment variable');
         this.initialized = false;
         this.client = null;
         return;
@@ -64,9 +65,9 @@ class AzureAIService {
 
       this.client = new AzureOpenAI(options);
       this.initialized = true;
-      console.log('🤖 Azure OpenAI Service initialized successfully');
+      logger.custom('🤖', 'Azure OpenAI Service initialized successfully');
     } catch (error) {
-      console.error('❌ Failed to initialize Azure OpenAI Service:', error);
+      logger.error('Failed to initialize Azure OpenAI Service:', error);
       this.initialized = false;
       this.client = null;
     }
@@ -99,8 +100,8 @@ class AzureAIService {
         throw new Error(`No configuration found for prompt type: ${promptType}`);
       }
 
-      console.log(`🤖 Starting Azure OpenAI completion for: ${promptType}`);
-      console.log(`📋 Model: ${config.modelName}`);
+      logger.custom('🤖', `Starting Azure OpenAI completion for: ${promptType}`);
+      logger.custom('📋', `Model: ${config.modelName}`);
 
       // Load the prompt file
       const systemMessage = options?.systemMessageOverride || promptManager.loadPrompt(config.promptFile);
@@ -120,7 +121,7 @@ class AzureAIService {
       // Enable JSON mode if specified in config
       if (config.responseFormat === 'json') {
         completionRequest.response_format = { type: "json_object" }
-        console.log('🔧 JSON response mode enabled')
+        logger.custom('🔧', 'JSON response mode enabled')
       }
 
       // Call the chat completion API
@@ -136,11 +137,11 @@ class AzureAIService {
 
       const aiResponse = response.choices[0].message.content;
 
-      console.log('🎯 Azure OpenAI Response:');
-      console.log('='.repeat(50));
-      console.log(aiResponse);
-      console.log('='.repeat(50));
-      console.log('✅ Azure OpenAI completion completed successfully');
+      logger.custom('🎯', 'Azure OpenAI Response:');
+      logger.debug('='.repeat(50));
+      logger.debug(aiResponse);
+      logger.debug('='.repeat(50));
+      logger.success('Azure OpenAI completion completed successfully');
 
       return {
         success: true,
@@ -151,7 +152,7 @@ class AzureAIService {
       };
 
     } catch (error) {
-      console.error('❌ Azure OpenAI completion error:', error);
+      logger.error('Azure OpenAI completion error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -178,7 +179,7 @@ class AzureAIService {
     }
 
     try {
-      console.log('🤖 Starting Azure OpenAI task generation...');
+      logger.custom('🤖', 'Starting Azure OpenAI task generation...');
 
       // Use the new generateCompletion method
       const userMessage = `User Goals: ${goals.longTermGoals}`;
@@ -226,15 +227,15 @@ class AzureAIService {
           }
           
           parsedTasks.lastUpdated = new Date().toISOString();
-          console.log('✅ Successfully parsed Azure AI response to JSON:', parsedTasks);
+          logger.success('Successfully parsed Azure AI response to JSON:', parsedTasks);
         } else {
-          console.log('⚠️ No JSON found in Azure AI response');
+          logger.warn('No JSON found in Azure AI response');
         }
       } catch (parseError) {
-        console.log('⚠️ Failed to parse Azure AI response as JSON:', parseError);
+        logger.warn('Failed to parse Azure AI response as JSON:', parseError);
       }
 
-      console.log('✅ Azure OpenAI task generation completed successfully');
+      logger.success('Azure OpenAI task generation completed successfully');
       
       // Return structure with parsed tasks
       return {
@@ -247,7 +248,7 @@ class AzureAIService {
       };
 
     } catch (error) {
-      console.error('❌ Azure OpenAI task generation error:', error);
+      logger.error('Azure OpenAI task generation error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error occurred',

@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { logger } from '../../utils/logger';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -38,10 +39,10 @@ class PromptManager {
       // Cache the loaded prompt
       this.promptCache.set(promptFileName, promptContent);
       
-      console.log(`📄 Loaded prompt: ${promptFileName}`);
+      logger.custom('📄', `Loaded prompt: ${promptFileName}`);
       return promptContent;
     } catch (error) {
-      console.error(`❌ Failed to load prompt file: ${promptFileName}`, error);
+      logger.error(`Failed to load prompt file: ${promptFileName}`, error);
       throw new Error(`Prompt file not found: ${promptFileName}`);
     }
   }
@@ -51,7 +52,7 @@ class PromptManager {
    */
   clearCache(): void {
     this.promptCache.clear();
-    console.log('🔄 Prompt cache cleared');
+    logger.custom('🔄', 'Prompt cache cleared');
   }
 }
 

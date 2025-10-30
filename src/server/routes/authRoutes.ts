@@ -25,6 +25,7 @@ import {
   SuccessMessages
 } from '../utils/responseHelpers'
 import type { User, LogoutRequest } from '../../shared/types'
+import { logger } from '../../utils/logger'
 
 // Register new user
 export async function registerUser(req: Request, res: Response) {
@@ -77,7 +78,7 @@ export async function registerUser(req: Request, res: Response) {
     ))
 
   } catch (error) {
-    console.error('Registration error:', error)
+    logger.error('Registration error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
@@ -124,7 +125,7 @@ export async function loginUser(req: Request, res: Response) {
     ))
 
   } catch (error) {
-    console.error('Login error:', error)
+    logger.error('Login error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
@@ -141,7 +142,7 @@ export async function logoutUser(req: Request, res: Response) {
     res.json(createSuccessResponse(SuccessMessages.LOGOUT_SUCCESS))
 
   } catch (error) {
-    console.error('Logout error:', error)
+    logger.error('Logout error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }

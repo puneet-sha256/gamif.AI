@@ -21,6 +21,7 @@ import {
   SuccessMessages
 } from '../utils/responseHelpers'
 import type { UserStats } from '../../shared/types'
+import { logger } from '../../utils/logger'
 
 // Get current user by session
 export async function getCurrentUser(req: Request, res: Response) {
@@ -47,7 +48,7 @@ export async function getCurrentUser(req: Request, res: Response) {
     ))
 
   } catch (error) {
-    console.error('Get user by session error:', error)
+    logger.error('Get user by session error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
@@ -70,7 +71,7 @@ export async function updateUserData(req: Request, res: Response) {
     ))
 
   } catch (error) {
-    console.error('Update user error:', error)
+    logger.error('Update user error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
@@ -150,7 +151,7 @@ export async function updateExperience(req: Request, res: Response) {
     ))
 
   } catch (error) {
-    console.error('Update experience error:', error)
+    logger.error('Update experience error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
@@ -228,7 +229,7 @@ export async function updateShards(req: Request, res: Response) {
     ))
 
   } catch (error) {
-    console.error('Update shards error:', error)
+    logger.error('Update shards error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
@@ -266,7 +267,7 @@ export async function getUserTasks(req: Request, res: Response) {
     ))
 
   } catch (error) {
-    console.error('Get user tasks error:', error)
+    logger.error('Get user tasks error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
@@ -323,7 +324,7 @@ export async function updateGeneratedTask(req: Request, res: Response) {
     ))
 
   } catch (error) {
-    console.error('Update generated task error:', error)
+    logger.error('Update generated task error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
@@ -380,7 +381,7 @@ export async function deleteGeneratedTask(req: Request, res: Response) {
     ))
 
   } catch (error) {
-    console.error('Delete generated task error:', error)
+    logger.error('Delete generated task error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
@@ -440,7 +441,7 @@ export async function addUserTask(req: Request, res: Response) {
     ))
 
   } catch (error) {
-    console.error('Add user task error:', error)
+    logger.error('Add user task error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }

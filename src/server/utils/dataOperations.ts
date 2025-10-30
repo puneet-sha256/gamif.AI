@@ -1,6 +1,7 @@
 import fs from 'fs-extra'
 import path from 'path'
 import type { User, Session } from '../../shared/types'
+import { logger } from '../../utils/logger'
 
 // Data file paths
 export const DATA_DIR = path.join(process.cwd(), 'data')
@@ -17,41 +18,41 @@ export async function initializeData() {
 
     // Initialize users.json if it doesn't exist
     if (!(await fs.pathExists(USERS_FILE))) {
-      console.log('📄 Server: Creating users.json file...')
+      logger.custom('📄', 'Creating users.json file...')
       await fs.writeJson(USERS_FILE, [], { spaces: 2 })
-      console.log('✅ Server: Created users.json')
+      logger.success('Created users.json')
     } else {
-      console.log('✅ Server: users.json already exists')
+      logger.success('users.json already exists')
     }
 
     // Initialize sessions.json if it doesn't exist
     if (!(await fs.pathExists(SESSIONS_FILE))) {
-      console.log('📄 Server: Creating sessions.json file...')
+      logger.custom('📄', 'Creating sessions.json file...')
       await fs.writeJson(SESSIONS_FILE, [], { spaces: 2 })
-      console.log('✅ Server: Created sessions.json')
+      logger.success('Created sessions.json')
     } else {
-      console.log('✅ Server: sessions.json already exists')
+      logger.success('sessions.json already exists')
     }
 
-    console.log('✅ Server: Data directory initialized')
-    console.log(`📁 Server: Data directory: ${DATA_DIR}`)
-    console.log(`👥 Server: Users file: ${USERS_FILE}`)
-    console.log(`🔐 Server: Sessions file: ${SESSIONS_FILE}`)
+    logger.success('Data directory initialized')
+    logger.custom('📁', `Data directory: ${DATA_DIR}`)
+    logger.custom('👥', `Users file: ${USERS_FILE}`)
+    logger.custom('🔐', `Sessions file: ${SESSIONS_FILE}`)
   } catch (error) {
-    console.error('❌ Server: Error initializing data directory:', error)
+    logger.error('Error initializing data directory:', error)
     throw error
   }
 }
 
 // User data operations
 export async function loadUsers(): Promise<User[]> {
-  console.log('🔄 Server: Loading users from file...')
+  logger.custom('🔄', 'Loading users from file...')
   try {
     const users: User[] = await fs.readJson(USERS_FILE)
-    console.log(`✅ Server: Loaded ${users.length} users`)
+    logger.success(`Loaded ${users.length} users`)
     return Array.isArray(users) ? users : []
   } catch (error) {
-    console.error('❌ Server: Error loading users:', error)
+    logger.error('Error loading users:', error)
     return []
   }
 }
@@ -72,7 +73,7 @@ export async function saveUsers(users: User[]): Promise<void> {
     // Save users
     await fs.writeJson(USERS_FILE, users, { spaces: 2 })
   } catch (error) {
-    console.error('Error saving users:', error)
+    logger.error('Error saving users:', error)
     throw error
   }
 }
@@ -83,7 +84,7 @@ export async function loadSessions(): Promise<Session[]> {
     const sessions: Session[] = await fs.readJson(SESSIONS_FILE)
     return Array.isArray(sessions) ? sessions : []
   } catch (error) {
-    console.error('Error loading sessions:', error)
+    logger.error('Error loading sessions:', error)
     return []
   }
 }
@@ -96,7 +97,7 @@ export async function saveSessions(sessions: Session[]): Promise<void> {
   try {
     await fs.writeJson(SESSIONS_FILE, sessions, { spaces: 2 })
   } catch (error) {
-    console.error('Error saving sessions:', error)
+    logger.error('Error saving sessions:', error)
     throw error
   }
 }
@@ -169,7 +170,7 @@ export async function removeSession(sessionId: string): Promise<void> {
 
 // Update user's generated tasks
 export async function updateUserGeneratedTasks(userId: string, generatedTasks: import('../../shared/types').GeneratedTasks): Promise<void> {
-  console.log('🔄 Server: Updating generated tasks for user:', userId)
+  logger.custom('🔄', `Updating generated tasks for user: ${userId}`)
   const users = await loadUsers()
   const user = users.find(u => u.id === userId)
   
@@ -178,9 +179,9 @@ export async function updateUserGeneratedTasks(userId: string, generatedTasks: i
     user.generatedTasks = generatedTasks
     
     await saveUsers(users)
-    console.log('✅ Server: Generated tasks updated successfully for user:', userId)
+    logger.success(`Generated tasks updated successfully for user: ${userId}`)
   } else {
-    console.log('❌ Server: User not found for updating generated tasks:', userId)
+    logger.error(`User not found for updating generated tasks: ${userId}`)
   }
 }
 
@@ -197,24 +198,24 @@ export async function updateTaskInGeneratedTasks(
   category: 'Strength' | 'Intelligence' | 'Charisma',
   updates: { title?: string; description?: string; xp?: number; shards?: number }
 ): Promise<boolean> {
-  console.log('🔄 Server: Updating task', taskId, 'in category', category, 'for user:', userId)
+  logger.custom('🔄', `Updating task ${taskId} in category ${category} for user: ${userId}`)
   const users = await loadUsers()
   const user = users.find(u => u.id === userId)
   
   if (!user || !user.generatedTasks) {
-    console.log('❌ Server: User or generated tasks not found')
+    logger.error('User or generated tasks not found')
     return false
   }
   
   const tasks = user.generatedTasks[category]
   if (!tasks) {
-    console.log('❌ Server: Category not found in generated tasks')
+    logger.error('Category not found in generated tasks')
     return false
   }
   
   const taskIndex = tasks.findIndex(t => t.id === taskId)
   if (taskIndex === -1) {
-    console.log('❌ Server: Task not found in category')
+    logger.error('Task not found in category')
     return false
   }
   
@@ -239,7 +240,7 @@ export async function updateTaskInGeneratedTasks(
   }
   
   await saveUsers(users)
-  console.log('✅ Server: Task updated successfully')
+  logger.success('Task updated successfully')
   return true
 }
 
@@ -249,24 +250,24 @@ export async function deleteTaskFromGeneratedTasks(
   taskId: string,
   category: 'Strength' | 'Intelligence' | 'Charisma'
 ): Promise<boolean> {
-  console.log('🔄 Server: Deleting task', taskId, 'from category', category, 'for user:', userId)
+  logger.custom('🔄', `Deleting task ${taskId} from category ${category} for user: ${userId}`)
   const users = await loadUsers()
   const user = users.find(u => u.id === userId)
   
   if (!user || !user.generatedTasks) {
-    console.log('❌ Server: User or generated tasks not found')
+    logger.error('User or generated tasks not found')
     return false
   }
   
   const tasks = user.generatedTasks[category]
   if (!tasks) {
-    console.log('❌ Server: Category not found in generated tasks')
+    logger.error('Category not found in generated tasks')
     return false
   }
   
   const taskIndex = tasks.findIndex(t => t.id === taskId)
   if (taskIndex === -1) {
-    console.log('❌ Server: Task not found in category')
+    logger.error('Task not found in category')
     return false
   }
   
@@ -274,7 +275,7 @@ export async function deleteTaskFromGeneratedTasks(
   tasks.splice(taskIndex, 1)
   
   await saveUsers(users)
-  console.log('✅ Server: Task deleted successfully')
+  logger.success('Task deleted successfully')
   return true
 }
 // Add a task to user's generated tasks (supports both AI and user-created tasks)
@@ -288,12 +289,12 @@ export async function addTaskToGeneratedTasks(
     shards: number;
   }
 ): Promise<boolean> {
-  console.log(' Server: Adding task for user:', userId)
+  logger.info(`Adding task for user: ${userId}`)
   const users = await loadUsers()
   const user = users.find(u => u.id === userId)
   
   if (!user) {
-    console.log(' Server: User not found')
+    logger.error('User not found')
     return false
   }
   
@@ -320,6 +321,6 @@ export async function addTaskToGeneratedTasks(
   user.generatedTasks[task.category]!.push(newTask)
   
   await saveUsers(users)
-  console.log(' Server: Task added successfully')
+  logger.success('Task added successfully')
   return true
 }
