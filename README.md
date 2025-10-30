@@ -59,6 +59,81 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 - **Concurrently** - Run multiple commands simultaneously
 - **TSX** - TypeScript execution
 
+## 🏗️ API Service Layer Architecture
+
+### **Organized Service Structure**
+The application uses a clean, modular API service layer to handle all backend communication:
+
+#### **Base API Client** (`apiClient.ts`)
+- Centralized HTTP client with unified error handling
+- Automatic JSON serialization/deserialization
+- Environment-based URL configuration via `VITE_API_BASE_URL`
+- Comprehensive logging for debugging
+- Type-safe request/response handling
+
+```typescript
+// Example usage
+import { apiClient } from '@/client/services'
+
+const response = await apiClient.post('/endpoint', data)
+```
+
+#### **AI Service** (`aiService.ts`)
+- AI task generation from user goals
+- Daily activity analysis and matching
+- Reward calculation based on activity matches
+- AI health checks
+
+```typescript
+// Generate AI tasks
+import { aiService } from '@/client/services'
+
+const result = await aiService.generateTasks(sessionId, goals, profile)
+
+// Analyze daily activity
+const analysis = await aiService.analyzeDailyActivity({
+  sessionId,
+  dailyActivity,
+  currentTasks
+})
+```
+
+#### **Task Service** (`taskService.ts`)
+- Create, update, and delete tasks
+- Fetch user tasks
+- Task category management
+- XP and shards assignment
+
+```typescript
+// Task operations
+import { taskService } from '@/client/services'
+
+await taskService.addTask(sessionId, {
+  title: "Complete workout",
+  description: "30 min cardio",
+  category: "Strength",
+  xp: 50,
+  shards: 10
+})
+
+await taskService.updateTask(sessionId, taskId, category, updates)
+await taskService.deleteTask(sessionId, taskId, category)
+```
+
+#### **Authentication Service** (`fileUserDatabase.ts`)
+- User registration and login
+- Session management
+- Profile and goals updates
+- User data persistence
+
+### **Benefits of Service Layer**
+✅ **Single Source of Truth** - All API endpoints defined in one place  
+✅ **Consistent Error Handling** - Unified error handling across all requests  
+✅ **Type Safety** - Full TypeScript support with shared types  
+✅ **Easy Testing** - Services can be easily mocked for unit tests  
+✅ **Maintainability** - Changes to API structure affect only service files  
+✅ **Environment Flexibility** - Easy switching between dev/prod environments  
+
 ## 🚀 Getting Started
 
 ### Environment Setup
@@ -224,8 +299,11 @@ xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50
 ├── src/
 │   ├── client/                 # Frontend services
 │   │   └── services/          # Client-side API services
-│   │       ├── fileUserDatabase.ts  # Frontend API client
-│   │       └── userDatabase.ts      # Abstract database interface
+│   │       ├── apiClient.ts        # Base HTTP client with error handling
+│   │       ├── aiService.ts        # AI task generation & analysis
+│   │       ├── taskService.ts      # Task CRUD operations
+│   │       ├── fileUserDatabase.ts # User authentication service
+│   │       └── index.ts            # Service exports
 │   ├── server/                # Backend code
 │   │   ├── routes/            # Express route handlers
 │   │   │   ├── authRoutes.ts  # Authentication endpoints
@@ -233,13 +311,15 @@ xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50
 │   │   │   ├── healthRoutes.ts # Health check endpoints
 │   │   │   └── aiRoutes.ts    # Azure AI integration endpoints
 │   │   ├── services/          # Server-side business logic
-│   │   │   └── azureAIService.ts # Azure OpenAI integration
+│   │   │   ├── azureAIService.ts # Azure OpenAI integration
+│   │   │   └── promptManager.ts  # AI prompt management
 │   │   ├── utils/             # Server utilities
 │   │   │   ├── dataOperations.ts    # Database operations
 │   │   │   ├── validation.ts        # Request validation
 │   │   │   ├── authUtils.ts         # Authentication utilities
 │   │   │   └── responseHelpers.ts   # API response helpers
-│   │   └── ai/                # AI-related backend code (future expansion)
+│   │   └── config/            # Configuration files
+│   │       └── aiConfigs.ts   # AI service configuration
 │   ├── components/            # React components
 │   │   ├── AuthScreen.tsx     # Login/Registration
 │   │   ├── ProfileSetup.tsx   # Profile creation

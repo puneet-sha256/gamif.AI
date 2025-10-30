@@ -3,7 +3,7 @@ import type { User, UserRegistration, UserLogin, ProfileData, GoalsData, Generat
 // Re-export types for backward compatibility
 export type { User, UserRegistration, UserLogin, ProfileData, GoalsData }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
 const SESSION_KEY = 'solo_leveling_session_id'
 
 class FileUserDatabase {

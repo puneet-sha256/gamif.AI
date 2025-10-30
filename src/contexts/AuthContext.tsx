@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { userDatabase } from '../client/services/fileUserDatabase'
+import { aiService } from '../client/services/aiService'
+import { taskService } from '../client/services/taskService'
 import type { AuthContextType, User, UserLogin, UserRegistration, ProfileData, GoalsData, GeneratedTasks } from '../shared/types'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -221,21 +223,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             return true // Goals saved successfully, task generation skipped
           }
           
-          // Call Azure AI agent for task generation
-          const aiResponse = await fetch('http://localhost:3001/api/ai/generate-tasks', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              sessionId,
-              goals: goalsData,
-              userProfile: user.profileData
-            })
-          })
+          // Call Azure AI agent for task generation using aiService
+          const aiResult = await aiService.generateTasks(
+            sessionId,
+            goalsData,
+            user.profileData
+          )
           
-          if (aiResponse.ok) {
-            const aiResult = await aiResponse.json()
+          if (aiResult.success) {
             console.log('🤖 AuthContext: Azure AI task generation completed successfully:', {
               processingTime: aiResult.metadata?.processingTime,
               hasGeneratedTasks: !!aiResult.data?.generatedTasks,
@@ -243,7 +238,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             })
             
             // If tasks were generated and stored, refresh user data to get updated tasks
-            if (aiResult.success && aiResult.data?.generatedTasks) {
+            if (aiResult.data?.generatedTasks) {
               console.log('🔄 AuthContext: Refreshing user data to get generated tasks...')
               const freshUser = await userDatabase.getCurrentUser()
               if (freshUser) {
@@ -264,8 +259,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
             
           } else {
-            const errorData = await aiResponse.json()
-            console.log('⚠️ AuthContext: Azure AI analysis failed:', errorData.message)
+            console.log('⚠️ AuthContext: Azure AI analysis failed:', aiResult.message)
             // Don't fail the entire operation if AI analysis fails
           }
         } catch (aiError) {
@@ -337,31 +331,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return false
       }
 
-      const response = await fetch('http://localhost:3001/api/user/tasks/update', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId,
-          taskId,
-          category,
-          updates
-        })
-      })
-
-      if (response.ok) {
-        await response.json()
-        console.log('✅ AuthContext: Task edited successfully')
-        
-        // Refresh user data to get updated tasks
-        await refreshUserTasks()
-        return true
-      } else {
-        const errorData = await response.json()
-        console.log('❌ AuthContext: Failed to edit task:', errorData.message)
-        return false
-      }
+      await taskService.updateTask(sessionId, taskId, category, updates)
+      console.log('✅ AuthContext: Task edited successfully')
+      
+      // Refresh user data to get updated tasks
+      await refreshUserTasks()
+      return true
     } catch (error) {
       console.error('❌ AuthContext: Error editing task:', error)
       return false
@@ -387,30 +362,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return false
       }
 
-      const response = await fetch('http://localhost:3001/api/user/tasks/delete', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId,
-          taskId,
-          category
-        })
-      })
-
-      if (response.ok) {
-        await response.json()
-        console.log('✅ AuthContext: Task deleted successfully')
-        
-        // Refresh user data to get updated tasks
-        await refreshUserTasks()
-        return true
-      } else {
-        const errorData = await response.json()
-        console.log('❌ AuthContext: Failed to delete task:', errorData.message)
-        return false
-      }
+      await taskService.deleteTask(sessionId, taskId, category)
+      console.log('✅ AuthContext: Task deleted successfully')
+      
+      // Refresh user data to get updated tasks
+      await refreshUserTasks()
+      return true
     } catch (error) {
       console.error('❌ AuthContext: Error deleting task:', error)
       return false
@@ -439,29 +396,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return false
       }
 
-      const response = await fetch('http://localhost:3001/api/user/tasks/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId,
-          ...task
-        })
-      })
-
-      if (response.ok) {
-        await response.json()
-        console.log('✅ AuthContext: Task added successfully')
-        
-        // Refresh user data
-        await refreshUserTasks()
-        return true
-      } else {
-        const errorData = await response.json()
-        console.log('❌ AuthContext: Failed to add task:', errorData.message)
-        return false
-      }
+      await taskService.addTask(sessionId, task)
+      console.log('✅ AuthContext: Task added successfully')
+      
+      // Refresh user data
+      await refreshUserTasks()
+      return true
     } catch (error) {
       console.error('❌ AuthContext: Error adding task:', error)
       return false

@@ -16,6 +16,7 @@ import {
 } from '../utils/taskMapping'
 import type { GeneratedTasks, GeneratedTask } from '../types'
 import { userDatabase } from '../client/services/fileUserDatabase'
+import { aiService } from '../client/services/aiService'
 
 interface DashboardProps {
   onLogout: () => void
@@ -212,20 +213,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       console.log('📝 Activity:', dailyActivity)
       console.log('📋 Current Tasks:', currentTasks)
 
-      // Call the API endpoint
-      const response = await fetch('http://localhost:3001/api/ai/analyze-activity', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId,
-          dailyActivity,
-          currentTasks
-        }),
+      // Call the AI service for activity analysis
+      const result = await aiService.analyzeDailyActivity({
+        sessionId,
+        dailyActivity,
+        currentTasks
       })
-
-      const result = await response.json()
 
       if (result.success && result.data) {
         console.log('✅ AI Analysis completed successfully')
