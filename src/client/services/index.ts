@@ -12,6 +12,9 @@ export { aiService, type GenerateTasksRequest, type GenerateTasksResponse } from
 // Export Task Service
 export { taskService, type TaskUpdateData, type NewTaskData } from './taskService'
 
+// Export Shop Service
+export { shopService, type NewShopItemData } from './shopService'
+
 // Export User Database (Auth Service)
 export { userDatabase } from './fileUserDatabase'
 export type { User, UserRegistration, UserLogin, ProfileData, GoalsData } from './fileUserDatabase'
