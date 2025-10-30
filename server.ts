@@ -3,16 +3,21 @@ import express from 'express'
 import cors from 'cors'
 import { initializeData, DATA_DIR, USERS_FILE, SESSIONS_FILE } from './src/server/utils/dataOperations'
 import { registerUser, loginUser, logoutUser } from './src/server/routes/authRoutes'
-import { getCurrentUser, updateUserData, updateExperience, updateShards, getUserTasks, updateGeneratedTask, deleteGeneratedTask, addUserTask } from './src/server/routes/userRoutes'
+import { getCurrentUser, updateUserData, updateExperience, updateShards, getUserTasks, updateGeneratedTask, deleteGeneratedTask, addUserTask, addUserShopItem, deleteUserShopItem, getUserShopItemsList } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
 import { generateTasks, analyzeDailyActivity } from './src/server/routes/aiRoutes'
 
 const app = express()
 const PORT = 3001
 
+// Get allowed origins from environment variable or use defaults
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ["http://localhost:5173", "http://localhost:5174"]
+
 // Middleware
 app.use(cors({
-  origin: "https://turbo-couscous-4v94xq5rg6xfjpgg-5173.app.github.dev", // your Codespaces FE URL
+  origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -58,6 +63,11 @@ app.put('/api/user/:userId', updateUserData)
 app.post('/api/user/tasks/add', addUserTask)
 app.put('/api/user/tasks/update', updateGeneratedTask)
 app.delete('/api/user/tasks/delete', deleteGeneratedTask)
+
+// Shop item management routes
+app.post('/api/user/shop/add', addUserShopItem)
+app.delete('/api/user/shop/delete', deleteUserShopItem)
+app.get('/api/user/shop/:sessionId', getUserShopItemsList)
 
 // Game mechanics routes
 app.patch('/api/user/experience', updateExperience)
