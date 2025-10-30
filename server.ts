@@ -12,7 +12,7 @@ const PORT = 3001
 
 // Middleware
 app.use(cors({
-  origin: "https://turbo-couscous-4v94xq5rg6xfjpgg-5173.app.github.dev", // your Codespaces FE URL
+  origin: ["https://turbo-couscous-4v94xq5rg6xfjpgg-5173.app.github.dev", "http://localhost:5173"], // Allow both Codespaces and local development
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
