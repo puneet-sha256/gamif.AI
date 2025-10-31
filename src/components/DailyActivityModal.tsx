@@ -23,7 +23,7 @@ const DailyActivityModal: React.FC<DailyActivityModalProps> = ({
     return today.toISOString().split('T')[0]
   }
 
-  const [selectedDate, setSelectedDate] = useState<string>(getTodayDate())
+  const [selectedDate, setSelectedDate] = useState<string>(() => getTodayDate())
 
   // Reset date to today when modal is opened
   useEffect(() => {
