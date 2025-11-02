@@ -86,10 +86,16 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Add Shop Item</h2>
-          <button className="modal-close" onClick={handleCancel}>✕</button>
+          <button className="close-btn" onClick={handleCancel}>×</button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="task-form">
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+
           <div className="form-group">
             <label htmlFor="item-title">Item Name *</label>
             <input
@@ -97,6 +103,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              className="form-input"
               placeholder="e.g., Movie Night, New Gadget, Spa Day"
               autoFocus
               disabled={isSaving}
@@ -109,6 +116,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
               id="item-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              className="form-textarea"
               placeholder="Add details about this item..."
               rows={3}
               disabled={isSaving}
@@ -122,6 +130,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
               type="number"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
+              className="form-input"
               placeholder="0"
               min="0"
               disabled={isSaving}
@@ -135,19 +144,18 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
               type="text"
               value={image}
               onChange={(e) => setImage(e.target.value)}
+              className="form-input"
               placeholder="🎁"
               maxLength={5}
               disabled={isSaving}
             />
-            <small>Use an emoji to represent this item</small>
+            <small className="form-hint">Use an emoji to represent this item</small>
           </div>
-
-          {error && <div className="error-message">{error}</div>}
 
           <div className="modal-actions">
             <button 
               type="button" 
-              className="btn-cancel" 
+              className="btn btn-secondary" 
               onClick={handleCancel}
               disabled={isSaving}
             >
@@ -155,7 +163,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
             </button>
             <button 
               type="submit" 
-              className="btn-save"
+              className="btn btn-primary"
               disabled={isSaving}
             >
               {isSaving ? 'Adding...' : 'Add Item'}
