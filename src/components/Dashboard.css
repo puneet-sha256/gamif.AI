@@ -606,7 +606,7 @@
 
 .nav-tabs {
   display: flex;
-  gap: 0;
+  gap: 8px;
   width: calc(100% - 80px);
   max-width: 1200px;
   margin: 0 auto;

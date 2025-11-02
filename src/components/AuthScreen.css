@@ -127,6 +127,7 @@
 
 .auth-tabs {
   display: flex;
+  gap: 8px;
   margin-bottom: 30px;
   border-radius: 8px;
   overflow: hidden;
