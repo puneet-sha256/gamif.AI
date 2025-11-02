@@ -1977,6 +1977,7 @@
     font-size: 0.9rem;
   }
   
+  /* Slightly smaller gap on mobile to optimize space */
   .example-tags {
     gap: 8px;
   }
