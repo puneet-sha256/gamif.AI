@@ -13,7 +13,7 @@ const PORT = 3001
 // Get allowed origins from environment variable or use defaults
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',')
-  : ["http://localhost:5173", "http://localhost:5174"]
+  : ["http://localhost:5173", "https://turbo-couscous-4v94xq5rg6xfjpgg-5173.app.github.dev"]
 
 // Middleware
 app.use(cors({
