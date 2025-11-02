@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+.alert-test-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  padding: 40px 20px;
+}
+
+.alert-test-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.alert-test-header h1 {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.5rem;
+  margin: 0 0 20px 0;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.alert-test-header p {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.alert-test-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+.test-section {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 16px;
+  padding: 30px;
+}
+
+.test-section h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.3rem;
+  margin: 0 0 20px 0;
+  color: #e2e8f0;
+}
+
+.test-btn {
+  width: 100%;
+  padding: 15px 20px;
+  margin: 10px 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.test-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.test-btn.success {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.test-btn.success:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.test-btn.error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.test-btn.error:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.test-btn.warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.test-btn.warning:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+}
+
+.test-btn.info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.test-btn.info:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+@media (max-width: 768px) {
+  .alert-test-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .alert-test-header h1 {
+    font-size: 2rem;
+  }
+  
+  .alert-test-header p {
+    font-size: 1rem;
+  }
+}

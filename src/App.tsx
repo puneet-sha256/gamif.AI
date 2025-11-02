@@ -7,6 +7,7 @@ import ProfileSetup from './components/ProfileSetup'
 import GoalsSetup from './components/GoalsSetup'
 import Dashboard from './components/Dashboard'
 import LoadingScreen from './components/LoadingScreen'
+import AlertTest from './components/AlertTest'
 import type { ProfileData, GoalsData } from './types'
 import './App.css'
 
@@ -151,6 +152,7 @@ function AppContent() {
     <Router>
       <div className="app">
         <Routes>
+          <Route path="/test-alerts" element={<AlertTest />} />
           <Route path="*" element={renderCurrentStep()} />
         </Routes>
       </div>
