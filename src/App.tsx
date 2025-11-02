@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { AlertProvider } from './contexts/AlertContext'
 import AuthScreen from './components/AuthScreen'
 import ProfileSetup from './components/ProfileSetup'
 import GoalsSetup from './components/GoalsSetup'
@@ -160,7 +161,9 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <AlertProvider>
+        <AppContent />
+      </AlertProvider>
     </AuthProvider>
   )
 }
