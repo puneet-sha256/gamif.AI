@@ -32,18 +32,12 @@ class UserService {
    * Update user experience points across attributes
    */
   async updateExperience(data: UpdateExperienceData): Promise<ApiResponse> {
-    console.log('⭐ UserService: Updating experience')
-    console.log('📊 UserService: Deltas:', {
-      strength: data.strengthDelta || 0,
-      intelligence: data.intelligenceDelta || 0,
-      charisma: data.charismaDelta || 0
-    })
+    
 
     try {
       const response = await apiClient.patch('/user/experience', data)
 
       if (response.success) {
-        console.log('✅ UserService: Experience updated successfully')
       }
 
       return response
@@ -57,14 +51,11 @@ class UserService {
    * Update user shards (currency)
    */
   async updateShards(data: UpdateShardsData): Promise<ApiResponse> {
-    console.log('💎 UserService: Updating shards')
-    console.log('📊 UserService: Delta:', data.shardsDelta)
 
     try {
       const response = await apiClient.patch('/user/shards', data)
 
       if (response.success) {
-        console.log('✅ UserService: Shards updated successfully')
       }
 
       return response
@@ -83,14 +74,7 @@ class UserService {
     shardsResult: ApiResponse
     success: boolean
   }> {
-    console.log('🎁 UserService: Claiming rewards')
-    console.log('📊 UserService: Rewards:', {
-      totalXP: data.totalXP,
-      totalShards: data.totalShards,
-      strengthXP: data.strengthXP,
-      intelligenceXP: data.intelligenceXP,
-      charismaXP: data.charismaXP
-    })
+    
 
     try {
       // Update experience first
@@ -111,9 +95,7 @@ class UserService {
       const success = experienceResult.success && shardsResult.success
 
       if (success) {
-        console.log('✅ UserService: All rewards claimed successfully')
       } else {
-        console.warn('⚠️ UserService: Some rewards failed to claim')
       }
 
       return {

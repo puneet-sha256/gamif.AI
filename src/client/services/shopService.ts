@@ -20,8 +20,6 @@ class ShopService {
     sessionId: string,
     item: NewShopItemData
   ): Promise<ApiResponse> {
-    console.log('➕ ShopService: Adding new shop item:', item.title)
-    console.log('💰 ShopService: Price:', item.price)
 
     try {
       const response = await apiClient.post('/user/shop/add', {
@@ -30,7 +28,6 @@ class ShopService {
       })
 
       if (response.success) {
-        console.log('✅ ShopService: Shop item added successfully')
       }
 
       return response
@@ -47,7 +44,6 @@ class ShopService {
     sessionId: string,
     itemId: string
   ): Promise<ApiResponse> {
-    console.log('🗑️ ShopService: Deleting shop item:', itemId)
 
     try {
       const response = await apiClient.delete('/user/shop/delete', {
@@ -56,7 +52,6 @@ class ShopService {
       })
 
       if (response.success) {
-        console.log('✅ ShopService: Shop item deleted successfully')
       }
 
       return response
@@ -70,13 +65,11 @@ class ShopService {
    * Get all shop items for a user
    */
   async getUserShopItems(sessionId: string): Promise<ApiResponse> {
-    console.log('🛒 ShopService: Fetching shop items for session:', sessionId.substring(0, 8) + '...')
 
     try {
       const response = await apiClient.get(`/user/shop/${sessionId}`)
 
       if (response.success) {
-        console.log('✅ ShopService: Shop items fetched successfully')
       }
 
       return response

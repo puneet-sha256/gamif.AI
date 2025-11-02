@@ -37,18 +37,12 @@ class AIService {
     goals: GoalsData,
     userProfile?: ProfileData
   ): Promise<GenerateTasksResponse> {
-    console.log('🤖 AIService: Generating tasks for session:', sessionId.substring(0, 8) + '...')
-    
     try {
       const response = await apiClient.post<GenerateTasksResponse['data']>('/ai/generate-tasks', {
         sessionId,
         goals,
         userProfile
       })
-
-      if (response.success) {
-        console.log('✅ AIService: Tasks generated successfully')
-      }
 
       return {
         success: response.success,
@@ -70,24 +64,11 @@ class AIService {
   async analyzeDailyActivity(
     request: AnalyzeDailyActivityRequest
   ): Promise<ApiResponse<AnalyzeDailyActivityResponse['data']>> {
-    console.log('🤖 AIService: Analyzing daily activity for session:', 
-      request.sessionId.substring(0, 8) + '...')
-    console.log('📝 AIService: Activity description length:', request.dailyActivity.length)
-    
     try {
       const response = await apiClient.post<AnalyzeDailyActivityResponse['data']>(
         '/ai/analyze-activity',
         request
       )
-
-      if (response.success && response.data) {
-        console.log('✅ AIService: Activity analyzed successfully')
-        console.log('🎯 AIService: Found', response.data.matches?.length || 0, 'activity matches')
-        console.log('💰 AIService: Total rewards:', {
-          xp: response.data.rewards?.totalXP || 0,
-          shards: response.data.rewards?.totalShards || 0
-        })
-      }
 
       return response
     } catch (error: any) {

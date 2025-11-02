@@ -6,8 +6,6 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
 
 // Log the API base URL on initialization
-console.log('🌐 ApiClient: Initialized with VITE_API_BASE_URL =', import.meta.env.VITE_API_BASE_URL)
-console.log('🌐 ApiClient: Using API_BASE_URL =', API_BASE_URL)
 
 export interface ApiResponse<T = any> {
   success: boolean
@@ -37,7 +35,6 @@ class ApiClient {
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl
-    console.log('🌐 ApiClient: Initialized with base URL:', this.baseUrl)
   }
 
   /**
@@ -49,11 +46,7 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`
     
-    console.log('📡 ApiClient: Making request:', {
-      method: options.method || 'GET',
-      url,
-      hasBody: !!options.body
-    })
+    
 
     try {
       const response = await fetch(url, {
@@ -64,11 +57,7 @@ class ApiClient {
         },
       })
 
-      console.log('📡 ApiClient: Response received:', {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok
-      })
+      
 
       const data = await response.json()
 
@@ -84,10 +73,7 @@ class ApiClient {
         )
       }
 
-      console.log('✅ ApiClient: Request successful:', {
-        success: data.success,
-        hasData: !!data.data
-      })
+      
 
       return data
     } catch (error) {
