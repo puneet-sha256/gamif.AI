@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 interface DailyActivityModalProps {
   isOpen: boolean
@@ -17,6 +17,21 @@ const DailyActivityModal: React.FC<DailyActivityModalProps> = ({
   isAnalyzing,
   onAnalyze
 }) => {
+  // Get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date()
+    return today.toISOString().split('T')[0]
+  }
+
+  const [selectedDate, setSelectedDate] = useState<string>(() => getTodayDate())
+
+  // Reset date to today when modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedDate(getTodayDate())
+    }
+  }, [isOpen])
+
   if (!isOpen) return null
 
   const handleOverlayClick = (e: React.MouseEvent) => {
@@ -28,6 +43,15 @@ const DailyActivityModal: React.FC<DailyActivityModalProps> = ({
   const handleCancel = () => {
     onClose()
     setDailyActivity('')
+    setSelectedDate(getTodayDate())
+  }
+
+  const handleAnalyze = () => {
+    // TODO: Pass selectedDate to backend when implementing actual date-based activity tracking
+    // For now, logging to console as per requirements
+    console.log('📅 Selected Date:', selectedDate)
+    console.log('📝 Daily Activity:', dailyActivity)
+    onAnalyze()
   }
 
   return (
@@ -47,6 +71,20 @@ const DailyActivityModal: React.FC<DailyActivityModalProps> = ({
           <p className="modal-description">
             Tell me what you accomplished today and I'll calculate your XP rewards based on your activities!
           </p>
+          
+          <div className="date-picker-section">
+            <label htmlFor="activity-date" className="date-label">
+              📅 Activity Date
+            </label>
+            <input
+              id="activity-date"
+              type="date"
+              className="date-input"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              max={getTodayDate()}
+            />
+          </div>
           
           <div className="activity-examples">
             <h4>Examples of activities I can recognize:</h4>
@@ -76,7 +114,7 @@ const DailyActivityModal: React.FC<DailyActivityModalProps> = ({
           </button>
           <button 
             className="modal-btn-primary" 
-            onClick={onAnalyze}
+            onClick={handleAnalyze}
             disabled={isAnalyzing || !dailyActivity.trim()}
           >
             {isAnalyzing ? (
