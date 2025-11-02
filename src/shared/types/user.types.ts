@@ -44,6 +44,32 @@ export interface ShopItem {
   createdAt: string // When the item was added
 }
 
+// Unclaimed reward from daily activity analysis
+export interface UnclaimedReward {
+  activityName: string
+  matchType: string
+  category: 'Strength' | 'Intelligence' | 'Charisma'
+  matchedTask?: string
+  goalLink?: string
+  effortRatio: number
+  xpEarned: number
+  shardsEarned: number
+  calculationNotes: string
+  timestamp: string // When the reward was earned
+}
+
+export interface UnclaimedRewards {
+  activities: UnclaimedReward[]
+  totalXP: number
+  totalShards: number
+  categoryBreakdown: {
+    Strength: { xp: number; shards: number }
+    Intelligence: { xp: number; shards: number }
+    Charisma: { xp: number; shards: number }
+  }
+  lastUpdated: string
+}
+
 export interface User {
   id: string
   username: string
@@ -56,6 +82,7 @@ export interface User {
   stats?: UserStats
   generatedTasks?: GeneratedTasks
   shopItems?: ShopItem[] // User's custom shop items
+  unclaimedRewards?: UnclaimedRewards // Pending rewards from daily activities
 }
 
 export interface UserRegistration {

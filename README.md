@@ -7,8 +7,16 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 ### 🤖 **AI-Powered Goal Analysis**
 - **Azure OpenAI Integration** - Advanced AI agent for goal processing
 - **Personalized Task Generation** - AI creates custom daily tasks from user goals
-- **Intelligent Insights** - AI provides goal analysis and recommendations
+- **Daily Activity Analysis** - AI analyzes your daily accomplishments and matches them with tasks
+- **Intelligent Rewards System** - Earn XP and shards based on completed activities
 - **Smart Categorization** - Automatic goal classification and prioritization
+
+### 🎁 **Reward Management System**
+- **Unclaimed Rewards Portal** - Dedicated interface to view and claim pending rewards
+- **Activity Breakdown** - Detailed view of each completed activity with rewards
+- **Category Indicators** - Visual badges showing which attribute (Strength/Intelligence/Charisma) each activity develops
+- **Persistent Rewards** - Rewards are saved until you're ready to claim them
+- **Batch Claiming** - Claim all pending rewards at once with a single click
 
 ### 🔐 **Authentication & Profile System**
 - Secure user registration and login system
@@ -118,6 +126,42 @@ await taskService.addTask(sessionId, {
 
 await taskService.updateTask(sessionId, taskId, category, updates)
 await taskService.deleteTask(sessionId, taskId, category)
+```
+
+#### **User Service** (`userService.ts`)
+- Update user experience points (XP) across attributes
+- Update user shards (currency)
+- Claim rewards with combined XP and shards updates
+- Automatic validation and error handling
+
+```typescript
+// User stats operations
+import { userService } from '@/client/services'
+
+// Update experience points
+await userService.updateExperience({
+  sessionId,
+  strengthDelta: 50,
+  intelligenceDelta: 30,
+  charismaDelta: 20
+})
+
+// Update shards
+await userService.updateShards({
+  sessionId,
+  shardsDelta: 100,
+  reason: 'Task completion'
+})
+
+// Claim all rewards at once
+await userService.claimRewards({
+  sessionId,
+  totalXP: 100,
+  totalShards: 50,
+  strengthXP: 40,
+  intelligenceXP: 30,
+  charismaXP: 30
+})
 ```
 
 #### **Authentication Service** (`fileUserDatabase.ts`)

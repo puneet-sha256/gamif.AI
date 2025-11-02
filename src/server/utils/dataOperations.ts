@@ -131,7 +131,17 @@ export async function updateUser(userId: string, updates: Partial<User>): Promis
     return null
   }
   
-  users[userIndex] = { ...users[userIndex], ...updates }
+  // Merge updates with existing user
+  const updatedUser = { ...users[userIndex], ...updates }
+  
+  // Remove properties that are explicitly set to null or undefined
+  Object.keys(updates).forEach(key => {
+    if (updates[key as keyof User] === null || updates[key as keyof User] === undefined) {
+      delete updatedUser[key as keyof User]
+    }
+  })
+  
+  users[userIndex] = updatedUser
   await saveUsers(users)
   
   return users[userIndex]

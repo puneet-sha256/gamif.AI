@@ -15,6 +15,9 @@ export { taskService, type TaskUpdateData, type NewTaskData } from './taskServic
 // Export Shop Service
 export { shopService, type NewShopItemData } from './shopService'
 
+// Export User Service
+export { userService, type UpdateExperienceData, type UpdateShardsData, type ClaimRewardsData } from './userService'
+
 // Export User Database (Auth Service)
 export { userDatabase } from './fileUserDatabase'
 export type { User, UserRegistration, UserLogin, ProfileData, GoalsData } from './fileUserDatabase'

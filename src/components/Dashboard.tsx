@@ -8,6 +8,7 @@ import ProgressBar from './ProgressBar'
 import DailyActivityModal from './DailyActivityModal'
 import TaskModal from './TaskModal'
 import ShopItemModal from './ShopItemModal'
+import RewardClaimModal from './RewardClaimModal'
 import { 
   mapGeneratedTasksToTaskItems, 
   groupMappedTasksByCategory, 
@@ -18,6 +19,8 @@ import {
 import type { GeneratedTasks, GeneratedTask } from '../types'
 import { userDatabase } from '../client/services/fileUserDatabase'
 import { aiService } from '../client/services/aiService'
+import { userService } from '../client/services/userService'
+import { apiClient } from '../client/services/apiClient'
 
 interface DashboardProps {
   onLogout: () => void
@@ -26,7 +29,7 @@ interface DashboardProps {
 type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
-  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems } = useAuth()
+  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, updateUser, refreshUserTasks } = useAuth()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
   const [showDailyInput, setShowDailyInput] = useState(false)
   const [dailyActivity, setDailyActivity] = useState('')
@@ -40,6 +43,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
   // Shop modal state
   const [showShopItemModal, setShowShopItemModal] = useState(false)
+
+  // Reward claim modal state
+  const [showRewardClaimModal, setShowRewardClaimModal] = useState(false)
+  const [isClaiming, setIsClaiming] = useState(false)
 
   useEffect(() => {
     console.log('🎯 Dashboard: Component mounted')
@@ -295,68 +302,39 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         console.log('🎯 Activity Matches:', result.data.matches)
         console.log('💰 Rewards:', result.data.rewards)
 
-        // Build a comprehensive message combining all information
-        let fullMessage = ''
-
-        // Add processed activities
+        // Save unclaimed rewards to user data if there are any rewards
         if (result.data.rewards?.activityRewards && result.data.rewards.activityRewards.length > 0) {
-          fullMessage += '🎯 PROCESSED ACTIVITIES:\n' + '='.repeat(40) + '\n\n'
+          const unclaimedRewards = {
+            activities: result.data.rewards.activityRewards.map((reward: any) => ({
+              activityName: reward.activityName,
+              matchType: reward.matchType,
+              category: reward.category as 'Strength' | 'Intelligence' | 'Charisma',
+              matchedTask: reward.matchedTask,
+              goalLink: reward.goalLink,
+              effortRatio: reward.effortRatio,
+              xpEarned: reward.xpEarned,
+              shardsEarned: reward.shardsEarned,
+              calculationNotes: reward.calculationNotes,
+              timestamp: new Date().toISOString()
+            })),
+            totalXP: result.data.rewards.totalXP,
+            totalShards: result.data.rewards.totalShards,
+            categoryBreakdown: result.data.rewards.categoryBreakdown,
+            lastUpdated: new Date().toISOString()
+          }
+
+          // Save to user data
+          const success = await updateUser({ unclaimedRewards })
           
-          result.data.rewards.activityRewards.forEach((reward: any, index: number) => {
-            const typeEmoji: { [key: string]: string } = {
-              'exact': '✅',
-              'similar': '🔄',
-              'goal-aligned': '🎯'
-            }
-            const emoji = typeEmoji[reward.matchType] || '•'
-            
-            const categoryEmoji: { [key: string]: string } = {
-              'Strength': '💪',
-              'Intelligence': '🧠',
-              'Charisma': '✨'
-            }
-            const catEmoji = categoryEmoji[reward.category] || '📌'
-
-            fullMessage += `${index + 1}. ${emoji} ${reward.activityName} ${catEmoji}\n`
-            fullMessage += `   Match: ${reward.matchType}\n`
-            if (reward.matchedTask) {
-              fullMessage += `   Task: ${reward.matchedTask}\n`
-            }
-            fullMessage += `   Rewards: +${reward.xpEarned} XP, +${reward.shardsEarned} shards\n\n`
-          })
-
-          // Add summary
-          fullMessage += '\n' + '='.repeat(40) + '\n'
-          fullMessage += `🎉 SUMMARY\n`
-          fullMessage += '='.repeat(40) + '\n'
-          fullMessage += `💰 Total XP: +${result.data.rewards.totalXP}\n`
-          fullMessage += `💎 Total Shards: +${result.data.rewards.totalShards}\n\n`
-          fullMessage += `� By Category:\n`
-          fullMessage += `  💪 Strength: ${result.data.rewards.categoryBreakdown.Strength.xp} XP\n`
-          fullMessage += `  🧠 Intelligence: ${result.data.rewards.categoryBreakdown.Intelligence.xp} XP\n`
-          fullMessage += `  ✨ Charisma: ${result.data.rewards.categoryBreakdown.Charisma.xp} XP\n\n`
-          fullMessage += `✅ Processed: ${result.data.rewards.processedCount}\n`
-          fullMessage += `⏭️ Skipped: ${result.data.rewards.skippedCount}\n`
-        }
-
-        // Add skipped activities if any
-        if (result.data.rewards?.skippedActivities && result.data.rewards.skippedActivities.length > 0) {
-          fullMessage += '\n' + '='.repeat(40) + '\n'
-          fullMessage += '⏭️ SKIPPED (Unrelated to Goals):\n'
-          fullMessage += '='.repeat(40) + '\n\n'
-          
-          result.data.rewards.skippedActivities.forEach((skipped: any, index: number) => {
-            fullMessage += `${index + 1}. ${skipped.activityName}\n`
-            fullMessage += `   ${skipped.reason}\n`
-            fullMessage += `   ${skipped.notes}\n\n`
-          })
-        }
-
-        // Show single comprehensive alert
-        if (fullMessage) {
-          alert(fullMessage)
+          if (success) {
+            console.log('✅ Unclaimed rewards saved successfully')
+            alert(`🎉 Great job! You've earned rewards from ${result.data.rewards.activityRewards.length} activities.\n\nClick the "Unclaimed Rewards" button to view and claim them!`)
+          } else {
+            console.error('❌ Failed to save unclaimed rewards')
+            alert('Activity analyzed but failed to save rewards. Please try again.')
+          }
         } else {
-          alert('No activities were identified in your update.')
+          alert('No activities were identified in your update that match your goals.')
         }
         
         setDailyActivity('')
@@ -370,6 +348,81 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       alert('Sorry, there was an error analyzing your activity. Please try again.')
     } finally {
       setIsAnalyzing(false)
+    }
+  }
+
+  const handleClaimRewards = async () => {
+    if (!user?.unclaimedRewards) return
+    
+    setIsClaiming(true)
+    
+    try {
+      const sessionId = userDatabase.getSessionId()
+      if (!sessionId) {
+        alert('Session expired. Please log in again.')
+        setIsClaiming(false)
+        return
+      }
+
+      const rewards = user.unclaimedRewards
+      
+      console.log('🎁 Starting reward claim process...')
+      
+      // Step 1: Use the userService API to claim rewards (updates stats in backend)
+      const result = await userService.claimRewards({
+        sessionId,
+        totalXP: rewards.totalXP,
+        totalShards: rewards.totalShards,
+        strengthXP: rewards.categoryBreakdown.Strength.xp,
+        intelligenceXP: rewards.categoryBreakdown.Intelligence.xp,
+        charismaXP: rewards.categoryBreakdown.Charisma.xp
+      })
+      
+      if (result.success) {
+        console.log('✅ Stats updated in backend')
+        
+        // Step 2: Clear unclaimed rewards in backend
+        console.log('🧹 Clearing unclaimed rewards in backend...')
+        
+        if (!user.id) {
+          console.error('❌ User ID not found')
+          alert('Failed to clear rewards. Please try again.')
+          return
+        }
+        
+        // Use apiClient to clear unclaimed rewards
+        try {
+          const clearResponse = await apiClient.put(`/user/${user.id}`, { 
+            unclaimedRewards: null 
+          })
+          
+          if (clearResponse.success) {
+            console.log('✅ Unclaimed rewards cleared in backend')
+            
+            // Step 3: Refresh user data from server to sync UI
+            console.log('🔄 Refreshing user data from server...')
+            await refreshUserTasks()
+            
+            console.log('✅ Rewards claimed successfully - all steps completed')
+            alert(`🎉 Congratulations!\n\nYou've claimed:\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nKeep up the great work!`)
+            setShowRewardClaimModal(false)
+          } else {
+            console.error('⚠️ Rewards applied but failed to clear unclaimed rewards in backend')
+            alert('Rewards claimed successfully, but there was an issue clearing the unclaimed rewards. Please refresh the page.')
+          }
+        } catch (clearError) {
+          console.error('❌ Error clearing unclaimed rewards:', clearError)
+          alert('Rewards claimed successfully, but there was an issue clearing the unclaimed rewards. Please refresh the page.')
+        }
+      } else {
+        console.error('❌ Failed to claim rewards - API call failed')
+        alert('Failed to claim rewards. Please try again.')
+      }
+    } catch (error) {
+      console.error('❌ Error claiming rewards:', error)
+      alert('Sorry, there was an error claiming your rewards. Please try again.')
+    } finally {
+      setIsClaiming(false)
     }
   }
 
@@ -969,6 +1022,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           {profileData && (
             <span className="welcome-text">Welcome, {profileData.name}!</span>
           )}
+          {user?.unclaimedRewards && user.unclaimedRewards.activities.length > 0 && (
+            <button 
+              className="unclaimed-rewards-button" 
+              onClick={() => setShowRewardClaimModal(true)}
+            >
+              <span className="reward-icon">🎁</span>
+              <span className="reward-text">Unclaimed Rewards</span>
+              <span className="reward-badge">{user.unclaimedRewards.activities.length}</span>
+            </button>
+          )}
           <button className="logout-button" onClick={handleLogout}>
             Logout
           </button>
@@ -1015,6 +1078,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       <div className="dashboard-content">
         {renderTabContent()}
       </div>
+
+      {/* Reward Claim Modal */}
+      <RewardClaimModal
+        isOpen={showRewardClaimModal}
+        onClose={() => setShowRewardClaimModal(false)}
+        unclaimedRewards={user?.unclaimedRewards || null}
+        onClaimRewards={handleClaimRewards}
+        isClaiming={isClaiming}
+      />
     </div>
   )
 }
