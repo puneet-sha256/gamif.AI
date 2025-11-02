@@ -1551,8 +1551,8 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1561,13 +1561,14 @@
 }
 
 .modal-content {
-  background: white;
-  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.95));
+  border-radius: 24px;
   width: 90%;
   max-width: 600px;
-  max-height: 80vh;
+  max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(59, 130, 246, 0.3);
   animation: modalSlideUp 0.3s ease;
 }
 
@@ -1575,80 +1576,90 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 24px 0 24px;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 20px;
+  padding: 32px 32px 24px;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(6, 182, 212, 0.05));
 }
 
 .modal-header h3 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.9rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .modal-close {
   background: none;
   border: none;
-  font-size: 24px;
+  font-size: 2rem;
   cursor: pointer;
-  color: #666;
-  width: 32px;
-  height: 32px;
+  color: #94a3b8;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 8px;
   transition: all 0.2s ease;
+  padding: 0;
 }
 
 .modal-close:hover {
-  background: #f5f5f5;
-  color: #333;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
 }
 
 .modal-body {
-  padding: 0 24px 20px 24px;
+  padding: 32px;
 }
 
 .modal-description {
-  color: #666;
-  margin-bottom: 20px;
-  font-size: 16px;
-  line-height: 1.5;
+  color: #64748b;
+  margin-bottom: 24px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
 }
 
 .date-picker-section {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .date-label {
   display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #1e293b;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .date-input {
   width: 100%;
-  border: 2px solid #e5e7eb;
+  border: 2px solid rgba(59, 130, 246, 0.2);
   border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 15px;
+  padding: 14px 18px;
+  font-size: 1.05rem;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 500;
-  background: #fafafa;
-  color: #333;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e293b;
   transition: all 0.3s ease;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .date-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #3b82f6;
   background: white;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .date-input::-webkit-calendar-picker-indicator {
@@ -1662,102 +1673,128 @@
 }
 
 .activity-examples {
-  background: #f8f9ff;
+  background: rgba(59, 130, 246, 0.05);
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(59, 130, 246, 0.1);
 }
 
 .activity-examples h4 {
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
+  margin: 0 0 14px 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
 }
 
 .example-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .example-tag {
-  background: white;
-  color: #666;
-  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #64748b;
+  padding: 8px 14px;
   border-radius: 20px;
-  font-size: 12px;
-  border: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  transition: all 0.2s ease;
+}
+
+.example-tag:hover {
+  background: white;
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
 }
 
 .activity-input-modal {
   width: 100%;
-  border: 2px solid #e5e7eb;
+  border: 2px solid rgba(59, 130, 246, 0.2);
   border-radius: 12px;
   padding: 16px;
-  font-size: 16px;
+  font-size: 1.05rem;
   font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
   resize: vertical;
-  transition: border-color 0.3s ease;
-  background: #fafafa;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e293b;
+  line-height: 1.6;
+  box-sizing: border-box;
+  min-height: 120px;
 }
 
 .activity-input-modal:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #3b82f6;
   background: white;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .modal-footer {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   justify-content: flex-end;
-  padding: 20px 24px 24px 24px;
-  border-top: 1px solid #f0f0f0;
+  padding: 24px 32px 32px;
+  border-top: 2px solid rgba(59, 130, 246, 0.15);
 }
 
 .modal-btn-secondary {
-  background: #f5f5f5;
-  color: #666;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
+  background: rgba(148, 163, 184, 0.15);
+  color: #475569;
+  border: 2px solid rgba(148, 163, 184, 0.3);
+  border-radius: 12px;
+  padding: 14px 28px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
   transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-width: 120px;
 }
 
 .modal-btn-secondary:hover {
-  background: #e5e5e5;
-  color: #333;
+  background: rgba(148, 163, 184, 0.25);
+  border-color: rgba(148, 163, 184, 0.4);
+  transform: translateY(-1px);
 }
 
 .modal-btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
+  border-radius: 12px;
+  padding: 14px 28px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-width: 120px;
 }
 
 .modal-btn-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45);
 }
 
 .modal-btn-primary:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
+  transform: none !important;
 }
 
 .loading-spinner {
@@ -1895,29 +1932,70 @@
 @media (max-width: 600px) {
   .modal-content {
     width: 95%;
-    margin: 20px;
-    max-height: 90vh;
+    max-height: 95vh;
+    border-radius: 16px;
   }
   
-  .modal-header, .modal-body, .modal-footer {
-    padding-left: 16px;
-    padding-right: 16px;
+  .modal-header {
+    padding: 20px 20px 16px;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .modal-footer {
+    padding: 20px;
   }
   
   .modal-header h3 {
-    font-size: 20px;
+    font-size: 1.4rem;
+  }
+
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    font-size: 1.6rem;
+  }
+
+  .date-label,
+  .modal-description {
+    font-size: 0.95rem;
+  }
+
+  .date-input,
+  .activity-input-modal {
+    padding: 12px 14px;
+    font-size: 1rem;
+  }
+
+  .activity-examples {
+    padding: 16px;
+  }
+
+  .activity-examples h4 {
+    font-size: 0.9rem;
   }
   
   .example-tags {
-    flex-direction: column;
+    gap: 8px;
+  }
+
+  .example-tag {
+    padding: 6px 12px;
+    font-size: 0.85rem;
   }
   
   .modal-footer {
     flex-direction: column-reverse;
+    gap: 10px;
   }
   
   .modal-btn-secondary, .modal-btn-primary {
     width: 100%;
+    min-width: auto;
     justify-content: center;
+    padding: 12px 20px;
+    font-size: 1rem;
   }
 }
