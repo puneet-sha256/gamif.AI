@@ -33,7 +33,6 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    
     // Validation
     if (!formData.name.trim()) {
       setError('Player name is required')
