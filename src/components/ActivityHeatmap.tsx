@@ -15,6 +15,9 @@ const CATEGORY_COLORS = {
   all: '#10b981'
 }
 
+const TOTAL_DAYS = 84 // 12 weeks of activity history
+const DAYS_PER_WEEK = 7
+
 const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) => {
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all')
 
@@ -38,7 +41,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
     }
 
     // Generate last 84 days
-    for (let i = 83; i >= 0; i--) {
+    for (let i = TOTAL_DAYS - 1; i >= 0; i--) {
       const date = new Date(today)
       date.setDate(date.getDate() - i)
       const dateStr = date.toISOString().split('T')[0]
@@ -105,8 +108,8 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
   // Group days into weeks
   const weeks = useMemo(() => {
     const grouped: Array<Array<{ date: string; value: number; dateObj: Date }>> = []
-    for (let i = 0; i < heatmapData.length; i += 7) {
-      grouped.push(heatmapData.slice(i, i + 7))
+    for (let i = 0; i < heatmapData.length; i += DAYS_PER_WEEK) {
+      grouped.push(heatmapData.slice(i, i + DAYS_PER_WEEK))
     }
     return grouped
   }, [heatmapData])
@@ -118,7 +121,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
     
     heatmapData.forEach((day, index) => {
       const month = day.dateObj.toLocaleDateString('en-US', { month: 'short' })
-      if (month !== currentMonth && index % 7 === 0) {
+      if (month !== currentMonth && index % DAYS_PER_WEEK === 0) {
         currentMonth = month
         labels.push({ month, index: Math.floor(index / 7) })
       }

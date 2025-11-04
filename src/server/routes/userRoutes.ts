@@ -146,20 +146,32 @@ export async function updateExperience(req: Request, res: Response) {
       activity => activity.date === today
     )
 
+    // Helper function to calculate total XP from category changes
+    const calculateTotal = (str: number, int: number, cha: number) => 
+      Math.max(0, str) + Math.max(0, int) + Math.max(0, cha)
+
     if (todayActivity) {
       // Update existing activity
       todayActivity.strength += Math.max(0, strengthChange)
       todayActivity.intelligence += Math.max(0, intelligenceChange)
       todayActivity.charisma += Math.max(0, charismaChange)
-      todayActivity.total = todayActivity.strength + todayActivity.intelligence + todayActivity.charisma
+      todayActivity.total = calculateTotal(
+        todayActivity.strength,
+        todayActivity.intelligence,
+        todayActivity.charisma
+      )
     } else {
       // Create new activity for today
+      const newStrengthXP = Math.max(0, strengthChange)
+      const newIntelligenceXP = Math.max(0, intelligenceChange)
+      const newCharismaXP = Math.max(0, charismaChange)
+      
       user.activityHistory.dailyActivities.push({
         date: today,
-        strength: Math.max(0, strengthChange),
-        intelligence: Math.max(0, intelligenceChange),
-        charisma: Math.max(0, charismaChange),
-        total: Math.max(0, strengthChange) + Math.max(0, intelligenceChange) + Math.max(0, charismaChange)
+        strength: newStrengthXP,
+        intelligence: newIntelligenceXP,
+        charisma: newCharismaXP,
+        total: calculateTotal(newStrengthXP, newIntelligenceXP, newCharismaXP)
       })
     }
 
