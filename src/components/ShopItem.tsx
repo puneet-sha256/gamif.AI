@@ -1,4 +1,5 @@
 import React from 'react'
+import { useConfirm } from '../contexts/ConfirmContext'
 
 interface ShopItemProps {
   id?: string
@@ -24,14 +25,17 @@ const ShopItem: React.FC<ShopItemProps> = ({
   className = '',
   isUserItem = false
 }) => {
+  const { showConfirm } = useConfirm()
   const canAfford = userShards >= price
   
-  const handleBuyClick = () => {
+  const handleBuyClick = async () => {
     if (!canAfford) return
     
-    // Show confirmation dialog before buying
-    const confirmed = window.confirm(
-      `Are you sure you want to buy "${title}" for ${price} 💎 shards?\n\nYou currently have ${userShards} 💎 shards.`
+    // Show custom confirmation dialog before buying
+    const confirmed = await showConfirm(
+      `Are you sure you want to buy "${title}" for ${price} 💎 shards?\n\nYou currently have ${userShards} 💎 shards.`,
+      'Buy',
+      'Cancel'
     )
     
     if (confirmed && onBuy) {
