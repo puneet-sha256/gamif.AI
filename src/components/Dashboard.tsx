@@ -312,18 +312,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           }))
           
           // Merge with existing activities
-          const allActivities = existingRewards?.activities
-            ? [...existingRewards.activities, ...newActivities]
-            : newActivities
+          const allActivities = [...(existingRewards?.activities || []), ...newActivities]
           
           // Calculate combined totals
-          const totalXP = existingRewards 
-            ? existingRewards.totalXP + result.data.rewards.totalXP
-            : result.data.rewards.totalXP
+          const totalXP = (existingRewards?.totalXP || 0) + result.data.rewards.totalXP
           
-          const totalShards = existingRewards 
-            ? existingRewards.totalShards + result.data.rewards.totalShards
-            : result.data.rewards.totalShards
+          const totalShards = (existingRewards?.totalShards || 0) + result.data.rewards.totalShards
           
           // Merge category breakdowns
           const categoryBreakdown = {
