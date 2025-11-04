@@ -312,7 +312,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           }))
           
           // Merge with existing activities
-          const allActivities = existingRewards 
+          const allActivities = existingRewards?.activities
             ? [...existingRewards.activities, ...newActivities]
             : newActivities
           
