@@ -30,7 +30,7 @@ interface DashboardProps {
 type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
-  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, updateUser, refreshUserTasks } = useAuth()
+  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, buyShopItem, updateUser, refreshUserTasks } = useAuth()
   const { showSuccess, showError, showWarning, showInfo } = useAlert()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
   const [showDailyInput, setShowDailyInput] = useState(false)
@@ -206,6 +206,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       if (!success) {
         showError('Failed to delete shop item. Please try again.')
       }
+    }
+  }
+
+  // Handler for buying shop items
+  const handleBuyShopItem = async (itemId: string, itemTitle: string, itemPrice: number) => {
+    const success = await buyShopItem(itemId, itemPrice)
+    if (success) {
+      showSuccess(`🎉 Congratulations! You've successfully purchased "${itemTitle}" for ${itemPrice} 💎 shards!`)
+    } else {
+      showError('Failed to purchase item. Please make sure you have enough shards.')
     }
   }
 
@@ -879,12 +889,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 {userShopItems.map((item) => (
                   <ShopItem
                     key={item.id}
+                    id={item.id}
                     image={item.image || '🎁'}
                     title={item.title}
                     description={item.description || 'Custom reward'}
                     price={item.price}
                     userShards={user?.stats?.shards || 0}
                     isUserItem={true}
+                    onBuy={() => handleBuyShopItem(item.id, item.title, item.price)}
                     onDelete={() => handleDeleteShopItem(item.id)}
                   />
                 ))}
@@ -896,27 +908,33 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             <h3>💝 Rewards</h3>
             <div className="shop-items">
               <ShopItem
+                id="reward-gaming"
                 image="🎮"
                 title="Gaming Session"
                 description="Unlock 2 hours of guilt-free gaming"
                 price={50}
                 userShards={user?.stats?.shards || 0}
+                onBuy={() => handleBuyShopItem('reward-gaming', 'Gaming Session', 50)}
               />
               
               <ShopItem
+                id="reward-treat"
                 image="🍕"
                 title="Treat Yourself"
                 description="Order your favorite meal"
                 price={75}
                 userShards={user?.stats?.shards || 0}
+                onBuy={() => handleBuyShopItem('reward-treat', 'Treat Yourself', 75)}
               />
               
               <ShopItem
+                id="reward-book"
                 image="📚"
                 title="Book Purchase"
                 description="Buy that book you've been wanting"
                 price={100}
                 userShards={user?.stats?.shards || 0}
+                onBuy={() => handleBuyShopItem('reward-book', 'Book Purchase', 100)}
               />
             </div>
           </div>
@@ -925,19 +943,23 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             <h3>⚡ Power-ups</h3>
             <div className="shop-items">
               <ShopItem
+                id="powerup-xp"
                 image="🔥"
                 title="XP Booster"
                 description="Double XP for 24 hours"
                 price={30}
                 userShards={user?.stats?.shards || 0}
+                onBuy={() => handleBuyShopItem('powerup-xp', 'XP Booster', 30)}
               />
               
               <ShopItem
+                id="powerup-extension"
                 image="⏰"
                 title="Task Extension"
                 description="Extra day to complete tasks"
                 price={25}
                 userShards={user?.stats?.shards || 0}
+                onBuy={() => handleBuyShopItem('powerup-extension', 'Task Extension', 25)}
               />
             </div>
           </div>

@@ -17,5 +17,6 @@ export interface AuthContextType {
   addShopItem: (item: { title: string; description?: string; price: number; image?: string }) => Promise<boolean>
   deleteShopItem: (itemId: string) => Promise<boolean>
   getShopItems: () => ShopItem[]
+  buyShopItem: (itemId: string, itemPrice: number) => Promise<boolean>
   isLoading: boolean
 }

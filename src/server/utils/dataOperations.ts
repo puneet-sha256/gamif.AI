@@ -415,3 +415,50 @@ export async function getUserShopItems(userId: string) {
   
   return user.shopItems || []
 }
+
+export async function buyShopItem(
+  userId: string,
+  itemId: string,
+  itemPrice: number
+): Promise<{ success: boolean; message?: string }> {
+  logger.info(`User ${userId} attempting to buy shop item ${itemId} for ${itemPrice} shards`)
+  const users = await loadUsers()
+  const user = users.find(u => u.id === userId)
+  
+  if (!user) {
+    logger.error('User not found')
+    return { success: false, message: 'User not found' }
+  }
+  
+  // Ensure user has stats
+  if (!user.stats) {
+    user.stats = {
+      experience: 0,
+      shards: 0,
+      strength: 0,
+      intelligence: 0,
+      charisma: 0
+    }
+  }
+  
+  const currentShards = user.stats.shards || 0
+  
+  // Check if user has enough shards
+  if (currentShards < itemPrice) {
+    logger.error(`Insufficient shards. User has ${currentShards}, needs ${itemPrice}`)
+    return { 
+      success: false, 
+      message: `Insufficient shards. You have ${currentShards} 💎, but need ${itemPrice} 💎` 
+    }
+  }
+  
+  // Deduct shards
+  user.stats.shards = currentShards - itemPrice
+  
+  await saveUsers(users)
+  logger.success(`Shop item purchased successfully. New shard balance: ${user.stats.shards}`)
+  return { 
+    success: true, 
+    message: `Successfully purchased item for ${itemPrice} 💎. Remaining shards: ${user.stats.shards} 💎` 
+  }
+}

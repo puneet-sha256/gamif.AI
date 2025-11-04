@@ -383,6 +383,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return user?.shopItems || []
   }
 
+  // Buy a shop item
+  const buyShopItem = async (itemId: string, itemPrice: number): Promise<boolean> => {
+    console.log('🔄 AuthContext: Buying shop item:', itemId, 'for', itemPrice, 'shards')
+    
+    if (!user) {
+      console.log('❌ AuthContext: Cannot buy shop item - no user logged in')
+      return false
+    }
+
+    try {
+      const sessionId = userDatabase.getSessionId()
+      if (!sessionId) {
+        console.log('❌ AuthContext: No session ID available')
+        return false
+      }
+
+      const result = await shopService.buyShopItem(sessionId, itemId, itemPrice)
+      
+      if (result.success) {
+        console.log('✅ AuthContext: Shop item purchased successfully')
+        
+        // Refresh user data to get updated shards
+        const freshUser = await userDatabase.getCurrentUser()
+        if (freshUser) {
+          setUser(freshUser)
+        }
+        return true
+      }
+      
+      return false
+    } catch (error) {
+      console.error('❌ AuthContext: Error buying shop item:', error)
+      return false
+    }
+  }
+
   const value: AuthContextType = {
     user,
     login,
@@ -399,6 +435,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     addShopItem,
     deleteShopItem,
     getShopItems,
+    buyShopItem,
     isLoading
   }
 
