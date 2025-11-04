@@ -21,58 +21,43 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    console.log('🔄 ProfileSetup: Input changed:', name, '=', value)
     setFormData(prev => ({
       ...prev,
       [name]: name === 'age' || name === 'monthlyLimit' ? Number(value) : value
     }))
     if (error) {
-      console.log('✅ ProfileSetup: Clearing error state')
       setError('')
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('🔄 ProfileSetup: Form submitted with data:', {
-      name: formData.name,
-      age: formData.age,
-      monthlyLimit: formData.monthlyLimit,
-      currency: formData.currency
-    })
     
     // Validation
     if (!formData.name.trim()) {
-      console.log('❌ ProfileSetup: Name validation failed')
       setError('Player name is required')
       return
     }
     
     if (formData.age < 13 || formData.age > 100) {
-      console.log('❌ ProfileSetup: Age validation failed:', formData.age)
       setError('Age must be between 13 and 100')
       return
     }
     
     if (formData.monthlyLimit < 0) {
-      console.log('❌ ProfileSetup: Monthly limit validation failed:', formData.monthlyLimit)
       setError('Monthly limit cannot be negative')
       return
     }
     
-    console.log('✅ ProfileSetup: Form validation passed')
     setIsSubmitting(true)
     setError('')
     
     try {
-      console.log('🔄 ProfileSetup: Saving profile data...')
       const success = await saveProfileData(formData)
       
       if (success) {
-        console.log('✅ ProfileSetup: Profile saved successfully, proceeding to next step')
         onComplete(formData)
       } else {
-        console.log('❌ ProfileSetup: Failed to save profile data')
         setError('Failed to save profile. Please try again.')
       }
     } catch (error: any) {
@@ -80,7 +65,6 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
       setError('Failed to save profile. Please try again.')
     } finally {
       setIsSubmitting(false)
-      console.log('✅ ProfileSetup: Form submission complete')
     }
   }
 

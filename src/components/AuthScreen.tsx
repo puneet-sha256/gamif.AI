@@ -27,68 +27,54 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('🔄 AuthScreen: Form submitted, mode:', isLogin ? 'login' : 'register')
     setError('')
     setSuccess('')
 
     // Validation
-    console.log('🔄 AuthScreen: Starting form validation...')
     if (!isLogin && formData.password !== formData.confirmPassword) {
-      console.log('❌ AuthScreen: Password confirmation mismatch')
       setError('Passwords do not match')
       return
     }
 
     if (formData.password.length < 6) {
-      console.log('❌ AuthScreen: Password too short')
       setError('Password must be at least 6 characters long')
       return
     }
 
     if (!isLogin && !formData.username.trim()) {
-      console.log('❌ AuthScreen: Username missing for registration')
       setError('Player name is required')
       return
     }
 
-    console.log('✅ AuthScreen: Form validation passed')
 
     try {
       if (isLogin) {
-        console.log('🔄 AuthScreen: Starting login process for:', formData.email)
         const result = await login({
           email: formData.email,
           password: formData.password
         })
 
-        console.log('📡 AuthScreen: Login result:', { success: result.success, message: result.message })
         if (result.success) {
-          console.log('✅ AuthScreen: Login successful, navigating to next step')
           setSuccess(result.message)
           setTimeout(() => {
             onLogin()
           }, 1000)
         } else {
-          console.log('❌ AuthScreen: Login failed:', result.message)
           setError(result.message)
         }
       } else {
-        console.log('🔄 AuthScreen: Starting registration process for:', formData.email, 'username:', formData.username)
         const result = await register({
           username: formData.username,
           email: formData.email,
           password: formData.password
         })
 
-        console.log('📡 AuthScreen: Registration result:', { success: result.success, message: result.message })
         if (result.success) {
-          console.log('✅ AuthScreen: Registration successful, navigating to next step')
           setSuccess(result.message)
           setTimeout(() => {
             onLogin()
           }, 1000)
         } else {
-          console.log('❌ AuthScreen: Registration failed:', result.message)
           setError(result.message)
         }
       }
@@ -99,7 +85,6 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
   }
 
   const toggleMode = () => {
-    console.log('🔄 AuthScreen: Toggling mode from', isLogin ? 'login' : 'register', 'to', !isLogin ? 'login' : 'register')
     setIsLogin(!isLogin)
     setFormData({
       username: '',
@@ -109,7 +94,6 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
     })
     setError('')
     setSuccess('')
-    console.log('✅ AuthScreen: Mode toggle complete, form cleared')
   }
 
   return (

@@ -51,44 +51,28 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const [isClaiming, setIsClaiming] = useState(false)
 
   useEffect(() => {
-    console.log('🎯 Dashboard: Component mounted')
     if (user) {
-      console.log('✅ Dashboard: User data loaded:', {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        hasProfile: !!user.profileData,
-        hasGoals: !!user.goalsData,
-        hasGeneratedTasks: !!user.generatedTasks
-      })
+      
       
       // Set generated tasks from user data
       setGeneratedTasks(user.generatedTasks || null)
     } else {
-      console.log('⚠️ Dashboard: No user data available')
     }
   }, [user])
 
   // Function to load fresh generated tasks
   const loadGeneratedTasks = async () => {
     setIsLoadingTasks(true)
-    console.log('🔄 Dashboard: Loading generated tasks...')
     try {
       const tasks = await getUserTasks()
       setGeneratedTasks(tasks)
       
       if (tasks && hasGeneratedTasks(tasks)) {
-        console.log('✅ Dashboard: Generated tasks loaded:', {
-          hasStrength: !!tasks?.Strength?.length,
-          hasIntelligence: !!tasks?.Intelligence?.length,
-          hasCharisma: !!tasks?.Charisma?.length
-        })
+        
       } else {
-        console.log('ℹ️ Dashboard: No tasks found in database.')
         
         // Check if user has goals data to generate tasks from
         if (user?.goalsData && user?.profileData) {
-          console.log('🤖 Dashboard: User has goals and profile. Attempting to generate tasks...')
           
           const sessionId = userDatabase.getSessionId()
           if (sessionId) {
@@ -100,7 +84,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               )
               
               if (result.success && result.data?.generatedTasks) {
-                console.log('✅ Dashboard: Tasks generated successfully via AI')
                 setGeneratedTasks(result.data.generatedTasks)
                 
                 // Refresh user data to sync with backend
@@ -109,16 +92,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                   setGeneratedTasks(freshTasks)
                 }
               } else {
-                console.log('⚠️ Dashboard: Task generation failed:', result.message)
               }
             } catch (error) {
               console.error('❌ Dashboard: Error generating tasks:', error)
             }
           } else {
-            console.log('⚠️ Dashboard: No session ID available for task generation')
           }
         } else {
-          console.log('ℹ️ Dashboard: User needs to complete Goals Setup to generate tasks.')
         }
       }
     } catch (error) {
@@ -230,10 +210,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   }
 
   const handleLogout = async () => {
-    console.log('🔄 Dashboard: Logout initiated by user')
     try {
       await logout()
-      console.log('✅ Dashboard: Logout successful, navigating away')
       onLogout()
     } catch (error) {
       console.error('❌ Dashboard: Error during logout:', error)
@@ -288,10 +266,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         }))
       } : undefined
 
-      console.log('🤖 Sending daily activity to AI for analysis...')
-      console.log('📝 Activity:', dailyActivity)
-      console.log('📋 Current Tasks:', currentTasks)
-
       // Call the AI service for activity analysis
       const result = await aiService.analyzeDailyActivity({
         sessionId,
@@ -300,9 +274,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       })
 
       if (result.success && result.data) {
-        console.log('✅ AI Analysis completed successfully')
-        console.log('🎯 Activity Matches:', result.data.matches)
-        console.log('💰 Rewards:', result.data.rewards)
 
         // Save unclaimed rewards to user data if there are any rewards
         if (result.data.rewards?.activityRewards && result.data.rewards.activityRewards.length > 0) {
@@ -329,7 +300,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           const success = await updateUser({ unclaimedRewards })
           
           if (success) {
-            console.log('✅ Unclaimed rewards saved successfully')
             showSuccess(`🎉 Great job! You've earned rewards from ${result.data.rewards.activityRewards.length} activities.\n\nClick the "Unclaimed Rewards" button to view and claim them!`)
           } else {
             console.error('❌ Failed to save unclaimed rewards')
@@ -368,7 +338,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
       const rewards = user.unclaimedRewards
       
-      console.log('🎁 Starting reward claim process...')
       
       // Step 1: Use the userService API to claim rewards (updates stats in backend)
       const result = await userService.claimRewards({
@@ -381,10 +350,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       })
       
       if (result.success) {
-        console.log('✅ Stats updated in backend')
         
         // Step 2: Clear unclaimed rewards in backend
-        console.log('🧹 Clearing unclaimed rewards in backend...')
         
         if (!user.id) {
           console.error('❌ User ID not found')
@@ -399,13 +366,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           })
           
           if (clearResponse.success) {
-            console.log('✅ Unclaimed rewards cleared in backend')
             
             // Step 3: Refresh user data from server to sync UI
-            console.log('🔄 Refreshing user data from server...')
             await refreshUserTasks()
             
-            console.log('✅ Rewards claimed successfully - all steps completed')
             showSuccess(`🎉 Congratulations!\n\nYou've claimed:\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nKeep up the great work!`)
             setShowRewardClaimModal(false)
           } else {
@@ -429,7 +393,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   }
 
   const profileData = user?.profileData
-  const goalsData = user?.goalsData
 
   // Calculate experience progress for next level
   const calculateLevelProgress = (experience: number) => {
@@ -508,15 +471,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
   }
 
-  console.log('🎯 Dashboard: Rendering with data:', {
-    hasProfileData: !!profileData,
-    hasGoalsData: !!goalsData,
-    profileName: profileData?.name,
-    currency: profileData?.currency
-  })
+  
 
   if (!user) {
-    console.log('⚠️ Dashboard: No user data, cannot render dashboard')
     return <div>Loading user data...</div>
   }
 

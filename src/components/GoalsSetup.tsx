@@ -19,50 +19,41 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
   const { saveGoalsData } = useAuth()
 
   const handleTextChange = (value: string) => {
-    console.log('🔄 GoalsSetup: Goals updated, length:', value.length)
     setFormData({ longTermGoals: value })
     if (error) {
-      console.log('✅ GoalsSetup: Clearing error state')
       setError('')
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('🔄 GoalsSetup: Form submitted with goals length:', formData.longTermGoals.length)
     
     // Validation
     if (!formData.longTermGoals.trim()) {
-      console.log('❌ GoalsSetup: Validation failed - goals are required')
       setError('Please describe your long-term goals to continue')
       return
     }
     
     if (formData.longTermGoals.trim().length < 50) {
-      console.log('❌ GoalsSetup: Validation failed - goals too short')
       setError('Please provide a more detailed description of your goals (at least 50 characters)')
       return
     }
     
-    console.log('✅ GoalsSetup: Form validation passed')
     setIsSubmitting(true)
     setError('')
     
     try {
-      console.log('🔄 GoalsSetup: Saving goals data...')
       setTaskGenerationStatus('Saving your goals...')
       
       const success = await saveGoalsData(formData)
       
       if (success) {
-        console.log('✅ GoalsSetup: Goals saved and AI tasks generated successfully, proceeding to dashboard')
         setTaskGenerationStatus('Goals saved and AI tasks generated! Redirecting...')
         // Small delay to show the success message
         setTimeout(() => {
           onComplete(formData)
         }, 1000)
       } else {
-        console.log('❌ GoalsSetup: Failed to save goals data')
         setError('Failed to save goals. Please try again.')
         setTaskGenerationStatus('')
       }
@@ -72,12 +63,10 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
       setTaskGenerationStatus('')
     } finally {
       setIsSubmitting(false)
-      console.log('✅ GoalsSetup: Form submission complete')
     }
   }
 
   const handleBackClick = () => {
-    console.log('🔄 GoalsSetup: Back button clicked, returning to profile setup')
     onBack()
   }
 
