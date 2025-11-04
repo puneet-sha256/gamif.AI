@@ -447,6 +447,10 @@
   .reward-modal-footer {
     padding: 20px;
   }
+  
+  .reward-modal-header h3 {
+    font-size: 20px;
+  }
 
   .activity-details {
     flex-direction: column;
@@ -466,5 +470,49 @@
   .reward-modal-btn-primary {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .reward-modal-header {
+    padding: 16px;
+  }
+  
+  .reward-modal-body {
+    padding: 16px;
+  }
+  
+  .reward-modal-footer {
+    padding: 16px;
+  }
+  
+  .reward-modal-header h3 {
+    font-size: 18px;
+  }
+  
+  .activity-name {
+    font-size: 14px;
+  }
+  
+  .category-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+  
+  .reward-item {
+    padding: 5px 10px;
+  }
+  
+  .reward-value,
+  .reward-icon {
+    font-size: 13px;
+  }
+  
+  .total-value {
+    font-size: 20px;
+  }
+  
+  .summary-header h4 {
+    font-size: 16px;
   }
 }

@@ -319,6 +319,7 @@
 @media (max-width: 768px) {
   .auth-content {
     max-width: 90%;
+    padding: 15px;
   }
   
   .auth-card {
@@ -327,5 +328,73 @@
   
   .solo-leveling-logo h1 {
     font-size: 2rem;
+  }
+  
+  .subtitle {
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+  }
+  
+  .auth-tabs {
+    margin-bottom: 20px;
+  }
+  
+  .tab {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+  
+  .input-group {
+    margin-bottom: 16px;
+  }
+  
+  .input-group label {
+    font-size: 0.85rem;
+  }
+  
+  .input-group input {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+  
+  .auth-button {
+    padding: 12px;
+    font-size: 1rem;
+    letter-spacing: 1.5px;
+  }
+  
+  .message {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+  
+  .auth-footer p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-content {
+    max-width: 95%;
+    padding: 10px;
+  }
+  
+  .auth-card {
+    padding: 25px 16px;
+  }
+  
+  .solo-leveling-logo h1 {
+    font-size: 1.6rem;
+  }
+  
+  .subtitle {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+  }
+  
+  .tab {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
   }
 }
