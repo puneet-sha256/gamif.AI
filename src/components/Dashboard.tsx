@@ -328,16 +328,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           // Merge category breakdowns
           const categoryBreakdown = {
             Strength: {
-              xp: (existingRewards?.categoryBreakdown.Strength.xp || 0) + (result.data.rewards.categoryBreakdown.Strength?.xp || 0),
-              shards: (existingRewards?.categoryBreakdown.Strength.shards || 0) + (result.data.rewards.categoryBreakdown.Strength?.shards || 0)
+              xp: (existingRewards?.categoryBreakdown?.Strength?.xp || 0) + (result.data.rewards.categoryBreakdown.Strength?.xp || 0),
+              shards: (existingRewards?.categoryBreakdown?.Strength?.shards || 0) + (result.data.rewards.categoryBreakdown.Strength?.shards || 0)
             },
             Intelligence: {
-              xp: (existingRewards?.categoryBreakdown.Intelligence.xp || 0) + (result.data.rewards.categoryBreakdown.Intelligence?.xp || 0),
-              shards: (existingRewards?.categoryBreakdown.Intelligence.shards || 0) + (result.data.rewards.categoryBreakdown.Intelligence?.shards || 0)
+              xp: (existingRewards?.categoryBreakdown?.Intelligence?.xp || 0) + (result.data.rewards.categoryBreakdown.Intelligence?.xp || 0),
+              shards: (existingRewards?.categoryBreakdown?.Intelligence?.shards || 0) + (result.data.rewards.categoryBreakdown.Intelligence?.shards || 0)
             },
             Charisma: {
-              xp: (existingRewards?.categoryBreakdown.Charisma.xp || 0) + (result.data.rewards.categoryBreakdown.Charisma?.xp || 0),
-              shards: (existingRewards?.categoryBreakdown.Charisma.shards || 0) + (result.data.rewards.categoryBreakdown.Charisma?.shards || 0)
+              xp: (existingRewards?.categoryBreakdown?.Charisma?.xp || 0) + (result.data.rewards.categoryBreakdown.Charisma?.xp || 0),
+              shards: (existingRewards?.categoryBreakdown?.Charisma?.shards || 0) + (result.data.rewards.categoryBreakdown.Charisma?.shards || 0)
             }
           }
           
