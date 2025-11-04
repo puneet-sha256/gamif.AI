@@ -88,8 +88,8 @@ function AppContent() {
     await logout()
   }
 
-  // Show loading screen while initializing
-  if (isInitializing || isLoading) {
+  // Show loading screen while initializing (but not during auth operations)
+  if (isInitializing) {
     return <LoadingScreen />
   }
 

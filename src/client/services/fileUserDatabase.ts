@@ -95,11 +95,9 @@ class FileUserDatabase {
       })
 
       const result = await response.json()
-      
 
       if (result.success && result.sessionId) {
         this.saveSession(result.sessionId)
-      } else {
       }
 
       return result

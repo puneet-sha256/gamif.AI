@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import './AuthScreen.css'
 
@@ -17,6 +17,12 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+
+  // Clear error and success messages when switching between login and register
+  useEffect(() => {
+    setError('')
+    setSuccess('')
+  }, [isLogin])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
