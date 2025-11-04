@@ -294,22 +294,58 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
         // Save unclaimed rewards to user data if there are any rewards
         if (result.data.rewards?.activityRewards && result.data.rewards.activityRewards.length > 0) {
+          // Get existing unclaimed rewards
+          const existingRewards = user?.unclaimedRewards
+          
+          // Map new rewards
+          const newActivities = result.data.rewards.activityRewards.map((reward: any) => ({
+            activityName: reward.activityName,
+            matchType: reward.matchType,
+            category: reward.category as 'Strength' | 'Intelligence' | 'Charisma',
+            matchedTask: reward.matchedTask,
+            goalLink: reward.goalLink,
+            effortRatio: reward.effortRatio,
+            xpEarned: reward.xpEarned,
+            shardsEarned: reward.shardsEarned,
+            calculationNotes: reward.calculationNotes,
+            timestamp: new Date().toISOString()
+          }))
+          
+          // Merge with existing activities
+          const allActivities = existingRewards 
+            ? [...existingRewards.activities, ...newActivities]
+            : newActivities
+          
+          // Calculate combined totals
+          const totalXP = existingRewards 
+            ? existingRewards.totalXP + result.data.rewards.totalXP
+            : result.data.rewards.totalXP
+          
+          const totalShards = existingRewards 
+            ? existingRewards.totalShards + result.data.rewards.totalShards
+            : result.data.rewards.totalShards
+          
+          // Merge category breakdowns
+          const categoryBreakdown = {
+            Strength: {
+              xp: (existingRewards?.categoryBreakdown.Strength.xp || 0) + (result.data.rewards.categoryBreakdown.Strength?.xp || 0),
+              shards: (existingRewards?.categoryBreakdown.Strength.shards || 0) + (result.data.rewards.categoryBreakdown.Strength?.shards || 0)
+            },
+            Intelligence: {
+              xp: (existingRewards?.categoryBreakdown.Intelligence.xp || 0) + (result.data.rewards.categoryBreakdown.Intelligence?.xp || 0),
+              shards: (existingRewards?.categoryBreakdown.Intelligence.shards || 0) + (result.data.rewards.categoryBreakdown.Intelligence?.shards || 0)
+            },
+            Charisma: {
+              xp: (existingRewards?.categoryBreakdown.Charisma.xp || 0) + (result.data.rewards.categoryBreakdown.Charisma?.xp || 0),
+              shards: (existingRewards?.categoryBreakdown.Charisma.shards || 0) + (result.data.rewards.categoryBreakdown.Charisma?.shards || 0)
+            }
+          }
+          
           const unclaimedRewards = {
-            activities: result.data.rewards.activityRewards.map((reward: any) => ({
-              activityName: reward.activityName,
-              matchType: reward.matchType,
-              category: reward.category as 'Strength' | 'Intelligence' | 'Charisma',
-              matchedTask: reward.matchedTask,
-              goalLink: reward.goalLink,
-              effortRatio: reward.effortRatio,
-              xpEarned: reward.xpEarned,
-              shardsEarned: reward.shardsEarned,
-              calculationNotes: reward.calculationNotes,
-              timestamp: new Date().toISOString()
-            })),
-            totalXP: result.data.rewards.totalXP,
-            totalShards: result.data.rewards.totalShards,
-            categoryBreakdown: result.data.rewards.categoryBreakdown,
+            activities: allActivities,
+            totalXP,
+            totalShards,
+            categoryBreakdown,
             lastUpdated: new Date().toISOString()
           }
 
