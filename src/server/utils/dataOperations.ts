@@ -452,8 +452,50 @@ export async function buyShopItem(
     }
   }
   
+  // Find the item in shopItems
+  const shopItem = user.shopItems?.find(item => item.id === itemId)
+  if (!shopItem) {
+    logger.error(`Shop item ${itemId} not found in user's wishlist`)
+    return { 
+      success: false, 
+      message: 'Item not found in wishlist' 
+    }
+  }
+  
   // Deduct shards
   user.stats.shards = currentShards - itemPrice
+  
+  // Remove item from shopItems (wishlist)
+  if (user.shopItems) {
+    user.shopItems = user.shopItems.filter(item => item.id !== itemId)
+  }
+  
+  // Initialize inventory if it doesn't exist
+  if (!user.inventory) {
+    user.inventory = []
+  }
+  
+  // Check if item already exists in inventory
+  const existingInventoryItem = user.inventory.find(item => item.id === itemId)
+  
+  if (existingInventoryItem) {
+    // Item already in inventory, increment count
+    existingInventoryItem.count += 1
+    logger.info(`Incremented count for item ${itemId} in inventory to ${existingInventoryItem.count}`)
+  } else {
+    // Add new item to inventory with count 1
+    const inventoryItem = {
+      id: shopItem.id,
+      title: shopItem.title,
+      description: shopItem.description,
+      price: shopItem.price,
+      image: shopItem.image,
+      count: 1,
+      purchasedAt: new Date().toISOString()
+    }
+    user.inventory.push(inventoryItem)
+    logger.info(`Added new item ${itemId} to inventory`)
+  }
   
   await saveUsers(users)
   logger.success(`Shop item purchased successfully. New shard balance: ${user.stats.shards}`)

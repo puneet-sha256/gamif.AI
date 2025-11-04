@@ -982,6 +982,48 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     )
   }
 
+  const renderInventoryTab = () => {
+    const inventoryItems = user?.inventory || []
+
+    return (
+      <div className="tab-content">
+        <div className="shop-header">
+          <div className="shop-header-content">
+            <h2>Inventory</h2>
+            <p>Your purchased items</p>
+          </div>
+        </div>
+        
+        {inventoryItems.length === 0 ? (
+          <div className="no-tasks-message">
+            <div className="no-tasks-content">
+              <h3>🎒 Your Inventory is Empty</h3>
+              <p>Purchase items from the shop to see them here!</p>
+            </div>
+          </div>
+        ) : (
+          <div className="shop-grid">
+            <div className="shop-section">
+              <h3>📦 My Items</h3>
+              <div className="shop-items">
+                {inventoryItems.map((item) => (
+                  <div key={item.id} className="shop-item">
+                    <div className="item-image">{item.image || '🎁'}</div>
+                    <div className="item-info">
+                      <h4>{item.title}</h4>
+                      <p>{item.description || 'Purchased item'}</p>
+                      <div className="item-price">Owned: {item.count}x</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
@@ -989,9 +1031,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       case 'tasks':
         return renderTasksTab()
       case 'inventory':
-        // Inventory is disabled, redirect to profile
-        setActiveTab('profile')
-        return renderProfileTab()
+        return renderInventoryTab()
       case 'shop':
         return renderShopTab()
       default:
@@ -1043,15 +1083,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             Tasks & Challenges
           </button>
           <button 
-            className={`nav-tab ${activeTab === 'inventory' ? 'active' : ''} disabled`}
-            onClick={() => {}} // Disabled, no action
-            disabled
+            className={`nav-tab ${activeTab === 'inventory' ? 'active' : ''}`}
+            onClick={() => setActiveTab('inventory')}
           >
             <span className="tab-icon">🎒</span>
-            <div className="tab-text">
-              <span>Inventory</span>
-              <span className="coming-soon">Coming Soon</span>
-            </div>
+            Inventory
           </button>
           <button 
             className={`nav-tab ${activeTab === 'shop' ? 'active' : ''}`}
