@@ -1,5 +1,6 @@
 import './Dashboard.css'
 import { useAuth } from '../contexts/AuthContext'
+import { useAlert } from '../contexts/AlertContext'
 import { useEffect, useState } from 'react'
 import StatCard from './StatCard'
 import TaskItem from './TaskItem'
@@ -30,6 +31,7 @@ type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, updateUser, refreshUserTasks } = useAuth()
+  const { showSuccess, showError, showWarning, showInfo } = useAlert()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
   const [showDailyInput, setShowDailyInput] = useState(false)
   const [dailyActivity, setDailyActivity] = useState('')
@@ -149,7 +151,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       // Refresh tasks
       await loadGeneratedTasks()
     } else {
-      alert('Failed to delete task. Please try again.')
+      showError('Failed to delete task. Please try again.')
     }
   }
 
@@ -222,7 +224,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     if (confirm('Are you sure you want to delete this item?')) {
       const success = await deleteShopItem(itemId)
       if (!success) {
-        alert('Failed to delete shop item. Please try again.')
+        showError('Failed to delete shop item. Please try again.')
       }
     }
   }
@@ -254,7 +256,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     try {
       const sessionId = userDatabase.getSessionId()
       if (!sessionId) {
-        alert('Session expired. Please log in again.')
+        showError('Session expired. Please log in again.')
         return
       }
 
@@ -328,24 +330,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           
           if (success) {
             console.log('✅ Unclaimed rewards saved successfully')
-            alert(`🎉 Great job! You've earned rewards from ${result.data.rewards.activityRewards.length} activities.\n\nClick the "Unclaimed Rewards" button to view and claim them!`)
+            showSuccess(`🎉 Great job! You've earned rewards from ${result.data.rewards.activityRewards.length} activities.\n\nClick the "Unclaimed Rewards" button to view and claim them!`)
           } else {
             console.error('❌ Failed to save unclaimed rewards')
-            alert('Activity analyzed but failed to save rewards. Please try again.')
+            showError('Activity analyzed but failed to save rewards. Please try again.')
           }
         } else {
-          alert('No activities were identified in your update that match your goals.')
+          showInfo('No activities were identified in your update that match your goals.')
         }
         
         setDailyActivity('')
         setShowDailyInput(false)
       } else {
         console.error('❌ AI Analysis failed:', result.message)
-        alert(`Failed to analyze activity: ${result.message}`)
+        showError(`Failed to analyze activity: ${result.message}`)
       }
     } catch (error) {
       console.error('❌ Error analyzing daily activity:', error)
-      alert('Sorry, there was an error analyzing your activity. Please try again.')
+      showError('Sorry, there was an error analyzing your activity. Please try again.')
     } finally {
       setIsAnalyzing(false)
     }
@@ -359,7 +361,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     try {
       const sessionId = userDatabase.getSessionId()
       if (!sessionId) {
-        alert('Session expired. Please log in again.')
+        showError('Session expired. Please log in again.')
         setIsClaiming(false)
         return
       }
@@ -386,7 +388,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         
         if (!user.id) {
           console.error('❌ User ID not found')
-          alert('Failed to clear rewards. Please try again.')
+          showError('Failed to clear rewards. Please try again.')
           return
         }
         
@@ -404,23 +406,23 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             await refreshUserTasks()
             
             console.log('✅ Rewards claimed successfully - all steps completed')
-            alert(`🎉 Congratulations!\n\nYou've claimed:\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nKeep up the great work!`)
+            showSuccess(`🎉 Congratulations!\n\nYou've claimed:\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nKeep up the great work!`)
             setShowRewardClaimModal(false)
           } else {
             console.error('⚠️ Rewards applied but failed to clear unclaimed rewards in backend')
-            alert('Rewards claimed successfully, but there was an issue clearing the unclaimed rewards. Please refresh the page.')
+            showWarning('Rewards claimed successfully, but there was an issue clearing the unclaimed rewards. Please refresh the page.')
           }
         } catch (clearError) {
           console.error('❌ Error clearing unclaimed rewards:', clearError)
-          alert('Rewards claimed successfully, but there was an issue clearing the unclaimed rewards. Please refresh the page.')
+          showWarning('Rewards claimed successfully, but there was an issue clearing the unclaimed rewards. Please refresh the page.')
         }
       } else {
         console.error('❌ Failed to claim rewards - API call failed')
-        alert('Failed to claim rewards. Please try again.')
+        showError('Failed to claim rewards. Please try again.')
       }
     } catch (error) {
       console.error('❌ Error claiming rewards:', error)
-      alert('Sorry, there was an error claiming your rewards. Please try again.')
+      showError('Sorry, there was an error claiming your rewards. Please try again.')
     } finally {
       setIsClaiming(false)
     }

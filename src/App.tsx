@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { AlertProvider } from './contexts/AlertContext'
 import AuthScreen from './components/AuthScreen'
 import ProfileSetup from './components/ProfileSetup'
 import GoalsSetup from './components/GoalsSetup'
 import Dashboard from './components/Dashboard'
 import LoadingScreen from './components/LoadingScreen'
+import AlertTest from './components/AlertTest'
 import type { ProfileData, GoalsData } from './types'
 import './App.css'
 
@@ -150,6 +152,7 @@ function AppContent() {
     <Router>
       <div className="app">
         <Routes>
+          <Route path="/test-alerts" element={<AlertTest />} />
           <Route path="*" element={renderCurrentStep()} />
         </Routes>
       </div>
@@ -160,7 +163,9 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <AlertProvider>
+        <AppContent />
+      </AlertProvider>
     </AuthProvider>
   )
 }
