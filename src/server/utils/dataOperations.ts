@@ -475,13 +475,17 @@ export async function buyShopItem(
     user.inventory = []
   }
   
-  // Check if item already exists in inventory
-  const existingInventoryItem = user.inventory.find(item => item.id === itemId)
+  // Check if item with the same title already exists in inventory (for counting duplicates)
+  const existingInventoryItem = user.inventory.find(item => 
+    item.title === shopItem.title && 
+    item.description === shopItem.description &&
+    item.price === shopItem.price
+  )
   
   if (existingInventoryItem) {
     // Item already in inventory, increment count
     existingInventoryItem.count += 1
-    logger.info(`Incremented count for item ${itemId} in inventory to ${existingInventoryItem.count}`)
+    logger.info(`Incremented count for item "${shopItem.title}" in inventory to ${existingInventoryItem.count}`)
   } else {
     // Add new item to inventory with count 1
     const inventoryItem = {
@@ -494,7 +498,7 @@ export async function buyShopItem(
       purchasedAt: new Date().toISOString()
     }
     user.inventory.push(inventoryItem)
-    logger.info(`Added new item ${itemId} to inventory`)
+    logger.info(`Added new item "${shopItem.title}" to inventory`)
   }
   
   await saveUsers(users)
