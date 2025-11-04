@@ -6,6 +6,7 @@ import { registerUser, loginUser, logoutUser } from './src/server/routes/authRou
 import { getCurrentUser, updateUserData, updateExperience, updateShards, getUserTasks, updateGeneratedTask, deleteGeneratedTask, addUserTask, addUserShopItem, deleteUserShopItem, getUserShopItemsList, buyUserShopItem } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
 import { generateTasks, analyzeDailyActivity } from './src/server/routes/aiRoutes'
+import { logger } from './src/utils/logger'
 
 const app = express()
 const PORT = 3001
@@ -28,18 +29,18 @@ app.use(express.json())
 // Request logging middleware
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString()
-  console.log(`🌐 Server: ${timestamp} - ${req.method} ${req.path}`)
+  logger.custom('🌐', `Server: ${timestamp} - ${req.method} ${req.path}`)
   if (req.body && Object.keys(req.body).length > 0) {
     // Log body but hide sensitive data
     const safeBody = { ...req.body }
     if (safeBody.password) safeBody.password = '[HIDDEN]'
-    console.log(`📥 Server: Request body:`, safeBody)
+    logger.custom('📥', 'Server: Request body:', safeBody)
   }
   
   // Log response
   const originalSend = res.send
   res.send = function(data) {
-    console.log(`📤 Server: ${req.method} ${req.path} - Status: ${res.statusCode}`)
+    logger.custom('📤', `Server: ${req.method} ${req.path} - Status: ${res.statusCode}`)
     return originalSend.call(this, data)
   }
   
@@ -83,11 +84,13 @@ async function startServer() {
   await initializeData()
   
   app.listen(PORT, () => {
-    console.log(`🚀 Solo Leveling API Server running on http://localhost:${PORT}`)
-    console.log(`📁 Data directory: ${DATA_DIR}`)
-    console.log(`👥 Users file: ${USERS_FILE}`)
-    console.log(`🔐 Sessions file: ${SESSIONS_FILE}`)
+    logger.custom('🚀', `Solo Leveling API Server running on http://localhost:${PORT}`)
+    logger.custom('📁', `Data directory: ${DATA_DIR}`)
+    logger.custom('👥', `Users file: ${USERS_FILE}`)
+    logger.custom('🔐', `Sessions file: ${SESSIONS_FILE}`)
   })
 }
 
-startServer().catch(console.error)
+startServer().catch((error) => {
+  logger.error('Failed to start server:', error)
+})
