@@ -1,0 +1,83 @@
+.confirm-test-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
+  padding: 40px 20px;
+  color: white;
+}
+
+.confirm-test-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.confirm-test-header h1 {
+  font-size: 42px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #8a2be2 0%, #00d4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.confirm-test-header p {
+  font-size: 18px;
+  color: #a0a0a0;
+}
+
+.confirm-test-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.test-section {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid rgba(138, 43, 226, 0.2);
+}
+
+.test-section h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #e0e0e0;
+}
+
+.test-btn {
+  width: 100%;
+  padding: 16px 24px;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.test-btn.delete {
+  background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+}
+
+.test-btn.delete:hover {
+  background: linear-gradient(135deg, #ff5555 0%, #dd1111 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 68, 68, 0.4);
+}
+
+.test-btn.buy {
+  background: linear-gradient(135deg, #00c851 0%, #007e33 100%);
+}
+
+.test-btn.buy:hover {
+  background: linear-gradient(135deg, #00d861 0%, #008e43 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 200, 81, 0.4);
+}
+
+.test-btn:active {
+  transform: translateY(0);
+}

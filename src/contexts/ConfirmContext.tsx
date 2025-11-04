@@ -25,6 +25,7 @@ interface ConfirmState {
 
 export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [confirm, setConfirm] = useState<ConfirmState | null>(null)
+  const [idCounter, setIdCounter] = useState(0)
 
   const showConfirm = (
     message: string,
@@ -32,11 +33,13 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
     cancelText: string = 'Cancel'
   ): Promise<boolean> => {
     return new Promise((resolve) => {
+      const newId = idCounter + 1
+      setIdCounter(newId)
       setConfirm({
         message,
         confirmText,
         cancelText,
-        id: Date.now(),
+        id: newId,
         resolver: resolve
       })
     })
