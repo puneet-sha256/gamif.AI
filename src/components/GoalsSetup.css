@@ -375,6 +375,7 @@
 @media (max-width: 768px) {
   .goals-setup-content {
     max-width: 90%;
+    padding: 15px;
   }
   
   .goals-setup-card {
@@ -385,7 +386,114 @@
     font-size: 1.8rem;
   }
   
+  .goals-subtitle {
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+  }
+  
+  .goals-description {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .goals-description p {
+    font-size: 1rem;
+  }
+  
+  .goals-header {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .goals-icon {
+    font-size: 1.5rem;
+    margin-right: 12px;
+  }
+  
+  .goals-info h3 {
+    font-size: 1.15rem;
+  }
+  
+  .goals-info p {
+    font-size: 0.85rem;
+  }
+  
+  .textarea-group {
+    margin-bottom: 20px;
+  }
+  
+  .textarea-group label {
+    font-size: 0.85rem;
+  }
+  
+  .goals-textarea,
+  .goal-textarea {
+    min-height: 120px;
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+  
+  .character-count {
+    font-size: 0.85rem;
+  }
+  
   .goals-buttons {
     flex-direction: column;
+    gap: 12px;
+  }
+  
+  .back-button,
+  .goals-button,
+  .complete-button {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+  
+  .status-message {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+  
+  .status-icon {
+    font-size: 1.2rem;
+  }
+  
+  .status-text {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .goals-setup-content {
+    max-width: 95%;
+    padding: 10px;
+  }
+  
+  .goals-setup-card {
+    padding: 25px 16px;
+  }
+  
+  .goals-logo h1 {
+    font-size: 1.5rem;
+  }
+  
+  .goals-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .goals-description {
+    padding: 14px;
+  }
+  
+  .goals-description p {
+    font-size: 0.95rem;
+  }
+  
+  .goals-header {
+    padding: 10px;
+  }
+  
+  .goals-info h3 {
+    font-size: 1.05rem;
   }
 }

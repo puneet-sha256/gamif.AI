@@ -583,6 +583,30 @@
     font-size: 1.5rem;
   }
   
+  .dashboard-logo .subtitle {
+    font-size: 0.7rem;
+  }
+  
+  .user-info {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .welcome-text {
+    font-size: 0.9rem;
+  }
+  
+  .unclaimed-rewards-button {
+    padding: 8px 16px;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .logout-button {
+    width: 100%;
+  }
+  
   .dashboard-content {
     padding: 20px;
   }
@@ -875,17 +899,88 @@
     gap: 20px;
   }
   
+  .profile-overview h2 {
+    font-size: 1.8rem;
+  }
+  
+  .profile-overview p {
+    font-size: 1rem;
+  }
+  
+  .profile-card {
+    padding: 20px 16px;
+  }
+  
+  .profile-card h3 {
+    font-size: 1.3rem;
+  }
+  
   .profile-details,
   .stats-row {
     grid-template-columns: 1fr;
   }
   
-  .experience-card {
+  .stat-card {
     padding: 20px;
+  }
+  
+  .experience-card {
+    padding: 20px 16px;
+  }
+  
+  .experience-card h3 {
+    font-size: 1.3rem;
   }
   
   .legend-row {
     padding: 12px;
+  }
+  
+  .shop-header {
+    padding: 0;
+  }
+  
+  .shop-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .shop-header p {
+    font-size: 1rem;
+  }
+  
+  .shop-header-content {
+    text-align: center;
+  }
+  
+  .shop-header-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .currency-display {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .shop-header-actions .add-task-btn {
+    width: 100%;
+  }
+  
+  .shop-section {
+    padding: 20px 16px;
+  }
+  
+  .shop-section h3 {
+    font-size: 1.3rem;
+  }
+  
+  .shop-items {
+    grid-template-columns: 1fr;
+  }
+  
+  .shop-item {
+    padding: 16px;
   }
 }
 
@@ -1524,18 +1619,29 @@
 /* Responsive Design for Tabs */
 @media (max-width: 768px) {
   .dashboard-navigation {
-    padding: 0 20px;
+    padding: 0 10px;
   }
   
   .nav-tabs {
     flex-wrap: wrap;
+    width: 100%;
   }
   
   .nav-tab {
-    flex: 1;
+    flex: 1 1 45%;
     min-width: 120px;
-    padding: 15px 10px;
-    font-size: 0.9rem;
+    padding: 12px 8px;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .tab-icon {
+    font-size: 1rem;
+  }
+  
+  .coming-soon {
+    font-size: 0.65rem;
+    padding: 1px 4px;
   }
   
   .tasks-grid,
@@ -1970,7 +2076,15 @@
     flex-direction: column;
     gap: 20px;
     text-align: center;
-    padding: 24px;
+    padding: 20px 16px;
+  }
+  
+  .tasks-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .tasks-header p {
+    font-size: 0.9rem;
   }
   
   .tasks-header-content {
@@ -1979,6 +2093,63 @@
   
   .add-task-btn {
     width: 100%;
+    min-width: auto;
+  }
+  
+  .task-section,
+  .challenge-section {
+    padding: 20px 16px;
+  }
+  
+  .task-section h3,
+  .challenge-section h3 {
+    font-size: 1.2rem;
+  }
+  
+  .task-item,
+  .challenge-item {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .task-item.enhanced,
+  .challenge-item.enhanced {
+    padding: 20px 16px;
+    gap: 16px;
+  }
+  
+  .task-content {
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .task-description {
+    font-size: 1.05rem;
+  }
+  
+  .task-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+  
+  .daily-activity-section {
+    padding: 0 16px;
+  }
+  
+  .daily-activity-btn {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  
+  .btn-content {
+    align-items: center;
+    text-align: center;
   }
 }
 
@@ -2052,5 +2223,62 @@
     justify-content: center;
     padding: 12px 20px;
     font-size: 1rem;
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+  .dashboard-logo h1 {
+    font-size: 1.3rem;
+  }
+  
+  .dashboard-logo .subtitle {
+    font-size: 0.65rem;
+  }
+  
+  .nav-tab {
+    flex: 1 1 100%;
+    padding: 12px 10px;
+    font-size: 0.8rem;
+  }
+  
+  .tasks-header h2,
+  .profile-overview h2,
+  .shop-header h2 {
+    font-size: 1.4rem;
+  }
+  
+  .task-icon,
+  .challenge-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+  }
+  
+  .stat-card {
+    padding: 16px;
+  }
+  
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+  }
+  
+  .experience-content {
+    gap: 30px;
+  }
+  
+  .ring-chart-wrapper svg {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .total-exp {
+    font-size: 1.4rem;
+  }
+  
+  .modal-header h3 {
+    font-size: 1.2rem;
   }
 }

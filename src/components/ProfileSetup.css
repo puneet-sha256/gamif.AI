@@ -391,6 +391,7 @@
 @media (max-width: 768px) {
   .profile-setup-content {
     max-width: 90%;
+    padding: 15px;
   }
   
   .profile-setup-card {
@@ -401,7 +402,94 @@
     font-size: 1.8rem;
   }
   
-  .form-row {
+  .setup-subtitle {
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+  }
+  
+  .form-row,
+  .input-row {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .form-section {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .form-section h3 {
+    font-size: 1.15rem;
+  }
+  
+  .form-group,
+  .input-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label,
+  .input-group label {
+    font-size: 0.85rem;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .input-group input,
+  .input-group select {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+  
+  .profile-button,
+  .setup-button {
+    padding: 14px;
+    font-size: 1rem;
+    letter-spacing: 1.5px;
+  }
+  
+  .character-preview {
+    padding: 16px;
+    margin-top: 16px;
+  }
+  
+  .character-preview h4 {
+    font-size: 1.05rem;
+  }
+  
+  .preview-stats {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    font-size: 0.95rem;
+  }
+  
+  .progress-text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-setup-content {
+    max-width: 95%;
+    padding: 10px;
+  }
+  
+  .profile-setup-card {
+    padding: 25px 16px;
+  }
+  
+  .setup-logo h1 {
+    font-size: 1.5rem;
+  }
+  
+  .setup-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .form-section {
+    padding: 14px;
+  }
+  
+  .form-section h3 {
+    font-size: 1.05rem;
   }
 }

@@ -135,3 +135,23 @@
     letter-spacing: 2px;
   }
 }
+
+@media (max-width: 480px) {
+  .loading-logo h1 {
+    font-size: 1.8rem;
+  }
+  
+  .loading-logo .subtitle {
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .loading-spinner-container p {
+    font-size: 1rem;
+  }
+}
