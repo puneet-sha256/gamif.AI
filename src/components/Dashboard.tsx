@@ -1,6 +1,7 @@
 import './Dashboard.css'
 import { useAuth } from '../contexts/AuthContext'
 import { useAlert } from '../contexts/AlertContext'
+import { useConfirm } from '../contexts/ConfirmContext'
 import { useEffect, useState } from 'react'
 import StatCard from './StatCard'
 import TaskItem from './TaskItem'
@@ -32,6 +33,7 @@ type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, buyShopItem, updateUser, refreshUserTasks } = useAuth()
   const { showSuccess, showError, showWarning, showInfo } = useAlert()
+  const { showConfirm } = useConfirm()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
   const [showDailyInput, setShowDailyInput] = useState(false)
   const [dailyActivity, setDailyActivity] = useState('')
@@ -201,7 +203,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
   // Handler for deleting shop items
   const handleDeleteShopItem = async (itemId: string) => {
-    if (confirm('Are you sure you want to delete this item?')) {
+    const confirmed = await showConfirm(
+      'Are you sure you want to delete this item?',
+      'Delete',
+      'Cancel'
+    )
+    if (confirmed) {
       const success = await deleteShopItem(itemId)
       if (!success) {
         showError('Failed to delete shop item. Please try again.')

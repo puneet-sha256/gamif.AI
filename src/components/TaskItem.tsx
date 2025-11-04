@@ -1,4 +1,5 @@
 import React from 'react'
+import { useConfirm } from '../contexts/ConfirmContext'
 
 interface TaskItemProps {
   icon: string
@@ -31,6 +32,8 @@ const TaskItem: React.FC<TaskItemProps> = ({
   onDelete,
   onComplete
 }) => {
+  const { showConfirm } = useConfirm()
+  
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (taskId && taskCategory && onEdit) {
@@ -38,10 +41,15 @@ const TaskItem: React.FC<TaskItemProps> = ({
     }
   }
 
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation()
     if (taskId && taskCategory && onDelete) {
-      if (confirm(`Are you sure you want to delete this task?\n\n"${description}"`)) {
+      const confirmed = await showConfirm(
+        `Are you sure you want to delete this task?\n\n"${description}"`,
+        'Delete',
+        'Cancel'
+      )
+      if (confirmed) {
         onDelete(taskId, taskCategory)
       }
     }
