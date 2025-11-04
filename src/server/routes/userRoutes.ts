@@ -132,6 +132,48 @@ export async function updateExperience(req: Request, res: Response) {
     // Total experience is sum of all attributes
     user.stats.experience = newStrength + newIntelligence + newCharisma
 
+    // Update activity history for heatmap
+    const today = new Date().toISOString().split('T')[0]
+    if (!user.activityHistory) {
+      user.activityHistory = {
+        dailyActivities: [],
+        lastUpdated: new Date().toISOString()
+      }
+    }
+
+    // Find today's activity or create new one
+    const todayActivity = user.activityHistory.dailyActivities.find(
+      activity => activity.date === today
+    )
+
+    if (todayActivity) {
+      // Update existing activity
+      todayActivity.strength += Math.max(0, strengthChange)
+      todayActivity.intelligence += Math.max(0, intelligenceChange)
+      todayActivity.charisma += Math.max(0, charismaChange)
+      todayActivity.total = todayActivity.strength + todayActivity.intelligence + todayActivity.charisma
+    } else {
+      // Create new activity for today
+      user.activityHistory.dailyActivities.push({
+        date: today,
+        strength: Math.max(0, strengthChange),
+        intelligence: Math.max(0, intelligenceChange),
+        charisma: Math.max(0, charismaChange),
+        total: Math.max(0, strengthChange) + Math.max(0, intelligenceChange) + Math.max(0, charismaChange)
+      })
+    }
+
+    user.activityHistory.lastUpdated = new Date().toISOString()
+
+    // Keep only last 365 days of activity history
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - 365)
+    const cutoffDateStr = cutoffDate.toISOString().split('T')[0]
+    
+    user.activityHistory.dailyActivities = user.activityHistory.dailyActivities.filter(
+      activity => activity.date >= cutoffDateStr
+    )
+
     // Update session last access and save user
     await updateSessionLastAccess(sessionId)
     const updatedUser = await updateUser(user.id, user)
