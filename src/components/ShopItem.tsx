@@ -1,6 +1,7 @@
 import React from 'react'
 
 interface ShopItemProps {
+  id?: string
   image: string
   title: string
   description: string
@@ -25,6 +26,19 @@ const ShopItem: React.FC<ShopItemProps> = ({
 }) => {
   const canAfford = userShards >= price
   
+  const handleBuyClick = () => {
+    if (!canAfford) return
+    
+    // Show confirmation dialog before buying
+    const confirmed = window.confirm(
+      `Are you sure you want to buy "${title}" for ${price} 💎 shards?\n\nYou currently have ${userShards} 💎 shards.`
+    )
+    
+    if (confirmed && onBuy) {
+      onBuy()
+    }
+  }
+  
   return (
     <div className={`shop-item ${className}`}>
       <div className="item-image">{image}</div>
@@ -37,7 +51,7 @@ const ShopItem: React.FC<ShopItemProps> = ({
         <button 
           className="buy-button" 
           disabled={!canAfford}
-          onClick={onBuy}
+          onClick={handleBuyClick}
         >
           Buy
         </button>

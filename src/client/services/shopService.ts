@@ -85,6 +85,34 @@ class ShopService {
       throw error
     }
   }
+
+  /**
+   * Buy a shop item
+   */
+  async buyShopItem(
+    sessionId: string,
+    itemId: string,
+    itemPrice: number
+  ): Promise<ApiResponse> {
+    console.log('💰 ShopService: Buying shop item:', itemId, 'for', itemPrice, 'shards')
+
+    try {
+      const response = await apiClient.post('/user/shop/buy', {
+        sessionId,
+        itemId,
+        itemPrice
+      })
+
+      if (response.success) {
+        console.log('✅ ShopService: Shop item purchased successfully')
+      }
+
+      return response
+    } catch (error: any) {
+      console.error('❌ ShopService: Shop item purchase failed:', error)
+      throw error
+    }
+  }
 }
 
 // Export singleton instance

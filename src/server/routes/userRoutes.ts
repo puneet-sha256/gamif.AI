@@ -14,7 +14,8 @@ import {
   addTaskToGeneratedTasks,
   addShopItem,
   deleteShopItem,
-  getUserShopItems
+  getUserShopItems,
+  buyShopItem
 } from '../utils/dataOperations'
 import {
   createSuccessResponse,
@@ -589,6 +590,64 @@ export async function getUserShopItemsList(req: Request, res: Response) {
 
   } catch (error) {
     logger.error('Get shop items error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Buy a shop item
+export async function buyUserShopItem(req: Request, res: Response) {
+  try {
+    const { sessionId, itemId, itemPrice } = req.body
+
+    // Validate required fields
+    if (!sessionId || !itemId || itemPrice === undefined) {
+      return res.status(400).json(createErrorResponse(
+        'Session ID, item ID, and item price are required'
+      ))
+    }
+
+    // Validate price is a positive number
+    if (typeof itemPrice !== 'number' || itemPrice < 0) {
+      return res.status(400).json(createErrorResponse(
+        'Item price must be a non-negative number'
+      ))
+    }
+
+    // Verify session
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    // Find user
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    // Buy the shop item
+    const result = await buyShopItem(user.id, itemId, itemPrice)
+
+    if (!result.success) {
+      return res.status(400).json(createErrorResponse(
+        result.message || 'Failed to purchase item'
+      ))
+    }
+
+    // Update session last access
+    await updateSessionLastAccess(sessionId)
+
+    // Get updated user data
+    const updatedUser = await findUserById(user.id)
+
+    res.json(createSuccessResponse(
+      result.message || 'Item purchased successfully',
+      undefined,
+      updatedUser ? sanitizeUser(updatedUser) : undefined
+    ))
+
+  } catch (error) {
+    logger.error('Buy shop item error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
