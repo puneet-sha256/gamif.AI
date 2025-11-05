@@ -15,15 +15,14 @@ const CATEGORY_COLORS = {
   all: '#10b981'
 }
 
-const TOTAL_DAYS = 84 // 12 weeks of activity history
 const DAYS_PER_WEEK = 7
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) => {
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all')
 
-  // Generate last 84 days (12 weeks) of data
-  const heatmapData = useMemo(() => {
-    const days: Array<{ date: string; value: number; dateObj: Date }> = []
+  // Generate grid data for last 12 months
+  const { gridData, monthLabels } = useMemo(() => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     
@@ -40,38 +39,107 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
       })
     }
 
-    // Generate last 84 days
-    for (let i = TOTAL_DAYS - 1; i >= 0; i--) {
-      const date = new Date(today)
-      date.setDate(date.getDate() - i)
-      const dateStr = date.toISOString().split('T')[0]
+    // Calculate start date (go back 12 months from today, then to the Sunday before that)
+    const startDate = new Date(today)
+    startDate.setFullYear(startDate.getFullYear() - 1)
+    const dayOfWeek = startDate.getDay() // 0 = Sunday
+    startDate.setDate(startDate.getDate() - dayOfWeek) // Go to previous Sunday
+    
+    // Build grid: 7 rows (days of week) x ~53 columns (weeks)
+    const grid: Array<Array<{ date: string; value: number; dateObj: Date } | null>> = Array.from({ length: DAYS_PER_WEEK }, () => [])
+    const months: Array<{ month: string; weekIndex: number; span: number }> = []
+    
+    let currentMonth = ''
+    let monthStartWeek = 0
+    let weekIndex = 0
+    
+    const currentDate = new Date(startDate)
+    
+    // Generate data for each week
+    while (currentDate <= today) {
+      const weekStart = new Date(currentDate)
       
-      const activity = activityMap.get(dateStr)
-      let value = 0
+      // Check if we're starting a new month
+      const monthName = weekStart.toLocaleDateString('en-US', { month: 'short' })
+      if (monthName !== currentMonth) {
+        if (currentMonth !== '') {
+          // Save previous month
+          months.push({
+            month: currentMonth,
+            weekIndex: monthStartWeek,
+            span: weekIndex - monthStartWeek
+          })
+        }
+        currentMonth = monthName
+        monthStartWeek = weekIndex
+      }
       
-      if (activity) {
-        switch (selectedCategory) {
-          case 'Strength':
-            value = activity.strength
-            break
-          case 'Intelligence':
-            value = activity.intelligence
-            break
-          case 'Charisma':
-            value = activity.charisma
-            break
-          case 'all':
-          default:
-            value = activity.total
-            break
+      // Add days for this week
+      for (let dayOfWeek = 0; dayOfWeek < DAYS_PER_WEEK; dayOfWeek++) {
+        const date = new Date(weekStart)
+        date.setDate(date.getDate() + dayOfWeek)
+        
+        if (date <= today && date >= startDate) {
+          const dateStr = date.toISOString().split('T')[0]
+          const activity = activityMap.get(dateStr)
+          
+          let value = 0
+          if (activity) {
+            switch (selectedCategory) {
+              case 'Strength':
+                value = activity.strength
+                break
+              case 'Intelligence':
+                value = activity.intelligence
+                break
+              case 'Charisma':
+                value = activity.charisma
+                break
+              case 'all':
+              default:
+                value = activity.total
+                break
+            }
+          }
+          
+          grid[dayOfWeek].push({ date: dateStr, value, dateObj: date })
+        } else {
+          grid[dayOfWeek].push(null)
         }
       }
       
-      days.push({ date: dateStr, value, dateObj: date })
+      weekIndex++
+      currentDate.setDate(currentDate.getDate() + DAYS_PER_WEEK)
     }
     
-    return days
+    // Add final month
+    if (currentMonth !== '') {
+      months.push({
+        month: currentMonth,
+        weekIndex: monthStartWeek,
+        span: weekIndex - monthStartWeek
+      })
+    }
+    
+    return { gridData: grid, monthLabels: months }
   }, [activityHistory, selectedCategory])
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    let totalXP = 0
+    let activeDays = 0
+    
+    gridData.forEach(row => {
+      row.forEach(cell => {
+        if (cell && cell.value > 0) {
+          totalXP += cell.value
+          activeDays++
+        }
+      })
+    })
+    
+    return { totalXP, activeDays }
+  }, [gridData])
 
   // Calculate intensity levels (0-4 scale)
   const getIntensityLevel = (value: number): number => {
@@ -105,54 +173,21 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
   }
 
-  // Group days into weeks
-  const weeks = useMemo(() => {
-    const grouped: Array<Array<{ date: string; value: number; dateObj: Date }>> = []
-    for (let i = 0; i < heatmapData.length; i += DAYS_PER_WEEK) {
-      grouped.push(heatmapData.slice(i, i + DAYS_PER_WEEK))
-    }
-    return grouped
-  }, [heatmapData])
-
-  // Get month labels
-  const monthLabels = useMemo(() => {
-    const labels: Array<{ month: string; index: number }> = []
-    let currentMonth = ''
-    
-    heatmapData.forEach((day, index) => {
-      const month = day.dateObj.toLocaleDateString('en-US', { month: 'short' })
-      if (month !== currentMonth && index % DAYS_PER_WEEK === 0) {
-        currentMonth = month
-        labels.push({ month, index: Math.floor(index / 7) })
-      }
-    })
-    
-    return labels
-  }, [heatmapData])
-
-  const totalXP = useMemo(() => {
-    return heatmapData.reduce((sum, day) => sum + day.value, 0)
-  }, [heatmapData])
-
-  const daysWithActivity = useMemo(() => {
-    return heatmapData.filter(day => day.value > 0).length
-  }, [heatmapData])
-
   return (
     <div className="activity-heatmap">
       <div className="heatmap-header">
         <div className="heatmap-title-section">
           <h3>Activity Heatmap</h3>
-          <p>Your effort over the last 12 weeks</p>
+          <p>Your effort over the last 12 months</p>
         </div>
         
         <div className="heatmap-stats">
           <div className="heatmap-stat">
-            <span className="stat-value">{totalXP}</span>
+            <span className="stat-value">{stats.totalXP}</span>
             <span className="stat-label">Total XP</span>
           </div>
           <div className="heatmap-stat">
-            <span className="stat-value">{daysWithActivity}</span>
+            <span className="stat-value">{stats.activeDays}</span>
             <span className="stat-label">Active Days</span>
           </div>
         </div>
@@ -190,44 +225,49 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
       </div>
 
       <div className="heatmap-container">
+        {/* Month labels */}
         <div className="heatmap-months">
           {monthLabels.map((label, idx) => (
             <div
               key={idx}
               className="month-label"
-              style={{ gridColumn: `${label.index + 1} / span 1` }}
+              style={{ gridColumnStart: label.weekIndex + 2, gridColumnEnd: `span ${label.span}` }}
             >
               {label.month}
             </div>
           ))}
         </div>
 
+        {/* Grid with day labels and cells */}
         <div className="heatmap-grid">
-          <div className="day-labels">
-            <div className="day-label">Mon</div>
-            <div className="day-label"></div>
-            <div className="day-label">Wed</div>
-            <div className="day-label"></div>
-            <div className="day-label">Fri</div>
-            <div className="day-label"></div>
-            <div className="day-label">Sun</div>
-          </div>
-
-          <div className="heatmap-weeks">
-            {weeks.map((week, weekIdx) => (
-              <div key={weekIdx} className="heatmap-week">
-                {week.map((day) => (
-                  <div
-                    key={day.date}
-                    className="heatmap-cell"
-                    style={{ backgroundColor: getCellColor(day.value) }}
-                    title={`${formatDate(day.date)}: ${day.value} XP`}
-                    data-value={day.value}
-                  />
+          {gridData.map((row, rowIndex) => (
+            <div key={rowIndex} className="heatmap-row">
+              {/* Day label - only show Mon, Wed, Fri */}
+              <div className="day-label">
+                {rowIndex % 2 === 1 ? DAY_LABELS[rowIndex] : ''}
+              </div>
+              
+              {/* Week cells */}
+              <div className="week-cells">
+                {row.map((cell, colIndex) => (
+                  cell ? (
+                    <div
+                      key={`${rowIndex}-${colIndex}`}
+                      className="heatmap-cell"
+                      style={{ backgroundColor: getCellColor(cell.value) }}
+                      title={`${formatDate(cell.date)}: ${cell.value} XP`}
+                      data-value={cell.value}
+                    />
+                  ) : (
+                    <div
+                      key={`${rowIndex}-${colIndex}`}
+                      className="heatmap-cell empty"
+                    />
+                  )
                 ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
         <div className="heatmap-legend">
