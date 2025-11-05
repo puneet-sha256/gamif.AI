@@ -15,22 +15,22 @@
 }
 
 .confirm-overlay.visible {
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--overlay-bg);
   opacity: 1;
   pointer-events: all;
 }
 
 .confirm-container {
-  background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%);
+  background: var(--bg-modal);
   border-radius: 16px;
   padding: 32px;
   max-width: 450px;
   width: 90%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  border: 2px solid rgba(138, 43, 226, 0.3);
+  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--border-primary);
   transform: scale(0.7) translateY(-20px);
   opacity: 0;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, border-color 0.3s ease;
 }
 
 .confirm-container.visible {
@@ -59,7 +59,7 @@
 }
 
 .confirm-message {
-  color: #e0e0e0;
+  color: var(--text-primary);
   font-size: 16px;
   line-height: 1.6;
   margin: 0;
@@ -88,23 +88,22 @@
 
 .cancel-btn {
   background: rgba(255, 255, 255, 0.1);
-  color: #e0e0e0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-secondary);
 }
 
 .cancel-btn:hover {
   background: rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .confirm-btn-primary {
-  background: linear-gradient(135deg, #8a2be2 0%, #6a1bb2 100%);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   color: white;
 }
 
 .confirm-btn-primary:hover {
-  background: linear-gradient(135deg, #9a3bf2 0%, #7a2bc2 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(138, 43, 226, 0.4);
 }
