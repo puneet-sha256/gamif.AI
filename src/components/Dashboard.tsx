@@ -217,8 +217,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   }
 
   // Handler for buying shop items
-  const handleBuyShopItem = async (itemId: string, itemTitle: string, itemPrice: number) => {
-    const success = await buyShopItem(itemId, itemPrice)
+  const handleBuyShopItem = async (
+    itemId: string, 
+    itemTitle: string, 
+    itemPrice: number,
+    itemDescription?: string,
+    itemImage?: string
+  ) => {
+    // Check if this is a user's wishlist item or a built-in shop item
+    const isWishlistItem = user?.shopItems?.some(item => item.id === itemId)
+    
+    // For built-in shop items, pass the item details
+    const itemDetails = !isWishlistItem ? {
+      title: itemTitle,
+      description: itemDescription,
+      image: itemImage
+    } : undefined
+    
+    const success = await buyShopItem(itemId, itemPrice, itemDetails)
     if (success) {
       showSuccess(`🎉 Congratulations! You've successfully purchased "${itemTitle}" for ${itemPrice} 💎 shards!`)
     } else {
@@ -921,7 +937,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Unlock 2 hours of guilt-free gaming"
                 price={50}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-gaming', 'Gaming Session', 50)}
+                onBuy={() => handleBuyShopItem('reward-gaming', 'Gaming Session', 50, 'Unlock 2 hours of guilt-free gaming', '🎮')}
               />
               
               <ShopItem
@@ -931,7 +947,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Order your favorite meal"
                 price={75}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-treat', 'Treat Yourself', 75)}
+                onBuy={() => handleBuyShopItem('reward-treat', 'Treat Yourself', 75, 'Order your favorite meal', '🍕')}
               />
               
               <ShopItem
@@ -941,7 +957,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Buy that book you've been wanting"
                 price={100}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-book', 'Book Purchase', 100)}
+                onBuy={() => handleBuyShopItem('reward-book', 'Book Purchase', 100, "Buy that book you've been wanting", '📚')}
               />
             </div>
           </div>
@@ -956,7 +972,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Double XP for 24 hours"
                 price={30}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('powerup-xp', 'XP Booster', 30)}
+                onBuy={() => handleBuyShopItem('powerup-xp', 'XP Booster', 30, 'Double XP for 24 hours', '🔥')}
               />
               
               <ShopItem
@@ -966,7 +982,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Extra day to complete tasks"
                 price={25}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('powerup-extension', 'Task Extension', 25)}
+                onBuy={() => handleBuyShopItem('powerup-extension', 'Task Extension', 25, 'Extra day to complete tasks', '⏰')}
               />
             </div>
           </div>

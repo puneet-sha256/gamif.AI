@@ -597,7 +597,7 @@ export async function getUserShopItemsList(req: Request, res: Response) {
 // Buy a shop item
 export async function buyUserShopItem(req: Request, res: Response) {
   try {
-    const { sessionId, itemId, itemPrice } = req.body
+    const { sessionId, itemId, itemPrice, itemDetails } = req.body
 
     // Validate required fields
     if (!sessionId || !itemId || itemPrice === undefined) {
@@ -625,8 +625,8 @@ export async function buyUserShopItem(req: Request, res: Response) {
       return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
     }
 
-    // Buy the shop item
-    const result = await buyShopItem(user.id, itemId, itemPrice)
+    // Buy the shop item (itemDetails is optional for built-in shop items)
+    const result = await buyShopItem(user.id, itemId, itemPrice, itemDetails)
 
     if (!result.success) {
       return res.status(400).json(createErrorResponse(
