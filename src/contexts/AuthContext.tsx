@@ -48,7 +48,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (result.success && result.user) {
         setUser(result.user)
-      } else {
       }
       return { success: result.success, message: result.message }
     } catch (error) {

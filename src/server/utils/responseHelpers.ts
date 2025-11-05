@@ -49,7 +49,7 @@ export const ErrorMessages = {
   USER_EXISTS: 'Player with this email already exists',
   USERNAME_TAKEN: 'Player name already taken',
   USER_NOT_FOUND: 'Player not found in the system',
-  INVALID_CREDENTIALS: 'Invalid credentials',
+  INVALID_CREDENTIALS: 'Invalid email or password',
   INVALID_SESSION: 'Invalid session',
   INTERNAL_ERROR: 'Internal server error',
   INSUFFICIENT_SHARDS: 'Insufficient shards',

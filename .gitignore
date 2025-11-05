@@ -37,3 +37,6 @@ data/backup/
 # Environment variables
 .env
 .env.*
+
+# Screenshots (used for testing/documentation)
+screenshots/
