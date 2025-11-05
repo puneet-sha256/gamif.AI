@@ -7,7 +7,8 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+  background: var(--bg-gradient);
+  transition: background 0.3s ease;
 }
 
 .auth-background {
@@ -69,16 +70,14 @@
 }
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid var(--border-primary);
   border-radius: 15px;
   padding: 40px;
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.08),
-    0 0 60px rgba(59, 130, 246, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-lg);
   animation: card-entrance 0.8s ease-out;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 @keyframes card-entrance {
@@ -101,7 +100,7 @@
   font-family: 'Orbitron', monospace;
   font-size: 2.5rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #3b82f6, #06b6d4, #10b981);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -113,7 +112,7 @@
 .subtitle {
   font-family: 'Rajdhani', sans-serif;
   font-size: 1rem;
-  color: #3b82f6;
+  color: var(--accent-primary);
   font-weight: 600;
   letter-spacing: 2px;
   margin-top: 5px;
