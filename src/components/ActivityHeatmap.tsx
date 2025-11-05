@@ -22,7 +22,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all')
 
   // Generate grid data for last 12 months
-  const { gridData, monthLabels } = useMemo(() => {
+  const { gridData, monthLabels, monthBoundaries } = useMemo(() => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     
@@ -48,6 +48,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
     // Build grid: 7 rows (days of week) x ~53 columns (weeks)
     const grid: Array<Array<{ date: string; value: number; dateObj: Date } | null>> = Array.from({ length: DAYS_PER_WEEK }, () => [])
     const months: Array<{ month: string; weekIndex: number; span: number }> = []
+    const boundaries = new Set<number>() // Track week indices that start a new month
     
     let currentMonth = ''
     let monthStartWeek = 0
@@ -69,6 +70,8 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
             weekIndex: monthStartWeek,
             span: weekIndex - monthStartWeek
           })
+          // Mark this week as a month boundary
+          boundaries.add(weekIndex)
         }
         currentMonth = monthName
         monthStartWeek = weekIndex
@@ -121,7 +124,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
       })
     }
     
-    return { gridData: grid, monthLabels: months }
+    return { gridData: grid, monthLabels: months, monthBoundaries: boundaries }
   }, [activityHistory, selectedCategory])
 
   // Calculate stats
@@ -253,7 +256,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
                   cell ? (
                     <div
                       key={`${rowIndex}-${colIndex}`}
-                      className="heatmap-cell"
+                      className={`heatmap-cell${monthBoundaries.has(colIndex) ? ' month-start' : ''}`}
                       style={{ backgroundColor: getCellColor(cell.value) }}
                       title={`${formatDate(cell.date)}: ${cell.value} XP`}
                       data-value={cell.value}
