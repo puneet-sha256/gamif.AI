@@ -17,14 +17,25 @@ const CATEGORY_COLORS = {
 
 const DAYS_PER_WEEK = 7
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const WEEKS_TO_SHOW = 53
 
 const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) => {
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all')
 
-  // Generate grid data for last 12 months
+  // Generate grid data for exactly 53 weeks
   const { gridData, monthLabels, monthBoundaries } = useMemo(() => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const endDate = new Date()
+    endDate.setHours(0, 0, 0, 0)
+    
+    // Calculate start date - exactly 52 weeks back from endDate
+    const startDate = new Date(endDate)
+    startDate.setDate(startDate.getDate() - (52 * 7))
+    
+    // Align to Sunday
+    const startDayOfWeek = startDate.getDay()
+    if (startDayOfWeek !== 0) {
+      startDate.setDate(startDate.getDate() - startDayOfWeek)
+    }
     
     // Create a map of existing activity data
     const activityMap = new Map<string, { strength: number; intelligence: number; charisma: number; total: number }>()
@@ -38,51 +49,37 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
         })
       })
     }
-
-    // Calculate start date (go back 12 months from today, then to the Sunday before that)
-    const startDate = new Date(today)
-    startDate.setFullYear(startDate.getFullYear() - 1)
-    const dayOfWeek = startDate.getDay() // 0 = Sunday
-    startDate.setDate(startDate.getDate() - dayOfWeek) // Go to previous Sunday
     
-    // Build grid: 7 rows (days of week) x ~53 columns (weeks)
+    // Build grid: 7 rows (days of week) x 53 columns (weeks)
     const grid: Array<Array<{ date: string; value: number; dateObj: Date } | null>> = Array.from({ length: DAYS_PER_WEEK }, () => [])
-    const months: Array<{ month: string; weekIndex: number; span: number }> = []
-    const boundaries = new Set<number>() // Track week indices that start a new month
-    
-    let currentMonth = ''
-    let monthStartWeek = 0
-    let weekIndex = 0
+    const monthsMap = new Map<string, number>() // month name -> first week index containing 1st of that month
+    const boundaries = new Set<number>()
     
     const currentDate = new Date(startDate)
+    let weekIndex = 0
     
-    // Generate data for each week
-    while (currentDate <= today) {
+    // Generate data for exactly 53 weeks
+    while (weekIndex < WEEKS_TO_SHOW) {
       const weekStart = new Date(currentDate)
-      
-      // Check if we're starting a new month
-      const monthName = weekStart.toLocaleDateString('en-US', { month: 'short' })
-      if (monthName !== currentMonth) {
-        if (currentMonth !== '') {
-          // Save previous month
-          months.push({
-            month: currentMonth,
-            weekIndex: monthStartWeek,
-            span: weekIndex - monthStartWeek
-          })
-          // Mark this week as a month boundary
-          boundaries.add(weekIndex)
-        }
-        currentMonth = monthName
-        monthStartWeek = weekIndex
-      }
       
       // Add days for this week
       for (let dayOfWeek = 0; dayOfWeek < DAYS_PER_WEEK; dayOfWeek++) {
         const date = new Date(weekStart)
         date.setDate(date.getDate() + dayOfWeek)
         
-        if (date <= today && date >= startDate) {
+        // Check if this day is the 1st of a month
+        if (date.getDate() === 1) {
+          const monthName = date.toLocaleDateString('en-US', { month: 'short' })
+          // Only record the first occurrence of the 1st for each month
+          if (!monthsMap.has(monthName + date.getFullYear())) {
+            monthsMap.set(monthName + date.getFullYear(), weekIndex)
+            if (weekIndex > 0) {
+              boundaries.add(weekIndex)
+            }
+          }
+        }
+        
+        if (date <= endDate) {
           const dateStr = date.toISOString().split('T')[0]
           const activity = activityMap.get(dateStr)
           
@@ -115,13 +112,15 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
       currentDate.setDate(currentDate.getDate() + DAYS_PER_WEEK)
     }
     
-    // Add final month
-    if (currentMonth !== '') {
-      months.push({
-        month: currentMonth,
-        weekIndex: monthStartWeek,
-        span: weekIndex - monthStartWeek
-      })
+    // Build month labels array from the map
+    const months: Array<{ month: string; weekIndex: number }> = []
+    const sortedMonths = Array.from(monthsMap.entries()).sort((a, b) => a[1] - b[1])
+    
+    for (let i = 0; i < sortedMonths.length; i++) {
+      const [monthKey, weekIdx] = sortedMonths[i]
+      // Extract just the month name (remove year)
+      const monthName = monthKey.substring(0, 3)
+      months.push({ month: monthName, weekIndex: weekIdx })
     }
     
     return { gridData: grid, monthLabels: months, monthBoundaries: boundaries }
@@ -234,7 +233,10 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
             <div
               key={idx}
               className="month-label"
-              style={{ gridColumnStart: label.weekIndex + 2, gridColumnEnd: `span ${label.span}` }}
+              style={{ 
+                position: 'absolute',
+                left: `${label.weekIndex * 15}px` // 12px cell + 3px gap
+              }}
             >
               {label.month}
             </div>
