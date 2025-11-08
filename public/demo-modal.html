@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reward Modal - Light Theme Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .reward-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .reward-modal-content {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 20px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .reward-modal-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(6, 182, 212, 0.02) 100%);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .reward-modal-header h3 {
+            margin: 0;
+            color: #1e293b;
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reward-modal-body {
+            padding: 24px 28px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .reward-description {
+            color: #475569;
+            margin: 0 0 20px 0;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .activities-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .activity-reward-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .activity-reward-card:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .activity-name-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .activity-name {
+            color: #1e293b;
+            font-size: 16px;
+            font-weight: 600;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .category-badge.strength {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .category-badge.intelligence {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .activity-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .match-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .match-type-label {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .matched-task {
+            color: #94a3b8;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .reward-amounts {
+            display: flex;
+            gap: 12px;
+        }
+
+        .reward-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .reward-item.xp {
+            background: rgba(251, 191, 36, 0.1);
+            color: #d97706;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .reward-item.shards {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .rewards-summary {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(6, 182, 212, 0.03) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .summary-header h4 {
+            margin: 0 0 16px 0;
+            color: #1e293b;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .total-rewards {
+            display: flex;
+            gap: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+        }
+
+        .total-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .total-label {
+            color: #475569;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .total-value {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .total-value.xp {
+            color: #d97706;
+        }
+
+        .total-value.shards {
+            color: #2563eb;
+        }
+
+        .breakdown-items {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .breakdown-item.strength {
+            background: rgba(239, 68, 68, 0.08);
+            color: #dc2626;
+        }
+
+        .breakdown-item.intelligence {
+            background: rgba(59, 130, 246, 0.08);
+            color: #2563eb;
+        }
+
+        .breakdown-title {
+            color: #475569;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 16px;
+        }
+
+        .reward-modal-footer {
+            padding: 20px 28px;
+            border-top: 1px solid rgba(59, 130, 246, 0.2);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: rgba(59, 130, 246, 0.03);
+            border-radius: 0 0 20px 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background: rgba(59, 130, 246, 0.08);
+            color: #1e293b;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+        }
+
+        .title-banner {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-banner">
+        ✨ Unclaimed Rewards Modal - Light Theme Fix
+    </div>
+
+    <div class="reward-modal-overlay">
+        <div class="reward-modal-content">
+            <div class="reward-modal-header">
+                <h3>🎉 Unclaimed Rewards</h3>
+            </div>
+            
+            <div class="reward-modal-body">
+                <p class="reward-description">
+                    Great job! Here are the rewards you've earned from your completed activities:
+                </p>
+                
+                <div class="activities-list">
+                    <div class="activity-reward-card">
+                        <div class="activity-name-section">
+                            <span>✅</span>
+                            <span class="activity-name">Morning Workout</span>
+                            <span class="category-badge strength">💪 Strength</span>
+                        </div>
+                        
+                        <div class="activity-details">
+                            <div class="match-info">
+                                <span class="match-type-label">Exact Match</span>
+                                <span class="matched-task">→ Complete 30-minute cardio session</span>
+                            </div>
+                            
+                            <div class="reward-amounts">
+                                <div class="reward-item xp">
+                                    <span>⭐</span>
+                                    <span>+50 XP</span>
+                                </div>
+                                <div class="reward-item shards">
+                                    <span>💎</span>
+                                    <span>+10</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="activity-reward-card">
+                        <div class="activity-name-section">
+                            <span>🎯</span>
+                            <span class="activity-name">Study JavaScript</span>
+                            <span class="category-badge intelligence">🧠 Intelligence</span>
+                        </div>
+                        
+                        <div class="activity-details">
+                            <div class="match-info">
+                                <span class="match-type-label">Goal Aligned</span>
+                                <span class="matched-task">→ Learn programming fundamentals</span>
+                            </div>
+                            
+                            <div class="reward-amounts">
+                                <div class="reward-item xp">
+                                    <span>⭐</span>
+                                    <span>+75 XP</span>
+                                </div>
+                                <div class="reward-item shards">
+                                    <span>💎</span>
+                                    <span>+15</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rewards-summary">
+                    <div class="summary-header">
+                        <h4>📊 Summary</h4>
+                    </div>
+                    
+                    <div class="total-rewards">
+                        <div class="total-item">
+                            <span class="total-label">Total XP:</span>
+                            <span class="total-value xp">+125</span>
+                        </div>
+                        <div class="total-item">
+                            <span class="total-label">Total Shards:</span>
+                            <span class="total-value shards">+25</span>
+                        </div>
+                    </div>
+                    
+                    <div class="breakdown-title">By Category:</div>
+                    <div class="breakdown-items">
+                        <div class="breakdown-item strength">
+                            <span>💪 Strength:</span>
+                            <span>+50 XP</span>
+                        </div>
+                        <div class="breakdown-item intelligence">
+                            <span>🧠 Intelligence:</span>
+                            <span>+75 XP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="reward-modal-footer">
+                <button class="btn btn-secondary">Close</button>
+                <button class="btn btn-primary">
+                    <span>🎁</span>
+                    Claim All Rewards
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
