@@ -44,6 +44,17 @@ export interface ShopItem {
   createdAt: string // When the item was added
 }
 
+// Inventory item structure for purchased items
+export interface InventoryItem {
+  id: string // Unique identifier for the inventory item (same as shop item id)
+  title: string // Name of the item
+  description?: string // Optional description
+  price: number // Original price in shards
+  image?: string // Optional emoji or image
+  count: number // Number of this item owned
+  purchasedAt: string // When the item was first purchased
+}
+
 // Unclaimed reward from daily activity analysis
 export interface UnclaimedReward {
   activityName: string
@@ -95,7 +106,8 @@ export interface User {
   goalsData?: GoalsData
   stats?: UserStats
   generatedTasks?: GeneratedTasks
-  shopItems?: ShopItem[] // User's custom shop items
+  shopItems?: ShopItem[] // User's custom shop items (wishlist)
+  inventory?: InventoryItem[] // User's purchased items
   unclaimedRewards?: UnclaimedRewards // Pending rewards from daily activities
   activityHistory?: ActivityHistory // Historical daily XP data for heatmap
 }

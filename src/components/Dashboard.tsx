@@ -218,8 +218,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   }
 
   // Handler for buying shop items
-  const handleBuyShopItem = async (itemId: string, itemTitle: string, itemPrice: number) => {
-    const success = await buyShopItem(itemId, itemPrice)
+  const handleBuyShopItem = async (
+    itemId: string, 
+    itemTitle: string, 
+    itemPrice: number,
+    itemDescription?: string,
+    itemImage?: string
+  ) => {
+    // Check if this is a user's wishlist item or a built-in shop item
+    const isWishlistItem = user?.shopItems?.some(item => item.id === itemId)
+    
+    // For built-in shop items, pass the item details
+    const itemDetails = !isWishlistItem ? {
+      title: itemTitle,
+      description: itemDescription,
+      image: itemImage
+    } : undefined
+    
+    const success = await buyShopItem(itemId, itemPrice, itemDetails)
     if (success) {
       showSuccess(`🎉 Congratulations! You've successfully purchased "${itemTitle}" for ${itemPrice} 💎 shards!`)
     } else {
@@ -957,7 +973,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Unlock 2 hours of guilt-free gaming"
                 price={50}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-gaming', 'Gaming Session', 50)}
+                onBuy={() => handleBuyShopItem('reward-gaming', 'Gaming Session', 50, 'Unlock 2 hours of guilt-free gaming', '🎮')}
               />
               
               <ShopItem
@@ -967,7 +983,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Order your favorite meal"
                 price={75}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-treat', 'Treat Yourself', 75)}
+                onBuy={() => handleBuyShopItem('reward-treat', 'Treat Yourself', 75, 'Order your favorite meal', '🍕')}
               />
               
               <ShopItem
@@ -977,7 +993,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Buy that book you've been wanting"
                 price={100}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-book', 'Book Purchase', 100)}
+                onBuy={() => handleBuyShopItem('reward-book', 'Book Purchase', 100, "Buy that book you've been wanting", '📚')}
               />
             </div>
           </div>
@@ -992,7 +1008,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Double XP for 24 hours"
                 price={30}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('powerup-xp', 'XP Booster', 30)}
+                onBuy={() => handleBuyShopItem('powerup-xp', 'XP Booster', 30, 'Double XP for 24 hours', '🔥')}
               />
               
               <ShopItem
@@ -1002,7 +1018,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Extra day to complete tasks"
                 price={25}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('powerup-extension', 'Task Extension', 25)}
+                onBuy={() => handleBuyShopItem('powerup-extension', 'Task Extension', 25, 'Extra day to complete tasks', '⏰')}
               />
             </div>
           </div>
@@ -1018,6 +1034,48 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     )
   }
 
+  const renderInventoryTab = () => {
+    const inventoryItems = user?.inventory || []
+
+    return (
+      <div className="tab-content">
+        <div className="shop-header">
+          <div className="shop-header-content">
+            <h2>Inventory</h2>
+            <p>Your purchased items</p>
+          </div>
+        </div>
+        
+        {inventoryItems.length === 0 ? (
+          <div className="no-tasks-message">
+            <div className="no-tasks-content">
+              <h3>🎒 Your Inventory is Empty</h3>
+              <p>Purchase items from the shop to see them here!</p>
+            </div>
+          </div>
+        ) : (
+          <div className="shop-grid">
+            <div className="shop-section">
+              <h3>📦 My Items</h3>
+              <div className="shop-items">
+                {inventoryItems.map((item) => (
+                  <div key={item.id} className="shop-item">
+                    <div className="item-image">{item.image || '🎁'}</div>
+                    <div className="item-info">
+                      <h4>{item.title}</h4>
+                      <p>{item.description || 'Purchased item'}</p>
+                      <div className="item-price">Owned: {item.count}x</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
@@ -1025,9 +1083,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       case 'tasks':
         return renderTasksTab()
       case 'inventory':
-        // Inventory is disabled, redirect to profile
-        setActiveTab('profile')
-        return renderProfileTab()
+        return renderInventoryTab()
       case 'shop':
         return renderShopTab()
       default:
@@ -1079,15 +1135,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             Tasks & Challenges
           </button>
           <button 
-            className={`nav-tab ${activeTab === 'inventory' ? 'active' : ''} disabled`}
-            onClick={() => {}} // Disabled, no action
-            disabled
+            className={`nav-tab ${activeTab === 'inventory' ? 'active' : ''}`}
+            onClick={() => setActiveTab('inventory')}
           >
             <span className="tab-icon">🎒</span>
-            <div className="tab-text">
-              <span>Inventory</span>
-              <span className="coming-soon">Coming Soon</span>
-            </div>
+            Inventory
           </button>
           <button 
             className={`nav-tab ${activeTab === 'shop' ? 'active' : ''}`}

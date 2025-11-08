@@ -85,7 +85,12 @@ class ShopService {
   async buyShopItem(
     sessionId: string,
     itemId: string,
-    itemPrice: number
+    itemPrice: number,
+    itemDetails?: {
+      title: string
+      description?: string
+      image?: string
+    }
   ): Promise<ApiResponse> {
     console.log('💰 ShopService: Buying shop item:', itemId, 'for', itemPrice, 'shards')
 
@@ -93,7 +98,8 @@ class ShopService {
       const response = await apiClient.post('/user/shop/buy', {
         sessionId,
         itemId,
-        itemPrice
+        itemPrice,
+        itemDetails
       })
 
       if (response.success) {

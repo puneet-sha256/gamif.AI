@@ -383,7 +383,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   // Buy a shop item
-  const buyShopItem = async (itemId: string, itemPrice: number): Promise<boolean> => {
+  const buyShopItem = async (
+    itemId: string, 
+    itemPrice: number,
+    itemDetails?: {
+      title: string
+      description?: string
+      image?: string
+    }
+  ): Promise<boolean> => {
     console.log('🔄 AuthContext: Buying shop item:', itemId, 'for', itemPrice, 'shards')
     
     if (!user) {
@@ -398,7 +406,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return false
       }
 
-      const result = await shopService.buyShopItem(sessionId, itemId, itemPrice)
+      const result = await shopService.buyShopItem(sessionId, itemId, itemPrice, itemDetails)
       
       if (result.success) {
         console.log('✅ AuthContext: Shop item purchased successfully')

@@ -419,7 +419,12 @@ export async function getUserShopItems(userId: string) {
 export async function buyShopItem(
   userId: string,
   itemId: string,
-  itemPrice: number
+  itemPrice: number,
+  itemDetails?: {
+    title: string
+    description?: string
+    image?: string
+  }
 ): Promise<{ success: boolean; message?: string }> {
   logger.info(`User ${userId} attempting to buy shop item ${itemId} for ${itemPrice} shards`)
   const users = await loadUsers()
@@ -452,8 +457,67 @@ export async function buyShopItem(
     }
   }
   
+  // Check if item is in user's wishlist (user-created item)
+  const shopItem = user.shopItems?.find(item => item.id === itemId)
+  const isWishlistItem = !!shopItem
+  
+  // If not a wishlist item, it must be a built-in shop item - require itemDetails
+  if (!isWishlistItem && !itemDetails) {
+    logger.error('Built-in shop item requires itemDetails parameter')
+    return { 
+      success: false, 
+      message: 'Invalid purchase request' 
+    }
+  }
+  
+  // Get item information from either wishlist or itemDetails
+  const itemInfo = isWishlistItem ? shopItem : {
+    id: itemId,
+    title: itemDetails!.title,
+    description: itemDetails?.description,
+    price: itemPrice,
+    image: itemDetails?.image
+  }
+  
   // Deduct shards
   user.stats.shards = currentShards - itemPrice
+  
+  // Remove item from shopItems (wishlist) ONLY if it's a user-created wishlist item
+  if (isWishlistItem && user.shopItems) {
+    user.shopItems = user.shopItems.filter(item => item.id !== itemId)
+    logger.info(`Removed item "${itemInfo.title}" from wishlist`)
+  }
+  
+  // Initialize inventory if it doesn't exist
+  if (!user.inventory) {
+    user.inventory = []
+  }
+  
+  // Check if item with the same title already exists in inventory (for counting duplicates)
+  const existingInventoryItem = user.inventory.find(item => 
+    item.title === itemInfo.title && 
+    item.description === itemInfo.description &&
+    item.price === itemInfo.price
+  )
+  
+  if (existingInventoryItem) {
+    // Item already in inventory, increment count
+    existingInventoryItem.count += 1
+    logger.info(`Incremented count for item "${itemInfo.title}" in inventory to ${existingInventoryItem.count}`)
+  } else {
+    // Add new item to inventory with count 1
+    const inventoryItem = {
+      id: itemInfo.id,
+      title: itemInfo.title,
+      description: itemInfo.description,
+      price: itemInfo.price,
+      image: itemInfo.image,
+      count: 1,
+      purchasedAt: new Date().toISOString()
+    }
+    user.inventory.push(inventoryItem)
+    logger.info(`Added new item "${itemInfo.title}" to inventory`)
+  }
   
   await saveUsers(users)
   logger.success(`Shop item purchased successfully. New shard balance: ${user.stats.shards}`)
