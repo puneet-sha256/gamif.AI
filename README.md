@@ -19,7 +19,11 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 - **Batch Claiming** - Claim all pending rewards at once with a single click
 
 ### 🔐 **Authentication & Profile System**
-- Secure user registration and login system
+- Secure user registration with email OTP verification
+- Two-step verification process for enhanced security
+- Email verification required before first login
+- OTP expiry (10 minutes) for security
+- Resend OTP functionality
 - Personalized player profile creation
 - Session-based authentication with persistent data
 
@@ -203,6 +207,7 @@ If `VITE_API_BASE_URL` is not set, the frontend will default to `/api`, which wo
 - **Node.js** (v18 or higher)
 - **npm** or **yarn**
 - **Azure OpenAI API Key** - Required for AI-powered task generation
+- **Email Account** - SMTP credentials for sending OTP verification emails (Gmail recommended)
 
 ### Installation
 
@@ -217,13 +222,35 @@ If `VITE_API_BASE_URL` is not set, the frontend will default to `/api`, which wo
    npm install
    ```
 
-3. **Configure Azure OpenAI**
+3. **Configure Environment Variables**
    ```bash
    # Copy the environment template
    cp .env.example .env
    
-   # Edit .env and add your Azure OpenAI API key
+   # Edit .env and add your configuration
+   ```
+   
+   Required configuration in `.env`:
+   
+   **Azure OpenAI** (for AI task generation):
+   ```env
    AZURE_OPENAI_API_KEY=your-azure-openai-api-key-here
+   ```
+   
+   **Email Service** (for OTP verification):
+   ```env
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASSWORD=your-app-specific-password
+   ```
+   
+   > 💡 **Gmail Setup**: To use Gmail, you need to generate an [App Password](https://myaccount.google.com/apppasswords):
+   > 1. Go to your Google Account
+   > 2. Select Security → 2-Step Verification (must be enabled)
+   > 3. Select App passwords
+   > 4. Generate a password for "Mail"
+   > 5. Use this password in EMAIL_PASSWORD
    ```
 
 4. **Start the application**
@@ -244,6 +271,29 @@ The application uses Azure OpenAI with the following configuration:
 - **API Version**: `2024-04-01-preview`
 
 The AI agent receives user goals in the format: `"User Goals: <longTermGoals>"` and generates personalized task recommendations.
+
+### Email OTP Verification
+
+The registration flow includes email verification for enhanced security:
+
+1. **User Registration**: New users enter username, email, and password
+2. **OTP Generation**: System generates a 6-digit OTP code
+3. **Email Delivery**: OTP is sent to the user's email address
+4. **Verification**: User enters the OTP code to verify their email
+5. **Account Activation**: Email is marked as verified, user can now login
+
+**Security Features:**
+- OTP expires after 10 minutes
+- Email must be verified before first login
+- OTP is cleared from database after successful verification
+- Resend OTP option available if email is not received
+- HTML sanitization prevents XSS attacks in email content
+
+**Troubleshooting:**
+- If emails are not being sent, check your SMTP credentials in `.env`
+- For Gmail, ensure you're using an App Password, not your account password
+- Check spam/junk folder if OTP email is not in inbox
+- OTP can be resent if it expires or is not received
 
 ### Alternative Start Methods
 
@@ -405,31 +455,119 @@ xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50
 
 ### **Authentication Endpoints**
 
-#### Login
+#### Register
 ```http
-POST /api/auth/login
+POST /api/register
 Content-Type: application/json
 
 {
   "username": "string",
+  "email": "string", 
   "password": "string"
 }
 ```
 
-#### Register
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Registration successful! Please check your email for the verification code.",
+  "user": {
+    "id": "string",
+    "username": "string",
+    "email": "string",
+    "emailVerified": false,
+    "createdAt": "2025-11-08T10:00:00.000Z"
+  }
+}
+```
+
+**Note:** After registration, an OTP is sent to the provided email address. The user must verify their email before logging in.
+
+#### Verify OTP
 ```http
-POST /api/auth/register
+POST /api/auth/verify-otp
 Content-Type: application/json
 
 {
-  "username": "string", 
+  "email": "string",
+  "otp": "string"  // 6-digit code
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Email verified successfully! Welcome to Gamif.AI",
+  "user": {
+    "id": "string",
+    "username": "string",
+    "email": "string",
+    "emailVerified": true
+  },
+  "sessionId": "string"
+}
+```
+
+**Error Responses:**
+- `400` - Invalid OTP code
+- `400` - OTP has expired (10 minute expiry)
+- `400` - Email already verified
+- `404` - User not found
+
+#### Resend OTP
+```http
+POST /api/auth/resend-otp
+Content-Type: application/json
+
+{
+  "email": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "OTP resent successfully! Please check your email"
+}
+```
+
+#### Login
+```http
+POST /api/login
+Content-Type: application/json
+
+{
+  "email": "string",
   "password": "string"
 }
 ```
 
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Welcome back, Player!",
+  "user": {
+    "id": "string",
+    "username": "string",
+    "email": "string",
+    "emailVerified": true
+  },
+  "sessionId": "string"
+}
+```
+
+**Error Responses:**
+- `400` - Invalid credentials
+- `403` - Email not verified (must complete OTP verification first)
+- `404` - User not found
+
 #### Logout
 ```http
-POST /api/auth/logout
+POST /api/logout
 Content-Type: application/json
 
 {
