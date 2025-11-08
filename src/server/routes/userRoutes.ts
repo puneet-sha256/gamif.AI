@@ -15,7 +15,8 @@ import {
   addShopItem,
   deleteShopItem,
   getUserShopItems,
-  buyShopItem
+  buyShopItem,
+  useInventoryItem
 } from '../utils/dataOperations'
 import {
   createSuccessResponse,
@@ -131,6 +132,60 @@ export async function updateExperience(req: Request, res: Response) {
     
     // Total experience is sum of all attributes
     user.stats.experience = newStrength + newIntelligence + newCharisma
+
+    // Update activity history for heatmap
+    const today = new Date().toISOString().split('T')[0]
+    if (!user.activityHistory) {
+      user.activityHistory = {
+        dailyActivities: [],
+        lastUpdated: new Date().toISOString()
+      }
+    }
+
+    // Find today's activity or create new one
+    const todayActivity = user.activityHistory.dailyActivities.find(
+      activity => activity.date === today
+    )
+
+    // Helper function to calculate total XP from category changes
+    const calculateTotal = (str: number, int: number, cha: number) => 
+      Math.max(0, str) + Math.max(0, int) + Math.max(0, cha)
+
+    if (todayActivity) {
+      // Update existing activity
+      todayActivity.strength += Math.max(0, strengthChange)
+      todayActivity.intelligence += Math.max(0, intelligenceChange)
+      todayActivity.charisma += Math.max(0, charismaChange)
+      todayActivity.total = calculateTotal(
+        todayActivity.strength,
+        todayActivity.intelligence,
+        todayActivity.charisma
+      )
+    } else {
+      // Create new activity for today
+      const newStrengthXP = Math.max(0, strengthChange)
+      const newIntelligenceXP = Math.max(0, intelligenceChange)
+      const newCharismaXP = Math.max(0, charismaChange)
+      
+      user.activityHistory.dailyActivities.push({
+        date: today,
+        strength: newStrengthXP,
+        intelligence: newIntelligenceXP,
+        charisma: newCharismaXP,
+        total: calculateTotal(newStrengthXP, newIntelligenceXP, newCharismaXP)
+      })
+    }
+
+    user.activityHistory.lastUpdated = new Date().toISOString()
+
+    // Keep only last 365 days of activity history
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - 365)
+    const cutoffDateStr = cutoffDate.toISOString().split('T')[0]
+    
+    user.activityHistory.dailyActivities = user.activityHistory.dailyActivities.filter(
+      activity => activity.date >= cutoffDateStr
+    )
 
     // Update session last access and save user
     await updateSessionLastAccess(sessionId)
@@ -453,7 +508,7 @@ export async function addUserTask(req: Request, res: Response) {
 // Add a shop item
 export async function addUserShopItem(req: Request, res: Response) {
   try {
-    const { sessionId, title, description, price, image } = req.body
+    const { sessionId, title, description, price, image, isConsumable, isKeyItem } = req.body
 
     // Validate required fields
     if (!sessionId || !title || price === undefined) {
@@ -486,7 +541,9 @@ export async function addUserShopItem(req: Request, res: Response) {
       title,
       description,
       price,
-      image
+      image,
+      isConsumable,
+      isKeyItem
     })
 
     if (!success) {
@@ -597,7 +654,7 @@ export async function getUserShopItemsList(req: Request, res: Response) {
 // Buy a shop item
 export async function buyUserShopItem(req: Request, res: Response) {
   try {
-    const { sessionId, itemId, itemPrice } = req.body
+    const { sessionId, itemId, itemPrice, itemDetails } = req.body
 
     // Validate required fields
     if (!sessionId || !itemId || itemPrice === undefined) {
@@ -625,8 +682,8 @@ export async function buyUserShopItem(req: Request, res: Response) {
       return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
     }
 
-    // Buy the shop item
-    const result = await buyShopItem(user.id, itemId, itemPrice)
+    // Buy the shop item (itemDetails is optional for built-in shop items)
+    const result = await buyShopItem(user.id, itemId, itemPrice, itemDetails)
 
     if (!result.success) {
       return res.status(400).json(createErrorResponse(
@@ -648,6 +705,57 @@ export async function buyUserShopItem(req: Request, res: Response) {
 
   } catch (error) {
     logger.error('Buy shop item error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Use an inventory item
+export async function useUserInventoryItem(req: Request, res: Response) {
+  try {
+    const { sessionId, itemId } = req.body
+
+    // Validate required fields
+    if (!sessionId || !itemId) {
+      return res.status(400).json(createErrorResponse(
+        'Session ID and item ID are required'
+      ))
+    }
+
+    // Verify session
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    // Find user
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    // Use the inventory item
+    const result = await useInventoryItem(user.id, itemId)
+
+    if (!result.success) {
+      return res.status(400).json(createErrorResponse(
+        result.message || 'Failed to use item'
+      ))
+    }
+
+    // Update session last access
+    await updateSessionLastAccess(sessionId)
+
+    // Get updated user data
+    const updatedUser = await findUserById(user.id)
+
+    res.json(createSuccessResponse(
+      result.message || 'Item used successfully',
+      undefined,
+      updatedUser ? sanitizeUser(updatedUser) : undefined
+    ))
+
+  } catch (error) {
+    logger.error('Use inventory item error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }

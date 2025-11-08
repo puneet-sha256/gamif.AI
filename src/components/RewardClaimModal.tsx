@@ -1,12 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import './RewardClaimModal.css'
 import type { UnclaimedRewards } from '../shared/types/user.types'
+import { soundEffects } from '../utils/soundEffects'
 
 interface RewardClaimModalProps {
   isOpen: boolean
   onClose: () => void
   unclaimedRewards: UnclaimedRewards | null
   onClaimRewards: () => void
+  onClaimIndividualReward: (index: number) => void
   isClaiming: boolean
 }
 
@@ -15,14 +17,29 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
   onClose,
   unclaimedRewards,
   onClaimRewards,
+  onClaimIndividualReward,
   isClaiming
 }) => {
+  const [claimingIndex, setClaimingIndex] = useState<number | null>(null)
+  
   if (!isOpen || !unclaimedRewards) return null
 
   const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget && !isClaiming) {
+    if (e.target === e.currentTarget && !isClaiming && claimingIndex === null) {
       onClose()
     }
+  }
+
+  const handleIndividualClaim = async (index: number) => {
+    setClaimingIndex(index)
+    soundEffects.playIndividualClaimSound()
+    await onClaimIndividualReward(index)
+    setClaimingIndex(null)
+  }
+
+  const handleClaimAll = async () => {
+    soundEffects.playClaimAllSound()
+    await onClaimRewards()
   }
 
   const getCategoryIcon = (category: string): string => {
@@ -71,7 +88,7 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
           <button 
             className="reward-modal-close"
             onClick={onClose}
-            disabled={isClaiming}
+            disabled={isClaiming || claimingIndex !== null}
           >
             ✕
           </button>
@@ -125,6 +142,26 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
                           <span className="reward-value">+{activity.shardsEarned}</span>
                         </div>
                       </div>
+                    </div>
+                    
+                    <div className="activity-claim-action">
+                      <button 
+                        className="activity-claim-btn"
+                        onClick={() => handleIndividualClaim(index)}
+                        disabled={isClaiming || claimingIndex !== null}
+                      >
+                        {claimingIndex === index ? (
+                          <>
+                            <span className="loading-spinner"></span>
+                            Claiming...
+                          </>
+                        ) : (
+                          <>
+                            <span className="claim-icon">✓</span>
+                            Claim
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -181,14 +218,14 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
             <button 
               className="reward-modal-btn-secondary"
               onClick={onClose}
-              disabled={isClaiming}
+              disabled={isClaiming || claimingIndex !== null}
             >
               Close
             </button>
             <button 
               className="reward-modal-btn-primary" 
-              onClick={onClaimRewards}
-              disabled={isClaiming}
+              onClick={handleClaimAll}
+              disabled={isClaiming || claimingIndex !== null}
             >
               {isClaiming ? (
                 <>

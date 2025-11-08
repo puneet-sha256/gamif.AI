@@ -12,6 +12,7 @@ import DailyActivityModal from './DailyActivityModal'
 import TaskModal from './TaskModal'
 import ShopItemModal from './ShopItemModal'
 import RewardClaimModal from './RewardClaimModal'
+import ActivityHeatmap from './ActivityHeatmap'
 import { 
   mapGeneratedTasksToTaskItems, 
   groupMappedTasksByCategory, 
@@ -32,7 +33,7 @@ interface DashboardProps {
 type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
-  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, buyShopItem, updateUser, refreshUserTasks } = useAuth()
+  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, buyShopItem, useInventoryItem, updateUser, refreshUserTasks } = useAuth()
   const { showSuccess, showError, showWarning, showInfo } = useAlert()
   const { showConfirm } = useConfirm()
   const { theme, toggleTheme } = useTheme()
@@ -219,8 +220,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   }
 
   // Handler for buying shop items
-  const handleBuyShopItem = async (itemId: string, itemTitle: string, itemPrice: number) => {
-    const success = await buyShopItem(itemId, itemPrice)
+  const handleBuyShopItem = async (
+    itemId: string, 
+    itemTitle: string, 
+    itemPrice: number,
+    itemDescription?: string,
+    itemImage?: string
+  ) => {
+    // Check if this is a user's wishlist item or a built-in shop item
+    const isWishlistItem = user?.shopItems?.some(item => item.id === itemId)
+    
+    // For built-in shop items, pass the item details
+    const itemDetails = !isWishlistItem ? {
+      title: itemTitle,
+      description: itemDescription,
+      image: itemImage
+    } : undefined
+    
+    const success = await buyShopItem(itemId, itemPrice, itemDetails)
     if (success) {
       showSuccess(`🎉 Congratulations! You've successfully purchased "${itemTitle}" for ${itemPrice} 💎 shards!`)
     } else {
@@ -438,6 +455,101 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       showError('Sorry, there was an error claiming your rewards. Please try again.')
     } finally {
       setIsClaiming(false)
+    }
+  }
+
+  const handleClaimIndividualReward = async (index: number) => {
+    if (!user?.unclaimedRewards) return
+    
+    try {
+      const sessionId = userDatabase.getSessionId()
+      if (!sessionId) {
+        showError('Session expired. Please log in again.')
+        return
+      }
+
+      const rewards = user.unclaimedRewards
+      const activity = rewards.activities[index]
+      
+      if (!activity) {
+        showError('Activity not found.')
+        return
+      }
+
+      // Calculate XP distribution for this single activity
+      const strengthXP = activity.category === 'Strength' ? activity.xpEarned : 0
+      const intelligenceXP = activity.category === 'Intelligence' ? activity.xpEarned : 0
+      const charismaXP = activity.category === 'Charisma' ? activity.xpEarned : 0
+
+      // Step 1: Use the userService API to claim individual reward
+      const result = await userService.claimRewards({
+        sessionId,
+        totalXP: activity.xpEarned,
+        totalShards: activity.shardsEarned,
+        strengthXP,
+        intelligenceXP,
+        charismaXP
+      })
+      
+      if (result.success) {
+        if (!user.id) {
+          console.error('❌ User ID not found')
+          showError('Failed to update rewards. Please try again.')
+          return
+        }
+
+        // Step 2: Remove the claimed activity from unclaimed rewards
+        const updatedActivities = rewards.activities.filter((_, i) => i !== index)
+        
+        // Recalculate totals
+        let newTotalXP = 0
+        let newTotalShards = 0
+        const newCategoryBreakdown = {
+          Strength: { xp: 0, shards: 0 },
+          Intelligence: { xp: 0, shards: 0 },
+          Charisma: { xp: 0, shards: 0 }
+        }
+
+        updatedActivities.forEach(act => {
+          newTotalXP += act.xpEarned
+          newTotalShards += act.shardsEarned
+          newCategoryBreakdown[act.category].xp += act.xpEarned
+          newCategoryBreakdown[act.category].shards += act.shardsEarned
+        })
+
+        const updatedRewards = updatedActivities.length > 0 ? {
+          activities: updatedActivities,
+          totalXP: newTotalXP,
+          totalShards: newTotalShards,
+          categoryBreakdown: newCategoryBreakdown,
+          lastUpdated: new Date().toISOString()
+        } : null
+
+        try {
+          const updateResponse = await apiClient.put(`/user/${user.id}`, { 
+            unclaimedRewards: updatedRewards 
+          })
+          
+          if (updateResponse.success) {
+            // Step 3: Refresh user data from server to sync UI
+            await refreshUserTasks()
+            
+            showSuccess(`🎉 Claimed reward!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards`)
+          } else {
+            console.error('⚠️ Reward claimed but failed to update unclaimed rewards in backend')
+            showWarning('Reward claimed successfully, but there was an issue updating. Please refresh the page.')
+          }
+        } catch (updateError) {
+          console.error('❌ Error updating unclaimed rewards:', updateError)
+          showWarning('Reward claimed successfully, but there was an issue updating. Please refresh the page.')
+        }
+      } else {
+        console.error('❌ Failed to claim individual reward - API call failed')
+        showError('Failed to claim reward. Please try again.')
+      }
+    } catch (error) {
+      console.error('❌ Error claiming individual reward:', error)
+      showError('Sorry, there was an error claiming your reward. Please try again.')
     }
   }
 
@@ -699,6 +811,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             })()}
           </div>
         </div>
+
+        {/* Activity Heatmap Section */}
+        <div className="heatmap-section">
+          <ActivityHeatmap activityHistory={user?.activityHistory} />
+        </div>
       </div>
     </div>
   )
@@ -711,7 +828,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       return (
         <div className="tab-content">
           <div className="tasks-header">
-            <h2>Tasks & Challenges</h2>
+            <h2>Tasks</h2>
             <p>Loading your personalized tasks...</p>
           </div>
           <div className="loading-tasks">⏳ Thinking...</div>
@@ -723,7 +840,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       return (
         <div className="tab-content">
           <div className="tasks-header">
-            <h2>Tasks & Challenges</h2>
+            <h2>Tasks</h2>
             <p>Complete tasks to earn experience and shards</p>
           </div>
           
@@ -759,18 +876,27 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       <div className="tab-content">
         <div className="tasks-header">
           <div className="tasks-header-content">
-            <h2>Tasks & Challenges</h2>
+            <h2>Tasks</h2>
             <p>Complete your personalized AI-generated tasks to earn experience and shards</p>
           </div>
-          <button 
-            onClick={() => {
-              setEditingTask(null)
-              setShowTaskModal(true)
-            }}
-            className="add-task-btn"
-          >
-            ➕ Add Task
-          </button>
+          <div className="tasks-header-actions">
+            <button 
+              className="daily-activity-btn-header"
+              onClick={() => setShowDailyInput(true)}
+            >
+              <span className="btn-icon">🤖</span>
+              <span className="btn-text">Log Daily Activities</span>
+            </button>
+            <button 
+              onClick={() => {
+                setEditingTask(null)
+                setShowTaskModal(true)
+              }}
+              className="add-task-btn"
+            >
+              ➕ Add Task
+            </button>
+          </div>
         </div>
         
         <div className="tasks-grid">
@@ -842,35 +968,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               </div>
             </div>
           )}
-        </div>
-
-        <div className="challenge-section">
-          <h3>🏆 Weekly Challenges</h3>
-          <div className="challenge-list">
-            <TaskItem
-              icon="🎯"
-              description="Complete daily tasks for 7 days straight"
-              category="Consistency"
-              xpReward={200}
-              shardReward={50}
-              isChallenge={true}
-              progress="3/7 days"
-            />
-          </div>
-        </div>
-        
-        {/* Daily Activity Input Section */}
-        <div className="daily-activity-section">
-          <button 
-            className="daily-activity-btn"
-            onClick={() => setShowDailyInput(true)}
-          >
-            <span className="btn-icon">🤖</span>
-            <div className="btn-content">
-              <span className="btn-title">Log Daily Activities</span>
-              <span className="btn-subtitle">Let AI analyze your day and award XP!</span>
-            </div>
-          </button>
         </div>
         
         <DailyActivityModal
@@ -953,7 +1050,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Unlock 2 hours of guilt-free gaming"
                 price={50}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-gaming', 'Gaming Session', 50)}
+                onBuy={() => handleBuyShopItem('reward-gaming', 'Gaming Session', 50, 'Unlock 2 hours of guilt-free gaming', '🎮')}
               />
               
               <ShopItem
@@ -963,7 +1060,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Order your favorite meal"
                 price={75}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-treat', 'Treat Yourself', 75)}
+                onBuy={() => handleBuyShopItem('reward-treat', 'Treat Yourself', 75, 'Order your favorite meal', '🍕')}
               />
               
               <ShopItem
@@ -973,7 +1070,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Buy that book you've been wanting"
                 price={100}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-book', 'Book Purchase', 100)}
+                onBuy={() => handleBuyShopItem('reward-book', 'Book Purchase', 100, "Buy that book you've been wanting", '📚')}
               />
             </div>
           </div>
@@ -988,7 +1085,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Double XP for 24 hours"
                 price={30}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('powerup-xp', 'XP Booster', 30)}
+                onBuy={() => handleBuyShopItem('powerup-xp', 'XP Booster', 30, 'Double XP for 24 hours', '🔥')}
               />
               
               <ShopItem
@@ -998,7 +1095,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 description="Extra day to complete tasks"
                 price={25}
                 userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('powerup-extension', 'Task Extension', 25)}
+                onBuy={() => handleBuyShopItem('powerup-extension', 'Task Extension', 25, 'Extra day to complete tasks', '⏰')}
               />
             </div>
           </div>
@@ -1014,6 +1111,122 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     )
   }
 
+  const renderInventoryTab = () => {
+    const inventoryItems = user?.inventory || []
+    
+    // Separate items into key items and consumables
+    const keyItems = inventoryItems.filter(item => item.isKeyItem)
+    const consumables = inventoryItems.filter(item => item.isConsumable)
+    const regularItems = inventoryItems.filter(item => !item.isKeyItem && !item.isConsumable)
+
+    const handleUseItem = async (itemId: string, itemTitle: string) => {
+      const confirmed = await showConfirm(
+        `Are you sure you want to use "${itemTitle}"?\n\nThis item will be consumed and removed from your inventory.`,
+        'Use',
+        'Cancel'
+      )
+      
+      if (confirmed) {
+        const success = await useInventoryItem(itemId)
+        if (success) {
+          showSuccess(`You used "${itemTitle}"!`)
+        } else {
+          showError('Failed to use item. Please try again.')
+        }
+      }
+    }
+
+    return (
+      <div className="tab-content">
+        <div className="shop-header">
+          <div className="shop-header-content">
+            <h2>Inventory</h2>
+            <p>Your purchased items</p>
+          </div>
+        </div>
+        
+        {inventoryItems.length === 0 ? (
+          <div className="no-tasks-message">
+            <div className="no-tasks-content">
+              <h3>🎒 Your Inventory is Empty</h3>
+              <p>Purchase items from the shop to see them here!</p>
+            </div>
+          </div>
+        ) : (
+          <div className="shop-grid">
+            {/* Key Items Section */}
+            {keyItems.length > 0 && (
+              <div className="shop-section">
+                <h3>🔑 Key Items</h3>
+                <div className="shop-items">
+                  {keyItems.map((item) => (
+                    <div key={item.id} className="shop-item">
+                      <div className="item-image">{item.image || '🎁'}</div>
+                      <div className="item-info">
+                        <h4>{item.title}</h4>
+                        <p>{item.description || 'Key item'}</p>
+                        <div className="item-price">Owned: {item.count}x</div>
+                      </div>
+                      <div className="shop-item-actions">
+                        <span className="item-badge key-item-badge">Key Item</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Consumable Items Section */}
+            {consumables.length > 0 && (
+              <div className="shop-section">
+                <h3>⚡ Consumables</h3>
+                <div className="shop-items">
+                  {consumables.map((item) => (
+                    <div key={item.id} className="shop-item">
+                      <div className="item-image">{item.image || '🎁'}</div>
+                      <div className="item-info">
+                        <h4>{item.title}</h4>
+                        <p>{item.description || 'Consumable item'}</p>
+                        <div className="item-price">Owned: {item.count}x</div>
+                      </div>
+                      <div className="shop-item-actions">
+                        <button 
+                          className="buy-button" 
+                          onClick={() => handleUseItem(item.id, item.title)}
+                        >
+                          Use
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Regular Items Section */}
+            {regularItems.length > 0 && (
+              <div className="shop-section">
+                <h3>📦 Regular Items</h3>
+                <div className="shop-items">
+                  {regularItems.map((item) => (
+                    <div key={item.id} className="shop-item">
+                      <div className="item-image">{item.image || '🎁'}</div>
+                      <div className="item-info">
+                        <h4>{item.title}</h4>
+                        <p>{item.description || 'Purchased item'}</p>
+                        <div className="item-price">Owned: {item.count}x</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
@@ -1021,9 +1234,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       case 'tasks':
         return renderTasksTab()
       case 'inventory':
-        // Inventory is disabled, redirect to profile
-        setActiveTab('profile')
-        return renderProfileTab()
+        return renderInventoryTab()
       case 'shop':
         return renderShopTab()
       default:
@@ -1042,16 +1253,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           {profileData && (
             <span className="welcome-text">Welcome, {profileData.name}!</span>
           )}
-          {user?.unclaimedRewards && user.unclaimedRewards.activities.length > 0 && (
-            <button 
-              className="unclaimed-rewards-button" 
-              onClick={() => setShowRewardClaimModal(true)}
-            >
-              <span className="reward-icon">🎁</span>
-              <span className="reward-text">Unclaimed Rewards</span>
+          <button 
+            className="unclaimed-rewards-button" 
+            onClick={() => setShowRewardClaimModal(true)}
+          >
+            <span className="reward-icon">🎁</span>
+            <span className="reward-text">Unclaimed Rewards</span>
+            {user?.unclaimedRewards && user.unclaimedRewards.activities.length > 0 && (
               <span className="reward-badge">{user.unclaimedRewards.activities.length}</span>
-            </button>
-          )}
+            )}
+          </button>
           <button className="theme-toggle-button" onClick={toggleTheme} title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}>
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
@@ -1075,18 +1286,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             onClick={() => setActiveTab('tasks')}
           >
             <span className="tab-icon">📋</span>
-            Tasks & Challenges
+            Tasks
           </button>
           <button 
-            className={`nav-tab ${activeTab === 'inventory' ? 'active' : ''} disabled`}
-            onClick={() => {}} // Disabled, no action
-            disabled
+            className={`nav-tab ${activeTab === 'inventory' ? 'active' : ''}`}
+            onClick={() => setActiveTab('inventory')}
           >
             <span className="tab-icon">🎒</span>
-            <div className="tab-text">
-              <span>Inventory</span>
-              <span className="coming-soon">Coming Soon</span>
-            </div>
+            Inventory
           </button>
           <button 
             className={`nav-tab ${activeTab === 'shop' ? 'active' : ''}`}
@@ -1108,6 +1315,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         onClose={() => setShowRewardClaimModal(false)}
         unclaimedRewards={user?.unclaimedRewards || null}
         onClaimRewards={handleClaimRewards}
+        onClaimIndividualReward={handleClaimIndividualReward}
         isClaiming={isClaiming}
       />
     </div>

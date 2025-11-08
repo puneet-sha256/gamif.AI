@@ -42,6 +42,21 @@ export interface ShopItem {
   price: number // Price in shards
   image?: string // Optional emoji or image
   createdAt: string // When the item was added
+  isConsumable?: boolean // Whether the item is consumable (can be used once)
+  isKeyItem?: boolean // Whether the item is a key item (cannot be consumed)
+}
+
+// Inventory item structure for purchased items
+export interface InventoryItem {
+  id: string // Unique identifier for the inventory item (same as shop item id)
+  title: string // Name of the item
+  description?: string // Optional description
+  price: number // Original price in shards
+  image?: string // Optional emoji or image
+  count: number // Number of this item owned
+  purchasedAt: string // When the item was first purchased
+  isConsumable?: boolean // Whether the item is consumable (can be used once)
+  isKeyItem?: boolean // Whether the item is a key item (cannot be consumed)
 }
 
 // Unclaimed reward from daily activity analysis
@@ -70,6 +85,20 @@ export interface UnclaimedRewards {
   lastUpdated: string
 }
 
+// Daily activity history for heatmap
+export interface DailyActivity {
+  date: string // ISO date string (YYYY-MM-DD)
+  strength: number // XP earned in Strength
+  intelligence: number // XP earned in Intelligence
+  charisma: number // XP earned in Charisma
+  total: number // Total XP earned
+}
+
+export interface ActivityHistory {
+  dailyActivities: DailyActivity[]
+  lastUpdated: string
+}
+
 export interface User {
   id: string
   username: string
@@ -81,8 +110,10 @@ export interface User {
   goalsData?: GoalsData
   stats?: UserStats
   generatedTasks?: GeneratedTasks
-  shopItems?: ShopItem[] // User's custom shop items
+  shopItems?: ShopItem[] // User's custom shop items (wishlist)
+  inventory?: InventoryItem[] // User's purchased items
   unclaimedRewards?: UnclaimedRewards // Pending rewards from daily activities
+  activityHistory?: ActivityHistory // Historical daily XP data for heatmap
 }
 
 export interface UserRegistration {
