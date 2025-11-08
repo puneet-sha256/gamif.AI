@@ -54,10 +54,10 @@
 
 .unclaimed-rewards-button {
   padding: 10px 20px;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  border: none;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(59, 130, 246, 0.3);
   border-radius: 8px;
-  color: #1a1a2e;
+  color: #3b82f6;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 700;
   cursor: pointer;
@@ -66,10 +66,23 @@
   align-items: center;
   gap: 8px;
   position: relative;
-  box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
 }
 
 .unclaimed-rewards-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  background: rgba(255, 255, 255, 1);
+}
+
+.unclaimed-rewards-button.has-rewards {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border: none;
+  color: #1a1a2e;
+  box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+}
+
+.unclaimed-rewards-button.has-rewards:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
 }

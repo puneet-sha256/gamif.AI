@@ -22,7 +22,7 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
 }) => {
   const [claimingIndex, setClaimingIndex] = useState<number | null>(null)
   
-  if (!isOpen || !unclaimedRewards) return null
+  if (!isOpen) return null
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && !isClaiming && claimingIndex === null) {
@@ -78,7 +78,7 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
     return icons[matchType] || '•'
   }
 
-  const hasActivities = unclaimedRewards.activities && unclaimedRewards.activities.length > 0
+  const hasActivities = unclaimedRewards?.activities && unclaimedRewards.activities.length > 0
 
   return (
     <div className="reward-modal-overlay" onClick={handleOverlayClick}>

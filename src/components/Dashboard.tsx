@@ -1252,7 +1252,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             <span className="welcome-text">Welcome, {profileData.name}!</span>
           )}
           <button 
-            className="unclaimed-rewards-button" 
+            className={`unclaimed-rewards-button ${user?.unclaimedRewards && user.unclaimedRewards.activities.length > 0 ? 'has-rewards' : ''}`}
             onClick={() => setShowRewardClaimModal(true)}
           >
             <span className="reward-icon">🎁</span>
