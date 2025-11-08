@@ -11,6 +11,7 @@ import DailyActivityModal from './DailyActivityModal'
 import TaskModal from './TaskModal'
 import ShopItemModal from './ShopItemModal'
 import RewardClaimModal from './RewardClaimModal'
+import ActivityHeatmap from './ActivityHeatmap'
 import { 
   mapGeneratedTasksToTaskItems, 
   groupMappedTasksByCategory, 
@@ -696,6 +697,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               )
             })()}
           </div>
+        </div>
+
+        {/* Activity Heatmap Section */}
+        <div className="heatmap-section">
+          <ActivityHeatmap activityHistory={user?.activityHistory} />
         </div>
       </div>
     </div>

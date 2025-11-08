@@ -774,6 +774,10 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
+.heatmap-section {
+  width: 100%;
+}
+
 .experience-card h3 {
   font-family: 'Orbitron', monospace;
   font-size: 1.5rem;
