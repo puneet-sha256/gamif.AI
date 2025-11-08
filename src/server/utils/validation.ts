@@ -17,7 +17,9 @@ export function isValidNumber(value: any): value is number {
 }
 
 export function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // More secure regex that prevents ReDoS attacks
+  // Simpler pattern that doesn't use nested quantifiers
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   return emailRegex.test(email);
 }
 

@@ -48,6 +48,18 @@ export async function sendOTPEmail(email: string, otp: string, username: string)
   }
 
   try {
+    // Sanitize username to prevent XSS
+    const sanitizedUsername = username.replace(/[<>'"&]/g, (char) => {
+      switch (char) {
+        case '<': return '&lt;'
+        case '>': return '&gt;'
+        case '"': return '&quot;'
+        case "'": return '&#39;'
+        case '&': return '&amp;'
+        default: return char
+      }
+    })
+
     const mailOptions = {
       from: `"Gamif.AI - Solo Leveling" <${EMAIL_USER}>`,
       to: email,
@@ -137,7 +149,7 @@ export async function sendOTPEmail(email: string, otp: string, username: string)
               <p style="margin: 10px 0 0 0;">Player System Verification</p>
             </div>
             <div class="content">
-              <h2>Welcome, ${username}!</h2>
+              <h2>Welcome, ${sanitizedUsername}!</h2>
               <p>You're one step closer to starting your personal development journey.</p>
               <p>To complete your registration, please verify your email address using the OTP code below:</p>
               
