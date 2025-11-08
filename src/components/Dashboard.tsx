@@ -456,6 +456,101 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
   }
 
+  const handleClaimIndividualReward = async (index: number) => {
+    if (!user?.unclaimedRewards) return
+    
+    try {
+      const sessionId = userDatabase.getSessionId()
+      if (!sessionId) {
+        showError('Session expired. Please log in again.')
+        return
+      }
+
+      const rewards = user.unclaimedRewards
+      const activity = rewards.activities[index]
+      
+      if (!activity) {
+        showError('Activity not found.')
+        return
+      }
+
+      // Calculate XP distribution for this single activity
+      const strengthXP = activity.category === 'Strength' ? activity.xpEarned : 0
+      const intelligenceXP = activity.category === 'Intelligence' ? activity.xpEarned : 0
+      const charismaXP = activity.category === 'Charisma' ? activity.xpEarned : 0
+
+      // Step 1: Use the userService API to claim individual reward
+      const result = await userService.claimRewards({
+        sessionId,
+        totalXP: activity.xpEarned,
+        totalShards: activity.shardsEarned,
+        strengthXP,
+        intelligenceXP,
+        charismaXP
+      })
+      
+      if (result.success) {
+        if (!user.id) {
+          console.error('❌ User ID not found')
+          showError('Failed to update rewards. Please try again.')
+          return
+        }
+
+        // Step 2: Remove the claimed activity from unclaimed rewards
+        const updatedActivities = rewards.activities.filter((_, i) => i !== index)
+        
+        // Recalculate totals
+        let newTotalXP = 0
+        let newTotalShards = 0
+        const newCategoryBreakdown = {
+          Strength: { xp: 0, shards: 0 },
+          Intelligence: { xp: 0, shards: 0 },
+          Charisma: { xp: 0, shards: 0 }
+        }
+
+        updatedActivities.forEach(act => {
+          newTotalXP += act.xpEarned
+          newTotalShards += act.shardsEarned
+          newCategoryBreakdown[act.category].xp += act.xpEarned
+          newCategoryBreakdown[act.category].shards += act.shardsEarned
+        })
+
+        const updatedRewards = updatedActivities.length > 0 ? {
+          activities: updatedActivities,
+          totalXP: newTotalXP,
+          totalShards: newTotalShards,
+          categoryBreakdown: newCategoryBreakdown,
+          lastUpdated: new Date().toISOString()
+        } : null
+
+        try {
+          const updateResponse = await apiClient.put(`/user/${user.id}`, { 
+            unclaimedRewards: updatedRewards 
+          })
+          
+          if (updateResponse.success) {
+            // Step 3: Refresh user data from server to sync UI
+            await refreshUserTasks()
+            
+            showSuccess(`🎉 Claimed reward!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards`)
+          } else {
+            console.error('⚠️ Reward claimed but failed to update unclaimed rewards in backend')
+            showWarning('Reward claimed successfully, but there was an issue updating. Please refresh the page.')
+          }
+        } catch (updateError) {
+          console.error('❌ Error updating unclaimed rewards:', updateError)
+          showWarning('Reward claimed successfully, but there was an issue updating. Please refresh the page.')
+        }
+      } else {
+        console.error('❌ Failed to claim individual reward - API call failed')
+        showError('Failed to claim reward. Please try again.')
+      }
+    } catch (error) {
+      console.error('❌ Error claiming individual reward:', error)
+      showError('Sorry, there was an error claiming your reward. Please try again.')
+    }
+  }
+
   const profileData = user?.profileData
 
   // Calculate experience progress for next level
@@ -1156,16 +1251,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           {profileData && (
             <span className="welcome-text">Welcome, {profileData.name}!</span>
           )}
-          {user?.unclaimedRewards && user.unclaimedRewards.activities.length > 0 && (
-            <button 
-              className="unclaimed-rewards-button" 
-              onClick={() => setShowRewardClaimModal(true)}
-            >
-              <span className="reward-icon">🎁</span>
-              <span className="reward-text">Unclaimed Rewards</span>
+          <button 
+            className="unclaimed-rewards-button" 
+            onClick={() => setShowRewardClaimModal(true)}
+          >
+            <span className="reward-icon">🎁</span>
+            <span className="reward-text">Unclaimed Rewards</span>
+            {user?.unclaimedRewards && user.unclaimedRewards.activities.length > 0 && (
               <span className="reward-badge">{user.unclaimedRewards.activities.length}</span>
-            </button>
-          )}
+            )}
+          </button>
           <button className="logout-button" onClick={handleLogout}>
             Logout
           </button>
@@ -1215,6 +1310,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         onClose={() => setShowRewardClaimModal(false)}
         unclaimedRewards={user?.unclaimedRewards || null}
         onClaimRewards={handleClaimRewards}
+        onClaimIndividualReward={handleClaimIndividualReward}
         isClaiming={isClaiming}
       />
     </div>
