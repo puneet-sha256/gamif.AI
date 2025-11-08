@@ -32,7 +32,7 @@ interface DashboardProps {
 type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
-  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, buyShopItem, updateUser, refreshUserTasks } = useAuth()
+  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, buyShopItem, useInventoryItem, updateUser, refreshUserTasks } = useAuth()
   const { showSuccess, showError, showWarning, showInfo } = useAlert()
   const { showConfirm } = useConfirm()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
@@ -1036,6 +1036,28 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
   const renderInventoryTab = () => {
     const inventoryItems = user?.inventory || []
+    
+    // Separate items into key items and consumables
+    const keyItems = inventoryItems.filter(item => item.isKeyItem)
+    const consumables = inventoryItems.filter(item => item.isConsumable)
+    const regularItems = inventoryItems.filter(item => !item.isKeyItem && !item.isConsumable)
+
+    const handleUseItem = async (itemId: string, itemTitle: string) => {
+      const confirmed = await showConfirm(
+        `Are you sure you want to use "${itemTitle}"?\n\nThis item will be consumed and removed from your inventory.`,
+        'Use',
+        'Cancel'
+      )
+      
+      if (confirmed) {
+        const success = await useInventoryItem(itemId)
+        if (success) {
+          showSuccess(`You used "${itemTitle}"!`)
+        } else {
+          showError('Failed to use item. Please try again.')
+        }
+      }
+    }
 
     return (
       <div className="tab-content">
@@ -1055,21 +1077,73 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           </div>
         ) : (
           <div className="shop-grid">
-            <div className="shop-section">
-              <h3>📦 My Items</h3>
-              <div className="shop-items">
-                {inventoryItems.map((item) => (
-                  <div key={item.id} className="shop-item">
-                    <div className="item-image">{item.image || '🎁'}</div>
-                    <div className="item-info">
-                      <h4>{item.title}</h4>
-                      <p>{item.description || 'Purchased item'}</p>
-                      <div className="item-price">Owned: {item.count}x</div>
+            {/* Key Items Section */}
+            {keyItems.length > 0 && (
+              <div className="shop-section">
+                <h3>🔑 Key Items</h3>
+                <div className="shop-items">
+                  {keyItems.map((item) => (
+                    <div key={item.id} className="shop-item">
+                      <div className="item-image">{item.image || '🎁'}</div>
+                      <div className="item-info">
+                        <h4>{item.title}</h4>
+                        <p>{item.description || 'Key item'}</p>
+                        <div className="item-price">Owned: {item.count}x</div>
+                      </div>
+                      <div className="shop-item-actions">
+                        <span className="item-badge key-item-badge">Key Item</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Consumable Items Section */}
+            {consumables.length > 0 && (
+              <div className="shop-section">
+                <h3>⚡ Consumables</h3>
+                <div className="shop-items">
+                  {consumables.map((item) => (
+                    <div key={item.id} className="shop-item">
+                      <div className="item-image">{item.image || '🎁'}</div>
+                      <div className="item-info">
+                        <h4>{item.title}</h4>
+                        <p>{item.description || 'Consumable item'}</p>
+                        <div className="item-price">Owned: {item.count}x</div>
+                      </div>
+                      <div className="shop-item-actions">
+                        <button 
+                          className="buy-button" 
+                          onClick={() => handleUseItem(item.id, item.title)}
+                        >
+                          Use
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Regular Items Section */}
+            {regularItems.length > 0 && (
+              <div className="shop-section">
+                <h3>📦 Regular Items</h3>
+                <div className="shop-items">
+                  {regularItems.map((item) => (
+                    <div key={item.id} className="shop-item">
+                      <div className="item-image">{item.image || '🎁'}</div>
+                      <div className="item-info">
+                        <h4>{item.title}</h4>
+                        <p>{item.description || 'Purchased item'}</p>
+                        <div className="item-price">Owned: {item.count}x</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

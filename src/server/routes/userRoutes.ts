@@ -15,7 +15,8 @@ import {
   addShopItem,
   deleteShopItem,
   getUserShopItems,
-  buyShopItem
+  buyShopItem,
+  useInventoryItem
 } from '../utils/dataOperations'
 import {
   createSuccessResponse,
@@ -507,7 +508,7 @@ export async function addUserTask(req: Request, res: Response) {
 // Add a shop item
 export async function addUserShopItem(req: Request, res: Response) {
   try {
-    const { sessionId, title, description, price, image } = req.body
+    const { sessionId, title, description, price, image, isConsumable, isKeyItem } = req.body
 
     // Validate required fields
     if (!sessionId || !title || price === undefined) {
@@ -540,7 +541,9 @@ export async function addUserShopItem(req: Request, res: Response) {
       title,
       description,
       price,
-      image
+      image,
+      isConsumable,
+      isKeyItem
     })
 
     if (!success) {
@@ -702,6 +705,57 @@ export async function buyUserShopItem(req: Request, res: Response) {
 
   } catch (error) {
     logger.error('Buy shop item error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Use an inventory item
+export async function useUserInventoryItem(req: Request, res: Response) {
+  try {
+    const { sessionId, itemId } = req.body
+
+    // Validate required fields
+    if (!sessionId || !itemId) {
+      return res.status(400).json(createErrorResponse(
+        'Session ID and item ID are required'
+      ))
+    }
+
+    // Verify session
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    // Find user
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    // Use the inventory item
+    const result = await useInventoryItem(user.id, itemId)
+
+    if (!result.success) {
+      return res.status(400).json(createErrorResponse(
+        result.message || 'Failed to use item'
+      ))
+    }
+
+    // Update session last access
+    await updateSessionLastAccess(sessionId)
+
+    // Get updated user data
+    const updatedUser = await findUserById(user.id)
+
+    res.json(createSuccessResponse(
+      result.message || 'Item used successfully',
+      undefined,
+      updatedUser ? sanitizeUser(updatedUser) : undefined
+    ))
+
+  } catch (error) {
+    logger.error('Use inventory item error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }

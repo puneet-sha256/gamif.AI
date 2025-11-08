@@ -9,6 +9,8 @@ interface ShopItemModalProps {
     description?: string
     price: number
     image?: string
+    isConsumable?: boolean
+    isKeyItem?: boolean
   }) => Promise<void>
 }
 
@@ -21,6 +23,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [image, setImage] = useState('🎁')
+  const [itemType, setItemType] = useState<'regular' | 'consumable' | 'key'>('regular')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -30,6 +33,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
       setDescription('')
       setPrice('')
       setImage('🎁')
+      setItemType('regular')
       setError('')
     }
   }, [isOpen])
@@ -58,7 +62,9 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
         title: title.trim(),
         description: description.trim() || undefined,
         price: priceValue,
-        image: image.trim() || undefined
+        image: image.trim() || undefined,
+        isConsumable: itemType === 'consumable',
+        isKeyItem: itemType === 'key'
       }
       
       await onSave(saveData)
@@ -75,6 +81,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
     setDescription('')
     setPrice('')
     setImage('🎁')
+    setItemType('regular')
     setError('')
     onClose()
   }
@@ -150,6 +157,26 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
               disabled={isSaving}
             />
             <small className="form-hint">Use an emoji to represent this item</small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="item-type">Item Type</label>
+            <select
+              id="item-type"
+              value={itemType}
+              onChange={(e) => setItemType(e.target.value as 'regular' | 'consumable' | 'key')}
+              className="form-input"
+              disabled={isSaving}
+            >
+              <option value="regular">Regular Item</option>
+              <option value="consumable">Consumable (Can be used once)</option>
+              <option value="key">Key Item (Cannot be consumed)</option>
+            </select>
+            <small className="form-hint">
+              {itemType === 'consumable' && 'This item will be removed from inventory when used'}
+              {itemType === 'key' && 'This item cannot be used or removed'}
+              {itemType === 'regular' && 'Standard inventory item'}
+            </small>
           </div>
 
           <div className="modal-actions">

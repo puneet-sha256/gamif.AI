@@ -10,6 +10,8 @@ export interface NewShopItemData {
   description?: string
   price: number
   image?: string
+  isConsumable?: boolean
+  isKeyItem?: boolean
 }
 
 class ShopService {
@@ -90,6 +92,8 @@ class ShopService {
       title: string
       description?: string
       image?: string
+      isConsumable?: boolean
+      isKeyItem?: boolean
     }
   ): Promise<ApiResponse> {
     console.log('💰 ShopService: Buying shop item:', itemId, 'for', itemPrice, 'shards')
@@ -109,6 +113,32 @@ class ShopService {
       return response
     } catch (error: any) {
       console.error('❌ ShopService: Shop item purchase failed:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Use an inventory item (consumable)
+   */
+  async useInventoryItem(
+    sessionId: string,
+    itemId: string
+  ): Promise<ApiResponse> {
+    console.log('🎯 ShopService: Using inventory item:', itemId)
+
+    try {
+      const response = await apiClient.post('/user/inventory/use', {
+        sessionId,
+        itemId
+      })
+
+      if (response.success) {
+        console.log('✅ ShopService: Inventory item used successfully')
+      }
+
+      return response
+    } catch (error: any) {
+      console.error('❌ ShopService: Inventory item use failed:', error)
       throw error
     }
   }
