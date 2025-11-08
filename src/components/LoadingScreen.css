@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: center;
   font-family: 'Rajdhani', sans-serif;
-  color: #1e293b;
+  color: var(--text-primary);
   z-index: 9999;
 }
 
@@ -80,7 +80,7 @@
 
 .loading-spinner-container p {
   font-size: 1.1rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0;
   font-weight: 600;
   letter-spacing: 1px;

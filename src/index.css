@@ -1,5 +1,71 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
+:root {
+  /* Light theme colors */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #e2e8f0;
+  --bg-tertiary: #cbd5e1;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-modal: rgba(255, 255, 255, 0.98);
+  --bg-button: rgba(255, 255, 255, 0.8);
+  --bg-hover: rgba(255, 255, 255, 1);
+  
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+  
+  --border-color: rgba(59, 130, 246, 0.2);
+  --border-hover: rgba(59, 130, 246, 0.3);
+  
+  --accent-primary: #3b82f6;
+  --accent-secondary: #06b6d4;
+  --accent-success: #10b981;
+  --accent-danger: #ef4444;
+  --accent-warning: #f59e0b;
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+  
+  --overlay-bg: rgba(0, 0, 0, 0.4);
+  --scrollbar-track: rgba(0, 0, 0, 0.1);
+  --scrollbar-thumb: linear-gradient(135deg, #3b82f6, #06b6d4);
+}
+
+[data-theme='dark'] {
+  /* Dark theme colors */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-card: rgba(30, 41, 59, 0.95);
+  --bg-modal: rgba(30, 41, 59, 0.98);
+  --bg-button: rgba(51, 65, 85, 0.8);
+  --bg-hover: rgba(51, 65, 85, 1);
+  
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-inverse: #0f172a;
+  
+  --border-color: rgba(138, 43, 226, 0.3);
+  --border-hover: rgba(138, 43, 226, 0.5);
+  
+  --accent-primary: #8a2be2;
+  --accent-secondary: #6a1bb2;
+  --accent-success: #10b981;
+  --accent-danger: #ef4444;
+  --accent-warning: #f59e0b;
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  
+  --overlay-bg: rgba(0, 0, 0, 0.7);
+  --scrollbar-track: rgba(0, 0, 0, 0.5);
+  --scrollbar-thumb: linear-gradient(135deg, #8a2be2, #4169e1);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -8,10 +74,11 @@
 
 body {
   font-family: 'Rajdhani', sans-serif;
-  background: #000;
-  color: white;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   overflow-x: hidden;
   line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 html, body, #root {
@@ -23,14 +90,14 @@ html, body, #root {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #8a2be2, #4169e1);
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #9932cc, #4682b4);
+  opacity: 0.8;
 }

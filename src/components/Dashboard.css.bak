@@ -184,7 +184,7 @@
 
 .welcome-section p {
   font-size: 1.2rem;
-  color: var(--text-muted);
+  color: #64748b;
   margin: 0;
 }
 
@@ -195,12 +195,12 @@
 
 .profile-card,
 .goals-card {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 15px;
   padding: 30px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .profile-card h3,
@@ -225,7 +225,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 0;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
 }
 
 .profile-item:last-child {
@@ -235,7 +235,7 @@
 .profile-item .label {
   font-family: 'Rajdhani', sans-serif;
   font-size: 1rem;
-  color: var(--accent-primary);
+  color: #3b82f6;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -244,7 +244,7 @@
 .profile-item .value {
   font-family: 'Orbitron', monospace;
   font-size: 1.1rem;
-  color: var(--text-primary);
+  color: #1e293b;
   font-weight: 600;
 }
 
@@ -255,17 +255,17 @@
 }
 
 .goal-item {
-  background: var(--bg-button);
+  background: rgba(248, 250, 252, 0.8);
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.15);
   transition: all 0.3s ease;
 }
 
 .goal-item:hover {
-  border-color: var(--border-hover);
-  background: var(--bg-hover);
-  box-shadow: var(--shadow-sm);
+  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(248, 250, 252, 1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
 .goal-header {
@@ -290,7 +290,7 @@
 .goal-header h4 {
   font-family: 'Orbitron', monospace;
   font-size: 1.1rem;
-  color: var(--text-primary);
+  color: #1e293b;
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -299,7 +299,7 @@
 .goal-text {
   font-family: 'Rajdhani', sans-serif;
   font-size: 1rem;
-  color: var(--text-muted);
+  color: #64748b;
   line-height: 1.6;
   margin: 0;
   padding: 10px 0;
@@ -344,9 +344,9 @@
 }
 
 .stat-card {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 15px;
   padding: 30px;
   display: flex;
@@ -377,7 +377,7 @@
 .stat-info h3 {
   margin: 0 0 5px 0;
   font-size: 1rem;
-  color: var(--accent-primary);
+  color: #3b82f6;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 600;
@@ -386,7 +386,7 @@
 .stat-value {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1e293b;
   font-family: 'Orbitron', monospace;
 }
 
@@ -420,7 +420,7 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #64748b;
   text-align: center;
 }
 
@@ -461,7 +461,7 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #64748b;
   text-align: center;
 }
 
@@ -513,7 +513,7 @@
   font-family: 'Orbitron', monospace;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1e293b;
   line-height: 1;
 }
 
@@ -521,7 +521,7 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -539,14 +539,14 @@
   align-items: center;
   gap: 15px;
   padding: 15px;
-  background: var(--bg-button);
+  background: rgba(248, 250, 252, 0.8);
   border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.15);
   transition: all 0.3s ease;
 }
 
 .legend-item:hover {
-  background: var(--bg-hover);
+  background: rgba(248, 250, 252, 1);
   border-color: rgba(59, 130, 246, 0.25);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
@@ -570,14 +570,14 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1e293b;
 }
 
 .legend-value {
   font-family: 'Rajdhani', sans-serif;
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--text-muted);
+  color: #64748b;
 }
 
 .strength-color {
@@ -658,9 +658,9 @@
 
 /* Tab Navigation Styles */
 .dashboard-navigation {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
   padding: 0 40px;
 }
 
@@ -681,7 +681,7 @@
   background: none;
   border: none;
   border-bottom: 3px solid transparent;
-  color: var(--text-muted);
+  color: #64748b;
   font-family: 'Rajdhani', sans-serif;
   font-size: 1rem;
   font-weight: 600;
@@ -694,13 +694,13 @@
 }
 
 .nav-tab:hover {
-  color: var(--accent-primary);
+  color: #3b82f6;
   background: rgba(59, 130, 246, 0.05);
 }
 
 .nav-tab.active {
-  color: var(--accent-primary);
-  border-bottom-color: var(--accent-primary);
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
   background: rgba(59, 130, 246, 0.1);
 }
 
@@ -715,7 +715,7 @@
 }
 
 .nav-tab.disabled:hover {
-  color: var(--text-muted);
+  color: #64748b;
   background: none;
 }
 
@@ -764,7 +764,7 @@
 
 .profile-overview p {
   font-size: 1.2rem;
-  color: var(--text-muted);
+  color: #64748b;
   margin: 0;
 }
 
@@ -802,12 +802,12 @@
 }
 
 .experience-card {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 15px;
   padding: 30px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .heatmap-section {
@@ -818,7 +818,7 @@
   font-family: 'Orbitron', monospace;
   font-size: 1.5rem;
   margin: 0 0 30px 0;
-  color: var(--text-primary);
+  color: #1e293b;
   text-align: center;
 }
 
@@ -849,7 +849,7 @@
   font-family: 'Orbitron', monospace;
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1e293b;
   line-height: 1;
 }
 
@@ -857,7 +857,7 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-top: 5px;
@@ -876,14 +876,14 @@
   align-items: center;
   gap: 15px;
   padding: 15px;
-  background: var(--bg-button);
+  background: rgba(248, 250, 252, 0.8);
   border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.15);
   transition: all 0.3s ease;
 }
 
 .legend-row:hover {
-  background: var(--bg-hover);
+  background: rgba(248, 250, 252, 1);
   border-color: rgba(59, 130, 246, 0.25);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
@@ -900,7 +900,7 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1e293b;
   flex: 1;
 }
 
@@ -908,7 +908,7 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #64748b;
 }
 
 .no-experience {
@@ -1025,11 +1025,11 @@
 }
 
 .goals-text {
-  background: var(--bg-button);
+  background: rgba(248, 250, 252, 0.8);
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid var(--border-color);
-  color: var(--text-muted);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  color: #64748b;
   font-family: 'Rajdhani', sans-serif;
   font-size: 1rem;
   line-height: 1.6;
@@ -1043,11 +1043,11 @@
   align-items: center;
   margin-bottom: 40px;
   padding: 30px;
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 20px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .tasks-header-content {
@@ -1066,7 +1066,7 @@
 
 .tasks-header p {
   font-size: 1rem;
-  color: var(--text-muted);
+  color: #64748b;
   margin: 0;
   line-height: 1.5;
 }
@@ -1137,12 +1137,12 @@
 
 .task-section,
 .challenge-section {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 20px;
   padding: 30px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .task-section h3,
@@ -1150,7 +1150,7 @@
   font-family: 'Orbitron', monospace;
   font-size: 1.4rem;
   margin: 0 0 24px 0;
-  color: var(--text-primary);
+  color: #1e293b;
   padding-bottom: 16px;
   border-bottom: 2px solid rgba(59, 130, 246, 0.15);
 }
@@ -1166,7 +1166,7 @@
   background: rgba(248, 250, 252, 0.9);
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.15);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1177,14 +1177,14 @@
 .challenge-item:hover {
   transform: translateX(4px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-  border-color: var(--border-hover);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 /* Enhanced task styling */
 .task-item.enhanced,
 .challenge-item.enhanced {
   background: linear-gradient(135deg, rgba(248, 250, 252, 0.95), rgba(241, 245, 249, 0.9));
-  border: 2px solid var(--border-color);
+  border: 2px solid rgba(59, 130, 246, 0.2);
   padding: 24px;
   display: flex;
   align-items: center;
@@ -1208,7 +1208,7 @@
 .challenge-item.enhanced:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
-  border-color: var(--border-hover);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .task-icon,
@@ -1237,7 +1237,7 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #1e293b;
   margin: 0 0 8px 0;
   line-height: 1.4;
 }
@@ -1289,14 +1289,14 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 1.1rem;
   margin: 0 0 5px 0;
-  color: var(--text-primary);
+  color: #1e293b;
   font-weight: 700;
 }
 
 .task-info p,
 .challenge-info p {
   font-size: 0.9rem;
-  color: var(--text-muted);
+  color: #64748b;
   margin: 0 0 10px 0;
 }
 
@@ -1338,7 +1338,7 @@
   padding: 4px 8px;
   border-radius: 4px;
   background: rgba(59, 130, 246, 0.1);
-  color: var(--accent-primary);
+  color: #3b82f6;
 }
 
 /* Task Action Buttons */
@@ -1350,7 +1350,7 @@
 
 .task-action-btn {
   background: rgba(59, 130, 246, 0.1);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 8px;
   width: 36px;
   height: 36px;
@@ -1381,7 +1381,7 @@
 
 .task-action-btn.edit-btn {
   background: rgba(59, 130, 246, 0.1);
-  border-color: var(--border-hover);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .task-action-btn.edit-btn:hover {
@@ -1417,7 +1417,7 @@
 
 .inventory-header p {
   font-size: 1.2rem;
-  color: var(--text-muted);
+  color: #64748b;
   margin: 0;
 }
 
@@ -1429,12 +1429,12 @@
 
 .inventory-section,
 .items-section {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 15px;
   padding: 30px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .inventory-section h3,
@@ -1442,7 +1442,7 @@
   font-family: 'Orbitron', monospace;
   font-size: 1.5rem;
   margin: 0 0 20px 0;
-  color: var(--text-primary);
+  color: #1e293b;
 }
 
 .achievement-item {
@@ -1452,7 +1452,7 @@
   padding: 15px;
   border-radius: 12px;
   margin-bottom: 10px;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.15);
 }
 
 .achievement-item.unlocked {
@@ -1481,13 +1481,13 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 1.1rem;
   margin: 0 0 5px 0;
-  color: var(--text-primary);
+  color: #1e293b;
   font-weight: 700;
 }
 
 .achievement-info p {
   font-size: 0.9rem;
-  color: var(--text-muted);
+  color: #64748b;
   margin: 0;
 }
 
@@ -1535,14 +1535,14 @@
 
 .shop-header p {
   font-size: 1.2rem;
-  color: var(--text-muted);
+  color: #64748b;
   margin: 0 0 20px 0;
 }
 
 .currency-display {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 12px;
   padding: 15px 25px;
   display: inline-block;
@@ -1553,7 +1553,7 @@
   font-family: 'Orbitron', monospace;
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--accent-primary);
+  color: #3b82f6;
 }
 
 .shop-grid {
@@ -1562,19 +1562,19 @@
 }
 
 .shop-section {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 15px;
   padding: 30px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .shop-section h3 {
   font-family: 'Orbitron', monospace;
   font-size: 1.5rem;
   margin: 0 0 20px 0;
-  color: var(--text-primary);
+  color: #1e293b;
 }
 
 .shop-items {
@@ -1584,10 +1584,10 @@
 }
 
 .shop-item {
-  background: var(--bg-button);
+  background: rgba(248, 250, 252, 0.8);
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.15);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1596,8 +1596,8 @@
 }
 
 .shop-item:hover {
-  border-color: var(--border-hover);
-  background: var(--bg-hover);
+  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(248, 250, 252, 1);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
@@ -1611,13 +1611,13 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 1.2rem;
   margin: 0 0 10px 0;
-  color: var(--text-primary);
+  color: #1e293b;
   font-weight: 700;
 }
 
 .item-info p {
   font-size: 0.9rem;
-  color: var(--text-muted);
+  color: #64748b;
   margin: 0 0 15px 0;
   line-height: 1.4;
 }
@@ -1626,7 +1626,7 @@
   font-family: 'Orbitron', monospace;
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--accent-primary);
+  color: #3b82f6;
   margin-bottom: 15px;
 }
 
@@ -1819,7 +1819,7 @@
   max-height: 85vh;
   overflow-y: auto;
   box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
-  border: 2px solid var(--border-color);
+  border: 2px solid rgba(59, 130, 246, 0.3);
   animation: modalSlideUp 0.3s ease;
 }
 
@@ -1869,7 +1869,7 @@
 }
 
 .modal-description {
-  color: var(--text-muted);
+  color: #64748b;
   margin-bottom: 24px;
   font-family: 'Rajdhani', sans-serif;
   font-size: 1.05rem;
@@ -1885,7 +1885,7 @@
   font-family: 'Rajdhani', sans-serif;
   font-weight: 700;
   font-size: 1.05rem;
-  color: var(--text-primary);
+  color: #1e293b;
   margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1893,14 +1893,14 @@
 
 .date-input {
   width: 100%;
-  border: 2px solid var(--border-color);
+  border: 2px solid rgba(59, 130, 246, 0.2);
   border-radius: 12px;
   padding: 14px 18px;
   font-size: 1.05rem;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 500;
-  background: var(--bg-card);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e293b;
   transition: all 0.3s ease;
   cursor: pointer;
   box-sizing: border-box;
@@ -1908,7 +1908,7 @@
 
 .date-input:focus {
   outline: none;
-  border-color: var(--accent-primary);
+  border-color: #3b82f6;
   background: white;
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
@@ -1936,7 +1936,7 @@
   font-family: 'Rajdhani', sans-serif;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1e293b;
 }
 
 .example-tags {
@@ -1946,26 +1946,26 @@
 }
 
 .example-tag {
-  background: var(--bg-card);
-  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.9);
+  color: #64748b;
   padding: 8px 14px;
   border-radius: 20px;
   font-size: 0.9rem;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 600;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(59, 130, 246, 0.15);
   transition: all 0.2s ease;
 }
 
 .example-tag:hover {
   background: white;
-  border-color: var(--border-hover);
+  border-color: rgba(59, 130, 246, 0.3);
   transform: translateY(-1px);
 }
 
 .activity-input-modal {
   width: 100%;
-  border: 2px solid var(--border-color);
+  border: 2px solid rgba(59, 130, 246, 0.2);
   border-radius: 12px;
   padding: 16px;
   font-size: 1.05rem;
@@ -1973,8 +1973,8 @@
   font-weight: 500;
   resize: vertical;
   transition: all 0.3s ease;
-  background: var(--bg-card);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e293b;
   line-height: 1.6;
   box-sizing: border-box;
   min-height: 120px;
@@ -1982,7 +1982,7 @@
 
 .activity-input-modal:focus {
   outline: none;
-  border-color: var(--accent-primary);
+  border-color: #3b82f6;
   background: white;
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
@@ -1997,7 +1997,7 @@
 
 .modal-btn-secondary {
   background: rgba(148, 163, 184, 0.15);
-  color: var(--text-secondary);
+  color: #475569;
   border: 2px solid rgba(148, 163, 184, 0.3);
   border-radius: 12px;
   padding: 14px 28px;
@@ -2126,7 +2126,7 @@
 
 .no-tasks-content {
   text-align: center;
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 20px;
   padding: 40px;
   border: 2px dashed rgba(59, 130, 246, 0.3);
@@ -2135,12 +2135,12 @@
 
 .no-tasks-content h3 {
   font-family: 'Orbitron', monospace;
-  color: var(--text-primary);
+  color: #1e293b;
   margin-bottom: 16px;
 }
 
 .no-tasks-content p {
-  color: var(--text-muted);
+  color: #64748b;
   margin-bottom: 24px;
   line-height: 1.6;
 }
@@ -2151,7 +2151,7 @@
   align-items: center;
   min-height: 200px;
   font-size: 1.2rem;
-  color: var(--accent-primary);
+  color: #3b82f6;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 600;
 }

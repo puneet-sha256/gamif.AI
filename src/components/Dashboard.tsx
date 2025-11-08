@@ -2,6 +2,7 @@ import './Dashboard.css'
 import { useAuth } from '../contexts/AuthContext'
 import { useAlert } from '../contexts/AlertContext'
 import { useConfirm } from '../contexts/ConfirmContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { useEffect, useState } from 'react'
 import StatCard from './StatCard'
 import TaskItem from './TaskItem'
@@ -35,6 +36,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, buyShopItem, useInventoryItem, updateUser, refreshUserTasks } = useAuth()
   const { showSuccess, showError, showWarning, showInfo } = useAlert()
   const { showConfirm } = useConfirm()
+  const { theme, toggleTheme } = useTheme()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
   const [showDailyInput, setShowDailyInput] = useState(false)
   const [dailyActivity, setDailyActivity] = useState('')
@@ -1255,6 +1257,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           {profileData && (
             <span className="welcome-text">Welcome, {profileData.name}!</span>
           )}
+          <button 
+            className="theme-toggle-button"
+            onClick={toggleTheme}
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
           <button 
             className={`unclaimed-rewards-button ${user?.unclaimedRewards && user.unclaimedRewards.activities.length > 0 ? 'has-rewards' : ''}`}
             onClick={() => setShowRewardClaimModal(true)}

@@ -32,9 +32,9 @@
 }
 
 .goals-setup-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid var(--border-color);
   border-radius: 15px;
   padding: 40px;
   box-shadow: 
@@ -92,14 +92,14 @@
   margin-bottom: 30px;
   padding: 20px;
   background: rgba(248, 250, 252, 0.6);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   text-align: center;
 }
 
 .goals-description p {
   margin: 0;
-  color: #64748b;
+  color: var(--text-muted);
   font-family: 'Rajdhani', sans-serif;
   font-size: 1.1rem;
   font-weight: 500;
@@ -121,7 +121,7 @@
   margin-bottom: 20px;
   padding: 15px;
   background: rgba(248, 250, 252, 0.6);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
 }
 
@@ -132,7 +132,7 @@
 
 .goals-info h3 {
   margin: 0 0 5px 0;
-  color: #1e293b;
+  color: var(--text-primary);
   font-family: 'Orbitron', monospace;
   font-size: 1.3rem;
   font-weight: 700;
@@ -142,7 +142,7 @@
 
 .goals-info p {
   margin: 0;
-  color: #64748b;
+  color: var(--text-muted);
   font-family: 'Rajdhani', sans-serif;
   font-size: 0.95rem;
   font-weight: 500;
@@ -177,10 +177,10 @@
   width: 100%;
   min-height: 150px;
   padding: 15px;
-  background: rgba(248, 250, 252, 0.8);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: var(--bg-button);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: #1e293b;
+  color: var(--text-primary);
   font-family: 'Rajdhani', sans-serif;
   font-size: 1rem;
   transition: all 0.3s ease;
@@ -198,7 +198,7 @@
 
 .goals-textarea::placeholder,
 .goal-textarea::placeholder {
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .character-count {
@@ -206,7 +206,7 @@
   margin-top: 5px;
   font-family: 'Rajdhani', sans-serif;
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .character-count.valid {
@@ -226,7 +226,7 @@
 .back-button {
   flex: 1;
   padding: 15px;
-  background: rgba(248, 250, 252, 0.8);
+  background: var(--bg-button);
   border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 8px;
   color: #3b82f6;
