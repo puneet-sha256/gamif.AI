@@ -163,7 +163,6 @@ class AzureAIService {
 
   /**
    * Generate daily tasks based on user goals
-   * @deprecated Use generateCompletion(AIPromptType.TASK_GENERATION, ...) instead
    */
   async generateTasks(
     goals: GoalsData,

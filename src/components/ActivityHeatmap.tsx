@@ -17,25 +17,29 @@ const CATEGORY_COLORS = {
 
 const DAYS_PER_WEEK = 7
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const WEEKS_TO_SHOW = 53
+const WEEKS_TO_SHOW = 53 // Exactly 53 weeks
 
 const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) => {
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all')
 
   // Generate grid data for exactly 53 weeks
-  const { gridData, monthLabels, monthBoundaries } = useMemo(() => {
-    const endDate = new Date()
-    endDate.setHours(0, 0, 0, 0)
+  const { gridData, monthLabels } = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
     
-    // Calculate start date - exactly 52 weeks back from endDate
-    const startDate = new Date(endDate)
+    // Find the Sunday of the current week (week starts on Sunday)
+    const todayDayOfWeek = today.getDay()
+    const currentWeekSunday = new Date(today)
+    currentWeekSunday.setDate(currentWeekSunday.getDate() - todayDayOfWeek)
+    currentWeekSunday.setHours(0, 0, 0, 0)
+    
+    // Start date is 52 weeks before current week's Sunday
+    const startDate = new Date(currentWeekSunday)
     startDate.setDate(startDate.getDate() - (52 * 7))
+    startDate.setHours(0, 0, 0, 0)
     
-    // Align to Sunday
-    const startDayOfWeek = startDate.getDay()
-    if (startDayOfWeek !== 0) {
-      startDate.setDate(startDate.getDate() - startDayOfWeek)
-    }
+    // End date is today (we want to include all days up to today)
+    const endDate = new Date(today)
     
     // Create a map of existing activity data
     const activityMap = new Map<string, { strength: number; intelligence: number; charisma: number; total: number }>()
@@ -53,34 +57,38 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
     // Build grid: 7 rows (days of week) x 53 columns (weeks)
     const grid: Array<Array<{ date: string; value: number; dateObj: Date } | null>> = Array.from({ length: DAYS_PER_WEEK }, () => [])
     const monthsMap = new Map<string, number>() // month name -> first week index containing 1st of that month
-    const boundaries = new Set<number>()
     
     const currentDate = new Date(startDate)
     let weekIndex = 0
+    let lastMonthAdded: string | null = null
+    
+    // Add the first month label at week 0
+    const firstMonth = startDate.toLocaleDateString('en-US', { month: 'short' })
+    monthsMap.set(firstMonth + startDate.getFullYear(), 0)
+    lastMonthAdded = firstMonth + startDate.getFullYear()
     
     // Generate data for exactly 53 weeks
     while (weekIndex < WEEKS_TO_SHOW) {
-      const weekStart = new Date(currentDate)
-      
-      // Add days for this week
+      // For each day of the week in this week column
       for (let dayOfWeek = 0; dayOfWeek < DAYS_PER_WEEK; dayOfWeek++) {
-        const date = new Date(weekStart)
+        const date = new Date(currentDate)
         date.setDate(date.getDate() + dayOfWeek)
+        date.setHours(0, 0, 0, 0)
         
-        // Check if this day is the 1st of a month
-        if (date.getDate() === 1) {
-          const monthName = date.toLocaleDateString('en-US', { month: 'short' })
-          // Only record the first occurrence of the 1st for each month
-          if (!monthsMap.has(monthName + date.getFullYear())) {
-            monthsMap.set(monthName + date.getFullYear(), weekIndex)
-            if (weekIndex > 0) {
-              boundaries.add(weekIndex)
-            }
-          }
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short' }) + date.getFullYear()
+        
+        // Check if we've entered a new month and it's not already recorded
+        if (monthKey !== lastMonthAdded && !monthsMap.has(monthKey)) {
+          monthsMap.set(monthKey, weekIndex)
+          lastMonthAdded = monthKey
         }
         
         if (date <= endDate) {
-          const dateStr = date.toISOString().split('T')[0]
+          // Format date as YYYY-MM-DD in local timezone to avoid timezone issues
+          const year = date.getFullYear()
+          const month = String(date.getMonth() + 1).padStart(2, '0')
+          const day = String(date.getDate()).padStart(2, '0')
+          const dateStr = `${year}-${month}-${day}`
           const activity = activityMap.get(dateStr)
           
           let value = 0
@@ -102,6 +110,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
             }
           }
           
+          // dayOfWeek index matches the row since we start from Sunday
           grid[dayOfWeek].push({ date: dateStr, value, dateObj: date })
         } else {
           grid[dayOfWeek].push(null)
@@ -123,7 +132,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
       months.push({ month: monthName, weekIndex: weekIdx })
     }
     
-    return { gridData: grid, monthLabels: months, monthBoundaries: boundaries }
+    return { gridData: grid, monthLabels: months }
   }, [activityHistory, selectedCategory])
 
   // Calculate stats
@@ -180,7 +189,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
       <div className="heatmap-header">
         <div className="heatmap-title-section">
           <h3>Activity Heatmap</h3>
-          <p>Your effort over the last 12 months</p>
+          <p>Your effort over the last year</p>
         </div>
         
         <div className="heatmap-stats">
@@ -235,7 +244,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
               className="month-label"
               style={{ 
                 position: 'absolute',
-                left: `${label.weekIndex * 15}px` // 12px cell + 3px gap
+                left: `${label.weekIndex * 15}px` // 12px cell + 3px gap = 15px per week
               }}
             >
               {label.month}
@@ -258,7 +267,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
                   cell ? (
                     <div
                       key={`${rowIndex}-${colIndex}`}
-                      className={`heatmap-cell${monthBoundaries.has(colIndex) ? ' month-start' : ''}`}
+                      className="heatmap-cell"
                       style={{ backgroundColor: getCellColor(cell.value) }}
                       title={`${formatDate(cell.date)}: ${cell.value} XP`}
                       data-value={cell.value}
