@@ -3,7 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import { initializeData, DATA_DIR, USERS_FILE, SESSIONS_FILE } from './src/server/utils/dataOperations'
 import { registerUser, loginUser, logoutUser } from './src/server/routes/authRoutes'
-import { getCurrentUser, updateUserData, updateExperience, updateShards, getUserTasks, updateGeneratedTask, deleteGeneratedTask, addUserTask, addUserShopItem, deleteUserShopItem, getUserShopItemsList, buyUserShopItem } from './src/server/routes/userRoutes'
+import { getCurrentUser, updateUserData, updateExperience, updateShards, getUserTasks, updateGeneratedTask, deleteGeneratedTask, addUserTask, addUserShopItem, deleteUserShopItem, getUserShopItemsList, buyUserShopItem, useUserInventoryItem } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
 import { generateTasks, analyzeDailyActivity } from './src/server/routes/aiRoutes'
 import { logger } from './src/utils/logger'
@@ -70,6 +70,9 @@ app.post('/api/user/shop/add', addUserShopItem)
 app.delete('/api/user/shop/delete', deleteUserShopItem)
 app.get('/api/user/shop/:sessionId', getUserShopItemsList)
 app.post('/api/user/shop/buy', buyUserShopItem)
+
+// Inventory routes
+app.post('/api/user/inventory/use', useUserInventoryItem)
 
 // Game mechanics routes
 app.patch('/api/user/experience', updateExperience)

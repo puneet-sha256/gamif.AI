@@ -343,6 +343,8 @@ export async function addShopItem(
     description?: string;
     price: number;
     image?: string;
+    isConsumable?: boolean;
+    isKeyItem?: boolean;
   }
 ): Promise<boolean> {
   logger.info(`Adding shop item for user: ${userId}`)
@@ -366,7 +368,9 @@ export async function addShopItem(
     description: item.description,
     price: item.price,
     image: item.image || '🎁',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    isConsumable: item.isConsumable || false,
+    isKeyItem: item.isKeyItem || false
   }
   
   // Add item to shop
@@ -424,6 +428,8 @@ export async function buyShopItem(
     title: string
     description?: string
     image?: string
+    isConsumable?: boolean
+    isKeyItem?: boolean
   }
 ): Promise<{ success: boolean; message?: string }> {
   logger.info(`User ${userId} attempting to buy shop item ${itemId} for ${itemPrice} shards`)
@@ -476,7 +482,9 @@ export async function buyShopItem(
     title: itemDetails!.title,
     description: itemDetails?.description,
     price: itemPrice,
-    image: itemDetails?.image
+    image: itemDetails?.image,
+    isConsumable: itemDetails?.isConsumable || false,
+    isKeyItem: itemDetails?.isKeyItem || false
   }
   
   // Deduct shards
@@ -513,7 +521,9 @@ export async function buyShopItem(
       price: itemInfo.price,
       image: itemInfo.image,
       count: 1,
-      purchasedAt: new Date().toISOString()
+      purchasedAt: new Date().toISOString(),
+      isConsumable: itemInfo.isConsumable || false,
+      isKeyItem: itemInfo.isKeyItem || false
     }
     user.inventory.push(inventoryItem)
     logger.info(`Added new item "${itemInfo.title}" to inventory`)
@@ -524,5 +534,60 @@ export async function buyShopItem(
   return { 
     success: true, 
     message: `Successfully purchased item for ${itemPrice} 💎. Remaining shards: ${user.stats.shards} 💎` 
+  }
+}
+
+// Use a consumable item from inventory
+export async function useInventoryItem(
+  userId: string,
+  itemId: string
+): Promise<{ success: boolean; message?: string }> {
+  logger.info(`User ${userId} attempting to use inventory item ${itemId}`)
+  const users = await loadUsers()
+  const user = users.find(u => u.id === userId)
+  
+  if (!user) {
+    logger.error('User not found')
+    return { success: false, message: 'User not found' }
+  }
+  
+  // Check if user has an inventory
+  if (!user.inventory || user.inventory.length === 0) {
+    logger.error('User has no inventory items')
+    return { success: false, message: 'No items in inventory' }
+  }
+  
+  // Find the item in inventory
+  const itemIndex = user.inventory.findIndex(item => item.id === itemId)
+  
+  if (itemIndex === -1) {
+    logger.error('Item not found in inventory')
+    return { success: false, message: 'Item not found in inventory' }
+  }
+  
+  const item = user.inventory[itemIndex]
+  
+  // Check if item is consumable
+  if (!item.isConsumable) {
+    logger.error('Item is not consumable')
+    return { success: false, message: 'This item cannot be used' }
+  }
+  
+  // Decrease count by 1
+  item.count -= 1
+  
+  // If count reaches 0, remove the item from inventory
+  if (item.count <= 0) {
+    user.inventory.splice(itemIndex, 1)
+    logger.info(`Item "${item.title}" removed from inventory (count reached 0)`)
+  } else {
+    logger.info(`Item "${item.title}" count decreased to ${item.count}`)
+  }
+  
+  await saveUsers(users)
+  logger.success(`Item used successfully`)
+  return { 
+    success: true, 
+    message: `Used "${item.title}" successfully` 
   }
 }

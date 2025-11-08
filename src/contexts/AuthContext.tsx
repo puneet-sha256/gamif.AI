@@ -390,6 +390,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       title: string
       description?: string
       image?: string
+      isConsumable?: boolean
+      isKeyItem?: boolean
     }
   ): Promise<boolean> => {
     console.log('🔄 AuthContext: Buying shop item:', itemId, 'for', itemPrice, 'shards')
@@ -426,6 +428,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  const useInventoryItem = async (itemId: string): Promise<boolean> => {
+    console.log('🔄 AuthContext: Using inventory item:', itemId)
+    
+    if (!user) {
+      console.log('❌ AuthContext: Cannot use item - no user logged in')
+      return false
+    }
+
+    try {
+      const sessionId = userDatabase.getSessionId()
+      if (!sessionId) {
+        console.log('❌ AuthContext: No session ID available')
+        return false
+      }
+
+      const result = await shopService.useInventoryItem(sessionId, itemId)
+      
+      if (result.success) {
+        console.log('✅ AuthContext: Item used successfully')
+        
+        // Refresh user data to get updated inventory
+        const freshUser = await userDatabase.getCurrentUser()
+        if (freshUser) {
+          setUser(freshUser)
+        }
+        return true
+      }
+      
+      return false
+    } catch (error) {
+      console.error('❌ AuthContext: Error using inventory item:', error)
+      return false
+    }
+  }
+
   const value: AuthContextType = {
     user,
     login,
@@ -443,6 +480,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     deleteShopItem,
     getShopItems,
     buyShopItem,
+    useInventoryItem,
     isLoading
   }
 

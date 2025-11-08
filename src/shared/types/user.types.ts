@@ -42,6 +42,8 @@ export interface ShopItem {
   price: number // Price in shards
   image?: string // Optional emoji or image
   createdAt: string // When the item was added
+  isConsumable?: boolean // Whether the item is consumable (can be used once)
+  isKeyItem?: boolean // Whether the item is a key item (cannot be consumed)
 }
 
 // Inventory item structure for purchased items
@@ -53,6 +55,8 @@ export interface InventoryItem {
   image?: string // Optional emoji or image
   count: number // Number of this item owned
   purchasedAt: string // When the item was first purchased
+  isConsumable?: boolean // Whether the item is consumable (can be used once)
+  isKeyItem?: boolean // Whether the item is a key item (cannot be consumed)
 }
 
 // Unclaimed reward from daily activity analysis
