@@ -731,7 +731,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       return (
         <div className="tab-content">
           <div className="tasks-header">
-            <h2>Tasks & Challenges</h2>
+            <h2>Tasks</h2>
             <p>Loading your personalized tasks...</p>
           </div>
           <div className="loading-tasks">⏳ Thinking...</div>
@@ -743,7 +743,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       return (
         <div className="tab-content">
           <div className="tasks-header">
-            <h2>Tasks & Challenges</h2>
+            <h2>Tasks</h2>
             <p>Complete tasks to earn experience and shards</p>
           </div>
           
@@ -779,7 +779,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       <div className="tab-content">
         <div className="tasks-header">
           <div className="tasks-header-content">
-            <h2>Tasks & Challenges</h2>
+            <h2>Tasks</h2>
             <p>Complete your personalized AI-generated tasks to earn experience and shards</p>
           </div>
           <button 
@@ -862,21 +862,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               </div>
             </div>
           )}
-        </div>
-
-        <div className="challenge-section">
-          <h3>🏆 Weekly Challenges</h3>
-          <div className="challenge-list">
-            <TaskItem
-              icon="🎯"
-              description="Complete daily tasks for 7 days straight"
-              category="Consistency"
-              xpReward={200}
-              shardReward={50}
-              isChallenge={true}
-              progress="3/7 days"
-            />
-          </div>
         </div>
         
         {/* Daily Activity Input Section */}
@@ -1132,7 +1117,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             onClick={() => setActiveTab('tasks')}
           >
             <span className="tab-icon">📋</span>
-            Tasks & Challenges
+            Tasks
           </button>
           <button 
             className={`nav-tab ${activeTab === 'inventory' ? 'active' : ''}`}
