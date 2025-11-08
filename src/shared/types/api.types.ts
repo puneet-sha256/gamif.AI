@@ -7,6 +7,15 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface VerifyOTPRequest {
+  email: string;
+  otp: string;
+}
+
+export interface ResendOTPRequest {
+  email: string;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;

@@ -2,10 +2,11 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import { initializeData, DATA_DIR, USERS_FILE, SESSIONS_FILE } from './src/server/utils/dataOperations'
-import { registerUser, loginUser, logoutUser } from './src/server/routes/authRoutes'
+import { registerUser, loginUser, logoutUser, verifyOTP, resendOTP } from './src/server/routes/authRoutes'
 import { getCurrentUser, updateUserData, updateExperience, updateShards, getUserTasks, updateGeneratedTask, deleteGeneratedTask, addUserTask, addUserShopItem, deleteUserShopItem, getUserShopItemsList, buyUserShopItem } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
 import { generateTasks, analyzeDailyActivity } from './src/server/routes/aiRoutes'
+import { initializeEmailService } from './src/server/services/emailService'
 import { logger } from './src/utils/logger'
 
 const app = express()
@@ -52,6 +53,8 @@ app.get('/api/health', healthCheck)
 
 // Authentication routes
 app.post('/api/register', registerUser)
+app.post('/api/auth/verify-otp', verifyOTP)
+app.post('/api/auth/resend-otp', resendOTP)
 app.post('/api/login', loginUser)
 app.post('/api/logout', logoutUser)
 
@@ -82,6 +85,7 @@ app.post('/api/ai/analyze-activity', analyzeDailyActivity)
 // Initialize and start server
 async function startServer() {
   await initializeData()
+  initializeEmailService()
   
   app.listen(PORT, () => {
     logger.custom('🚀', `Solo Leveling API Server running on http://localhost:${PORT}`)

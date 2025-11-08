@@ -398,3 +398,39 @@
     letter-spacing: 0.5px;
   }
 }
+
+/* OTP Verification Styles */
+.otp-verification-header {
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 10px;
+}
+
+.otp-verification-header h2 {
+  color: #1e293b;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.otp-verification-header p {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin: 5px 0;
+}
+
+.otp-verification-header .email-display {
+  color: #3b82f6;
+  font-weight: 600;
+  font-size: 1rem;
+  word-break: break-word;
+}
+
+.input-group input[name="otp"] {
+  text-align: center;
+  font-size: 1.5rem;
+  letter-spacing: 0.5rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+}

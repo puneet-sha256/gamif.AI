@@ -2,7 +2,9 @@ import type {
   RegisterRequest,
   LoginRequest,
   ExperienceUpdateRequest,
-  ShardsUpdateRequest
+  ShardsUpdateRequest,
+  VerifyOTPRequest,
+  ResendOTPRequest
 } from '../../shared/types'
 
 // Server-specific validation helper functions
@@ -26,6 +28,23 @@ export function validateRegisterRequest(body: any): body is RegisterRequest {
     isValidEmail(body.email) &&
     isValidString(body.password) &&
     body.password.length >= 6
+  );
+}
+
+export function validateVerifyOTPRequest(body: any): body is VerifyOTPRequest {
+  return (
+    isValidString(body.email) &&
+    isValidEmail(body.email) &&
+    isValidString(body.otp) &&
+    body.otp.length === 6 &&
+    /^\d{6}$/.test(body.otp)
+  );
+}
+
+export function validateResendOTPRequest(body: any): body is ResendOTPRequest {
+  return (
+    isValidString(body.email) &&
+    isValidEmail(body.email)
   );
 }
 

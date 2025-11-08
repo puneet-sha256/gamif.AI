@@ -91,6 +91,9 @@ export interface User {
   passwordHash: string
   createdAt: string
   lastLogin?: string
+  emailVerified?: boolean // Email verification status
+  otp?: string // Temporary OTP for email verification
+  otpExpiry?: string // OTP expiration timestamp
   profileData?: ProfileData
   goalsData?: GoalsData
   stats?: UserStats
