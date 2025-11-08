@@ -1056,6 +1056,43 @@
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
+.tasks-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.daily-activity-btn-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.daily-activity-btn-header:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.daily-activity-btn-header .btn-icon {
+  font-size: 18px;
+}
+
+.daily-activity-btn-header .btn-text {
+  font-size: 0.95rem;
+}
+
 .tasks-grid {
   display: grid;
   grid-template-columns: 1fr;

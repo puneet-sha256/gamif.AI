@@ -782,15 +782,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             <h2>Tasks</h2>
             <p>Complete your personalized AI-generated tasks to earn experience and shards</p>
           </div>
-          <button 
-            onClick={() => {
-              setEditingTask(null)
-              setShowTaskModal(true)
-            }}
-            className="add-task-btn"
-          >
-            ➕ Add Task
-          </button>
+          <div className="tasks-header-actions">
+            <button 
+              className="daily-activity-btn-header"
+              onClick={() => setShowDailyInput(true)}
+            >
+              <span className="btn-icon">🤖</span>
+              <span className="btn-text">Log Daily Activities</span>
+            </button>
+            <button 
+              onClick={() => {
+                setEditingTask(null)
+                setShowTaskModal(true)
+              }}
+              className="add-task-btn"
+            >
+              ➕ Add Task
+            </button>
+          </div>
         </div>
         
         <div className="tasks-grid">
@@ -862,20 +871,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               </div>
             </div>
           )}
-        </div>
-        
-        {/* Daily Activity Input Section */}
-        <div className="daily-activity-section">
-          <button 
-            className="daily-activity-btn"
-            onClick={() => setShowDailyInput(true)}
-          >
-            <span className="btn-icon">🤖</span>
-            <div className="btn-content">
-              <span className="btn-title">Log Daily Activities</span>
-              <span className="btn-subtitle">Let AI analyze your day and award XP!</span>
-            </div>
-          </button>
         </div>
         
         <DailyActivityModal
