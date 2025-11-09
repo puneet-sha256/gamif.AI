@@ -908,6 +908,7 @@
   
   .experience-legend {
     max-width: 100%;
+    width: 100%;
   }
 }
 
@@ -947,10 +948,30 @@
   
   .experience-card h3 {
     font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+  
+  .experience-content {
+    gap: 30px;
+  }
+  
+  .ring-chart-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
   
   .legend-row {
     padding: 12px;
+    gap: 12px;
+  }
+  
+  .legend-label {
+    font-size: 0.95rem;
+  }
+  
+  .legend-stats {
+    font-size: 0.85rem;
   }
   
   .shop-header {
@@ -2333,17 +2354,43 @@
     font-size: 2rem;
   }
   
+  .experience-card {
+    padding: 16px 12px;
+  }
+  
+  .experience-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+  }
+  
   .experience-content {
-    gap: 30px;
+    gap: 24px;
   }
   
-  .ring-chart-wrapper svg {
-    width: 120px;
-    height: 120px;
-  }
-  
-  .total-exp {
+  .ring-center-text .total-exp {
     font-size: 1.4rem;
+  }
+  
+  .ring-center-text .exp-label {
+    font-size: 0.7rem;
+  }
+  
+  .legend-row {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .legend-color {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .legend-label {
+    font-size: 0.9rem;
+  }
+  
+  .legend-stats {
+    font-size: 0.8rem;
   }
   
   .modal-header h3 {
