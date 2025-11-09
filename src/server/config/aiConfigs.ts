@@ -5,7 +5,13 @@
  * - Prompt files
  * - Model selections
  * - Generation parameters
+ * - Azure OpenAI deployment configurations
  */
+
+// Azure OpenAI configuration
+export const AZURE_OPENAI_CONFIG = {
+  endpoint: "https://gamifai-resource.cognitiveservices.azure.com/"
+} as const;
 
 export const AIPromptType = {
   TASK_GENERATION: 'task-generation',
@@ -17,6 +23,10 @@ export type AIPromptType = typeof AIPromptType[keyof typeof AIPromptType];
 export interface AIPromptConfig {
   /** Name of the prompt file (without path) in src/server/prompts/ */
   promptFile: string;
+  /** Azure OpenAI deployment name */
+  deployment: string;
+  /** Azure OpenAI API version */
+  apiVersion: string;
   /** Azure OpenAI model name to use */
   modelName: string;
   /** Temperature parameter for generation (0-2) */
@@ -33,18 +43,22 @@ export interface AIPromptConfig {
  * To add a new use case:
  * 1. Add enum value to AIPromptType
  * 2. Create a .prompt.md file in src/server/prompts/
- * 3. Add configuration here
+ * 3. Add configuration here with deployment and model settings
  */
 export const AI_CONFIGS: Record<AIPromptType, AIPromptConfig> = {
   [AIPromptType.TASK_GENERATION]: {
     promptFile: 'task-generation.prompt.md',
+    deployment: 'daily-task-agent',
+    apiVersion: '2024-04-01-preview',
     modelName: 'gpt-4o-mini',
     temperature: 1,
     maxTokens: 4096
   },
   [AIPromptType.ACTIVITY_ANALYSIS]: {
     promptFile: 'activity-analysis.prompt.md',
-    modelName: 'gpt-4o-mini',
+    deployment: 'gpt-4o',
+    apiVersion: '2024-12-01-preview',
+    modelName: 'gpt-4o',
     temperature: 0.7,
     maxTokens: 2048,
     responseFormat: 'json'
