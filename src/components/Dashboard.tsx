@@ -419,7 +419,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       }>()
       
       rewards.activities.forEach(activity => {
-        const date = activity.activityDate
+        // Fallback to today's date if activityDate is missing (for backward compatibility)
+        const date = activity.activityDate || new Date().toISOString().split('T')[0]
         if (!activitiesByDate.has(date)) {
           activitiesByDate.set(date, {
             activities: [],
@@ -538,7 +539,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         strengthXP,
         intelligenceXP,
         charismaXP,
-        activityDate: activity.activityDate
+        // Fallback to today's date if activityDate is missing (for backward compatibility)
+        activityDate: activity.activityDate || new Date().toISOString().split('T')[0]
       })
       
       if (result.success) {
