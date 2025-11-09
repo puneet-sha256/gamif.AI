@@ -238,18 +238,24 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
       <div className="heatmap-container">
         {/* Month labels */}
         <div className="heatmap-months">
-          {monthLabels.map((label, idx) => (
-            <div
-              key={idx}
-              className="month-label"
-              style={{ 
-                position: 'absolute',
-                left: `${label.weekIndex * 15}px` // 12px cell + 3px gap = 15px per week
-              }}
-            >
-              {label.month}
-            </div>
-          ))}
+          {monthLabels.map((label, idx) => {
+            // Calculate flex-grow based on weeks until next label
+            const nextWeekIndex = idx < monthLabels.length - 1 ? monthLabels[idx + 1].weekIndex : WEEKS_TO_SHOW
+            const weekSpan = nextWeekIndex - label.weekIndex
+            
+            return (
+              <div
+                key={idx}
+                className="month-label"
+                style={{ 
+                  flexGrow: weekSpan,
+                  flexShrink: 0
+                }}
+              >
+                {label.month}
+              </div>
+            )
+          })}
         </div>
 
         {/* Grid with day labels and cells */}

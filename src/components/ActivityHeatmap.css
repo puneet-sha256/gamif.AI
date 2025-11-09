@@ -102,14 +102,16 @@
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 10px;
+  width: 100%;
 }
 
 .heatmap-months {
-  position: relative;
+  display: flex;
   height: 20px;
   margin-left: 40px;
   margin-bottom: 4px;
-  min-width: fit-content;
+  width: 100%;
+  overflow: hidden;
 }
 
 .month-label {
@@ -120,13 +122,14 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   text-align: left;
+  white-space: nowrap;
 }
 
 .heatmap-grid {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  min-width: fit-content;
+  width: 100%;
 }
 
 .heatmap-row {
@@ -151,15 +154,19 @@
 .week-cells {
   display: flex;
   gap: 3px;
+  flex: 1;
+  justify-content: space-between;
 }
 
 .heatmap-cell {
   width: 12px;
   height: 12px;
+  min-width: 8px;
   border-radius: 2px;
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
 }
 
 .heatmap-cell.empty {
@@ -220,22 +227,19 @@
   }
 
   .heatmap-cell {
-    width: 10px;
-    height: 10px;
+    width: 11px;
+    height: 11px;
+    min-width: 11px;
   }
 
   .legend-cell {
-    width: 10px;
-    height: 10px;
+    width: 11px;
+    height: 11px;
   }
 
   .day-label {
     font-size: 0.65rem;
     width: 28px;
-  }
-
-  .heatmap-months {
-    grid-auto-columns: 10px;
   }
 }
 
@@ -265,14 +269,29 @@
     font-size: 0.85rem;
   }
 
+  .heatmap-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .heatmap-months {
+    margin-left: 32px;
+    min-width: 700px;
+  }
+
+  .heatmap-grid {
+    min-width: 700px;
+  }
+
   .heatmap-cell {
-    width: 8px;
-    height: 8px;
+    width: 11px;
+    height: 11px;
+    min-width: 11px;
   }
 
   .legend-cell {
-    width: 8px;
-    height: 8px;
+    width: 11px;
+    height: 11px;
   }
 
   .day-label {
@@ -282,12 +301,6 @@
 
   .month-label {
     font-size: 0.65rem;
-  }
-
-  .heatmap-months {
-    margin-left: 32px;
-    grid-auto-columns: 8px;
-    gap: 2px;
   }
 
   .week-cells {
@@ -300,6 +313,10 @@
 }
 
 @media (max-width: 480px) {
+  .activity-heatmap {
+    padding: 16px 12px;
+  }
+
   .heatmap-filters {
     gap: 8px;
   }
@@ -315,14 +332,29 @@
     gap: 20px;
   }
 
+  .heatmap-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .heatmap-months {
+    margin-left: 28px;
+    min-width: 600px;
+  }
+
+  .heatmap-grid {
+    min-width: 600px;
+  }
+
   .heatmap-cell {
-    width: 7px;
-    height: 7px;
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
   }
 
   .legend-cell {
-    width: 7px;
-    height: 7px;
+    width: 10px;
+    height: 10px;
   }
 
   .day-label {
@@ -330,8 +362,11 @@
     width: 20px;
   }
 
-  .heatmap-months {
-    margin-left: 28px;
-    grid-auto-columns: 7px;
+  .week-cells {
+    gap: 2px;
+  }
+
+  .heatmap-row {
+    gap: 2px;
   }
 }
