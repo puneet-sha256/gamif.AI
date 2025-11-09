@@ -6,7 +6,7 @@ interface DailyActivityModalProps {
   dailyActivity: string
   setDailyActivity: (value: string) => void
   isAnalyzing: boolean
-  onAnalyze: () => void
+  onAnalyze: (activityDate: string) => void
 }
 
 const DailyActivityModal: React.FC<DailyActivityModalProps> = ({
@@ -47,9 +47,8 @@ const DailyActivityModal: React.FC<DailyActivityModalProps> = ({
   }
 
   const handleAnalyze = () => {
-    // TODO: Pass selectedDate to backend when implementing actual date-based activity tracking
-    // For now, logging to console as per requirements
-    onAnalyze()
+    // Pass selectedDate to backend for date-based activity tracking
+    onAnalyze(selectedDate)
   }
 
   return (

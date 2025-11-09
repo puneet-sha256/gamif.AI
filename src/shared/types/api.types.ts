@@ -21,6 +21,7 @@ export interface ExperienceUpdateRequest {
   strengthDelta?: number;
   intelligenceDelta?: number;
   charismaDelta?: number;
+  activityDate?: string; // Optional activity date (YYYY-MM-DD) for activity history
 }
 
 export interface ShardsUpdateRequest {
@@ -74,6 +75,7 @@ export interface AddTaskRequest {
 export interface AnalyzeDailyActivityRequest {
   sessionId: string;
   dailyActivity: string; // User's description of what they did today
+  activityDate?: string; // Date of the activity (YYYY-MM-DD)
   currentTasks?: {
     Strength?: Array<{ 
       id: string; 

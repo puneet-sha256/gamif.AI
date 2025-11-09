@@ -277,7 +277,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     return currencies[code] || code
   }
 
-  const analyzeDailyActivity = async () => {
+  const analyzeDailyActivity = async (activityDate: string) => {
     if (!dailyActivity.trim()) return
     
     setIsAnalyzing(true)
@@ -321,7 +321,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       const result = await aiService.analyzeDailyActivity({
         sessionId,
         dailyActivity,
-        currentTasks
+        currentTasks,
+        activityDate
       })
 
       if (result.success && result.data) {
@@ -342,7 +343,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             xpEarned: reward.xpEarned,
             shardsEarned: reward.shardsEarned,
             calculationNotes: reward.calculationNotes,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            activityDate: activityDate
           }))
           
           // Merge with existing activities
@@ -419,18 +421,64 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
       const rewards = user.unclaimedRewards
       
+      // Group activities by date
+      const activitiesByDate = new Map<string, {
+        activities: typeof rewards.activities,
+        strengthXP: number,
+        intelligenceXP: number,
+        charismaXP: number,
+        totalXP: number,
+        totalShards: number
+      }>()
       
-      // Step 1: Use the userService API to claim rewards (updates stats in backend)
-      const result = await userService.claimRewards({
-        sessionId,
-        totalXP: rewards.totalXP,
-        totalShards: rewards.totalShards,
-        strengthXP: rewards.categoryBreakdown.Strength.xp,
-        intelligenceXP: rewards.categoryBreakdown.Intelligence.xp,
-        charismaXP: rewards.categoryBreakdown.Charisma.xp
+      rewards.activities.forEach(activity => {
+        // Fallback to today's date if activityDate is missing (for backward compatibility)
+        const date = activity.activityDate || new Date().toISOString().split('T')[0]
+        if (!activitiesByDate.has(date)) {
+          activitiesByDate.set(date, {
+            activities: [],
+            strengthXP: 0,
+            intelligenceXP: 0,
+            charismaXP: 0,
+            totalXP: 0,
+            totalShards: 0
+          })
+        }
+        
+        const dateGroup = activitiesByDate.get(date)!
+        dateGroup.activities.push(activity)
+        dateGroup.totalXP += activity.xpEarned
+        dateGroup.totalShards += activity.shardsEarned
+        
+        if (activity.category === 'Strength') {
+          dateGroup.strengthXP += activity.xpEarned
+        } else if (activity.category === 'Intelligence') {
+          dateGroup.intelligenceXP += activity.xpEarned
+        } else if (activity.category === 'Charisma') {
+          dateGroup.charismaXP += activity.xpEarned
+        }
       })
       
-      if (result.success) {
+      // Step 1: Claim rewards for each date
+      let allSuccess = true
+      for (const [date, dateRewards] of activitiesByDate.entries()) {
+        const result = await userService.claimRewards({
+          sessionId,
+          totalXP: dateRewards.totalXP,
+          totalShards: dateRewards.totalShards,
+          strengthXP: dateRewards.strengthXP,
+          intelligenceXP: dateRewards.intelligenceXP,
+          charismaXP: dateRewards.charismaXP,
+          activityDate: date
+        })
+        
+        if (!result.success) {
+          allSuccess = false
+          console.error(`❌ Failed to claim rewards for date ${date}`)
+        }
+      }
+      
+      if (allSuccess) {
         
         // Step 2: Clear unclaimed rewards in backend
         
@@ -503,7 +551,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         totalShards: activity.shardsEarned,
         strengthXP,
         intelligenceXP,
-        charismaXP
+        charismaXP,
+        // Fallback to today's date if activityDate is missing (for backward compatibility)
+        activityDate: activity.activityDate || new Date().toISOString().split('T')[0]
       })
       
       if (result.success) {
