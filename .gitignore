@@ -34,9 +34,9 @@ data/backup/
 # Keep data directory structure but not the actual data
 !data/.gitkeep
 
-# Environment variables
+# Environment variables (only ignore .env, allow .env.production and .env.development)
 .env
-.env.*
+.env.local
 
 # Screenshots (used for testing/documentation)
 screenshots/
