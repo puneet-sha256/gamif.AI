@@ -53,6 +53,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const [showRewardClaimModal, setShowRewardClaimModal] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
 
+  // Window width state for responsive chart sizing
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
+
   useEffect(() => {
     if (user) {
       
@@ -62,6 +65,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     } else {
     }
   }, [user])
+
+  // Track window resize for responsive chart
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Function to load fresh generated tasks
   const loadGeneratedTasks = async () => {
@@ -718,8 +731,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               const intelligenceAngle = (intelligence / total) * 360
               const charismaAngle = (charisma / total) * 360
 
-              const radius = 70
-              const strokeWidth = 18
+              // Responsive sizing based on window width
+              const getResponsiveRadius = () => {
+                if (windowWidth < 480) return 55  // Extra small mobile
+                if (windowWidth < 768) return 60  // Mobile
+                return 70  // Tablet and desktop
+              }
+              
+              const getResponsiveStrokeWidth = () => {
+                if (windowWidth < 480) return 14  // Extra small mobile
+                if (windowWidth < 768) return 16  // Mobile
+                return 18  // Tablet and desktop
+              }
+
+              const radius = getResponsiveRadius()
+              const strokeWidth = getResponsiveStrokeWidth()
               const normalizedRadius = radius - strokeWidth * 0.5
               const circumference = normalizedRadius * 2 * Math.PI
 
