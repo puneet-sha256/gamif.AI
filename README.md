@@ -180,25 +180,6 @@ await userService.claimRewards({
 
 ## 🚀 Getting Started
 
-### Environment Setup
-
-Before starting the application, configure the API base URL for your environment:
-
-1. **Open `.env` in the project root.**
-2. Set the API base URL for your backend:
-   - **Local development:**
-     ```env
-     VITE_API_BASE_URL=http://localhost:3001/api
-     ```
-   - **Codespaces or remote:**
-     ```env
-     VITE_API_BASE_URL=https://<your-codespaces-backend-url>/api
-     ```
-     Replace `<your-codespaces-backend-url>` with your actual Codespaces backend URL.
-3. **Restart the Vite dev server** after changing `.env`.
-
-If `VITE_API_BASE_URL` is not set, the frontend will default to `/api`, which works if your backend is served from the same origin or proxied by Vite.
-
 ### Prerequisites
 - **Node.js** (v18 or higher)
 - **npm** or **yarn**
@@ -217,14 +198,78 @@ If `VITE_API_BASE_URL` is not set, the frontend will default to `/api`, which wo
    npm install
    ```
 
-3. **Configure Azure OpenAI**
-   ```bash
-   # Copy the environment template
-   cp .env.example .env
-   
-   # Edit .env and add your Azure OpenAI API key
-   AZURE_OPENAI_API_KEY=your-azure-openai-api-key-here
+3. **Configure Environment Variables**
+
+   The project uses multiple environment files for different deployment scenarios:
+
+   #### **Environment Files Overview**
+
+   | File | Purpose | Committed to Git |
+   |------|---------|------------------|
+   | `.env.example` | Template with all variables and documentation | ✅ Yes |
+   | `.env.development` | Development-specific configuration | ✅ Yes |
+   | `.env.production` | Production-specific configuration | ✅ Yes |
+   | `.env` | Your active environment (contains secrets) | ❌ No |
+
+   #### **Setup Steps**
+
+   **Windows (PowerShell):**
+   ```powershell
+   Copy-Item .env.example .env
    ```
+
+   **Linux/Mac:**
+   ```bash
+   cp .env.example .env
+   ```
+
+   #### **Configure Your `.env` File**
+
+   Open the newly created `.env` file and update the following variables:
+
+   ```bash
+   # Backend API URL
+   # For local development:
+   VITE_API_BASE_URL=http://localhost:3001/api
+   
+   # For GitHub Codespaces (replace with your actual URL):
+   # VITE_API_BASE_URL=https://your-codespace-name-3001.app.github.dev/api
+   
+   # CORS allowed origins for backend
+   # For local development:
+   ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174
+   
+   # For GitHub Codespaces (replace with your actual URL):
+   # ALLOWED_ORIGINS=https://your-codespace-name-5173.app.github.dev
+   
+   # Azure OpenAI API Key (Required)
+   # Get this from Azure Portal > Your OpenAI Resource > Keys and Endpoint
+   AZURE_OPENAI_API_KEY=your-actual-azure-openai-api-key-here
+   ```
+
+   #### **Getting Your Azure OpenAI API Key**
+
+   1. Go to [Azure Portal](https://portal.azure.com/)
+   2. Navigate to your **Azure OpenAI resource**
+   3. Go to **Keys and Endpoint** in the left menu
+   4. Copy **Key 1** or **Key 2**
+   5. Paste it into your `.env` file as the value for `AZURE_OPENAI_API_KEY`
+
+   #### **Environment Variables Reference**
+
+   | Variable | Description | Example |
+   |----------|-------------|---------|
+   | `VITE_API_BASE_URL` | Backend API base URL (used by frontend) | `http://localhost:3001/api` |
+   | `ALLOWED_ORIGINS` | CORS allowed origins for backend security | `http://localhost:5173,http://localhost:5174` |
+   | `AZURE_OPENAI_API_KEY` | Your Azure OpenAI API key for AI features | `abc123...xyz` |
+
+   #### **Important Security Notes**
+
+   - **Never commit `.env` to Git** - It contains sensitive API keys
+   - **`.env.example` is safe to commit** - It only contains placeholder values
+   - **Verify `.env` is in `.gitignore`** - Should already be listed
+   - **Rotate API keys immediately** if they are accidentally exposed
+   - **Restart the dev server** after modifying `.env` for changes to take effect
 
 4. **Start the application**
    ```bash
