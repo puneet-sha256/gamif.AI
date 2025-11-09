@@ -91,7 +91,7 @@ export async function updateExperience(req: Request, res: Response) {
       ))
     }
 
-    const { sessionId, strengthDelta, intelligenceDelta, charismaDelta } = req.body
+    const { sessionId, strengthDelta, intelligenceDelta, charismaDelta, activityDate } = req.body
 
     const strengthChange = strengthDelta || 0
     const intelligenceChange = intelligenceDelta || 0
@@ -134,7 +134,8 @@ export async function updateExperience(req: Request, res: Response) {
     user.stats.experience = newStrength + newIntelligence + newCharisma
 
     // Update activity history for heatmap
-    const today = new Date().toISOString().split('T')[0]
+    // Use provided activityDate or default to today
+    const activityDateToUse = activityDate || new Date().toISOString().split('T')[0]
     if (!user.activityHistory) {
       user.activityHistory = {
         dailyActivities: [],
@@ -142,33 +143,33 @@ export async function updateExperience(req: Request, res: Response) {
       }
     }
 
-    // Find today's activity or create new one
-    const todayActivity = user.activityHistory.dailyActivities.find(
-      activity => activity.date === today
+    // Find activity for the specified date or create new one
+    const targetActivity = user.activityHistory.dailyActivities.find(
+      activity => activity.date === activityDateToUse
     )
 
     // Helper function to calculate total XP from category changes
     const calculateTotal = (str: number, int: number, cha: number) => 
       Math.max(0, str) + Math.max(0, int) + Math.max(0, cha)
 
-    if (todayActivity) {
+    if (targetActivity) {
       // Update existing activity
-      todayActivity.strength += Math.max(0, strengthChange)
-      todayActivity.intelligence += Math.max(0, intelligenceChange)
-      todayActivity.charisma += Math.max(0, charismaChange)
-      todayActivity.total = calculateTotal(
-        todayActivity.strength,
-        todayActivity.intelligence,
-        todayActivity.charisma
+      targetActivity.strength += Math.max(0, strengthChange)
+      targetActivity.intelligence += Math.max(0, intelligenceChange)
+      targetActivity.charisma += Math.max(0, charismaChange)
+      targetActivity.total = calculateTotal(
+        targetActivity.strength,
+        targetActivity.intelligence,
+        targetActivity.charisma
       )
     } else {
-      // Create new activity for today
+      // Create new activity for the specified date
       const newStrengthXP = Math.max(0, strengthChange)
       const newIntelligenceXP = Math.max(0, intelligenceChange)
       const newCharismaXP = Math.max(0, charismaChange)
       
       user.activityHistory.dailyActivities.push({
-        date: today,
+        date: activityDateToUse,
         strength: newStrengthXP,
         intelligence: newIntelligenceXP,
         charisma: newCharismaXP,

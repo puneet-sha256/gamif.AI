@@ -10,6 +10,7 @@ export interface UpdateExperienceData {
   strengthDelta?: number
   intelligenceDelta?: number
   charismaDelta?: number
+  activityDate?: string // Optional activity date (YYYY-MM-DD)
 }
 
 export interface UpdateShardsData {
@@ -25,6 +26,7 @@ export interface ClaimRewardsData {
   strengthXP: number
   intelligenceXP: number
   charismaXP: number
+  activityDate?: string // Optional activity date (YYYY-MM-DD)
 }
 
 class UserService {
@@ -82,7 +84,8 @@ class UserService {
         sessionId: data.sessionId,
         strengthDelta: data.strengthXP,
         intelligenceDelta: data.intelligenceXP,
-        charismaDelta: data.charismaXP
+        charismaDelta: data.charismaXP,
+        activityDate: data.activityDate
       })
 
       // Update shards

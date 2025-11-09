@@ -71,6 +71,7 @@ export interface UnclaimedReward {
   shardsEarned: number
   calculationNotes: string
   timestamp: string // When the reward was earned
+  activityDate: string // Date of the activity (YYYY-MM-DD)
 }
 
 export interface UnclaimedRewards {
