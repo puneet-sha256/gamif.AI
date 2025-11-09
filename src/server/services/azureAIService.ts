@@ -1,14 +1,9 @@
 import { AzureOpenAI } from "openai";
 import type { GoalsData, ProfileData, GeneratedTasks } from '../../types';
 import { promptManager } from './promptManager';
-import { AI_CONFIGS, AIPromptType } from '../config/aiConfigs';
+import { AI_CONFIGS, AIPromptType, AZURE_OPENAI_CONFIG } from '../config/aiConfigs';
 import type { AIPromptConfig } from '../config/aiConfigs';
 import { logger } from '../../utils/logger';
-
-// Azure OpenAI configuration
-const endpoint = "https://gamifai-resource.cognitiveservices.azure.com/";
-const deployment = "daily-task-agent";
-const apiVersion = "2024-04-01-preview";
 
 export interface TaskGenerationResult {
   success: boolean;
@@ -39,7 +34,7 @@ export interface CompletionResult {
 }
 
 class AzureAIService {
-  private client: AzureOpenAI | null = null;
+  private clients: Map<string, AzureOpenAI> = new Map();
   private initialized = false;
   private apiKey: string = "";
 
@@ -52,25 +47,42 @@ class AzureAIService {
         logger.error('Azure OpenAI API key not found in environment variables');
         logger.error('Please set AZURE_OPENAI_API_KEY environment variable');
         this.initialized = false;
-        this.client = null;
         return;
       }
 
-      const options = { 
-        endpoint, 
-        apiKey: this.apiKey, 
-        deployment, 
-        apiVersion 
-      };
-
-      this.client = new AzureOpenAI(options);
       this.initialized = true;
       logger.custom('🤖', 'Azure OpenAI Service initialized successfully');
     } catch (error) {
       logger.error('Failed to initialize Azure OpenAI Service:', error);
       this.initialized = false;
-      this.client = null;
     }
+  }
+
+  /**
+   * Get or create a client for a specific prompt type
+   * Implements client caching pattern for performance and connection pooling
+   * @param promptType - The AI prompt type to get a client for
+   */
+  private getClient(promptType: AIPromptType): AzureOpenAI {
+    const config = AI_CONFIGS[promptType];
+    if (!config) {
+      throw new Error(`No configuration found for prompt type: ${promptType}`);
+    }
+
+    const clientKey = `${config.deployment}-${config.apiVersion}`;
+    
+    if (!this.clients.has(clientKey)) {
+      const client = new AzureOpenAI({ 
+        endpoint: AZURE_OPENAI_CONFIG.endpoint, 
+        apiKey: this.apiKey, 
+        deployment: config.deployment, 
+        apiVersion: config.apiVersion 
+      });
+      this.clients.set(clientKey, client);
+      logger.custom('🔧', `Created new Azure OpenAI client for ${promptType} (deployment: ${config.deployment})`);
+    }
+    
+    return this.clients.get(clientKey)!;
   }
 
   /**
@@ -86,7 +98,7 @@ class AzureAIService {
   ): Promise<CompletionResult> {
     const startTime = Date.now();
     
-    if (!this.initialized || !this.client) {
+    if (!this.initialized) {
       return {
         success: false,
         error: 'Azure OpenAI Service not initialized'
@@ -100,8 +112,11 @@ class AzureAIService {
         throw new Error(`No configuration found for prompt type: ${promptType}`);
       }
 
+      // Get or create client for this prompt type
+      const client = this.getClient(promptType);
+
       logger.custom('🤖', `Starting Azure OpenAI completion for: ${promptType}`);
-      logger.custom('📋', `Model: ${config.modelName}`);
+      logger.custom('📋', `Deployment: ${config.deployment}, Model: ${config.modelName}`);
 
       // Load the prompt file
       const systemMessage = options?.systemMessageOverride || promptManager.loadPrompt(config.promptFile);
@@ -125,7 +140,7 @@ class AzureAIService {
       }
 
       // Call the chat completion API
-      const response = await this.client.chat.completions.create(completionRequest);
+      const response = await client.chat.completions.create(completionRequest);
 
       if (!response?.choices?.[0]?.message?.content) {
         return {
@@ -170,7 +185,7 @@ class AzureAIService {
   ): Promise<TaskGenerationResult> {
     const startTime = Date.now();
     
-    if (!this.initialized || !this.client) {
+    if (!this.initialized) {
       return {
         success: false,
         error: 'Azure OpenAI Service not initialized'
