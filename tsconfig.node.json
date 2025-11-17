@@ -1,25 +1,32 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "target": "ES2023",
-    "lib": ["ES2023"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-
-    /* Linting */
+    "outDir": "build",
+    "rootDir": ".",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "target": "ES2022",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "noEmit": false,
+    "lib": ["ES2022"]
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "server.ts",
+    "src/server/**/*.ts",
+    "src/utils/logger.ts",             // <- include only server-safe utils
+    "src/shared/types/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.tsx",
+    "src/client/**/*",
+    "src/components/**/*",
+    "src/contexts/**/*",
+    "src/utils/soundEffects.ts"        // <- exclude browser-only util
+  ]
 }

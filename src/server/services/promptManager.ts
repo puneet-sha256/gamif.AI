@@ -1,11 +1,8 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import { logger } from '../../utils/logger';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __DIRNAME = __dirname;
 
 /**
  * PromptManager - Loads and caches prompt files
@@ -18,7 +15,7 @@ class PromptManager {
 
   constructor() {
     // Prompts directory relative to this file
-    this.promptsDir = join(__dirname, '..', 'prompts');
+    this.promptsDir = join(__DIRNAME, '..', 'prompts');
   }
 
   /**

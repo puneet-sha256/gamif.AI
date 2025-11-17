@@ -4,7 +4,7 @@ import type { User, Session } from '../../shared/types'
 import { logger } from '../../utils/logger'
 
 // Data file paths
-export const DATA_DIR = path.join(process.cwd(), 'data')
+export const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(process.cwd(), 'data'))
 export const USERS_FILE = path.join(DATA_DIR, 'users.json')
 export const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json')
 export const BACKUP_DIR = path.join(DATA_DIR, 'backup')
