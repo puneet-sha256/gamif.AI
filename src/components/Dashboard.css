@@ -2397,3 +2397,221 @@
     font-size: 1.2rem;
   }
 }
+
+/* ========================================
+   MOBILE-FIRST ANDROID-LIKE ENHANCEMENTS
+   ======================================== */
+
+/* Enhanced Touch Targets for Mobile */
+@media (max-width: 768px) {
+  /* Ensure all interactive elements have minimum 44x44px touch target */
+  button,
+  .nav-tab,
+  .task-item,
+  .shop-item,
+  .stat-card,
+  .legend-row,
+  .unclaimed-rewards-button,
+  .logout-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improve header spacing on mobile */
+  .dashboard-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 12px 16px;
+  }
+
+  /* Better tab navigation for mobile */
+  .dashboard-navigation {
+    position: sticky;
+    top: 0;
+    z-index: 99;
+    padding: 0 16px;
+  }
+
+  .nav-tabs {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Optimize content padding for mobile */
+  .dashboard-content {
+    padding: 16px;
+  }
+
+  .tab-content {
+    padding: 0;
+  }
+
+  /* Better modal experience on mobile */
+  .modal-overlay {
+    padding: 0;
+  }
+
+  .modal-content {
+    margin: 0;
+    border-radius: 20px 20px 0 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 90vh;
+    width: 100%;
+  }
+
+  /* Improve form inputs for mobile */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+    padding: 14px 16px;
+  }
+
+  /* Better card spacing on mobile */
+  .profile-card,
+  .experience-card,
+  .tasks-section,
+  .shop-section {
+    margin-bottom: 16px;
+    border-radius: 16px;
+  }
+
+  /* Optimize ring chart for mobile */
+  .ring-chart-container {
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+  }
+}
+
+/* Extra small devices optimization */
+@media (max-width: 480px) {
+  /* Compact header for very small screens */
+  .dashboard-header {
+    padding: 10px 12px;
+  }
+
+  .dashboard-logo h1 {
+    font-size: 1.2rem;
+  }
+
+  .dashboard-logo .subtitle {
+    font-size: 0.6rem;
+  }
+
+  /* Single column layout for all cards */
+  .stats-grid,
+  .profile-details,
+  .stats-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Compact navigation tabs */
+  .nav-tab {
+    font-size: 0.75rem;
+    padding: 10px 8px;
+  }
+
+  .nav-tab-icon {
+    font-size: 1.2rem;
+  }
+
+  /* Optimize content spacing */
+  .dashboard-content {
+    padding: 12px;
+  }
+
+  /* Better task/challenge items */
+  .task-item,
+  .challenge-item {
+    padding: 14px;
+  }
+
+  /* Compact shop items */
+  .shop-item {
+    padding: 16px 12px;
+  }
+
+  /* Better button sizing */
+  .modal-btn-primary,
+  .modal-btn-secondary {
+    padding: 14px 20px;
+    font-size: 1rem;
+  }
+}
+
+/* Landscape orientation optimization for mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .dashboard-header {
+    padding: 8px 16px;
+  }
+
+  .dashboard-logo h1 {
+    font-size: 1.4rem;
+  }
+
+  .welcome-section h2 {
+    font-size: 1.6rem;
+  }
+
+  .modal-content {
+    max-height: 85vh;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .stat-card:hover,
+  .task-item:hover,
+  .shop-item:hover,
+  .legend-row:hover {
+    transform: none;
+  }
+
+  /* Add active state instead for touch feedback */
+  .stat-card:active,
+  .task-item:active,
+  .shop-item:active,
+  button:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  /* Improve button touch feedback */
+  .nav-tab:active {
+    opacity: 0.8;
+  }
+}
+
+/* High contrast mode for accessibility */
+@media (prefers-contrast: high) {
+  .dashboard-header,
+  .nav-tabs,
+  .stat-card,
+  .profile-card {
+    border-width: 2px;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
