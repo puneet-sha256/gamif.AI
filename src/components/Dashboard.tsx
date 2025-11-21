@@ -1098,7 +1098,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         
         <div className="shop-grid">
           {/* User's Custom Items */}
-          {userShopItems.length > 0 && (
+          {userShopItems.length > 0 ? (
             <div className="shop-section">
               <h3>🎯 My Wish List</h3>
               <div className="shop-items">
@@ -1118,67 +1118,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 ))}
               </div>
             </div>
+          ) : (
+            <div className="no-tasks-message">
+              <div className="no-tasks-content">
+                <h3>🛒 Your Shop is Empty</h3>
+                <p>Click the "➕ Add Item" button above to add items to your wish list!</p>
+              </div>
+            </div>
           )}
-
-          <div className="shop-section">
-            <h3>💝 Rewards</h3>
-            <div className="shop-items">
-              <ShopItem
-                id="reward-gaming"
-                image="🎮"
-                title="Gaming Session"
-                description="Unlock 2 hours of guilt-free gaming"
-                price={50}
-                userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-gaming', 'Gaming Session', 50, 'Unlock 2 hours of guilt-free gaming', '🎮', true)}
-              />
-              
-              <ShopItem
-                id="reward-treat"
-                image="🍕"
-                title="Treat Yourself"
-                description="Order your favorite meal"
-                price={75}
-                userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-treat', 'Treat Yourself', 75, 'Order your favorite meal', '🍕', true)}
-              />
-              
-              <ShopItem
-                id="reward-book"
-                image="📚"
-                title="Book Purchase"
-                description="Buy that book you've been wanting"
-                price={100}
-                userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-book', 'Book Purchase', 100, "Buy that book you've been wanting", '📚', true)}
-              />
-            </div>
-          </div>
-
-          <div className="shop-section">
-            <h3>⚡ Power-ups</h3>
-            <div className="shop-items">
-              <ShopItem
-                id="powerup-xp"
-                image="🔥"
-                title="XP Booster"
-                description="Double XP for 24 hours"
-                price={30}
-                userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('powerup-xp', 'XP Booster', 30, 'Double XP for 24 hours', '🔥', true)}
-              />
-              
-              <ShopItem
-                id="powerup-extension"
-                image="⏰"
-                title="Task Extension"
-                description="Extra day to complete tasks"
-                price={25}
-                userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('powerup-extension', 'Task Extension', 25, 'Extra day to complete tasks', '⏰', true)}
-              />
-            </div>
-          </div>
         </div>
 
         {/* Shop Item Modal */}
