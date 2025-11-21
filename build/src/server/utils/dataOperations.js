@@ -325,7 +325,8 @@ async function addShopItem(userId, item) {
         image: item.image || '🎁',
         createdAt: new Date().toISOString(),
         isConsumable: item.isConsumable || false,
-        isKeyItem: item.isKeyItem || false
+        isKeyItem: item.isKeyItem || false,
+        allowMultiplePurchases: item.allowMultiplePurchases || false
     };
     // Add item to shop
     user.shopItems.push(newItem);
@@ -407,14 +408,20 @@ async function buyShopItem(userId, itemId, itemPrice, itemDetails) {
         price: itemPrice,
         image: itemDetails?.image,
         isConsumable: itemDetails?.isConsumable || false,
-        isKeyItem: itemDetails?.isKeyItem || false
+        isKeyItem: itemDetails?.isKeyItem || false,
+        allowMultiplePurchases: itemDetails?.allowMultiplePurchases || false
     };
     // Deduct shards
     user.stats.shards = currentShards - itemPrice;
-    // Remove item from shopItems (wishlist) ONLY if it's a user-created wishlist item
-    if (isWishlistItem && user.shopItems) {
+    // Remove item from shopItems (wishlist) ONLY if:
+    // 1. It's a user-created wishlist item, AND
+    // 2. allowMultiplePurchases is NOT set to true
+    if (isWishlistItem && user.shopItems && !shopItem?.allowMultiplePurchases) {
         user.shopItems = user.shopItems.filter(item => item.id !== itemId);
-        logger_1.logger.info(`Removed item "${itemInfo.title}" from wishlist`);
+        logger_1.logger.info(`Removed item "${itemInfo.title}" from wishlist (single-purchase item)`);
+    }
+    else if (isWishlistItem && shopItem?.allowMultiplePurchases) {
+        logger_1.logger.info(`Kept item "${itemInfo.title}" in wishlist (multi-purchase item)`);
     }
     // Initialize inventory if it doesn't exist
     if (!user.inventory) {
