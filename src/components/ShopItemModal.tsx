@@ -11,6 +11,7 @@ interface ShopItemModalProps {
     image?: string
     isConsumable?: boolean
     isKeyItem?: boolean
+    allowMultiplePurchases?: boolean
   }) => Promise<void>
 }
 
@@ -23,7 +24,8 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [image, setImage] = useState('🎁')
-  const [itemType, setItemType] = useState<'regular' | 'consumable' | 'key'>('regular')
+  const [itemType, setItemType] = useState<'consumable' | 'key'>('consumable')
+  const [allowMultiplePurchases, setAllowMultiplePurchases] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -33,7 +35,8 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
       setDescription('')
       setPrice('')
       setImage('🎁')
-      setItemType('regular')
+      setItemType('consumable')
+      setAllowMultiplePurchases(false)
       setError('')
     }
   }, [isOpen])
@@ -64,7 +67,8 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
         price: priceValue,
         image: image.trim() || undefined,
         isConsumable: itemType === 'consumable',
-        isKeyItem: itemType === 'key'
+        isKeyItem: itemType === 'key',
+        allowMultiplePurchases: allowMultiplePurchases
       }
       
       await onSave(saveData)
@@ -81,7 +85,8 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
     setDescription('')
     setPrice('')
     setImage('🎁')
-    setItemType('regular')
+    setItemType('consumable')
+    setAllowMultiplePurchases(false)
     setError('')
     onClose()
   }
@@ -164,18 +169,31 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
             <select
               id="item-type"
               value={itemType}
-              onChange={(e) => setItemType(e.target.value as 'regular' | 'consumable' | 'key')}
+              onChange={(e) => setItemType(e.target.value as 'consumable' | 'key')}
               className="form-input"
               disabled={isSaving}
             >
-              <option value="regular">Regular Item</option>
               <option value="consumable">Consumable (Can be used once)</option>
               <option value="key">Key Item (Cannot be consumed)</option>
             </select>
             <small className="form-hint">
               {itemType === 'consumable' && 'This item will be removed from inventory when used'}
               {itemType === 'key' && 'This item cannot be used or removed'}
-              {itemType === 'regular' && 'Standard inventory item'}
+            </small>
+          </div>
+
+          <div className="form-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={allowMultiplePurchases}
+                onChange={(e) => setAllowMultiplePurchases(e.target.checked)}
+                disabled={isSaving}
+              />
+              <span>Allow multiple purchases</span>
+            </label>
+            <small className="form-hint">
+              If checked, this item will remain in the shop after purchase and can be bought multiple times
             </small>
           </div>
 

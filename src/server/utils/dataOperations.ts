@@ -345,6 +345,7 @@ export async function addShopItem(
     image?: string;
     isConsumable?: boolean;
     isKeyItem?: boolean;
+    allowMultiplePurchases?: boolean;
   }
 ): Promise<boolean> {
   logger.info(`Adding shop item for user: ${userId}`)
@@ -370,7 +371,8 @@ export async function addShopItem(
     image: item.image || '🎁',
     createdAt: new Date().toISOString(),
     isConsumable: item.isConsumable || false,
-    isKeyItem: item.isKeyItem || false
+    isKeyItem: item.isKeyItem || false,
+    allowMultiplePurchases: item.allowMultiplePurchases || false
   }
   
   // Add item to shop
@@ -430,6 +432,7 @@ export async function buyShopItem(
     image?: string
     isConsumable?: boolean
     isKeyItem?: boolean
+    allowMultiplePurchases?: boolean
   }
 ): Promise<{ success: boolean; message?: string }> {
   logger.info(`User ${userId} attempting to buy shop item ${itemId} for ${itemPrice} shards`)
@@ -484,16 +487,21 @@ export async function buyShopItem(
     price: itemPrice,
     image: itemDetails?.image,
     isConsumable: itemDetails?.isConsumable || false,
-    isKeyItem: itemDetails?.isKeyItem || false
+    isKeyItem: itemDetails?.isKeyItem || false,
+    allowMultiplePurchases: itemDetails?.allowMultiplePurchases || false
   }
   
   // Deduct shards
   user.stats.shards = currentShards - itemPrice
   
-  // Remove item from shopItems (wishlist) ONLY if it's a user-created wishlist item
-  if (isWishlistItem && user.shopItems) {
+  // Remove item from shopItems (wishlist) ONLY if:
+  // 1. It's a user-created wishlist item, AND
+  // 2. allowMultiplePurchases is NOT set to true
+  if (isWishlistItem && user.shopItems && !shopItem?.allowMultiplePurchases) {
     user.shopItems = user.shopItems.filter(item => item.id !== itemId)
-    logger.info(`Removed item "${itemInfo.title}" from wishlist`)
+    logger.info(`Removed item "${itemInfo.title}" from wishlist (single-purchase item)`)
+  } else if (isWishlistItem && shopItem?.allowMultiplePurchases) {
+    logger.info(`Kept item "${itemInfo.title}" in wishlist (multi-purchase item)`)
   }
   
   // Initialize inventory if it doesn't exist
