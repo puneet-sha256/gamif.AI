@@ -1190,11 +1190,12 @@
 .challenge-item {
   background: rgba(248, 250, 252, 0.9);
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   border: 1px solid rgba(59, 130, 246, 0.15);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   transition: all 0.3s ease;
 }
 
@@ -1210,10 +1211,10 @@
 .challenge-item.enhanced {
   background: linear-gradient(135deg, rgba(248, 250, 252, 0.95), rgba(241, 245, 249, 0.9));
   border: 2px solid rgba(59, 130, 246, 0.2);
-  padding: 24px;
+  padding: 16px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -1238,11 +1239,11 @@
 
 .task-icon,
 .challenge-icon {
-  font-size: 2.5rem;
+  font-size: 2rem;
   background: linear-gradient(135deg, #3b82f6, #06b6d4);
   border-radius: 50%;
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1253,29 +1254,30 @@
 .task-content {
   flex: 1;
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
+  min-width: 0;
 }
 
 .task-description {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: #1e293b;
-  margin: 0 0 8px 0;
-  line-height: 1.4;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.task-info p {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.3;
 }
 
 .task-category {
-  font-size: 0.85rem;
-  color: #06b6d4;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  background: rgba(6, 182, 212, 0.1);
-  padding: 4px 8px;
-  border-radius: 6px;
+  display: none;
 }
 
 .complete-btn {
@@ -1309,20 +1311,31 @@
 
 /* Legacy task styling */
 
+.task-info,
+.challenge-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .task-info h4,
 .challenge-info h4 {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1.1rem;
-  margin: 0 0 5px 0;
+  font-size: 1rem;
+  margin: 0;
   color: #1e293b;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .task-info p,
 .challenge-info p {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #64748b;
-  margin: 0 0 10px 0;
+  margin: 0;
+  line-height: 1.3;
 }
 
 .task-progress,
@@ -1350,41 +1363,45 @@
 .task-rewards,
 .challenge-rewards {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  align-items: flex-end;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .xp-reward,
 .shard-reward {
   font-family: 'Rajdhani', sans-serif;
   font-weight: 600;
-  font-size: 0.9rem;
-  padding: 4px 8px;
+  font-size: 0.75rem;
+  padding: 2px 5px;
   border-radius: 4px;
   background: rgba(59, 130, 246, 0.1);
   color: #3b82f6;
+  white-space: nowrap;
 }
 
 /* Task Action Buttons */
 .task-actions {
   display: flex;
-  gap: 8px;
-  margin-left: 12px;
+  gap: 3px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .task-action-btn {
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 8px;
-  width: 36px;
-  height: 36px;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1rem;
+  font-size: 0.85rem;
 }
 
 .task-action-btn:hover {
@@ -1682,6 +1699,10 @@
   flex-shrink: 0;
   transition: all 0.3s ease;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .buy-button:hover:not(:disabled) {
@@ -1703,8 +1724,27 @@
   align-items: flex-end;
 }
 
-.shop-item-actions .buy-button {
+.shop-item-actions .buy-button,
+.shop-item-actions .delete-button {
   min-width: 80px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+/* Mobile: Show buttons in same line */
+@media (max-width: 768px) {
+  .shop-item-actions {
+    flex-direction: row;
+    gap: 4px;
+  }
+
+  .shop-item-actions .buy-button,
+  .shop-item-actions .delete-button {
+    min-width: auto;
+    flex: 1;
+    padding: 6px 8px;
+    font-size: 0.7rem;
+  }
 }
 
 .item-badge {
@@ -1722,14 +1762,20 @@
 }
 
 .delete-button {
-  padding: 10px 15px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, #ef4444, #dc2626);
   border: none;
   border-radius: 8px;
   color: white;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .delete-button:hover {
@@ -1820,9 +1866,84 @@
   }
 
   .buy-button {
-    padding: 6px 12px;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  .delete-button {
+    padding: 6px 10px;
+    font-size: 1rem;
+  }
+
+  .shop-item-actions .buy-button,
+  .shop-item-actions .delete-button {
+    min-width: auto;
+    padding: 6px 8px;
+  }
+
+  .shop-item-actions .buy-button {
+    font-size: 0.7rem;
+  }
+
+  .shop-item-actions .delete-button {
+    font-size: 0.95rem;
+  }
+
+  /* Compact task items on mobile */
+  .task-item,
+  .challenge-item {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .task-item.enhanced,
+  .challenge-item.enhanced {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .task-icon,
+  .challenge-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 1.75rem;
+  }
+
+  .task-content {
+    gap: 8px;
+  }
+
+  .task-info h4 {
+    font-size: 0.95rem;
+  }
+
+  .task-info p {
+    font-size: 0.75rem;
+  }
+
+  .task-description {
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .task-category {
+    display: none;
+  }
+
+  .xp-reward,
+  .shard-reward {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+  }
+
+  .task-actions {
+    gap: 3px;
+  }
+
+  .task-action-btn {
+    width: 26px;
+    height: 26px;
     font-size: 0.8rem;
-    min-width: 70px;
   }
 }
 
@@ -2815,7 +2936,58 @@
   /* Better task/challenge items */
   .task-item,
   .challenge-item {
-    padding: 14px;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .task-item.enhanced,
+  .challenge-item.enhanced {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .task-icon,
+  .challenge-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 1.4rem;
+  }
+
+  .task-content {
+    gap: 6px;
+  }
+
+  .task-info h4 {
+    font-size: 0.9rem;
+  }
+
+  .task-info p {
+    font-size: 0.7rem;
+  }
+
+  .task-description {
+    font-size: 0.9rem;
+    line-height: 1.2;
+  }
+
+  .task-category {
+    display: none;
+  }
+
+  .xp-reward,
+  .shard-reward {
+    font-size: 0.65rem;
+    padding: 2px 4px;
+  }
+
+  .task-actions {
+    gap: 2px;
+  }
+
+  .task-action-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
   }
 
   /* Extra compact shop/inventory items for very small screens */
@@ -2850,9 +3022,27 @@
   }
 
   .buy-button {
-    padding: 6px 10px;
-    font-size: 0.75rem;
-    min-width: 65px;
+    padding: 5px 8px;
+    font-size: 0.7rem;
+  }
+
+  .delete-button {
+    padding: 5px 8px;
+    font-size: 0.9rem;
+  }
+
+  .shop-item-actions .buy-button,
+  .shop-item-actions .delete-button {
+    min-width: auto;
+    padding: 5px 6px;
+  }
+
+  .shop-item-actions .buy-button {
+    font-size: 0.65rem;
+  }
+
+  .shop-item-actions .delete-button {
+    font-size: 0.85rem;
   }
 
   .item-badge {
@@ -2914,12 +3104,53 @@
   
   .task-item,
   .challenge-item {
-    padding: 12px 16px;
+    padding: 12px;
+    gap: 10px;
   }
   
   .task-item.enhanced,
   .challenge-item.enhanced {
-    padding: 16px 20px;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .task-icon,
+  .challenge-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 1.6rem;
+  }
+
+  .task-content {
+    gap: 8px;
+  }
+
+  .task-description {
+    font-size: 0.95rem;
+  }
+
+  .task-info h4 {
+    font-size: 0.95rem;
+  }
+
+  .task-info p {
+    font-size: 0.75rem;
+  }
+
+  .task-category {
+    display: none;
+  }
+
+  .xp-reward,
+  .shard-reward {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+  }
+
+  .task-action-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 0.8rem;
   }
 }
 

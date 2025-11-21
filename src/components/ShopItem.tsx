@@ -56,6 +56,7 @@ const ShopItem: React.FC<ShopItemProps> = ({
           className="buy-button" 
           disabled={!canAfford}
           onClick={handleBuyClick}
+          title={canAfford ? `Buy ${title} for ${price} 💎` : `Not enough shards (need ${price} 💎)`}
         >
           Buy
         </button>

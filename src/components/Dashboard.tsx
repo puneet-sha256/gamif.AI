@@ -1205,6 +1205,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                         <button 
                           className="buy-button" 
                           onClick={() => handleUseItem(item.id, item.title)}
+                          title={`Use ${item.title}`}
                         >
                           Use
                         </button>
