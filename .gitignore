@@ -13,8 +13,9 @@ node_modules
 # Build outputs
 dist
 dist-ssr
-*.local
 build
+*.local
+build/
 
 # Editor directories and files
 .vscode/*
