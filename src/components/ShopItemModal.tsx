@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import EmojiPicker from 'emoji-picker-react'
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react'
+import { getEmojiSuggestions } from '../utils/emojiSuggestions'
 import './TaskModal.css' // Reuse the same styles
 
 interface ShopItemModalProps {
@@ -49,83 +50,8 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
 
   // Generate context-aware emoji suggestions based on item name
   useEffect(() => {
-    if (!title.trim()) {
-      setSuggestedEmojis([])
-      return
-    }
-
-    const titleLower = title.toLowerCase()
-    const suggestions: string[] = []
-
-    // Define emoji mappings based on common keywords
-    const emojiMap: Record<string, string[]> = {
-      'movie': ['🎬', '🎥', '🍿', '🎞️', '📽️'],
-      'food': ['🍕', '🍔', '🍰', '🍱', '🍜'],
-      'pizza': ['🍕', '🧀', '🍅', '🌶️'],
-      'burger': ['🍔', '🍟', '🥤'],
-      'coffee': ['☕', '🍵', '🥤'],
-      'tea': ['🍵', '☕', '🫖'],
-      'game': ['🎮', '🕹️', '🎯', '🎲', '🃏'],
-      'book': ['📚', '📖', '📕', '📗', '📘'],
-      'music': ['🎵', '🎶', '🎸', '🎹', '🎤'],
-      'sport': ['⚽', '🏀', '🎾', '🏈', '⚾'],
-      'gym': ['💪', '🏋️', '🤸', '🏃'],
-      'workout': ['💪', '🏋️', '🤸', '🏃'],
-      'travel': ['✈️', '🌍', '🗺️', '🧳', '🏖️'],
-      'vacation': ['🏖️', '🌴', '🌊', '🏝️'],
-      'spa': ['💆', '🧖', '💅', '🛁', '🌸'],
-      'massage': ['💆', '🙌', '✨'],
-      'gift': ['🎁', '🎀', '💝', '🎉'],
-      'car': ['🚗', '🚙', '🏎️', '🚕'],
-      'bike': ['🚲', '🏍️'],
-      'phone': ['📱', '📞', '☎️'],
-      'computer': ['💻', '🖥️', '⌨️', '🖱️'],
-      'laptop': ['💻', '🖥️'],
-      'watch': ['⌚', '⏰', '⏱️'],
-      'clothes': ['👕', '👔', '👗', '👠', '👟'],
-      'shirt': ['👕', '👔', '🎽'],
-      'shoes': ['👟', '👠', '👞', '🥿'],
-      'hat': ['👒', '🎩', '🧢', '👑'],
-      'jewelry': ['💍', '💎', '📿', '⌚'],
-      'ring': ['💍', '💎'],
-      'home': ['🏠', '🏡', '🏘️', '🏰'],
-      'house': ['🏠', '🏡', '🏘️'],
-      'garden': ['🌻', '🌷', '🌹', '🌺', '🪴'],
-      'plant': ['🌱', '🌿', '🪴', '🌵'],
-      'pet': ['🐶', '🐱', '🐹', '🐰', '🐠'],
-      'dog': ['🐶', '🐕', '🦮', '🐩'],
-      'cat': ['🐱', '🐈', '🐾'],
-      'party': ['🎉', '🎊', '🥳', '🎈', '🎂'],
-      'celebration': ['🎉', '🎊', '🥳', '🍾'],
-      'birthday': ['🎂', '🎁', '🎈', '🎉'],
-      'night': ['🌙', '⭐', '✨', '🌃', '🌌'],
-      'day': ['☀️', '🌞', '⛅', '🌤️'],
-      'gadget': ['📱', '💻', '🎧', '📷', '🖥️'],
-      'camera': ['📷', '📸', '🎥', '📹'],
-      'headphone': ['🎧', '🎵', '🔊'],
-      'ticket': ['🎫', '🎟️', '🎪'],
-      'tool': ['🔧', '🔨', '⚒️', '🛠️'],
-      'art': ['🎨', '🖌️', '🖍️', '✏️'],
-      'paint': ['🎨', '🖌️', '🖍️'],
-    }
-
-    // Search for matching keywords in the title
-    for (const [keyword, emojis] of Object.entries(emojiMap)) {
-      if (titleLower.includes(keyword)) {
-        suggestions.push(...emojis)
-      }
-    }
-
-    // Remove duplicates and limit to 8 suggestions
-    const uniqueSuggestions = [...new Set(suggestions)].slice(0, 8)
-    
-    // If we have suggestions, use them; otherwise provide generic ones
-    if (uniqueSuggestions.length > 0) {
-      setSuggestedEmojis(uniqueSuggestions)
-    } else {
-      // Generic suggestions if no specific match
-      setSuggestedEmojis(['🎁', '✨', '⭐', '💎', '🎯', '🏆', '🎪', '🎨'])
-    }
+    const suggestions = getEmojiSuggestions(title)
+    setSuggestedEmojis(suggestions)
   }, [title])
 
   // Close emoji picker when clicking outside
@@ -196,7 +122,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
     onClose()
   }
 
-  const handleEmojiClick = (emojiData: any) => {
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
     setImage(emojiData.emoji)
     setShowEmojiPicker(false)
   }
@@ -317,7 +243,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
                 <EmojiPicker
                   onEmojiClick={handleEmojiClick}
                   autoFocusSearch={false}
-                  searchPlaceHolder="Search emojis..."
+                  searchPlaceholder="Search emojis..."
                   width="100%"
                   height={350}
                 />
