@@ -509,7 +509,7 @@ export async function addUserTask(req: Request, res: Response) {
 // Add a shop item
 export async function addUserShopItem(req: Request, res: Response) {
   try {
-    const { sessionId, title, description, price, image, isConsumable, isKeyItem } = req.body
+    const { sessionId, title, description, price, image, isConsumable, isKeyItem, allowMultiplePurchases } = req.body
 
     // Validate required fields
     if (!sessionId || !title || price === undefined) {
@@ -544,7 +544,8 @@ export async function addUserShopItem(req: Request, res: Response) {
       price,
       image,
       isConsumable,
-      isKeyItem
+      isKeyItem,
+      allowMultiplePurchases
     })
 
     if (!success) {

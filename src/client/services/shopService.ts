@@ -12,6 +12,7 @@ export interface NewShopItemData {
   image?: string
   isConsumable?: boolean
   isKeyItem?: boolean
+  allowMultiplePurchases?: boolean
 }
 
 class ShopService {
@@ -94,6 +95,7 @@ class ShopService {
       image?: string
       isConsumable?: boolean
       isKeyItem?: boolean
+      allowMultiplePurchases?: boolean
     }
   ): Promise<ApiResponse> {
     console.log('💰 ShopService: Buying shop item:', itemId, 'for', itemPrice, 'shards')

@@ -146,9 +146,11 @@
   text-transform: uppercase;
   letter-spacing: 0.3px;
   width: 32px;
+  min-width: 32px;
   text-align: right;
   padding-right: 8px;
   min-height: 12px;
+  flex-shrink: 0;
 }
 
 .week-cells {
@@ -240,6 +242,8 @@
   .day-label {
     font-size: 0.65rem;
     width: 28px;
+    min-width: 28px;
+    flex-shrink: 0;
   }
 }
 
@@ -275,7 +279,7 @@
   }
 
   .heatmap-months {
-    margin-left: 32px;
+    margin-left: 34px;
     min-width: 700px;
   }
 
@@ -297,6 +301,8 @@
   .day-label {
     font-size: 0.6rem;
     width: 24px;
+    min-width: 24px;
+    flex-shrink: 0;
   }
 
   .month-label {
@@ -338,7 +344,7 @@
   }
 
   .heatmap-months {
-    margin-left: 28px;
+    margin-left: 30px;
     min-width: 600px;
   }
 
@@ -360,6 +366,8 @@
   .day-label {
     font-size: 0.55rem;
     width: 20px;
+    min-width: 20px;
+    flex-shrink: 0;
   }
 
   .week-cells {
