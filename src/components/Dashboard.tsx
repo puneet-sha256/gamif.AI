@@ -11,6 +11,7 @@ import DailyActivityModal from './DailyActivityModal'
 import TaskModal from './TaskModal'
 import ShopItemModal from './ShopItemModal'
 import RewardClaimModal from './RewardClaimModal'
+import TaskHistoryModal from './TaskHistoryModal'
 import ActivityHeatmap from './ActivityHeatmap'
 import { 
   mapGeneratedTasksToTaskItems, 
@@ -24,6 +25,7 @@ import { userDatabase } from '../client/services/fileUserDatabase'
 import { aiService } from '../client/services/aiService'
 import { userService } from '../client/services/userService'
 import { apiClient } from '../client/services/apiClient'
+import { calculateLevelProgress } from '../utils/levelCalculation'
 
 interface DashboardProps {
   onLogout: () => void
@@ -52,6 +54,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   // Reward claim modal state
   const [showRewardClaimModal, setShowRewardClaimModal] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
+
+  // Task history modal state
+  const [showTaskHistoryModal, setShowTaskHistoryModal] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
   // Window width state for responsive chart sizing
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
@@ -238,7 +244,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     itemDescription?: string,
     itemImage?: string,
     isConsumable?: boolean,
-    isKeyItem?: boolean
+    isKeyItem?: boolean,
+    allowMultiplePurchases?: boolean
   ) => {
     // Check if this is a user's wishlist item or a built-in shop item
     const isWishlistItem = user?.shopItems?.some(item => item.id === itemId)
@@ -249,7 +256,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       description: itemDescription,
       image: itemImage,
       isConsumable,
-      isKeyItem
+      isKeyItem,
+      allowMultiplePurchases
     } : undefined
     
     const success = await buyShopItem(itemId, itemPrice, itemDetails)
@@ -379,8 +387,57 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             lastUpdated: new Date().toISOString()
           }
 
+          // Also save to task history for permanent record
+          const existingTaskHistory = user?.taskHistory
+          
+          // Map rewards to completed tasks
+          interface RewardItem {
+            activityName: string
+            matchType: string
+            category: 'Strength' | 'Intelligence' | 'Charisma'
+            matchedTask?: string
+            goalLink?: string
+            effortRatio: number
+            xpEarned: number
+            shardsEarned: number
+            calculationNotes: string
+          }
+          
+          const completedTasks = result.data.rewards.activityRewards.map((reward: RewardItem) => ({
+            activityName: reward.activityName,
+            matchType: reward.matchType,
+            category: reward.category,
+            matchedTask: reward.matchedTask,
+            goalLink: reward.goalLink,
+            effortRatio: reward.effortRatio,
+            xpEarned: reward.xpEarned,
+            shardsEarned: reward.shardsEarned,
+            calculationNotes: reward.calculationNotes,
+            timestamp: new Date().toISOString()
+          }))
+          
+          // Find or create daily task history for the activity date
+          let dailyTasks = existingTaskHistory?.dailyTasks || []
+          const existingDayIndex = dailyTasks.findIndex(dt => dt.date === activityDate)
+          
+          if (existingDayIndex >= 0) {
+            // Append to existing day's tasks efficiently
+            dailyTasks[existingDayIndex].tasks.push(...completedTasks)
+          } else {
+            // Create new day entry
+            dailyTasks.push({
+              date: activityDate,
+              tasks: completedTasks
+            })
+          }
+          
+          const taskHistory = {
+            dailyTasks,
+            lastUpdated: new Date().toISOString()
+          }
+
           // Save to user data
-          const success = await updateUser({ unclaimedRewards })
+          const success = await updateUser({ unclaimedRewards, taskHistory })
           
           if (success) {
             showSuccess(`🎉 Great job! You've earned rewards from ${result.data.rewards.activityRewards.length} activities.\n\nClick the "Unclaimed Rewards" button to view and claim them!`)
@@ -421,6 +478,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
       const rewards = user.unclaimedRewards
       
+      // Calculate current level before claiming rewards
+      const currentLevel = calculateLevelProgress(user?.stats?.experience || 0).actualLevel
+      
       // Group activities by date
       const activitiesByDate = new Map<string, {
         activities: typeof rewards.activities,
@@ -459,8 +519,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         }
       })
       
-      // Step 1: Claim rewards for each date
+      // Step 1: Claim rewards for each date and check for level-ups
       let allSuccess = true
+      let leveledUp = false
+      let newLevel = currentLevel
+      
       for (const [date, dateRewards] of activitiesByDate.entries()) {
         const result = await userService.claimRewards({
           sessionId,
@@ -475,6 +538,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         if (!result.success) {
           allSuccess = false
           console.error(`❌ Failed to claim rewards for date ${date}`)
+        } else {
+          // Check if we leveled up from this experience result
+          const experienceMetadata = result.experienceResult?.metadata
+          if (experienceMetadata?.leveledUp) {
+            leveledUp = true
+            newLevel = experienceMetadata.newLevel
+          }
         }
       }
       
@@ -499,7 +569,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             // Step 3: Refresh user data from server to sync UI
             await refreshUserTasks()
             
-            showSuccess(`🎉 Congratulations!\n\nYou've claimed:\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nKeep up the great work!`)
+            // Show level-up celebration if leveled up
+            if (leveledUp) {
+              showSuccess(`🎊✨ LEVEL UP! ✨🎊\n\nCongratulations! You've reached Level ${newLevel}!\n\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nYou're becoming unstoppable!`)
+            } else {
+              showSuccess(`🎉 Congratulations!\n\nYou've claimed:\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nKeep up the great work!`)
+            }
             setShowRewardClaimModal(false)
           } else {
             console.error('⚠️ Rewards applied but failed to clear unclaimed rewards in backend')
@@ -563,6 +638,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           return
         }
 
+        // Check if we leveled up
+        const experienceMetadata = result.experienceResult?.metadata
+        const leveledUp = experienceMetadata?.leveledUp
+        const newLevel = experienceMetadata?.newLevel
+
         // Step 2: Remove the claimed activity from unclaimed rewards
         const updatedActivities = rewards.activities.filter((_, i) => i !== index)
         
@@ -599,7 +679,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             // Step 3: Refresh user data from server to sync UI
             await refreshUserTasks()
             
-            showSuccess(`🎉 Claimed reward!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards`)
+            // Show level-up celebration if leveled up
+            if (leveledUp) {
+              showSuccess(`🎊✨ LEVEL UP! ✨🎊\n\nCongratulations! You've reached Level ${newLevel}!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards\n\nYou're becoming unstoppable!`)
+            } else {
+              showSuccess(`🎉 Claimed reward!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards`)
+            }
           } else {
             console.error('⚠️ Reward claimed but failed to update unclaimed rewards in backend')
             showWarning('Reward claimed successfully, but there was an issue updating. Please refresh the page.')
@@ -619,50 +704,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   }
 
   const profileData = user?.profileData
-
-  // Calculate experience progress for next level
-  const calculateLevelProgress = (experience: number) => {
-    // New formula: xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50
-    const xpForLevel = (n: number) => 100 + Math.floor((n - 1) / 10) * 50
-    
-    // Calculate what level the user should actually be at based on total experience
-    const calculateActualLevel = (totalExp: number): number => {
-      let level = 1
-      let expUsed = 0
-      
-      while (true) {
-        const expNeededForNextLevel = xpForLevel(level)
-        if (expUsed + expNeededForNextLevel > totalExp) {
-          break
-        }
-        expUsed += expNeededForNextLevel
-        level++
-      }
-      
-      return level
-    }
-    
-    const actualLevel = calculateActualLevel(experience)
-    
-    // Calculate total XP needed up to the start of actual level
-    let totalExpForCurrentLevel = 0
-    for (let i = 1; i < actualLevel; i++) {
-      totalExpForCurrentLevel += xpForLevel(i)
-    }
-    
-    const expNeededForNextLevel = xpForLevel(actualLevel)
-    
-    // Calculate progress within current level
-    const expInCurrentLevel = Math.max(0, experience - totalExpForCurrentLevel)
-    const progressPercentage = Math.min((expInCurrentLevel / expNeededForNextLevel) * 100, 100)
-    
-    return {
-      current: expInCurrentLevel,
-      needed: expNeededForNextLevel,
-      percentage: progressPercentage,
-      actualLevel: actualLevel
-    }
-  }
 
   // Calculate attribute distribution from total experience
   const calculateAttributeDistribution = () => {
@@ -695,6 +736,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       intelligencePercent: (intelligence / totalExp * 100),
       charismaPercent: (charisma / totalExp * 100)
     }
+  }
+
+  // Handle heatmap cell click
+  const handleHeatmapCellClick = (date: string) => {
+    setSelectedDate(date)
+    setShowTaskHistoryModal(true)
+  }
+
+  // Get task history for selected date
+  const getTaskHistoryForDate = (date: string | null) => {
+    if (!date || !user?.taskHistory) return null
+    
+    const dailyTasks = user.taskHistory.dailyTasks.find(dt => dt.date === date)
+    return dailyTasks || null
   }
 
   
@@ -892,7 +947,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
         {/* Activity Heatmap Section */}
         <div className="heatmap-section">
-          <ActivityHeatmap activityHistory={user?.activityHistory} />
+          <ActivityHeatmap 
+            activityHistory={user?.activityHistory} 
+            onCellClick={handleHeatmapCellClick}
+          />
         </div>
       </div>
     </div>
@@ -1096,7 +1154,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         
         <div className="shop-grid">
           {/* User's Custom Items */}
-          {userShopItems.length > 0 && (
+          {userShopItems.length > 0 ? (
             <div className="shop-section">
               <h3>🎯 My Wish List</h3>
               <div className="shop-items">
@@ -1110,73 +1168,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                     price={item.price}
                     userShards={user?.stats?.shards || 0}
                     isUserItem={true}
-                    onBuy={() => handleBuyShopItem(item.id, item.title, item.price)}
+                    onBuy={() => handleBuyShopItem(item.id, item.title, item.price, item.description, item.image, item.isConsumable, item.isKeyItem, item.allowMultiplePurchases)}
                     onDelete={() => handleDeleteShopItem(item.id)}
                   />
                 ))}
               </div>
             </div>
+          ) : (
+            <div className="no-tasks-message">
+              <div className="no-tasks-content">
+                <h3>🛒 Your Shop is Empty</h3>
+                <p>Click the "➕ Add Item" button above to add items to your wish list!</p>
+              </div>
+            </div>
           )}
-
-          <div className="shop-section">
-            <h3>💝 Rewards</h3>
-            <div className="shop-items">
-              <ShopItem
-                id="reward-gaming"
-                image="🎮"
-                title="Gaming Session"
-                description="Unlock 2 hours of guilt-free gaming"
-                price={50}
-                userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-gaming', 'Gaming Session', 50, 'Unlock 2 hours of guilt-free gaming', '🎮', true)}
-              />
-              
-              <ShopItem
-                id="reward-treat"
-                image="🍕"
-                title="Treat Yourself"
-                description="Order your favorite meal"
-                price={75}
-                userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-treat', 'Treat Yourself', 75, 'Order your favorite meal', '🍕', true)}
-              />
-              
-              <ShopItem
-                id="reward-book"
-                image="📚"
-                title="Book Purchase"
-                description="Buy that book you've been wanting"
-                price={100}
-                userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('reward-book', 'Book Purchase', 100, "Buy that book you've been wanting", '📚', true)}
-              />
-            </div>
-          </div>
-
-          <div className="shop-section">
-            <h3>⚡ Power-ups</h3>
-            <div className="shop-items">
-              <ShopItem
-                id="powerup-xp"
-                image="🔥"
-                title="XP Booster"
-                description="Double XP for 24 hours"
-                price={30}
-                userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('powerup-xp', 'XP Booster', 30, 'Double XP for 24 hours', '🔥', true)}
-              />
-              
-              <ShopItem
-                id="powerup-extension"
-                image="⏰"
-                title="Task Extension"
-                description="Extra day to complete tasks"
-                price={25}
-                userShards={user?.stats?.shards || 0}
-                onBuy={() => handleBuyShopItem('powerup-extension', 'Task Extension', 25, 'Extra day to complete tasks', '⏰', true)}
-              />
-            </div>
-          </div>
         </div>
 
         {/* Shop Item Modal */}
@@ -1271,6 +1276,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                         <button 
                           className="buy-button" 
                           onClick={() => handleUseItem(item.id, item.title)}
+                          title={`Use ${item.title}`}
                         >
                           Use
                         </button>
@@ -1392,6 +1398,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         onClaimRewards={handleClaimRewards}
         onClaimIndividualReward={handleClaimIndividualReward}
         isClaiming={isClaiming}
+      />
+
+      {/* Task History Modal */}
+      <TaskHistoryModal
+        isOpen={showTaskHistoryModal}
+        onClose={() => {
+          setShowTaskHistoryModal(false)
+          setSelectedDate(null)
+        }}
+        date={selectedDate}
+        taskHistory={getTaskHistoryForDate(selectedDate)}
       />
     </div>
   )

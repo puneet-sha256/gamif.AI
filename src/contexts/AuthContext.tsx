@@ -392,6 +392,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       image?: string
       isConsumable?: boolean
       isKeyItem?: boolean
+      allowMultiplePurchases?: boolean
     }
   ): Promise<boolean> => {
     console.log('🔄 AuthContext: Buying shop item:', itemId, 'for', itemPrice, 'shards')

@@ -34,6 +34,21 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 - **Ring Chart Visualization** - Interactive SVG charts showing attribute distribution
 - **Level Progress Display** - Dynamic calculation using `xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50`
 - **Responsive Design** - Optimized for desktop, tablet, and mobile devices
+- **PWA Support** - Installable as a native-like app on Android and iOS devices
+
+### 📱 **Mobile-First Enhancements**
+- **Progressive Web App (PWA)** - Install as an app on your mobile device
+- **Offline Support** - Service worker caches for offline functionality
+- **Touch-Optimized Interface** - Minimum 44x44px touch targets for accessibility
+- **Mobile-Friendly Navigation** - Icon-centric tab navigation optimized for small screens
+- **Responsive Breakpoints** - Optimized for 320px, 360px, 375px, 480px, 768px, 1024px viewports
+- **iOS Zoom Prevention** - 16px minimum font size on form inputs
+- **Safe Area Support** - Works seamlessly with notched devices (iPhone X+)
+- **Sticky Header & Navigation** - Always accessible while scrolling
+- **Bottom Sheet Modals** - Mobile-optimized modal dialogs
+- **Touch Feedback** - Active states for better touch interaction feedback
+- **Landscape Mode Support** - Optimized layouts for landscape orientation
+- **Reduced Motion Support** - Respects user accessibility preferences
 
 ### 🎨 **Modern UI/UX**
 - Clean light theme with blue gradient accents (#3b82f6, #06b6d4)
@@ -794,7 +809,32 @@ interface UserStats {
 - High contrast text ratios
 - Keyboard navigation support
 - Screen reader friendly structure
-- Mobile-optimized touch targets
+- Mobile-optimized touch targets (minimum 44x44px)
+- Reduced motion support for users with motion sensitivity
+- High contrast mode support
+
+## 📱 Installing as a Mobile App (PWA)
+
+### **Android Devices**
+1. Open the website in **Chrome** or **Edge**
+2. Tap the **menu (⋮)** in the top right
+3. Select **"Add to Home screen"** or **"Install app"**
+4. Tap **"Install"** in the confirmation dialog
+5. The app icon will appear on your home screen
+
+### **iOS Devices (iPhone/iPad)**
+1. Open the website in **Safari**
+2. Tap the **Share button** (square with arrow pointing up)
+3. Scroll down and tap **"Add to Home Screen"**
+4. Tap **"Add"** in the top right
+5. The app icon will appear on your home screen
+
+### **Benefits of Installing**
+- ✅ **Instant Access** - Launch from your home screen like a native app
+- ✅ **Offline Support** - Access cached content without internet
+- ✅ **Full Screen** - No browser bars for immersive experience
+- ✅ **Push Notifications** - (Future feature) Get notified about tasks and rewards
+- ✅ **Faster Loading** - Cached resources load instantly
 
 ## 🔒 Security Features
 

@@ -4,6 +4,7 @@ import type { ActivityHistory } from '../shared/types/user.types'
 
 interface ActivityHeatmapProps {
   activityHistory?: ActivityHistory
+  onCellClick?: (date: string) => void
 }
 
 type CategoryFilter = 'all' | 'Strength' | 'Intelligence' | 'Charisma'
@@ -19,7 +20,7 @@ const DAYS_PER_WEEK = 7
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const WEEKS_TO_SHOW = 53 // Exactly 53 weeks
 
-const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) => {
+const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory, onCellClick }) => {
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all')
 
   // Generate grid data for exactly 53 weeks
@@ -277,6 +278,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
                       style={{ backgroundColor: getCellColor(cell.value) }}
                       title={`${formatDate(cell.date)}: ${cell.value} XP`}
                       data-value={cell.value}
+                      onClick={() => onCellClick?.(cell.date)}
                     />
                   ) : (
                     <div

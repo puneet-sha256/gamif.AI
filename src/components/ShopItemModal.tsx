@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import EmojiPicker from 'emoji-picker-react'
+import type { EmojiClickData } from 'emoji-picker-react'
 import './TaskModal.css' // Reuse the same styles
 
 interface ShopItemModalProps {
@@ -11,6 +13,7 @@ interface ShopItemModalProps {
     image?: string
     isConsumable?: boolean
     isKeyItem?: boolean
+    allowMultiplePurchases?: boolean
   }) => Promise<void>
 }
 
@@ -23,9 +26,13 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [image, setImage] = useState('🎁')
-  const [itemType, setItemType] = useState<'regular' | 'consumable' | 'key'>('regular')
+  const [itemType, setItemType] = useState<'consumable' | 'key'>('consumable')
+  const [allowMultiplePurchases, setAllowMultiplePurchases] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const emojiPickerRef = useRef<HTMLDivElement>(null)
+  const emojiButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (isOpen) {
@@ -33,10 +40,34 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
       setDescription('')
       setPrice('')
       setImage('🎁')
-      setItemType('regular')
+      setItemType('consumable')
+      setAllowMultiplePurchases(false)
       setError('')
+      setShowEmojiPicker(false)
     }
   }, [isOpen])
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        emojiPickerRef.current && 
+        !emojiPickerRef.current.contains(event.target as Node) &&
+        emojiButtonRef.current &&
+        !emojiButtonRef.current.contains(event.target as Node)
+      ) {
+        setShowEmojiPicker(false)
+      }
+    }
+
+    if (showEmojiPicker) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showEmojiPicker])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,7 +95,8 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
         price: priceValue,
         image: image.trim() || undefined,
         isConsumable: itemType === 'consumable',
-        isKeyItem: itemType === 'key'
+        isKeyItem: itemType === 'key',
+        allowMultiplePurchases: allowMultiplePurchases
       }
       
       await onSave(saveData)
@@ -81,9 +113,16 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
     setDescription('')
     setPrice('')
     setImage('🎁')
-    setItemType('regular')
+    setItemType('consumable')
+    setAllowMultiplePurchases(false)
     setError('')
+    setShowEmojiPicker(false)
     onClose()
+  }
+
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    setImage(emojiData.emoji)
+    setShowEmojiPicker(false)
   }
 
   if (!isOpen) return null
@@ -146,16 +185,58 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
 
           <div className="form-group">
             <label htmlFor="item-image">Emoji/Icon (Optional)</label>
-            <input
-              id="item-image"
-              type="text"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              className="form-input"
-              placeholder="🎁"
-              maxLength={5}
-              disabled={isSaving}
-            />
+            <div style={{ position: 'relative' }}>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
+                <input
+                  id="item-image"
+                  type="text"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                  className="form-input"
+                  placeholder="🎁"
+                  maxLength={5}
+                  disabled={isSaving}
+                  style={{ flex: 1 }}
+                />
+                <button
+                  ref={emojiButtonRef}
+                  type="button"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  disabled={isSaving}
+                  className="btn btn-secondary"
+                  style={{ 
+                    minWidth: 'auto',
+                    padding: '14px 20px',
+                    fontSize: '1.2rem'
+                  }}
+                  title="Pick an emoji"
+                >
+                  😀
+                </button>
+              </div>
+              {showEmojiPicker && (
+                <div 
+                  ref={emojiPickerRef}
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: '8px',
+                    zIndex: 1001,
+                    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
+                    borderRadius: '12px',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <EmojiPicker
+                    onEmojiClick={handleEmojiClick}
+                    searchPlaceHolder="Search emoji..."
+                    width={320}
+                    height={400}
+                  />
+                </div>
+              )}
+            </div>
             <small className="form-hint">Use an emoji to represent this item</small>
           </div>
 
@@ -164,18 +245,31 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
             <select
               id="item-type"
               value={itemType}
-              onChange={(e) => setItemType(e.target.value as 'regular' | 'consumable' | 'key')}
+              onChange={(e) => setItemType(e.target.value as 'consumable' | 'key')}
               className="form-input"
               disabled={isSaving}
             >
-              <option value="regular">Regular Item</option>
               <option value="consumable">Consumable (Can be used once)</option>
               <option value="key">Key Item (Cannot be consumed)</option>
             </select>
             <small className="form-hint">
               {itemType === 'consumable' && 'This item will be removed from inventory when used'}
               {itemType === 'key' && 'This item cannot be used or removed'}
-              {itemType === 'regular' && 'Standard inventory item'}
+            </small>
+          </div>
+
+          <div className="form-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={allowMultiplePurchases}
+                onChange={(e) => setAllowMultiplePurchases(e.target.checked)}
+                disabled={isSaving}
+              />
+              <span>Allow multiple purchases</span>
+            </label>
+            <small className="form-hint">
+              If checked, this item will remain in the shop after purchase and can be bought multiple times
             </small>
           </div>
 

@@ -398,3 +398,49 @@
     letter-spacing: 0.5px;
   }
 }
+
+/* Mobile-specific enhancements for Auth Screen */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 20px 16px;
+  }
+
+  .auth-box {
+    padding: 30px 20px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Ensure form inputs don't trigger zoom on iOS */
+  .input-field {
+    font-size: 16px;
+    padding: 14px 16px;
+  }
+
+  /* Better button touch targets */
+  .submit-button,
+  .tab {
+    min-height: 48px;
+    font-size: 1rem;
+  }
+
+  /* Improve spacing */
+  .form-group {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-box {
+    padding: 24px 16px;
+  }
+
+  .logo h1 {
+    font-size: 1.8rem;
+  }
+
+  .subtitle {
+    font-size: 0.7rem;
+  }
+}

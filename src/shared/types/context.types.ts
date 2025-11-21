@@ -14,10 +14,10 @@ export interface AuthContextType {
   editGeneratedTask: (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma', updates: { title?: string; description?: string; xp?: number; shards?: number }) => Promise<boolean>
   deleteGeneratedTask: (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma') => Promise<boolean>
   addUserTask: (task: { title: string; description: string; category: 'Strength' | 'Intelligence' | 'Charisma'; xp: number; shards: number }) => Promise<boolean>
-  addShopItem: (item: { title: string; description?: string; price: number; image?: string; isConsumable?: boolean; isKeyItem?: boolean }) => Promise<boolean>
+  addShopItem: (item: { title: string; description?: string; price: number; image?: string; isConsumable?: boolean; isKeyItem?: boolean; allowMultiplePurchases?: boolean }) => Promise<boolean>
   deleteShopItem: (itemId: string) => Promise<boolean>
   getShopItems: () => ShopItem[]
-  buyShopItem: (itemId: string, itemPrice: number, itemDetails?: { title: string; description?: string; image?: string; isConsumable?: boolean; isKeyItem?: boolean }) => Promise<boolean>
+  buyShopItem: (itemId: string, itemPrice: number, itemDetails?: { title: string; description?: string; image?: string; isConsumable?: boolean; isKeyItem?: boolean; allowMultiplePurchases?: boolean }) => Promise<boolean>
   useInventoryItem: (itemId: string) => Promise<boolean>
   isLoading: boolean
 }
