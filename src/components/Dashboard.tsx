@@ -24,6 +24,7 @@ import { userDatabase } from '../client/services/fileUserDatabase'
 import { aiService } from '../client/services/aiService'
 import { userService } from '../client/services/userService'
 import { apiClient } from '../client/services/apiClient'
+import { calculateLevelProgress } from '../utils/levelCalculation'
 
 interface DashboardProps {
   onLogout: () => void
@@ -423,6 +424,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
       const rewards = user.unclaimedRewards
       
+      // Calculate current level before claiming rewards
+      const currentLevel = calculateLevelProgress(user?.stats?.experience || 0).actualLevel
+      
       // Group activities by date
       const activitiesByDate = new Map<string, {
         activities: typeof rewards.activities,
@@ -461,8 +465,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         }
       })
       
-      // Step 1: Claim rewards for each date
+      // Step 1: Claim rewards for each date and check for level-ups
       let allSuccess = true
+      let leveledUp = false
+      let newLevel = currentLevel
+      
       for (const [date, dateRewards] of activitiesByDate.entries()) {
         const result = await userService.claimRewards({
           sessionId,
@@ -477,6 +484,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         if (!result.success) {
           allSuccess = false
           console.error(`❌ Failed to claim rewards for date ${date}`)
+        } else {
+          // Check if we leveled up from this experience result
+          const experienceMetadata = result.experienceResult?.metadata
+          if (experienceMetadata?.leveledUp) {
+            leveledUp = true
+            newLevel = experienceMetadata.newLevel
+          }
         }
       }
       
@@ -501,7 +515,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             // Step 3: Refresh user data from server to sync UI
             await refreshUserTasks()
             
-            showSuccess(`🎉 Congratulations!\n\nYou've claimed:\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nKeep up the great work!`)
+            // Show level-up celebration if leveled up
+            if (leveledUp) {
+              showSuccess(`🎊✨ LEVEL UP! ✨🎊\n\nCongratulations! You've reached Level ${newLevel}!\n\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nYou're becoming unstoppable!`)
+            } else {
+              showSuccess(`🎉 Congratulations!\n\nYou've claimed:\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nKeep up the great work!`)
+            }
             setShowRewardClaimModal(false)
           } else {
             console.error('⚠️ Rewards applied but failed to clear unclaimed rewards in backend')
@@ -565,6 +584,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           return
         }
 
+        // Check if we leveled up
+        const experienceMetadata = result.experienceResult?.metadata
+        const leveledUp = experienceMetadata?.leveledUp
+        const newLevel = experienceMetadata?.newLevel
+
         // Step 2: Remove the claimed activity from unclaimed rewards
         const updatedActivities = rewards.activities.filter((_, i) => i !== index)
         
@@ -601,7 +625,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             // Step 3: Refresh user data from server to sync UI
             await refreshUserTasks()
             
-            showSuccess(`🎉 Claimed reward!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards`)
+            // Show level-up celebration if leveled up
+            if (leveledUp) {
+              showSuccess(`🎊✨ LEVEL UP! ✨🎊\n\nCongratulations! You've reached Level ${newLevel}!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards\n\nYou're becoming unstoppable!`)
+            } else {
+              showSuccess(`🎉 Claimed reward!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards`)
+            }
           } else {
             console.error('⚠️ Reward claimed but failed to update unclaimed rewards in backend')
             showWarning('Reward claimed successfully, but there was an issue updating. Please refresh the page.')
@@ -621,50 +650,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   }
 
   const profileData = user?.profileData
-
-  // Calculate experience progress for next level
-  const calculateLevelProgress = (experience: number) => {
-    // New formula: xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50
-    const xpForLevel = (n: number) => 100 + Math.floor((n - 1) / 10) * 50
-    
-    // Calculate what level the user should actually be at based on total experience
-    const calculateActualLevel = (totalExp: number): number => {
-      let level = 1
-      let expUsed = 0
-      
-      while (true) {
-        const expNeededForNextLevel = xpForLevel(level)
-        if (expUsed + expNeededForNextLevel > totalExp) {
-          break
-        }
-        expUsed += expNeededForNextLevel
-        level++
-      }
-      
-      return level
-    }
-    
-    const actualLevel = calculateActualLevel(experience)
-    
-    // Calculate total XP needed up to the start of actual level
-    let totalExpForCurrentLevel = 0
-    for (let i = 1; i < actualLevel; i++) {
-      totalExpForCurrentLevel += xpForLevel(i)
-    }
-    
-    const expNeededForNextLevel = xpForLevel(actualLevel)
-    
-    // Calculate progress within current level
-    const expInCurrentLevel = Math.max(0, experience - totalExpForCurrentLevel)
-    const progressPercentage = Math.min((expInCurrentLevel / expNeededForNextLevel) * 100, 100)
-    
-    return {
-      current: expInCurrentLevel,
-      needed: expNeededForNextLevel,
-      percentage: progressPercentage,
-      actualLevel: actualLevel
-    }
-  }
 
   // Calculate attribute distribution from total experience
   const calculateAttributeDistribution = () => {
