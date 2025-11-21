@@ -101,6 +101,31 @@ export interface ActivityHistory {
   lastUpdated: string
 }
 
+// Completed task details for a specific date
+export interface CompletedTask {
+  activityName: string
+  matchType: string
+  category: 'Strength' | 'Intelligence' | 'Charisma'
+  matchedTask?: string
+  goalLink?: string
+  effortRatio: number
+  xpEarned: number
+  shardsEarned: number
+  calculationNotes: string
+  timestamp: string
+}
+
+// Task history grouped by date
+export interface DailyTaskHistory {
+  date: string // ISO date string (YYYY-MM-DD)
+  tasks: CompletedTask[]
+}
+
+export interface TaskHistory {
+  dailyTasks: DailyTaskHistory[]
+  lastUpdated: string
+}
+
 export interface User {
   id: string
   username: string
@@ -116,6 +141,7 @@ export interface User {
   inventory?: InventoryItem[] // User's purchased items
   unclaimedRewards?: UnclaimedRewards // Pending rewards from daily activities
   activityHistory?: ActivityHistory // Historical daily XP data for heatmap
+  taskHistory?: TaskHistory // Detailed task history for each date
 }
 
 export interface UserRegistration {

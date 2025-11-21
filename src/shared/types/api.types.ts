@@ -112,6 +112,7 @@ export interface ApiSuccessResponse<T = any> {
   sessionId?: string;
   changes?: any;
   data?: T;
+  metadata?: any;
 }
 
 export interface ApiErrorResponse {
