@@ -227,12 +227,13 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
                     borderRadius: '12px',
                     overflow: 'hidden'
                   }}
+                  className="emoji-picker-container"
                 >
                   <EmojiPicker
                     onEmojiClick={handleEmojiClick}
                     searchPlaceHolder="Search emoji..."
-                    width={320}
-                    height={400}
+                    width={window.innerWidth < 480 ? Math.min(window.innerWidth - 32, 320) : 320}
+                    height={window.innerWidth < 480 ? 350 : 400}
                   />
                 </div>
               )}

@@ -430,3 +430,36 @@ aside.EmojiPickerReact .epr-search-container {
 aside.EmojiPickerReact .epr-icn-search {
   left: 12px !important;
 }
+
+/* Mobile emoji picker optimization */
+@media (max-width: 480px) {
+  /* Position emoji picker better on small screens */
+  aside.EmojiPickerReact {
+    max-width: calc(100vw - 32px) !important;
+    width: 100% !important;
+  }
+
+  .task-form .form-group {
+    position: relative;
+  }
+
+  /* Ensure emoji picker doesn't overflow on mobile */
+  .task-form .form-group > div {
+    position: relative;
+  }
+
+  /* Emoji picker container adjustment */
+  .emoji-picker-container {
+    left: 0 !important;
+    right: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: calc(100vw - 2rem) !important;
+  }
+
+  /* Make emoji button more touch-friendly */
+  .btn.btn-secondary[title="Pick an emoji"] {
+    padding: 16px 22px;
+    min-width: 56px;
+  }
+}

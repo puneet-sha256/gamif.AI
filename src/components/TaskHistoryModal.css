@@ -291,8 +291,12 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .task-history-modal-overlay {
+    padding: 0.5rem;
+  }
+
   .task-history-modal-content {
-    max-width: 95%;
+    max-width: 100%;
     max-height: 95vh;
   }
 
@@ -306,9 +310,147 @@
 
   .task-history-summary {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0.875rem;
+  }
+
+  .summary-value {
+    font-size: 1.25rem;
   }
 
   .task-rewards {
     gap: 1rem;
+  }
+
+  .task-history-item {
+    padding: 1rem;
+  }
+
+  .task-history-modal-footer {
+    padding: 1rem;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .task-history-modal-overlay {
+    padding: 0;
+  }
+
+  .task-history-modal-content {
+    border-radius: 1rem;
+    max-height: 100vh;
+  }
+
+  .task-history-modal-header {
+    padding: 0.875rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .task-history-modal-title h3 {
+    font-size: 1.25rem;
+  }
+
+  .task-history-date {
+    font-size: 0.875rem;
+  }
+
+  .task-history-modal-close {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.25rem;
+  }
+
+  .task-history-modal-body {
+    padding: 0.875rem;
+  }
+
+  .task-history-summary {
+    gap: 0.625rem;
+    padding: 0.75rem;
+  }
+
+  .summary-label {
+    font-size: 0.8125rem;
+  }
+
+  .summary-value {
+    font-size: 1.125rem;
+  }
+
+  .task-history-list-title {
+    font-size: 1.125rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .task-history-item {
+    padding: 0.875rem;
+  }
+
+  .task-history-item-header {
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .task-category-badge,
+  .task-match-badge {
+    padding: 0.2rem 0.625rem;
+    font-size: 0.8125rem;
+  }
+
+  .task-activity-name {
+    font-size: 1rem;
+  }
+
+  .task-matched-info,
+  .task-goal-info,
+  .task-notes {
+    font-size: 0.8125rem;
+  }
+
+  .task-rewards {
+    gap: 0.875rem;
+    flex-wrap: wrap;
+  }
+
+  .reward-label {
+    font-size: 0.8125rem;
+  }
+
+  .reward-value {
+    font-size: 0.9375rem;
+  }
+
+  .task-history-modal-footer {
+    padding: 0.875rem;
+  }
+
+  .task-history-close-btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9375rem;
+  }
+
+  .no-tasks-message {
+    padding: 2rem 1rem;
+  }
+
+  .no-tasks-message p:first-child {
+    font-size: 1.125rem;
+  }
+
+  .no-tasks-hint {
+    font-size: 0.875rem;
+  }
+}
+
+/* Landscape mode on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .task-history-modal-content {
+    max-height: 92vh;
+  }
+
+  .task-history-modal-body {
+    max-height: calc(92vh - 8rem);
   }
 }
