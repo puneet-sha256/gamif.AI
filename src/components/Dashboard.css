@@ -2564,13 +2564,14 @@
     font-size: 0.95rem;
   }
 
-  .date-input,
-  .activity-input-modal {
+  .date-input {
     padding: 12px 14px;
     font-size: 1rem;
   }
 
   .activity-input-modal {
+    padding: 12px 14px;
+    font-size: 1rem;
     min-height: 100px;
   }
 

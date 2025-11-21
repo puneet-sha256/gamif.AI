@@ -31,6 +31,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 768)
   const emojiPickerRef = useRef<HTMLDivElement>(null)
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -46,6 +47,18 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
       setShowEmojiPicker(false)
     }
   }, [isOpen])
+
+  // Track window width for responsive emoji picker
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Close emoji picker when clicking outside
   useEffect(() => {
@@ -232,8 +245,8 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
                   <EmojiPicker
                     onEmojiClick={handleEmojiClick}
                     searchPlaceHolder="Search emoji..."
-                    width={window.innerWidth < 480 ? Math.min(window.innerWidth - 32, 320) : 320}
-                    height={window.innerWidth < 480 ? 350 : 400}
+                    width={windowWidth < 480 ? Math.min(windowWidth - 32, 320) : 320}
+                    height={windowWidth < 480 ? 350 : 400}
                   />
                 </div>
               )}
