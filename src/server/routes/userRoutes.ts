@@ -27,7 +27,7 @@ import {
 } from '../utils/responseHelpers'
 import type { UserStats } from '../../shared/types'
 import { logger } from '../../utils/logger'
-import { detectLevelUp } from '../../utils/levelCalculation'
+import { detectLevelUp, calculateLevelFromXp } from '../../utils/levelCalculation'
 
 // Get current user by session
 export async function getCurrentUser(req: Request, res: Response) {
@@ -213,7 +213,7 @@ export async function updateExperience(req: Request, res: Response) {
     }
 
     if (newLevel !== null) {
-      const oldLevel = require('../../utils/levelCalculation').calculateLevelFromXp(oldExperience)
+      const oldLevel = calculateLevelFromXp(oldExperience)
       changes.levelUp = {
         newLevel,
         oldLevel

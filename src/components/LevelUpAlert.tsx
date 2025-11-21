@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import './LevelUpAlert.css'
 
 export interface LevelUpAlertProps {
@@ -8,6 +8,11 @@ export interface LevelUpAlertProps {
 
 const LevelUpAlert: React.FC<LevelUpAlertProps> = ({ newLevel, onClose }) => {
   const [isVisible, setIsVisible] = useState(false)
+
+  const handleClose = useCallback(() => {
+    setIsVisible(false)
+    setTimeout(onClose, 300) // Wait for animation to complete
+  }, [onClose])
 
   useEffect(() => {
     // Trigger animation on mount
@@ -22,12 +27,7 @@ const LevelUpAlert: React.FC<LevelUpAlertProps> = ({ newLevel, onClose }) => {
       clearTimeout(showTimer)
       clearTimeout(closeTimer)
     }
-  }, [])
-
-  const handleClose = () => {
-    setIsVisible(false)
-    setTimeout(onClose, 300) // Wait for animation to complete
-  }
+  }, [handleClose])
 
   return (
     <div className={`levelup-overlay ${isVisible ? 'visible' : ''}`} onClick={handleClose}>

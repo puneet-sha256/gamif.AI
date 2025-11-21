@@ -17,6 +17,7 @@ const validation_1 = require("../utils/validation");
 const dataOperations_1 = require("../utils/dataOperations");
 const responseHelpers_1 = require("../utils/responseHelpers");
 const logger_1 = require("../../utils/logger");
+const levelCalculation_1 = require("../../utils/levelCalculation");
 // Get current user by session
 async function getCurrentUser(req, res) {
     try {
@@ -89,12 +90,17 @@ async function updateExperience(req, res) {
         const newStrength = Math.max(0, (user.stats.strength || 0) + strengthChange);
         const newIntelligence = Math.max(0, (user.stats.intelligence || 0) + intelligenceChange);
         const newCharisma = Math.max(0, (user.stats.charisma || 0) + charismaChange);
+        // Store old experience for level-up detection
+        const oldExperience = user.stats.experience || 0;
         // Update stats
         user.stats.strength = newStrength;
         user.stats.intelligence = newIntelligence;
         user.stats.charisma = newCharisma;
         // Total experience is sum of all attributes
-        user.stats.experience = newStrength + newIntelligence + newCharisma;
+        const newExperience = newStrength + newIntelligence + newCharisma;
+        user.stats.experience = newExperience;
+        // Detect level-up
+        const newLevel = (0, levelCalculation_1.detectLevelUp)(oldExperience, newExperience);
         // Update activity history for heatmap
         // Use provided activityDate or default to today
         const activityDateToUse = activityDate || new Date().toISOString().split('T')[0];
@@ -140,13 +146,22 @@ async function updateExperience(req, res) {
         if (!updatedUser) {
             return res.status(500).json((0, responseHelpers_1.createErrorResponse)('Failed to update user'));
         }
-        // Return updated stats
-        res.json((0, responseHelpers_1.createSuccessResponse)(responseHelpers_1.SuccessMessages.EXPERIENCE_UPDATED, undefined, (0, responseHelpers_1.sanitizeUser)(updatedUser), undefined, {
+        // Prepare changes object with level-up information if applicable
+        const changes = {
             strengthChange,
             intelligenceChange,
             charismaChange,
             totalExperienceChange: strengthChange + intelligenceChange + charismaChange
-        }));
+        };
+        if (newLevel !== null) {
+            const oldLevel = (0, levelCalculation_1.calculateLevelFromXp)(oldExperience);
+            changes.levelUp = {
+                newLevel,
+                oldLevel
+            };
+        }
+        // Return updated stats
+        res.json((0, responseHelpers_1.createSuccessResponse)(responseHelpers_1.SuccessMessages.EXPERIENCE_UPDATED, undefined, (0, responseHelpers_1.sanitizeUser)(updatedUser), undefined, changes));
     }
     catch (error) {
         logger_1.logger.error('Update experience error:', error);
@@ -359,7 +374,7 @@ async function addUserTask(req, res) {
 // Add a shop item
 async function addUserShopItem(req, res) {
     try {
-        const { sessionId, title, description, price, image, isConsumable, isKeyItem } = req.body;
+        const { sessionId, title, description, price, image, isConsumable, isKeyItem, allowMultiplePurchases } = req.body;
         // Validate required fields
         if (!sessionId || !title || price === undefined) {
             return res.status(400).json((0, responseHelpers_1.createErrorResponse)('Missing required fields: sessionId, title, and price are required'));
@@ -385,7 +400,8 @@ async function addUserShopItem(req, res) {
             price,
             image,
             isConsumable,
-            isKeyItem
+            isKeyItem,
+            allowMultiplePurchases
         });
         if (!success) {
             return res.status(500).json((0, responseHelpers_1.createErrorResponse)('Failed to add shop item'));
