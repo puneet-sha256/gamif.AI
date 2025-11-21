@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import './TaskModal.css' // Reuse the same styles
+import EmojiPicker from './EmojiPicker'
 
 interface ShopItemModalProps {
   isOpen: boolean
@@ -119,6 +120,11 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
               placeholder="e.g., Movie Night, New Gadget, Spa Day"
               autoFocus
               disabled={isSaving}
+            />
+            {/* Emoji Picker - shows suggestions based on item name */}
+            <EmojiPicker
+              searchTerm={title}
+              onEmojiSelect={(emoji) => setImage(emoji)}
             />
           </div>
 
