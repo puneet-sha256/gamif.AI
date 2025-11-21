@@ -3,6 +3,7 @@
   "short_name": "Gamif.AI",
   "description": "Transform your personal development journey into an RPG-like experience where every skill learned and goal achieved contributes to your character's growth",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#3b82f6",
@@ -18,7 +19,8 @@
   "categories": [
     "productivity",
     "lifestyle",
-    "health"
+    "health",
+    "education"
   ],
   "screenshots": [],
   "shortcuts": [
@@ -26,8 +28,11 @@
       "name": "Dashboard",
       "short_name": "Dashboard",
       "description": "View your progress dashboard",
-      "url": "/",
-      "icons": []
+      "url": "/"
     }
-  ]
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "dir": "ltr",
+  "lang": "en-US"
 }
