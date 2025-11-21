@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import EmojiPicker, { EmojiClickData } from 'emoji-picker-react'
+import EmojiPicker from 'emoji-picker-react'
+import type { EmojiClickData } from 'emoji-picker-react'
 import './TaskModal.css' // Reuse the same styles
 
 interface ShopItemModalProps {
@@ -31,6 +32,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
   const [error, setError] = useState('')
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const emojiPickerRef = useRef<HTMLDivElement>(null)
+  const emojiButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (isOpen) {
@@ -48,7 +50,12 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
   // Close emoji picker when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+      if (
+        emojiPickerRef.current && 
+        !emojiPickerRef.current.contains(event.target as Node) &&
+        emojiButtonRef.current &&
+        !emojiButtonRef.current.contains(event.target as Node)
+      ) {
         setShowEmojiPicker(false)
       }
     }
@@ -192,6 +199,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
                   style={{ flex: 1 }}
                 />
                 <button
+                  ref={emojiButtonRef}
                   type="button"
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                   disabled={isSaving}
