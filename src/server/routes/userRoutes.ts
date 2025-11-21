@@ -27,6 +27,7 @@ import {
 } from '../utils/responseHelpers'
 import type { UserStats } from '../../shared/types'
 import { logger } from '../../utils/logger'
+import { calculateActualLevel } from '../../utils/levelCalculation'
 
 // Get current user by session
 export async function getCurrentUser(req: Request, res: Response) {
@@ -120,6 +121,10 @@ export async function updateExperience(req: Request, res: Response) {
       } as UserStats
     }
 
+    // Calculate old level before XP change
+    const oldExperience = user.stats.experience || 0
+    const oldLevel = calculateActualLevel(oldExperience)
+
     // Calculate new attribute values (prevent negative values)
     const newStrength = Math.max(0, (user.stats.strength || 0) + strengthChange)
     const newIntelligence = Math.max(0, (user.stats.intelligence || 0) + intelligenceChange)
@@ -132,6 +137,10 @@ export async function updateExperience(req: Request, res: Response) {
     
     // Total experience is sum of all attributes
     user.stats.experience = newStrength + newIntelligence + newCharisma
+
+    // Calculate new level after XP change
+    const newLevel = calculateActualLevel(user.stats.experience)
+    const leveledUp = newLevel > oldLevel
 
     // Update activity history for heatmap
     // Use provided activityDate or default to today
@@ -207,6 +216,11 @@ export async function updateExperience(req: Request, res: Response) {
         intelligenceChange,
         charismaChange,
         totalExperienceChange: strengthChange + intelligenceChange + charismaChange
+      },
+      {
+        leveledUp,
+        oldLevel,
+        newLevel
       }
     ))
 

@@ -10,7 +10,8 @@ export function createSuccessResponse(
   data?: any, 
   user?: Omit<User, 'passwordHash'>,
   sessionId?: string,
-  changes?: any
+  changes?: any,
+  metadata?: any
 ): ApiSuccessResponse {
   const response: ApiSuccessResponse = {
     success: true,
@@ -21,6 +22,7 @@ export function createSuccessResponse(
   if (user !== undefined) response.user = user
   if (sessionId !== undefined) response.sessionId = sessionId
   if (changes !== undefined) response.changes = changes
+  if (metadata !== undefined) response.metadata = metadata
   
   return response
 }
