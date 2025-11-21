@@ -345,6 +345,7 @@ export async function addShopItem(
     image?: string;
     isConsumable?: boolean;
     isKeyItem?: boolean;
+    allowMultiplePurchases?: boolean;
   }
 ): Promise<boolean> {
   logger.info(`Adding shop item for user: ${userId}`)
@@ -370,7 +371,8 @@ export async function addShopItem(
     image: item.image || '🎁',
     createdAt: new Date().toISOString(),
     isConsumable: item.isConsumable || false,
-    isKeyItem: item.isKeyItem || false
+    isKeyItem: item.isKeyItem || false,
+    allowMultiplePurchases: item.allowMultiplePurchases || false
   }
   
   // Add item to shop
