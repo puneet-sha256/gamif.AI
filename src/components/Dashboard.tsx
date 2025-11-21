@@ -11,6 +11,7 @@ import DailyActivityModal from './DailyActivityModal'
 import TaskModal from './TaskModal'
 import ShopItemModal from './ShopItemModal'
 import RewardClaimModal from './RewardClaimModal'
+import TaskHistoryModal from './TaskHistoryModal'
 import ActivityHeatmap from './ActivityHeatmap'
 import { 
   mapGeneratedTasksToTaskItems, 
@@ -52,6 +53,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   // Reward claim modal state
   const [showRewardClaimModal, setShowRewardClaimModal] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
+
+  // Task history modal state
+  const [showTaskHistoryModal, setShowTaskHistoryModal] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
   // Window width state for responsive chart sizing
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
@@ -381,8 +386,48 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             lastUpdated: new Date().toISOString()
           }
 
+          // Also save to task history for permanent record
+          const existingTaskHistory = user?.taskHistory
+          
+          // Map rewards to completed tasks
+          const completedTasks = result.data.rewards.activityRewards.map((reward: any) => ({
+            activityName: reward.activityName,
+            matchType: reward.matchType,
+            category: reward.category as 'Strength' | 'Intelligence' | 'Charisma',
+            matchedTask: reward.matchedTask,
+            goalLink: reward.goalLink,
+            effortRatio: reward.effortRatio,
+            xpEarned: reward.xpEarned,
+            shardsEarned: reward.shardsEarned,
+            calculationNotes: reward.calculationNotes,
+            timestamp: new Date().toISOString()
+          }))
+          
+          // Find or create daily task history for the activity date
+          let dailyTasks = existingTaskHistory?.dailyTasks || []
+          const existingDayIndex = dailyTasks.findIndex(dt => dt.date === activityDate)
+          
+          if (existingDayIndex >= 0) {
+            // Append to existing day's tasks
+            dailyTasks[existingDayIndex].tasks = [
+              ...dailyTasks[existingDayIndex].tasks,
+              ...completedTasks
+            ]
+          } else {
+            // Create new day entry
+            dailyTasks.push({
+              date: activityDate,
+              tasks: completedTasks
+            })
+          }
+          
+          const taskHistory = {
+            dailyTasks,
+            lastUpdated: new Date().toISOString()
+          }
+
           // Save to user data
-          const success = await updateUser({ unclaimedRewards })
+          const success = await updateUser({ unclaimedRewards, taskHistory })
           
           if (success) {
             showSuccess(`🎉 Great job! You've earned rewards from ${result.data.rewards.activityRewards.length} activities.\n\nClick the "Unclaimed Rewards" button to view and claim them!`)
@@ -699,6 +744,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
   }
 
+  // Handle heatmap cell click
+  const handleHeatmapCellClick = (date: string) => {
+    setSelectedDate(date)
+    setShowTaskHistoryModal(true)
+  }
+
+  // Get task history for selected date
+  const getTaskHistoryForDate = (date: string | null) => {
+    if (!date || !user?.taskHistory) return null
+    
+    const dailyTasks = user.taskHistory.dailyTasks.find(dt => dt.date === date)
+    return dailyTasks || null
+  }
+
   
 
   if (!user) {
@@ -894,7 +953,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
         {/* Activity Heatmap Section */}
         <div className="heatmap-section">
-          <ActivityHeatmap activityHistory={user?.activityHistory} />
+          <ActivityHeatmap 
+            activityHistory={user?.activityHistory} 
+            onCellClick={handleHeatmapCellClick}
+          />
         </div>
       </div>
     </div>
@@ -1394,6 +1456,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         onClaimRewards={handleClaimRewards}
         onClaimIndividualReward={handleClaimIndividualReward}
         isClaiming={isClaiming}
+      />
+
+      {/* Task History Modal */}
+      <TaskHistoryModal
+        isOpen={showTaskHistoryModal}
+        onClose={() => {
+          setShowTaskHistoryModal(false)
+          setSelectedDate(null)
+        }}
+        date={selectedDate}
+        taskHistory={getTaskHistoryForDate(selectedDate)}
       />
     </div>
   )
