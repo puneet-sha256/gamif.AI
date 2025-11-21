@@ -411,3 +411,22 @@
     margin-bottom: 20px;
   }
 }
+
+/* Emoji Picker Search Input Fix */
+.epr-search-container input.epr-search {
+  padding-left: 45px !important;
+  padding-right: 12px !important;
+}
+
+/* Additional emoji picker search styling */
+aside.EmojiPickerReact .epr-search-container input {
+  padding-left: 45px !important;
+}
+
+aside.EmojiPickerReact .epr-search-container {
+  position: relative;
+}
+
+aside.EmojiPickerReact .epr-icn-search {
+  left: 12px !important;
+}
