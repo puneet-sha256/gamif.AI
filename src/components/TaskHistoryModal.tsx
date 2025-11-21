@@ -165,6 +165,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                         {task.effortRatio !== undefined && (
                           <div className="reward-item">
                             <span className="reward-label">Effort:</span>
+                            {/* effortRatio is a decimal value between 0 and 1 representing percentage */}
                             <span className="reward-value">{(task.effortRatio * 100).toFixed(0)}%</span>
                           </div>
                         )}

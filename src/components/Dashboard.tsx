@@ -390,10 +390,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           const existingTaskHistory = user?.taskHistory
           
           // Map rewards to completed tasks
-          const completedTasks = result.data.rewards.activityRewards.map((reward: any) => ({
+          interface RewardItem {
+            activityName: string
+            matchType: string
+            category: 'Strength' | 'Intelligence' | 'Charisma'
+            matchedTask?: string
+            goalLink?: string
+            effortRatio: number
+            xpEarned: number
+            shardsEarned: number
+            calculationNotes: string
+          }
+          
+          const completedTasks = result.data.rewards.activityRewards.map((reward: RewardItem) => ({
             activityName: reward.activityName,
             matchType: reward.matchType,
-            category: reward.category as 'Strength' | 'Intelligence' | 'Charisma',
+            category: reward.category,
             matchedTask: reward.matchedTask,
             goalLink: reward.goalLink,
             effortRatio: reward.effortRatio,
@@ -408,11 +420,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           const existingDayIndex = dailyTasks.findIndex(dt => dt.date === activityDate)
           
           if (existingDayIndex >= 0) {
-            // Append to existing day's tasks
-            dailyTasks[existingDayIndex].tasks = [
-              ...dailyTasks[existingDayIndex].tasks,
-              ...completedTasks
-            ]
+            // Append to existing day's tasks efficiently
+            dailyTasks[existingDayIndex].tasks.push(...completedTasks)
           } else {
             // Create new day entry
             dailyTasks.push({
