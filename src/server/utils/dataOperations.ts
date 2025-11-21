@@ -432,6 +432,7 @@ export async function buyShopItem(
     image?: string
     isConsumable?: boolean
     isKeyItem?: boolean
+    allowMultiplePurchases?: boolean
   }
 ): Promise<{ success: boolean; message?: string }> {
   logger.info(`User ${userId} attempting to buy shop item ${itemId} for ${itemPrice} shards`)
@@ -486,7 +487,8 @@ export async function buyShopItem(
     price: itemPrice,
     image: itemDetails?.image,
     isConsumable: itemDetails?.isConsumable || false,
-    isKeyItem: itemDetails?.isKeyItem || false
+    isKeyItem: itemDetails?.isKeyItem || false,
+    allowMultiplePurchases: itemDetails?.allowMultiplePurchases || false
   }
   
   // Deduct shards
