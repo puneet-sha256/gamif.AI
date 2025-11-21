@@ -490,10 +490,14 @@ export async function buyShopItem(
   // Deduct shards
   user.stats.shards = currentShards - itemPrice
   
-  // Remove item from shopItems (wishlist) ONLY if it's a user-created wishlist item
-  if (isWishlistItem && user.shopItems) {
+  // Remove item from shopItems (wishlist) ONLY if:
+  // 1. It's a user-created wishlist item, AND
+  // 2. allowMultiplePurchases is NOT set to true
+  if (isWishlistItem && user.shopItems && !shopItem?.allowMultiplePurchases) {
     user.shopItems = user.shopItems.filter(item => item.id !== itemId)
-    logger.info(`Removed item "${itemInfo.title}" from wishlist`)
+    logger.info(`Removed item "${itemInfo.title}" from wishlist (single-purchase item)`)
+  } else if (isWishlistItem && shopItem?.allowMultiplePurchases) {
+    logger.info(`Kept item "${itemInfo.title}" in wishlist (multi-purchase item)`)
   }
   
   // Initialize inventory if it doesn't exist

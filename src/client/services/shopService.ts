@@ -12,6 +12,7 @@ export interface NewShopItemData {
   image?: string
   isConsumable?: boolean
   isKeyItem?: boolean
+  allowMultiplePurchases?: boolean
 }
 
 class ShopService {

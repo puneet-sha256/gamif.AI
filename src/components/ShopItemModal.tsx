@@ -11,6 +11,7 @@ interface ShopItemModalProps {
     image?: string
     isConsumable?: boolean
     isKeyItem?: boolean
+    allowMultiplePurchases?: boolean
   }) => Promise<void>
 }
 
@@ -24,6 +25,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
   const [price, setPrice] = useState('')
   const [image, setImage] = useState('🎁')
   const [itemType, setItemType] = useState<'regular' | 'consumable' | 'key'>('regular')
+  const [allowMultiplePurchases, setAllowMultiplePurchases] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -34,6 +36,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
       setPrice('')
       setImage('🎁')
       setItemType('regular')
+      setAllowMultiplePurchases(false)
       setError('')
     }
   }, [isOpen])
@@ -64,7 +67,8 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
         price: priceValue,
         image: image.trim() || undefined,
         isConsumable: itemType === 'consumable',
-        isKeyItem: itemType === 'key'
+        isKeyItem: itemType === 'key',
+        allowMultiplePurchases: allowMultiplePurchases
       }
       
       await onSave(saveData)
@@ -82,6 +86,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
     setPrice('')
     setImage('🎁')
     setItemType('regular')
+    setAllowMultiplePurchases(false)
     setError('')
     onClose()
   }
@@ -176,6 +181,21 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
               {itemType === 'consumable' && 'This item will be removed from inventory when used'}
               {itemType === 'key' && 'This item cannot be used or removed'}
               {itemType === 'regular' && 'Standard inventory item'}
+            </small>
+          </div>
+
+          <div className="form-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={allowMultiplePurchases}
+                onChange={(e) => setAllowMultiplePurchases(e.target.checked)}
+                disabled={isSaving}
+              />
+              <span>Allow multiple purchases (keep item in shop after purchase)</span>
+            </label>
+            <small className="form-hint">
+              If checked, this item will remain in the shop after purchase and can be bought multiple times
             </small>
           </div>
 
