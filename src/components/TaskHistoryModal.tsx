@@ -24,7 +24,8 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
   }
 
   const formatDate = (dateStr: string): string => {
-    const date = new Date(dateStr)
+    // Parse date string ensuring local timezone interpretation
+    const date = new Date(dateStr + 'T00:00:00')
     return date.toLocaleDateString('en-US', { 
       weekday: 'long',
       month: 'long', 
