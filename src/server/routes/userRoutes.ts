@@ -27,6 +27,7 @@ import {
 } from '../utils/responseHelpers'
 import type { UserStats } from '../../shared/types'
 import { logger } from '../../utils/logger'
+import { detectLevelUp } from '../../utils/levelCalculation'
 
 // Get current user by session
 export async function getCurrentUser(req: Request, res: Response) {
@@ -125,13 +126,20 @@ export async function updateExperience(req: Request, res: Response) {
     const newIntelligence = Math.max(0, (user.stats.intelligence || 0) + intelligenceChange)
     const newCharisma = Math.max(0, (user.stats.charisma || 0) + charismaChange)
 
+    // Store old experience for level-up detection
+    const oldExperience = user.stats.experience || 0
+
     // Update stats
     user.stats.strength = newStrength
     user.stats.intelligence = newIntelligence
     user.stats.charisma = newCharisma
     
     // Total experience is sum of all attributes
-    user.stats.experience = newStrength + newIntelligence + newCharisma
+    const newExperience = newStrength + newIntelligence + newCharisma
+    user.stats.experience = newExperience
+
+    // Detect level-up
+    const newLevel = detectLevelUp(oldExperience, newExperience)
 
     // Update activity history for heatmap
     // Use provided activityDate or default to today
@@ -196,18 +204,29 @@ export async function updateExperience(req: Request, res: Response) {
       return res.status(500).json(createErrorResponse('Failed to update user'))
     }
 
+    // Prepare changes object with level-up information if applicable
+    const changes: any = {
+      strengthChange,
+      intelligenceChange,
+      charismaChange,
+      totalExperienceChange: strengthChange + intelligenceChange + charismaChange
+    }
+
+    if (newLevel !== null) {
+      const oldLevel = require('../../utils/levelCalculation').calculateLevelFromXp(oldExperience)
+      changes.levelUp = {
+        newLevel,
+        oldLevel
+      }
+    }
+
     // Return updated stats
     res.json(createSuccessResponse(
       SuccessMessages.EXPERIENCE_UPDATED,
       undefined,
       sanitizeUser(updatedUser),
       undefined,
-      {
-        strengthChange,
-        intelligenceChange,
-        charismaChange,
-        totalExperienceChange: strengthChange + intelligenceChange + charismaChange
-      }
+      changes
     ))
 
   } catch (error) {

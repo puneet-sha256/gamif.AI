@@ -12,6 +12,7 @@ import TaskModal from './TaskModal'
 import ShopItemModal from './ShopItemModal'
 import RewardClaimModal from './RewardClaimModal'
 import ActivityHeatmap from './ActivityHeatmap'
+import LevelUpAlert from './LevelUpAlert'
 import { 
   mapGeneratedTasksToTaskItems, 
   groupMappedTasksByCategory, 
@@ -52,6 +53,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   // Reward claim modal state
   const [showRewardClaimModal, setShowRewardClaimModal] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
+
+  // Level-up state
+  const [showLevelUpAlert, setShowLevelUpAlert] = useState(false)
+  const [levelUpData, setLevelUpData] = useState<number | null>(null)
 
   // Window width state for responsive chart sizing
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
@@ -463,6 +468,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       
       // Step 1: Claim rewards for each date
       let allSuccess = true
+      let leveledUp = false
+      let newLevelValue = 0
+      
       for (const [date, dateRewards] of activitiesByDate.entries()) {
         const result = await userService.claimRewards({
           sessionId,
@@ -477,6 +485,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         if (!result.success) {
           allSuccess = false
           console.error(`❌ Failed to claim rewards for date ${date}`)
+        } else {
+          // Check if a level-up occurred in the experience result
+          if (result.experienceResult?.changes?.levelUp) {
+            leveledUp = true
+            newLevelValue = result.experienceResult.changes.levelUp.newLevel
+          }
         }
       }
       
@@ -503,6 +517,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             
             showSuccess(`🎉 Congratulations!\n\nYou've claimed:\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nKeep up the great work!`)
             setShowRewardClaimModal(false)
+            
+            // Show level-up alert if leveled up
+            if (leveledUp && newLevelValue > 0) {
+              setLevelUpData(newLevelValue)
+              setShowLevelUpAlert(true)
+            }
           } else {
             console.error('⚠️ Rewards applied but failed to clear unclaimed rewards in backend')
             showWarning('Rewards claimed successfully, but there was an issue clearing the unclaimed rewards. Please refresh the page.')
@@ -602,6 +622,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             await refreshUserTasks()
             
             showSuccess(`🎉 Claimed reward!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards`)
+            
+            // Check if a level-up occurred
+            if (result.experienceResult?.changes?.levelUp) {
+              setLevelUpData(result.experienceResult.changes.levelUp.newLevel)
+              setShowLevelUpAlert(true)
+            }
           } else {
             console.error('⚠️ Reward claimed but failed to update unclaimed rewards in backend')
             showWarning('Reward claimed successfully, but there was an issue updating. Please refresh the page.')
@@ -1395,6 +1421,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         onClaimIndividualReward={handleClaimIndividualReward}
         isClaiming={isClaiming}
       />
+
+      {/* Level Up Alert */}
+      {showLevelUpAlert && levelUpData && (
+        <LevelUpAlert
+          newLevel={levelUpData}
+          onClose={() => {
+            setShowLevelUpAlert(false)
+            setLevelUpData(null)
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -150,6 +150,10 @@ export interface ExperienceUpdateResponse extends ApiSuccessResponse {
     intelligenceChange: number;
     charismaChange: number;
     totalExperienceChange: number;
+    levelUp?: {
+      newLevel: number;
+      oldLevel: number;
+    };
   };
 }
 
