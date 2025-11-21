@@ -587,45 +587,65 @@
 
 @media (max-width: 768px) {
   .dashboard-header {
-    padding: 15px 20px;
-    flex-direction: column;
-    gap: 15px;
+    padding: 8px 12px;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: space-between;
   }
   
   .dashboard-logo h1 {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
   }
   
   .dashboard-logo .subtitle {
-    font-size: 0.7rem;
+    display: none; /* Hide subtitle for cleaner look */
   }
   
   .user-info {
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
+    flex-direction: row;
+    gap: 6px;
+    width: auto;
+    justify-content: flex-end;
+    align-items: center;
   }
   
   .welcome-text {
-    font-size: 0.9rem;
+    display: none; /* Hide welcome text to reduce clutter */
   }
   
   .unclaimed-rewards-button {
-    padding: 8px 16px;
-    width: 100%;
-    justify-content: center;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    min-width: auto;
+  }
+  
+  .unclaimed-rewards-button .reward-text {
+    display: none; /* Show only icon and badge */
+  }
+  
+  .unclaimed-rewards-button .reward-icon {
+    font-size: 1.2rem;
+  }
+  
+  .unclaimed-rewards-button .reward-badge {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
   }
   
   .logout-button {
-    width: 100%;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
   }
   
   .dashboard-content {
-    padding: 20px;
+    padding: 16px;
   }
   
   .welcome-section h2 {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
   
   .stats-grid {
@@ -712,6 +732,13 @@
   border-radius: 8px;
   text-transform: none;
   letter-spacing: 0;
+}
+
+/* Mobile optimization: reduce active tab border */
+@media (max-width: 768px) {
+  .nav-tab.active {
+    border-bottom-width: 2px;
+  }
 }
 
 /* Tab Content Styles */
@@ -1163,11 +1190,12 @@
 .challenge-item {
   background: rgba(248, 250, 252, 0.9);
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   border: 1px solid rgba(59, 130, 246, 0.15);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   transition: all 0.3s ease;
 }
 
@@ -1183,10 +1211,10 @@
 .challenge-item.enhanced {
   background: linear-gradient(135deg, rgba(248, 250, 252, 0.95), rgba(241, 245, 249, 0.9));
   border: 2px solid rgba(59, 130, 246, 0.2);
-  padding: 24px;
+  padding: 16px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -1211,11 +1239,11 @@
 
 .task-icon,
 .challenge-icon {
-  font-size: 2.5rem;
+  font-size: 2rem;
   background: linear-gradient(135deg, #3b82f6, #06b6d4);
   border-radius: 50%;
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1226,29 +1254,30 @@
 .task-content {
   flex: 1;
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
+  min-width: 0;
 }
 
 .task-description {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: #1e293b;
-  margin: 0 0 8px 0;
-  line-height: 1.4;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.task-info p {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.3;
 }
 
 .task-category {
-  font-size: 0.85rem;
-  color: #06b6d4;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  background: rgba(6, 182, 212, 0.1);
-  padding: 4px 8px;
-  border-radius: 6px;
+  display: none;
 }
 
 .complete-btn {
@@ -1282,20 +1311,31 @@
 
 /* Legacy task styling */
 
+.task-info,
+.challenge-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .task-info h4,
 .challenge-info h4 {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1.1rem;
-  margin: 0 0 5px 0;
+  font-size: 1rem;
+  margin: 0;
   color: #1e293b;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .task-info p,
 .challenge-info p {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #64748b;
-  margin: 0 0 10px 0;
+  margin: 0;
+  line-height: 1.3;
 }
 
 .task-progress,
@@ -1323,41 +1363,45 @@
 .task-rewards,
 .challenge-rewards {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  align-items: flex-end;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .xp-reward,
 .shard-reward {
   font-family: 'Rajdhani', sans-serif;
   font-weight: 600;
-  font-size: 0.9rem;
-  padding: 4px 8px;
+  font-size: 0.75rem;
+  padding: 2px 5px;
   border-radius: 4px;
   background: rgba(59, 130, 246, 0.1);
   color: #3b82f6;
+  white-space: nowrap;
 }
 
 /* Task Action Buttons */
 .task-actions {
   display: flex;
-  gap: 8px;
-  margin-left: 12px;
+  gap: 3px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .task-action-btn {
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 8px;
-  width: 36px;
-  height: 36px;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1rem;
+  font-size: 0.85rem;
 }
 
 .task-action-btn:hover {
@@ -1576,20 +1620,21 @@
 }
 
 .shop-items {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .shop-item {
   background: rgba(248, 250, 252, 0.8);
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   border: 1px solid rgba(59, 130, 246, 0.15);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  text-align: center;
+  gap: 12px;
+  text-align: left;
   transition: all 0.3s ease;
 }
 
@@ -1601,47 +1646,63 @@
 }
 
 .item-image {
-  font-size: 3rem;
-  margin-bottom: 15px;
+  font-size: 2.5rem;
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .item-info h4 {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1.2rem;
-  margin: 0 0 10px 0;
+  font-size: 1.1rem;
+  margin: 0 0 4px 0;
   color: #1e293b;
   font-weight: 700;
 }
 
 .item-info p {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #64748b;
-  margin: 0 0 15px 0;
-  line-height: 1.4;
+  margin: 0 0 6px 0;
+  line-height: 1.3;
 }
 
 .item-price {
   font-family: 'Orbitron', monospace;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #3b82f6;
-  margin-bottom: 15px;
+  margin: 0;
 }
 
 .buy-button {
-  padding: 10px 20px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, #3b82f6, #06b6d4);
   border: none;
   border-radius: 8px;
   color: white;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.3s ease;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .buy-button:hover:not(:disabled) {
@@ -1657,12 +1718,33 @@
 
 .shop-item-actions {
   display: flex;
-  gap: 8px;
-  width: 100%;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  align-items: flex-end;
 }
 
-.shop-item-actions .buy-button {
-  flex: 1;
+.shop-item-actions .buy-button,
+.shop-item-actions .delete-button {
+  min-width: 80px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+/* Mobile: Show buttons in same line */
+@media (max-width: 768px) {
+  .shop-item-actions {
+    flex-direction: row;
+    gap: 4px;
+  }
+
+  .shop-item-actions .buy-button,
+  .shop-item-actions .delete-button {
+    min-width: auto;
+    flex: 1;
+    padding: 6px 8px;
+    font-size: 0.7rem;
+  }
 }
 
 .item-badge {
@@ -1680,14 +1762,20 @@
 }
 
 .delete-button {
-  padding: 10px 15px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, #ef4444, #dc2626);
   border: none;
   border-radius: 8px;
   color: white;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .delete-button:hover {
@@ -1708,29 +1796,40 @@
 /* Responsive Design for Tabs */
 @media (max-width: 768px) {
   .dashboard-navigation {
-    padding: 0 10px;
+    padding: 0 4px;
   }
   
   .nav-tabs {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 2px;
+  }
+  
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
   }
   
   .nav-tab {
-    flex: 1 1 45%;
-    min-width: 120px;
-    padding: 12px 8px;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
+    flex: 1;
+    min-width: 65px;
+    padding: 8px 6px;
+    font-size: 0.7rem;
+    letter-spacing: 0.3px;
+    flex-direction: column;
+    gap: 2px;
+    border-radius: 8px 8px 0 0;
   }
   
   .tab-icon {
-    font-size: 1rem;
+    font-size: 1.25rem;
   }
   
   .coming-soon {
-    font-size: 0.65rem;
-    padding: 1px 4px;
+    font-size: 0.55rem;
+    padding: 1px 3px;
   }
   
   .tasks-grid,
@@ -1738,8 +1837,113 @@
     grid-template-columns: 1fr;
   }
   
+  /* Shop items already in list format, ensure proper spacing */
   .shop-items {
-    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .shop-item {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .item-image {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+  }
+
+  .item-info h4 {
+    font-size: 1rem;
+  }
+
+  .item-info p {
+    font-size: 0.8rem;
+  }
+
+  .item-price {
+    font-size: 0.9rem;
+  }
+
+  .buy-button {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  .delete-button {
+    padding: 6px 10px;
+    font-size: 1rem;
+  }
+
+  .shop-item-actions .buy-button,
+  .shop-item-actions .delete-button {
+    min-width: auto;
+    padding: 6px 8px;
+  }
+
+  .shop-item-actions .buy-button {
+    font-size: 0.7rem;
+  }
+
+  .shop-item-actions .delete-button {
+    font-size: 0.95rem;
+  }
+
+  /* Compact task items on mobile */
+  .task-item,
+  .challenge-item {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .task-item.enhanced,
+  .challenge-item.enhanced {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .task-icon,
+  .challenge-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 1.75rem;
+  }
+
+  .task-content {
+    gap: 8px;
+  }
+
+  .task-info h4 {
+    font-size: 0.95rem;
+  }
+
+  .task-info p {
+    font-size: 0.75rem;
+  }
+
+  .task-description {
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .task-category {
+    display: none;
+  }
+
+  .xp-reward,
+  .shard-reward {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+  }
+
+  .task-actions {
+    gap: 3px;
+  }
+
+  .task-action-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 0.8rem;
   }
 }
 
@@ -2164,25 +2368,49 @@
   .tasks-header {
     flex-direction: column;
     gap: 20px;
-    text-align: center;
+    align-items: stretch;
     padding: 20px 16px;
   }
   
   .tasks-header h2 {
     font-size: 1.5rem;
+    text-align: left;
   }
   
   .tasks-header p {
     font-size: 0.9rem;
+    text-align: left;
   }
   
   .tasks-header-content {
     width: 100%;
   }
   
+  .tasks-header-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .daily-activity-btn-header {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 20px;
+  }
+  
+  .daily-activity-btn-header .btn-icon {
+    font-size: 20px;
+  }
+  
+  .daily-activity-btn-header .btn-text {
+    font-size: 0.9rem;
+  }
+  
   .add-task-btn {
     width: 100%;
     min-width: auto;
+    padding: 14px 24px;
+    font-size: 0.9rem;
   }
   
   .task-section,
@@ -2193,6 +2421,7 @@
   .task-section h3,
   .challenge-section h3 {
     font-size: 1.2rem;
+    margin-bottom: 16px;
   }
   
   .task-item,
@@ -2209,20 +2438,61 @@
     gap: 16px;
   }
   
+  .task-icon,
+  .challenge-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+  }
+  
   .task-content {
     width: 100%;
     flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
+  }
+  
+  .task-info,
+  .challenge-info {
+    width: 100%;
   }
   
   .task-description {
     font-size: 1.05rem;
+    line-height: 1.5;
+  }
+  
+  .task-category {
+    font-size: 0.8rem;
+  }
+  
+  .task-rewards,
+  .challenge-rewards {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  
+  .xp-reward,
+  .shard-reward {
+    font-size: 0.85rem;
+    padding: 5px 10px;
   }
   
   .task-actions {
     width: 100%;
     justify-content: flex-end;
     margin-left: 0;
+    flex-wrap: wrap;
+  }
+  
+  .task-action-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
   }
   
   .daily-activity-section {
@@ -2239,6 +2509,19 @@
   .btn-content {
     align-items: center;
     text-align: center;
+  }
+  
+  .no-tasks-content {
+    padding: 30px 20px;
+    margin: 0 16px;
+  }
+  
+  .no-tasks-content h3 {
+    font-size: 1.3rem;
+  }
+  
+  .no-tasks-content p {
+    font-size: 0.95rem;
   }
 }
 
@@ -2318,17 +2601,24 @@
 /* Extra small mobile devices */
 @media (max-width: 480px) {
   .dashboard-logo h1 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
   
   .dashboard-logo .subtitle {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
   }
   
   .nav-tab {
-    flex: 1 1 100%;
-    padding: 12px 10px;
-    font-size: 0.8rem;
+    flex: 1;
+    padding: 7px 6px;
+    font-size: 0.65rem;
+    min-width: 60px;
+    gap: 1px;
+  }
+  
+  .tab-icon {
+    font-size: 1.2rem;
   }
   
   .tasks-header h2,
@@ -2337,11 +2627,79 @@
     font-size: 1.4rem;
   }
   
+  .tasks-header {
+    padding: 16px 12px;
+    gap: 16px;
+  }
+  
+  .tasks-header p {
+    font-size: 0.85rem;
+  }
+  
+  .daily-activity-btn-header,
+  .add-task-btn {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .daily-activity-btn-header .btn-icon {
+    font-size: 18px;
+  }
+  
+  .task-section,
+  .challenge-section {
+    padding: 16px 12px;
+  }
+  
+  .task-section h3,
+  .challenge-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 14px;
+  }
+  
+  .task-item,
+  .challenge-item {
+    padding: 14px 12px;
+  }
+  
+  .task-item.enhanced,
+  .challenge-item.enhanced {
+    padding: 18px 12px;
+    gap: 14px;
+  }
+  
   .task-icon,
   .challenge-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 2rem;
+    width: 45px;
+    height: 45px;
+    font-size: 1.8rem;
+  }
+  
+  .task-description {
+    font-size: 1rem;
+  }
+  
+  .task-category {
+    font-size: 0.75rem;
+    padding: 3px 6px;
+  }
+  
+  .task-rewards,
+  .challenge-rewards {
+    gap: 6px;
+    margin-top: 2px;
+  }
+  
+  .xp-reward,
+  .shard-reward {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+  
+  .task-action-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
   }
   
   .stat-card {
@@ -2395,5 +2753,449 @@
   
   .modal-header h3 {
     font-size: 1.2rem;
+  }
+}
+
+/* ========================================
+   MOBILE-FIRST ANDROID-LIKE ENHANCEMENTS
+   ======================================== */
+
+/* Enhanced Touch Targets for Mobile */
+@media (max-width: 768px) {
+  /* Ensure all interactive elements have minimum 44x44px touch target */
+  button,
+  .nav-tab,
+  .task-item,
+  .shop-item,
+  .stat-card,
+  .legend-row,
+  .unclaimed-rewards-button,
+  .logout-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improve header spacing on mobile */
+  .dashboard-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 12px 16px;
+  }
+
+  /* Better tab navigation for mobile */
+  .dashboard-navigation {
+    position: sticky;
+    top: 0;
+    z-index: 99;
+    padding: 0 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .nav-tabs {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 2px;
+  }
+
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Make tabs more compact and touch-friendly on mobile */
+  .nav-tab {
+    padding: 8px 10px;
+    font-size: 0.7rem;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 65px;
+    min-height: 52px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .tab-icon {
+    font-size: 1.25rem;
+  }
+
+  /* Ultra-compact for very small screens */
+  @media (max-width: 400px) {
+    .dashboard-navigation {
+      padding: 0 2px;
+    }
+    
+    .nav-tab {
+      padding: 6px 6px;
+      min-width: 58px;
+      min-height: 48px;
+    }
+    
+    .tab-icon {
+      font-size: 1.3rem;
+    }
+    
+    .nav-tab span:not(.tab-icon) {
+      font-size: 0.6rem;
+      letter-spacing: 0;
+    }
+  }
+
+  /* Optimize content padding for mobile */
+  .dashboard-content {
+    padding: 16px;
+  }
+
+  .tab-content {
+    padding: 0;
+  }
+
+  /* Better modal experience on mobile */
+  .modal-overlay {
+    padding: 0;
+  }
+
+  .modal-content {
+    margin: 0;
+    border-radius: 20px 20px 0 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 90vh;
+    width: 100%;
+  }
+
+  /* Improve form inputs for mobile */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+    padding: 14px 16px;
+  }
+
+  /* Better card spacing on mobile */
+  .profile-card,
+  .experience-card,
+  .tasks-section,
+  .shop-section {
+    margin-bottom: 16px;
+    border-radius: 16px;
+  }
+
+  /* Optimize ring chart for mobile */
+  .ring-chart-container {
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+  }
+}
+
+/* Extra small devices optimization */
+@media (max-width: 480px) {
+  /* Compact header for very small screens */
+  .dashboard-header {
+    padding: 8px 12px;
+  }
+
+  .dashboard-logo h1 {
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+  }
+
+  .dashboard-logo .subtitle {
+    font-size: 0.55rem;
+    letter-spacing: 0.5px;
+  }
+
+  /* Single column layout for all cards */
+  .stats-grid,
+  .profile-details,
+  .stats-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Compact navigation tabs */
+  .nav-tab {
+    font-size: 0.6rem;
+    padding: 6px 4px;
+    gap: 1px;
+    min-width: 55px;
+  }
+
+  .tab-icon {
+    font-size: 1.15rem;
+  }
+
+  /* Optimize content spacing */
+  .dashboard-content {
+    padding: 12px;
+  }
+
+  /* Better task/challenge items */
+  .task-item,
+  .challenge-item {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .task-item.enhanced,
+  .challenge-item.enhanced {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .task-icon,
+  .challenge-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 1.4rem;
+  }
+
+  .task-content {
+    gap: 6px;
+  }
+
+  .task-info h4 {
+    font-size: 0.9rem;
+  }
+
+  .task-info p {
+    font-size: 0.7rem;
+  }
+
+  .task-description {
+    font-size: 0.9rem;
+    line-height: 1.2;
+  }
+
+  .task-category {
+    display: none;
+  }
+
+  .xp-reward,
+  .shard-reward {
+    font-size: 0.65rem;
+    padding: 2px 4px;
+  }
+
+  .task-actions {
+    gap: 2px;
+  }
+
+  .task-action-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+
+  /* Extra compact shop/inventory items for very small screens */
+  .shop-item {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .item-image {
+    font-size: 1.75rem;
+    width: 45px;
+    height: 45px;
+  }
+
+  .item-info h4 {
+    font-size: 0.95rem;
+    margin: 0 0 2px 0;
+  }
+
+  .item-info p {
+    font-size: 0.75rem;
+    margin: 0 0 3px 0;
+    line-height: 1.2;
+  }
+
+  .item-price {
+    font-size: 0.85rem;
+  }
+
+  .shop-items {
+    gap: 8px;
+  }
+
+  .buy-button {
+    padding: 5px 8px;
+    font-size: 0.7rem;
+  }
+
+  .delete-button {
+    padding: 5px 8px;
+    font-size: 0.9rem;
+  }
+
+  .shop-item-actions .buy-button,
+  .shop-item-actions .delete-button {
+    min-width: auto;
+    padding: 5px 6px;
+  }
+
+  .shop-item-actions .buy-button {
+    font-size: 0.65rem;
+  }
+
+  .shop-item-actions .delete-button {
+    font-size: 0.85rem;
+  }
+
+  .item-badge {
+    padding: 3px 6px;
+    font-size: 0.65rem;
+  }
+
+  /* Better button sizing */
+  .modal-btn-primary,
+  .modal-btn-secondary {
+    padding: 14px 20px;
+    font-size: 1rem;
+  }
+}
+
+/* Landscape orientation optimization for mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .dashboard-header {
+    padding: 8px 16px;
+  }
+
+  .dashboard-logo h1 {
+    font-size: 1.4rem;
+  }
+
+  .welcome-section h2 {
+    font-size: 1.6rem;
+  }
+
+  .modal-content {
+    max-height: 85vh;
+  }
+  
+  /* Optimize tasks section for landscape */
+  .tasks-header {
+    padding: 16px 20px;
+    gap: 16px;
+  }
+  
+  .tasks-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .tasks-header-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .daily-activity-btn-header,
+  .add-task-btn {
+    flex: 1;
+    min-width: 45%;
+  }
+  
+  .task-section,
+  .challenge-section {
+    padding: 16px 20px;
+  }
+  
+  .task-item,
+  .challenge-item {
+    padding: 12px;
+    gap: 10px;
+  }
+  
+  .task-item.enhanced,
+  .challenge-item.enhanced {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .task-icon,
+  .challenge-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 1.6rem;
+  }
+
+  .task-content {
+    gap: 8px;
+  }
+
+  .task-description {
+    font-size: 0.95rem;
+  }
+
+  .task-info h4 {
+    font-size: 0.95rem;
+  }
+
+  .task-info p {
+    font-size: 0.75rem;
+  }
+
+  .task-category {
+    display: none;
+  }
+
+  .xp-reward,
+  .shard-reward {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+  }
+
+  .task-action-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .stat-card:hover,
+  .task-item:hover,
+  .shop-item:hover,
+  .legend-row:hover {
+    transform: none;
+  }
+
+  /* Add active state instead for touch feedback */
+  .stat-card:active,
+  .task-item:active,
+  .shop-item:active,
+  button:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  /* Improve button touch feedback */
+  .nav-tab:active {
+    opacity: 0.8;
+  }
+}
+
+/* High contrast mode for accessibility */
+@media (prefers-contrast: high) {
+  .dashboard-header,
+  .nav-tabs,
+  .stat-card,
+  .profile-card {
+    border-width: 2px;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

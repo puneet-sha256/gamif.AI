@@ -497,3 +497,49 @@
     font-size: 1.05rem;
   }
 }
+
+/* Mobile enhancements for Goals Setup */
+@media (max-width: 768px) {
+  .goals-setup-container {
+    padding: 20px 16px;
+  }
+
+  .goals-box {
+    padding: 30px 20px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Prevent zoom on textarea focus */
+  .textarea-field {
+    font-size: 16px;
+    padding: 14px 16px;
+    min-height: 200px;
+  }
+
+  /* Better button sizing */
+  .nav-button,
+  .submit-button {
+    min-height: 48px;
+    padding: 14px 24px;
+  }
+
+  /* Improve info cards */
+  .goals-info {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .goals-box {
+    padding: 24px 16px;
+  }
+
+  .progress-indicator {
+    font-size: 0.85rem;
+  }
+
+  .textarea-field {
+    min-height: 180px;
+  }
+}

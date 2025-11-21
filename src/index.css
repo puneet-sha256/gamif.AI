@@ -4,6 +4,8 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  /* Disable tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -12,10 +14,20 @@ body {
   color: white;
   overflow-x: hidden;
   line-height: 1.6;
+  /* Improve font rendering on mobile */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent text size adjustment on orientation change */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html, body, #root {
   height: 100%;
+  /* Support for safe area insets (notch support) */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 ::-webkit-scrollbar {
