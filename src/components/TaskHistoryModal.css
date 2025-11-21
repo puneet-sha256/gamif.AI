@@ -13,15 +13,16 @@
 }
 
 .task-history-modal-content {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
   border-radius: 1rem;
   max-width: 800px;
   width: 100%;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .task-history-modal-header {
@@ -29,26 +30,26 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .task-history-modal-title h3 {
-  color: #fff;
+  color: #1e293b;
   font-size: 1.5rem;
   margin: 0 0 0.5rem 0;
   font-weight: 600;
 }
 
 .task-history-date {
-  color: rgba(255, 255, 255, 0.7);
+  color: #64748b;
   font-size: 0.95rem;
   margin: 0;
 }
 
 .task-history-modal-close {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(59, 130, 246, 0.1);
   border: none;
-  color: #fff;
+  color: #3b82f6;
   font-size: 1.5rem;
   width: 2.5rem;
   height: 2.5rem;
@@ -61,7 +62,8 @@
 }
 
 .task-history-modal-close:hover {
-  background: rgba(255, 59, 48, 0.8);
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
   transform: scale(1.05);
 }
 
@@ -77,7 +79,7 @@
   gap: 1rem;
   margin-bottom: 2rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(59, 130, 246, 0.05);
   border-radius: 0.75rem;
 }
 
@@ -88,13 +90,13 @@
 }
 
 .summary-label {
-  color: rgba(255, 255, 255, 0.6);
+  color: #64748b;
   font-size: 0.875rem;
   font-weight: 500;
 }
 
 .summary-value {
-  color: #fff;
+  color: #1e293b;
   font-size: 1.5rem;
   font-weight: 700;
 }
@@ -114,23 +116,25 @@
 }
 
 .task-history-list-title {
-  color: #fff;
+  color: #1e293b;
   font-size: 1.25rem;
   margin: 0 0 1rem 0;
   font-weight: 600;
 }
 
 .task-history-item {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.8);
   border-radius: 0.75rem;
   padding: 1.25rem;
   border-left: 4px solid;
   transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .task-history-item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 1);
   transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .task-history-item.strength {
@@ -161,13 +165,13 @@
 }
 
 .task-category-badge {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(59, 130, 246, 0.1);
+  color: #1e293b;
 }
 
 .task-match-badge {
-  background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
 }
 
 .task-history-item-body {
@@ -177,7 +181,7 @@
 }
 
 .task-activity-name {
-  color: #fff;
+  color: #1e293b;
   font-size: 1.125rem;
   margin: 0;
   font-weight: 600;
@@ -186,19 +190,19 @@
 .task-matched-info,
 .task-goal-info,
 .task-notes {
-  color: rgba(255, 255, 255, 0.8);
+  color: #64748b;
   font-size: 0.9rem;
   margin: 0;
   line-height: 1.5;
 }
 
 .info-label {
-  color: rgba(255, 255, 255, 0.6);
+  color: #475569;
   font-weight: 600;
 }
 
 .task-notes {
-  color: rgba(255, 255, 255, 0.7);
+  color: #64748b;
   font-style: italic;
 }
 
@@ -216,7 +220,7 @@
 }
 
 .reward-label {
-  color: rgba(255, 255, 255, 0.6);
+  color: #64748b;
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -240,28 +244,29 @@
 }
 
 .no-tasks-message p:first-child {
-  color: #fff;
+  color: #1e293b;
   font-size: 1.25rem;
   margin: 0 0 0.5rem 0;
+  line-height: 1.6;
 }
 
 .no-tasks-hint {
-  color: rgba(255, 255, 255, 0.6);
+  color: #64748b;
   font-size: 0.95rem;
   margin: 0;
 }
 
 .task-history-modal-footer {
   padding: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
   display: flex;
   justify-content: flex-end;
 }
 
 .task-history-close-btn {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(59, 130, 246, 0.1);
   border: none;
-  color: #fff;
+  color: #3b82f6;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   font-size: 1rem;
@@ -271,7 +276,8 @@
 }
 
 .task-history-close-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: #3b82f6;
+  color: #fff;
   transform: translateY(-2px);
 }
 

@@ -101,7 +101,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
         <div className="task-history-modal-body">
           {!hasTasks ? (
             <div className="no-tasks-message">
-              <p>🌟 No activities logged for this date</p>
+              <p>🌟 No activities logged<br />for this date</p>
               <p className="no-tasks-hint">Start logging your daily activities to see them here!</p>
             </div>
           ) : (
