@@ -215,7 +215,9 @@ export async function updateExperience(req: Request, res: Response) {
         strengthChange,
         intelligenceChange,
         charismaChange,
-        totalExperienceChange: strengthChange + intelligenceChange + charismaChange,
+        totalExperienceChange: strengthChange + intelligenceChange + charismaChange
+      },
+      {
         leveledUp,
         oldLevel,
         newLevel
