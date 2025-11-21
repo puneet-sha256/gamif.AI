@@ -359,7 +359,7 @@ async function addUserTask(req, res) {
 // Add a shop item
 async function addUserShopItem(req, res) {
     try {
-        const { sessionId, title, description, price, image, isConsumable, isKeyItem } = req.body;
+        const { sessionId, title, description, price, image, isConsumable, isKeyItem, allowMultiplePurchases } = req.body;
         // Validate required fields
         if (!sessionId || !title || price === undefined) {
             return res.status(400).json((0, responseHelpers_1.createErrorResponse)('Missing required fields: sessionId, title, and price are required'));
@@ -385,7 +385,8 @@ async function addUserShopItem(req, res) {
             price,
             image,
             isConsumable,
-            isKeyItem
+            isKeyItem,
+            allowMultiplePurchases
         });
         if (!success) {
             return res.status(500).json((0, responseHelpers_1.createErrorResponse)('Failed to add shop item'));

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import EmojiPicker from 'emoji-picker-react'
 import './TaskModal.css' // Reuse the same styles
 
 interface ShopItemModalProps {
@@ -28,6 +29,9 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
   const [allowMultiplePurchases, setAllowMultiplePurchases] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [suggestedEmojis, setSuggestedEmojis] = useState<string[]>([])
+  const emojiPickerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (isOpen) {
@@ -38,8 +42,107 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
       setItemType('consumable')
       setAllowMultiplePurchases(false)
       setError('')
+      setShowEmojiPicker(false)
+      setSuggestedEmojis([])
     }
   }, [isOpen])
+
+  // Generate context-aware emoji suggestions based on item name
+  useEffect(() => {
+    if (!title.trim()) {
+      setSuggestedEmojis([])
+      return
+    }
+
+    const titleLower = title.toLowerCase()
+    const suggestions: string[] = []
+
+    // Define emoji mappings based on common keywords
+    const emojiMap: Record<string, string[]> = {
+      'movie': ['🎬', '🎥', '🍿', '🎞️', '📽️'],
+      'food': ['🍕', '🍔', '🍰', '🍱', '🍜'],
+      'pizza': ['🍕', '🧀', '🍅', '🌶️'],
+      'burger': ['🍔', '🍟', '🥤'],
+      'coffee': ['☕', '🍵', '🥤'],
+      'tea': ['🍵', '☕', '🫖'],
+      'game': ['🎮', '🕹️', '🎯', '🎲', '🃏'],
+      'book': ['📚', '📖', '📕', '📗', '📘'],
+      'music': ['🎵', '🎶', '🎸', '🎹', '🎤'],
+      'sport': ['⚽', '🏀', '🎾', '🏈', '⚾'],
+      'gym': ['💪', '🏋️', '🤸', '🏃'],
+      'workout': ['💪', '🏋️', '🤸', '🏃'],
+      'travel': ['✈️', '🌍', '🗺️', '🧳', '🏖️'],
+      'vacation': ['🏖️', '🌴', '🌊', '🏝️'],
+      'spa': ['💆', '🧖', '💅', '🛁', '🌸'],
+      'massage': ['💆', '🙌', '✨'],
+      'gift': ['🎁', '🎀', '💝', '🎉'],
+      'car': ['🚗', '🚙', '🏎️', '🚕'],
+      'bike': ['🚲', '🏍️'],
+      'phone': ['📱', '📞', '☎️'],
+      'computer': ['💻', '🖥️', '⌨️', '🖱️'],
+      'laptop': ['💻', '🖥️'],
+      'watch': ['⌚', '⏰', '⏱️'],
+      'clothes': ['👕', '👔', '👗', '👠', '👟'],
+      'shirt': ['👕', '👔', '🎽'],
+      'shoes': ['👟', '👠', '👞', '🥿'],
+      'hat': ['👒', '🎩', '🧢', '👑'],
+      'jewelry': ['💍', '💎', '📿', '⌚'],
+      'ring': ['💍', '💎'],
+      'home': ['🏠', '🏡', '🏘️', '🏰'],
+      'house': ['🏠', '🏡', '🏘️'],
+      'garden': ['🌻', '🌷', '🌹', '🌺', '🪴'],
+      'plant': ['🌱', '🌿', '🪴', '🌵'],
+      'pet': ['🐶', '🐱', '🐹', '🐰', '🐠'],
+      'dog': ['🐶', '🐕', '🦮', '🐩'],
+      'cat': ['🐱', '🐈', '🐾'],
+      'party': ['🎉', '🎊', '🥳', '🎈', '🎂'],
+      'celebration': ['🎉', '🎊', '🥳', '🍾'],
+      'birthday': ['🎂', '🎁', '🎈', '🎉'],
+      'night': ['🌙', '⭐', '✨', '🌃', '🌌'],
+      'day': ['☀️', '🌞', '⛅', '🌤️'],
+      'gadget': ['📱', '💻', '🎧', '📷', '🖥️'],
+      'camera': ['📷', '📸', '🎥', '📹'],
+      'headphone': ['🎧', '🎵', '🔊'],
+      'ticket': ['🎫', '🎟️', '🎪'],
+      'tool': ['🔧', '🔨', '⚒️', '🛠️'],
+      'art': ['🎨', '🖌️', '🖍️', '✏️'],
+      'paint': ['🎨', '🖌️', '🖍️'],
+    }
+
+    // Search for matching keywords in the title
+    for (const [keyword, emojis] of Object.entries(emojiMap)) {
+      if (titleLower.includes(keyword)) {
+        suggestions.push(...emojis)
+      }
+    }
+
+    // Remove duplicates and limit to 8 suggestions
+    const uniqueSuggestions = [...new Set(suggestions)].slice(0, 8)
+    
+    // If we have suggestions, use them; otherwise provide generic ones
+    if (uniqueSuggestions.length > 0) {
+      setSuggestedEmojis(uniqueSuggestions)
+    } else {
+      // Generic suggestions if no specific match
+      setSuggestedEmojis(['🎁', '✨', '⭐', '💎', '🎯', '🏆', '🎪', '🎨'])
+    }
+  }, [title])
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false)
+      }
+    }
+
+    if (showEmojiPicker) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }
+  }, [showEmojiPicker])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -88,7 +191,18 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
     setItemType('consumable')
     setAllowMultiplePurchases(false)
     setError('')
+    setShowEmojiPicker(false)
+    setSuggestedEmojis([])
     onClose()
+  }
+
+  const handleEmojiClick = (emojiData: any) => {
+    setImage(emojiData.emoji)
+    setShowEmojiPicker(false)
+  }
+
+  const handleSuggestedEmojiClick = (emoji: string) => {
+    setImage(emoji)
   }
 
   if (!isOpen) return null
@@ -151,16 +265,65 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
 
           <div className="form-group">
             <label htmlFor="item-image">Emoji/Icon (Optional)</label>
-            <input
-              id="item-image"
-              type="text"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              className="form-input"
-              placeholder="🎁"
-              maxLength={5}
-              disabled={isSaving}
-            />
+            
+            {/* Suggested emojis based on item name */}
+            {suggestedEmojis.length > 0 && (
+              <div className="emoji-suggestions">
+                <small className="form-hint" style={{ marginBottom: '8px', display: 'block' }}>
+                  Suggested for "{title}":
+                </small>
+                <div className="emoji-suggestions-grid">
+                  {suggestedEmojis.map((emoji, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      className={`emoji-suggestion-btn ${image === emoji ? 'selected' : ''}`}
+                      onClick={() => handleSuggestedEmojiClick(emoji)}
+                      disabled={isSaving}
+                      title={`Use ${emoji}`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="emoji-input-container">
+              <input
+                id="item-image"
+                type="text"
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+                className="form-input"
+                placeholder="🎁"
+                maxLength={5}
+                disabled={isSaving}
+              />
+              <button
+                type="button"
+                className="emoji-picker-btn"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                disabled={isSaving}
+                title="Choose emoji"
+              >
+                😀
+              </button>
+            </div>
+            
+            {/* Emoji Picker */}
+            {showEmojiPicker && (
+              <div className="emoji-picker-wrapper" ref={emojiPickerRef}>
+                <EmojiPicker
+                  onEmojiClick={handleEmojiClick}
+                  autoFocusSearch={false}
+                  searchPlaceHolder="Search emojis..."
+                  width="100%"
+                  height={350}
+                />
+              </div>
+            )}
+            
             <small className="form-hint">Use an emoji to represent this item</small>
           </div>
 

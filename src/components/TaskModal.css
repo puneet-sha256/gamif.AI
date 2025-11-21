@@ -411,3 +411,120 @@
     margin-bottom: 20px;
   }
 }
+
+/* Emoji Picker Styles */
+.emoji-suggestions {
+  margin-bottom: 16px;
+}
+
+.emoji-suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+  padding: 12px;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 12px;
+  border: 2px solid rgba(59, 130, 246, 0.15);
+}
+
+.emoji-suggestion-btn {
+  width: 50px;
+  height: 50px;
+  font-size: 1.8rem;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.emoji-suggestion-btn:hover:not(:disabled) {
+  transform: scale(1.1);
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.emoji-suggestion-btn.selected {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  border-color: #3b82f6;
+  transform: scale(1.05);
+}
+
+.emoji-suggestion-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.emoji-input-container {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.emoji-input-container .form-input {
+  flex: 1;
+}
+
+.emoji-picker-btn {
+  width: 50px;
+  height: auto;
+  font-size: 1.5rem;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.emoji-picker-btn:hover:not(:disabled) {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+  transform: scale(1.05);
+}
+
+.emoji-picker-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.emoji-picker-wrapper {
+  margin-top: 12px;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Override emoji-picker-react styles to match our theme */
+.emoji-picker-wrapper aside {
+  border: none !important;
+}
+
+@media (max-width: 600px) {
+  .emoji-suggestions-grid {
+    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .emoji-suggestion-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.5rem;
+  }
+
+  .emoji-picker-btn {
+    width: 45px;
+    font-size: 1.3rem;
+  }
+}
+
