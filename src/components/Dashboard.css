@@ -587,45 +587,50 @@
 
 @media (max-width: 768px) {
   .dashboard-header {
-    padding: 15px 20px;
+    padding: 10px 16px;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
   }
   
   .dashboard-logo h1 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+    letter-spacing: 1.5px;
   }
   
   .dashboard-logo .subtitle {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.8px;
   }
   
   .user-info {
-    flex-direction: column;
-    gap: 12px;
+    flex-direction: row;
+    gap: 10px;
     width: 100%;
+    justify-content: space-between;
+    align-items: center;
   }
   
   .welcome-text {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    flex: 1;
   }
   
   .unclaimed-rewards-button {
-    padding: 8px 16px;
-    width: 100%;
-    justify-content: center;
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
   
   .logout-button {
-    width: 100%;
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
   
   .dashboard-content {
-    padding: 20px;
+    padding: 16px;
   }
   
   .welcome-section h2 {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
   
   .stats-grid {
@@ -712,6 +717,13 @@
   border-radius: 8px;
   text-transform: none;
   letter-spacing: 0;
+}
+
+/* Mobile optimization: reduce active tab border */
+@media (max-width: 768px) {
+  .nav-tab.active {
+    border-bottom-width: 2px;
+  }
 }
 
 /* Tab Content Styles */
@@ -1708,29 +1720,40 @@
 /* Responsive Design for Tabs */
 @media (max-width: 768px) {
   .dashboard-navigation {
-    padding: 0 10px;
+    padding: 0 4px;
   }
   
   .nav-tabs {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 2px;
+  }
+  
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
   }
   
   .nav-tab {
-    flex: 1 1 45%;
-    min-width: 120px;
-    padding: 12px 8px;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
+    flex: 1;
+    min-width: 65px;
+    padding: 8px 6px;
+    font-size: 0.7rem;
+    letter-spacing: 0.3px;
+    flex-direction: column;
+    gap: 2px;
+    border-radius: 8px 8px 0 0;
   }
   
   .tab-icon {
-    font-size: 1rem;
+    font-size: 1.25rem;
   }
   
   .coming-soon {
-    font-size: 0.65rem;
-    padding: 1px 4px;
+    font-size: 0.55rem;
+    padding: 1px 3px;
   }
   
   .tasks-grid,
@@ -2318,17 +2341,24 @@
 /* Extra small mobile devices */
 @media (max-width: 480px) {
   .dashboard-logo h1 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
   
   .dashboard-logo .subtitle {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
   }
   
   .nav-tab {
-    flex: 1 1 100%;
-    padding: 12px 10px;
-    font-size: 0.8rem;
+    flex: 1;
+    padding: 7px 6px;
+    font-size: 0.65rem;
+    min-width: 60px;
+    gap: 1px;
+  }
+  
+  .tab-icon {
+    font-size: 1.2rem;
   }
   
   .tasks-header h2,
@@ -2430,7 +2460,8 @@
     position: sticky;
     top: 0;
     z-index: 99;
-    padding: 0 16px;
+    padding: 0 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
   .nav-tabs {
@@ -2438,6 +2469,7 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    gap: 2px;
   }
 
   .nav-tabs::-webkit-scrollbar {
@@ -2446,26 +2478,38 @@
 
   /* Make tabs more compact and touch-friendly on mobile */
   .nav-tab {
-    padding: 14px 16px;
-    font-size: 0.85rem;
+    padding: 8px 10px;
+    font-size: 0.7rem;
     flex-direction: column;
-    gap: 4px;
-    min-width: 80px;
+    gap: 2px;
+    min-width: 65px;
+    min-height: 52px;
+    border-radius: 8px 8px 0 0;
   }
 
   .tab-icon {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 
-  /* Hide tab text labels on very small screens, keep icons only */
+  /* Ultra-compact for very small screens */
   @media (max-width: 400px) {
+    .dashboard-navigation {
+      padding: 0 2px;
+    }
+    
     .nav-tab {
-      padding: 12px 10px;
-      min-width: 70px;
+      padding: 6px 6px;
+      min-width: 58px;
+      min-height: 48px;
+    }
+    
+    .tab-icon {
+      font-size: 1.3rem;
     }
     
     .nav-tab span:not(.tab-icon) {
-      font-size: 0.75rem;
+      font-size: 0.6rem;
+      letter-spacing: 0;
     }
   }
 
@@ -2523,15 +2567,17 @@
 @media (max-width: 480px) {
   /* Compact header for very small screens */
   .dashboard-header {
-    padding: 10px 12px;
+    padding: 8px 12px;
   }
 
   .dashboard-logo h1 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
   }
 
   .dashboard-logo .subtitle {
-    font-size: 0.6rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.5px;
   }
 
   /* Single column layout for all cards */
@@ -2544,12 +2590,14 @@
 
   /* Compact navigation tabs */
   .nav-tab {
-    font-size: 0.75rem;
-    padding: 10px 8px;
+    font-size: 0.6rem;
+    padding: 6px 4px;
+    gap: 1px;
+    min-width: 55px;
   }
 
-  .nav-tab-icon {
-    font-size: 1.2rem;
+  .tab-icon {
+    font-size: 1.15rem;
   }
 
   /* Optimize content spacing */
