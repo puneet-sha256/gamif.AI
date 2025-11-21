@@ -2202,25 +2202,49 @@
   .tasks-header {
     flex-direction: column;
     gap: 20px;
-    text-align: center;
+    align-items: stretch;
     padding: 20px 16px;
   }
   
   .tasks-header h2 {
     font-size: 1.5rem;
+    text-align: left;
   }
   
   .tasks-header p {
     font-size: 0.9rem;
+    text-align: left;
   }
   
   .tasks-header-content {
     width: 100%;
   }
   
+  .tasks-header-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .daily-activity-btn-header {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 20px;
+  }
+  
+  .daily-activity-btn-header .btn-icon {
+    font-size: 20px;
+  }
+  
+  .daily-activity-btn-header .btn-text {
+    font-size: 0.9rem;
+  }
+  
   .add-task-btn {
     width: 100%;
     min-width: auto;
+    padding: 14px 24px;
+    font-size: 0.9rem;
   }
   
   .task-section,
@@ -2231,6 +2255,7 @@
   .task-section h3,
   .challenge-section h3 {
     font-size: 1.2rem;
+    margin-bottom: 16px;
   }
   
   .task-item,
@@ -2247,20 +2272,61 @@
     gap: 16px;
   }
   
+  .task-icon,
+  .challenge-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+  }
+  
   .task-content {
     width: 100%;
     flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
+  }
+  
+  .task-info,
+  .challenge-info {
+    width: 100%;
   }
   
   .task-description {
     font-size: 1.05rem;
+    line-height: 1.5;
+  }
+  
+  .task-category {
+    font-size: 0.8rem;
+  }
+  
+  .task-rewards,
+  .challenge-rewards {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  
+  .xp-reward,
+  .shard-reward {
+    font-size: 0.85rem;
+    padding: 5px 10px;
   }
   
   .task-actions {
     width: 100%;
     justify-content: flex-end;
     margin-left: 0;
+    flex-wrap: wrap;
+  }
+  
+  .task-action-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
   }
   
   .daily-activity-section {
@@ -2277,6 +2343,19 @@
   .btn-content {
     align-items: center;
     text-align: center;
+  }
+  
+  .no-tasks-content {
+    padding: 30px 20px;
+    margin: 0 16px;
+  }
+  
+  .no-tasks-content h3 {
+    font-size: 1.3rem;
+  }
+  
+  .no-tasks-content p {
+    font-size: 0.95rem;
   }
 }
 
@@ -2382,11 +2461,79 @@
     font-size: 1.4rem;
   }
   
+  .tasks-header {
+    padding: 16px 12px;
+    gap: 16px;
+  }
+  
+  .tasks-header p {
+    font-size: 0.85rem;
+  }
+  
+  .daily-activity-btn-header,
+  .add-task-btn {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .daily-activity-btn-header .btn-icon {
+    font-size: 18px;
+  }
+  
+  .task-section,
+  .challenge-section {
+    padding: 16px 12px;
+  }
+  
+  .task-section h3,
+  .challenge-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 14px;
+  }
+  
+  .task-item,
+  .challenge-item {
+    padding: 14px 12px;
+  }
+  
+  .task-item.enhanced,
+  .challenge-item.enhanced {
+    padding: 18px 12px;
+    gap: 14px;
+  }
+  
   .task-icon,
   .challenge-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 2rem;
+    width: 45px;
+    height: 45px;
+    font-size: 1.8rem;
+  }
+  
+  .task-description {
+    font-size: 1rem;
+  }
+  
+  .task-category {
+    font-size: 0.75rem;
+    padding: 3px 6px;
+  }
+  
+  .task-rewards,
+  .challenge-rewards {
+    gap: 6px;
+    margin-top: 2px;
+  }
+  
+  .xp-reward,
+  .shard-reward {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+  
+  .task-action-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
   }
   
   .stat-card {
@@ -2655,6 +2802,42 @@
 
   .modal-content {
     max-height: 85vh;
+  }
+  
+  /* Optimize tasks section for landscape */
+  .tasks-header {
+    padding: 16px 20px;
+    gap: 16px;
+  }
+  
+  .tasks-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .tasks-header-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .daily-activity-btn-header,
+  .add-task-btn {
+    flex: 1;
+    min-width: 45%;
+  }
+  
+  .task-section,
+  .challenge-section {
+    padding: 16px 20px;
+  }
+  
+  .task-item,
+  .challenge-item {
+    padding: 12px 16px;
+  }
+  
+  .task-item.enhanced,
+  .challenge-item.enhanced {
+    padding: 16px 20px;
   }
 }
 
