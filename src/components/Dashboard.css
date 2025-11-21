@@ -1603,20 +1603,21 @@
 }
 
 .shop-items {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .shop-item {
   background: rgba(248, 250, 252, 0.8);
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   border: 1px solid rgba(59, 130, 246, 0.15);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  text-align: center;
+  gap: 12px;
+  text-align: left;
   transition: all 0.3s ease;
 }
 
@@ -1628,45 +1629,57 @@
 }
 
 .item-image {
-  font-size: 3rem;
-  margin-bottom: 15px;
+  font-size: 2.5rem;
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .item-info h4 {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1.2rem;
-  margin: 0 0 10px 0;
+  font-size: 1.1rem;
+  margin: 0 0 4px 0;
   color: #1e293b;
   font-weight: 700;
 }
 
 .item-info p {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #64748b;
-  margin: 0 0 15px 0;
-  line-height: 1.4;
+  margin: 0 0 6px 0;
+  line-height: 1.3;
 }
 
 .item-price {
   font-family: 'Orbitron', monospace;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #3b82f6;
-  margin-bottom: 15px;
+  margin: 0;
 }
 
 .buy-button {
-  padding: 10px 20px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, #3b82f6, #06b6d4);
   border: none;
   border-radius: 8px;
   color: white;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.3s ease;
   width: 100%;
 }
@@ -1684,12 +1697,14 @@
 
 .shop-item-actions {
   display: flex;
-  gap: 8px;
-  width: 100%;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  align-items: flex-end;
 }
 
 .shop-item-actions .buy-button {
-  flex: 1;
+  min-width: 80px;
 }
 
 .item-badge {
@@ -2773,9 +2788,44 @@
     padding: 14px;
   }
 
-  /* Compact shop items */
+  /* Extra compact shop/inventory items for very small screens */
   .shop-item {
-    padding: 16px 12px;
+    padding: 10px 8px;
+  }
+
+  .item-image {
+    font-size: 1.75rem;
+    margin-bottom: 6px;
+  }
+
+  .item-info h4 {
+    font-size: 0.95rem;
+    margin: 0 0 5px 0;
+  }
+
+  .item-info p {
+    font-size: 0.75rem;
+    margin: 0 0 6px 0;
+    line-height: 1.3;
+  }
+
+  .item-price {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+
+  .shop-items {
+    gap: 10px;
+  }
+
+  .buy-button {
+    padding: 7px 12px;
+    font-size: 0.8rem;
+  }
+
+  .item-badge {
+    padding: 3px 6px;
+    font-size: 0.65rem;
   }
 
   /* Better button sizing */
