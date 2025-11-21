@@ -3,6 +3,14 @@ import EmojiPicker from 'emoji-picker-react'
 import type { EmojiClickData } from 'emoji-picker-react'
 import './TaskModal.css' // Reuse the same styles
 
+// Constants for responsive emoji picker
+const MOBILE_BREAKPOINT = 480
+const EMOJI_PICKER_PADDING = 32
+const EMOJI_PICKER_WIDTH_DEFAULT = 320
+const EMOJI_PICKER_HEIGHT_MOBILE = 350
+const EMOJI_PICKER_HEIGHT_DEFAULT = 400
+const DEFAULT_WINDOW_WIDTH = 768 // Fallback for SSR
+
 interface ShopItemModalProps {
   isOpen: boolean
   onClose: () => void
@@ -31,7 +39,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 768)
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : DEFAULT_WINDOW_WIDTH)
   const emojiPickerRef = useRef<HTMLDivElement>(null)
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -245,8 +253,8 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
                   <EmojiPicker
                     onEmojiClick={handleEmojiClick}
                     searchPlaceHolder="Search emoji..."
-                    width={windowWidth < 480 ? Math.min(windowWidth - 32, 320) : 320}
-                    height={windowWidth < 480 ? 350 : 400}
+                    width={windowWidth < MOBILE_BREAKPOINT ? Math.min(windowWidth - EMOJI_PICKER_PADDING, EMOJI_PICKER_WIDTH_DEFAULT) : EMOJI_PICKER_WIDTH_DEFAULT}
+                    height={windowWidth < MOBILE_BREAKPOINT ? EMOJI_PICKER_HEIGHT_MOBILE : EMOJI_PICKER_HEIGHT_DEFAULT}
                   />
                 </div>
               )}
