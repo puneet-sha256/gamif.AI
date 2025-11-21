@@ -238,7 +238,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     itemDescription?: string,
     itemImage?: string,
     isConsumable?: boolean,
-    isKeyItem?: boolean
+    isKeyItem?: boolean,
+    allowMultiplePurchases?: boolean
   ) => {
     // Check if this is a user's wishlist item or a built-in shop item
     const isWishlistItem = user?.shopItems?.some(item => item.id === itemId)
@@ -249,7 +250,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       description: itemDescription,
       image: itemImage,
       isConsumable,
-      isKeyItem
+      isKeyItem,
+      allowMultiplePurchases
     } : undefined
     
     const success = await buyShopItem(itemId, itemPrice, itemDetails)
@@ -1110,7 +1112,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                     price={item.price}
                     userShards={user?.stats?.shards || 0}
                     isUserItem={true}
-                    onBuy={() => handleBuyShopItem(item.id, item.title, item.price)}
+                    onBuy={() => handleBuyShopItem(item.id, item.title, item.price, item.description, item.image, item.isConsumable, item.isKeyItem, item.allowMultiplePurchases)}
                     onDelete={() => handleDeleteShopItem(item.id)}
                   />
                 ))}
