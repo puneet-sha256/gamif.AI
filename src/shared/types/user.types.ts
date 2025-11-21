@@ -101,6 +101,37 @@ export interface ActivityHistory {
   lastUpdated: string
 }
 
+// Task history for tracking claimed activities by date
+export interface ClaimedActivity {
+  activityName: string
+  matchType: string
+  category: 'Strength' | 'Intelligence' | 'Charisma'
+  matchedTask?: string
+  goalLink?: string
+  effortRatio: number
+  xpEarned: number
+  shardsEarned: number
+  calculationNotes: string
+  claimedAt: string // When the reward was claimed
+}
+
+export interface DailyTaskHistory {
+  date: string // ISO date string (YYYY-MM-DD)
+  activities: ClaimedActivity[]
+  totalXP: number
+  totalShards: number
+  categoryBreakdown: {
+    Strength: { xp: number; shards: number }
+    Intelligence: { xp: number; shards: number }
+    Charisma: { xp: number; shards: number }
+  }
+}
+
+export interface TaskHistory {
+  dailyHistory: DailyTaskHistory[]
+  lastUpdated: string
+}
+
 export interface User {
   id: string
   username: string
@@ -116,6 +147,7 @@ export interface User {
   inventory?: InventoryItem[] // User's purchased items
   unclaimedRewards?: UnclaimedRewards // Pending rewards from daily activities
   activityHistory?: ActivityHistory // Historical daily XP data for heatmap
+  taskHistory?: TaskHistory // Detailed history of claimed activities by date
 }
 
 export interface UserRegistration {

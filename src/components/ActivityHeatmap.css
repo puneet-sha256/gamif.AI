@@ -165,10 +165,13 @@
   height: 12px;
   min-width: 8px;
   border-radius: 2px;
-  cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.3);
   flex-shrink: 0;
+}
+
+.heatmap-cell.clickable {
+  cursor: pointer;
 }
 
 .heatmap-cell.empty {
@@ -177,7 +180,7 @@
   cursor: default;
 }
 
-.heatmap-cell:not(.empty):hover {
+.heatmap-cell.clickable:hover {
   transform: scale(1.5);
   border-color: rgba(30, 41, 59, 0.3);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);

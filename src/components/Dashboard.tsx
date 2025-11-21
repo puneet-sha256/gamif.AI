@@ -12,6 +12,7 @@ import TaskModal from './TaskModal'
 import ShopItemModal from './ShopItemModal'
 import RewardClaimModal from './RewardClaimModal'
 import ActivityHeatmap from './ActivityHeatmap'
+import TaskHistoryModal from './TaskHistoryModal'
 import { 
   mapGeneratedTasksToTaskItems, 
   groupMappedTasksByCategory, 
@@ -19,7 +20,7 @@ import {
   TASK_CATEGORIES,
   type MappedTaskItem
 } from '../utils/taskMapping'
-import type { GeneratedTasks, GeneratedTask } from '../types'
+import type { GeneratedTasks, GeneratedTask, DailyTaskHistory } from '../types'
 import { userDatabase } from '../client/services/fileUserDatabase'
 import { aiService } from '../client/services/aiService'
 import { userService } from '../client/services/userService'
@@ -52,6 +53,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   // Reward claim modal state
   const [showRewardClaimModal, setShowRewardClaimModal] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
+
+  // Task history modal state
+  const [showTaskHistoryModal, setShowTaskHistoryModal] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [selectedDateHistory, setSelectedDateHistory] = useState<DailyTaskHistory | null>(null)
 
   // Window width state for responsive chart sizing
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
@@ -271,6 +277,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
   }
 
+  const handleHeatmapDateClick = (date: string) => {
+    // Find the task history for the selected date
+    const historyForDate = user?.taskHistory?.dailyHistory?.find(
+      (history) => history.date === date
+    )
+    
+    setSelectedDate(date)
+    setSelectedDateHistory(historyForDate || null)
+    setShowTaskHistoryModal(true)
+  }
+
   const getCurrency = (code: string) => {
     const currencies: { [key: string]: string } = {
       'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥', 
@@ -482,7 +499,88 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       
       if (allSuccess) {
         
-        // Step 2: Clear unclaimed rewards in backend
+        // Step 2: Save task history before clearing unclaimed rewards
+        const existingTaskHistory = user.taskHistory || {
+          dailyHistory: [],
+          lastUpdated: new Date().toISOString()
+        }
+
+        // Create new daily history entries from unclaimed rewards
+        const newHistoryEntries = Array.from(activitiesByDate.entries()).map(([date, dateRewards]) => ({
+          date,
+          activities: dateRewards.activities.map(activity => ({
+            activityName: activity.activityName,
+            matchType: activity.matchType,
+            category: activity.category,
+            matchedTask: activity.matchedTask,
+            goalLink: activity.goalLink,
+            effortRatio: activity.effortRatio,
+            xpEarned: activity.xpEarned,
+            shardsEarned: activity.shardsEarned,
+            calculationNotes: activity.calculationNotes,
+            claimedAt: new Date().toISOString()
+          })),
+          totalXP: dateRewards.totalXP,
+          totalShards: dateRewards.totalShards,
+          categoryBreakdown: {
+            Strength: { 
+              xp: dateRewards.strengthXP, 
+              shards: dateRewards.activities
+                .filter(a => a.category === 'Strength')
+                .reduce((sum, a) => sum + a.shardsEarned, 0)
+            },
+            Intelligence: { 
+              xp: dateRewards.intelligenceXP, 
+              shards: dateRewards.activities
+                .filter(a => a.category === 'Intelligence')
+                .reduce((sum, a) => sum + a.shardsEarned, 0)
+            },
+            Charisma: { 
+              xp: dateRewards.charismaXP, 
+              shards: dateRewards.activities
+                .filter(a => a.category === 'Charisma')
+                .reduce((sum, a) => sum + a.shardsEarned, 0)
+            }
+          }
+        }))
+
+        // Merge with existing history, updating entries for same dates
+        const mergedHistory = [...existingTaskHistory.dailyHistory]
+        newHistoryEntries.forEach(newEntry => {
+          const existingIndex = mergedHistory.findIndex(h => h.date === newEntry.date)
+          if (existingIndex >= 0) {
+            // Merge activities for the same date
+            mergedHistory[existingIndex] = {
+              date: newEntry.date,
+              activities: [...mergedHistory[existingIndex].activities, ...newEntry.activities],
+              totalXP: mergedHistory[existingIndex].totalXP + newEntry.totalXP,
+              totalShards: mergedHistory[existingIndex].totalShards + newEntry.totalShards,
+              categoryBreakdown: {
+                Strength: {
+                  xp: mergedHistory[existingIndex].categoryBreakdown.Strength.xp + newEntry.categoryBreakdown.Strength.xp,
+                  shards: mergedHistory[existingIndex].categoryBreakdown.Strength.shards + newEntry.categoryBreakdown.Strength.shards
+                },
+                Intelligence: {
+                  xp: mergedHistory[existingIndex].categoryBreakdown.Intelligence.xp + newEntry.categoryBreakdown.Intelligence.xp,
+                  shards: mergedHistory[existingIndex].categoryBreakdown.Intelligence.shards + newEntry.categoryBreakdown.Intelligence.shards
+                },
+                Charisma: {
+                  xp: mergedHistory[existingIndex].categoryBreakdown.Charisma.xp + newEntry.categoryBreakdown.Charisma.xp,
+                  shards: mergedHistory[existingIndex].categoryBreakdown.Charisma.shards + newEntry.categoryBreakdown.Charisma.shards
+                }
+              }
+            }
+          } else {
+            mergedHistory.push(newEntry)
+          }
+        })
+
+        const updatedTaskHistory = {
+          dailyHistory: mergedHistory,
+          lastUpdated: new Date().toISOString()
+        }
+        
+        // Step 3: Clear unclaimed rewards and save task history in backend
         
         if (!user.id) {
           console.error('❌ User ID not found')
@@ -490,15 +588,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           return
         }
         
-        // Use apiClient to clear unclaimed rewards
+        // Use apiClient to update both unclaimed rewards and task history
         try {
           const clearResponse = await apiClient.put(`/user/${user.id}`, { 
-            unclaimedRewards: null 
+            unclaimedRewards: null,
+            taskHistory: updatedTaskHistory
           })
           
           if (clearResponse.success) {
             
-            // Step 3: Refresh user data from server to sync UI
+            // Step 4: Refresh user data from server to sync UI
             await refreshUserTasks()
             
             showSuccess(`🎉 Congratulations!\n\nYou've claimed:\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nKeep up the great work!`)
@@ -894,7 +993,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
         {/* Activity Heatmap Section */}
         <div className="heatmap-section">
-          <ActivityHeatmap activityHistory={user?.activityHistory} />
+          <ActivityHeatmap 
+            activityHistory={user?.activityHistory}
+            onDateClick={handleHeatmapDateClick}
+          />
         </div>
       </div>
     </div>
@@ -1394,6 +1496,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         onClaimRewards={handleClaimRewards}
         onClaimIndividualReward={handleClaimIndividualReward}
         isClaiming={isClaiming}
+      />
+
+      {/* Task History Modal */}
+      <TaskHistoryModal
+        isOpen={showTaskHistoryModal}
+        onClose={() => setShowTaskHistoryModal(false)}
+        selectedDate={selectedDate}
+        taskHistory={selectedDateHistory}
       />
     </div>
   )

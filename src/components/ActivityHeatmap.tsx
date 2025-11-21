@@ -4,6 +4,7 @@ import type { ActivityHistory } from '../shared/types/user.types'
 
 interface ActivityHeatmapProps {
   activityHistory?: ActivityHistory
+  onDateClick?: (date: string) => void
 }
 
 type CategoryFilter = 'all' | 'Strength' | 'Intelligence' | 'Charisma'
@@ -19,8 +20,15 @@ const DAYS_PER_WEEK = 7
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const WEEKS_TO_SHOW = 53 // Exactly 53 weeks
 
-const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) => {
+const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory, onDateClick }) => {
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all')
+
+  const handleCellClick = (date: string, value: number) => {
+    // Only trigger callback if there's activity on that date
+    if (value > 0 && onDateClick) {
+      onDateClick(date)
+    }
+  }
 
   // Generate grid data for exactly 53 weeks
   const { gridData, monthLabels } = useMemo(() => {
@@ -273,10 +281,11 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory }) =>
                   cell ? (
                     <div
                       key={`${rowIndex}-${colIndex}`}
-                      className="heatmap-cell"
+                      className={`heatmap-cell ${cell.value > 0 ? 'clickable' : ''}`}
                       style={{ backgroundColor: getCellColor(cell.value) }}
                       title={`${formatDate(cell.date)}: ${cell.value} XP`}
                       data-value={cell.value}
+                      onClick={() => handleCellClick(cell.date, cell.value)}
                     />
                   ) : (
                     <div
