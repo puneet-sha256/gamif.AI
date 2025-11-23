@@ -2,8 +2,6 @@
 export interface ProfileData {
   name: string
   age: number
-  monthlyLimit: number
-  currency: string
 }
 
 export interface GoalsData {
