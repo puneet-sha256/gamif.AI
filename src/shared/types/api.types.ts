@@ -35,8 +35,6 @@ export interface UpdateProfileRequest {
   profile: {
     name?: string;
     age?: number;
-    monthlyBudget?: number;
-    currency?: string;
   };
 }
 

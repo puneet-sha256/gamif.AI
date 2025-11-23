@@ -10,9 +10,7 @@ interface ProfileSetupProps {
 const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
   const [formData, setFormData] = useState<ProfileData>({
     name: '',
-    age: 18,
-    monthlyLimit: 1000,
-    currency: 'USD'
+    age: 18
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -23,7 +21,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'age' || name === 'monthlyLimit' ? Number(value) : value
+      [name]: name === 'age' ? Number(value) : value
     }))
     if (error) {
       setError('')
@@ -41,11 +39,6 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
     
     if (formData.age < 13 || formData.age > 100) {
       setError('Age must be between 13 and 100')
-      return
-    }
-    
-    if (formData.monthlyLimit < 0) {
-      setError('Monthly limit cannot be negative')
       return
     }
     
@@ -67,17 +60,6 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
       setIsSubmitting(false)
     }
   }
-
-  const currencies = [
-    { code: 'USD', symbol: '$', name: 'US Dollar' },
-    { code: 'EUR', symbol: '€', name: 'Euro' },
-    { code: 'GBP', symbol: '£', name: 'British Pound' },
-    { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
-    { code: 'KRW', symbol: '₩', name: 'Korean Won' },
-    { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
-    { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
-    { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' }
-  ]
 
   return (
     <div className="profile-setup-container">
@@ -137,43 +119,6 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
                   max="100"
                   required
                 />
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h3>Financial Settings</h3>
-              
-              <div className="input-row">
-                <div className="input-group">
-                  <label htmlFor="monthlyLimit">Monthly Expenditure Limit</label>
-                  <input
-                    type="number"
-                    id="monthlyLimit"
-                    name="monthlyLimit"
-                    value={formData.monthlyLimit}
-                    onChange={handleInputChange}
-                    min="0"
-                    step="0.01"
-                    required
-                  />
-                </div>
-
-                <div className="input-group">
-                  <label htmlFor="currency">Currency</label>
-                  <select
-                    id="currency"
-                    name="currency"
-                    value={formData.currency}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    {currencies.map(currency => (
-                      <option key={currency.code} value={currency.code}>
-                        {currency.symbol} {currency.code} - {currency.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
             </div>
 

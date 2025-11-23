@@ -277,14 +277,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
   }
 
-  const getCurrency = (code: string) => {
-    const currencies: { [key: string]: string } = {
-      'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥', 
-      'KRW': '₩', 'INR': '₹', 'CAD': 'C$', 'AUD': 'A$'
-    }
-    return currencies[code] || code
-  }
-
   const analyzeDailyActivity = async (activityDate: string) => {
     if (!dailyActivity.trim()) return
     
@@ -778,16 +770,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 <div className="profile-item">
                   <span className="label">Age:</span>
                   <span className="value">{profileData.age} years</span>
-                </div>
-                <div className="profile-item">
-                  <span className="label">Monthly Limit:</span>
-                  <span className="value">
-                    {getCurrency(profileData.currency)}{profileData.monthlyLimit.toLocaleString()}
-                  </span>
-                </div>
-                <div className="profile-item">
-                  <span className="label">Currency:</span>
-                  <span className="value">{profileData.currency}</span>
                 </div>
               </div>
             </div>
