@@ -96,9 +96,17 @@ export interface DailyActivity {
   total: number // Total XP earned
 }
 
+export interface StreakCache {
+  asOfDate: string // ISO date string (YYYY-MM-DD) - last date streaks were calculated for
+  strengthStreak: number // Streak count as of asOfDate
+  intelligenceStreak: number // Streak count as of asOfDate
+  charismaStreak: number // Streak count as of asOfDate
+}
+
 export interface ActivityHistory {
   dailyActivities: DailyActivity[]
   lastUpdated: string
+  streakCache?: StreakCache // Memoized streak data for O(1) incremental calculation
 }
 
 // Completed task details for a specific date

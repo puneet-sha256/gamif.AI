@@ -26,6 +26,7 @@ import { aiService } from '../client/services/aiService'
 import { userService } from '../client/services/userService'
 import { apiClient } from '../client/services/apiClient'
 import { calculateLevelProgress } from '../utils/levelCalculation'
+import { calculateStreakMultiplier, formatMultiplier, calculateStreaksFromHistory } from '../utils/streakCalculation'
 
 interface DashboardProps {
   onLogout: () => void
@@ -262,7 +263,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     
     const success = await buyShopItem(itemId, itemPrice, itemDetails)
     if (success) {
-      showSuccess(`🎉 Congratulations! You've successfully purchased "${itemTitle}" for ${itemPrice} 💎 shards!`)
+      showSuccess(`🎉 Congratulations! You've successfully purchased "${itemTitle}" for ${itemPrice.toFixed(2)} 💎 shards!`)
     } else {
       showError('Failed to purchase item. Please make sure you have enough shards.')
     }
@@ -390,23 +391,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           // Also save to task history for permanent record
           const existingTaskHistory = user?.taskHistory
           
-          // Map rewards to completed tasks
-          interface RewardItem {
-            activityName: string
-            matchType: string
-            category: 'Strength' | 'Intelligence' | 'Charisma'
-            matchedTask?: string
-            goalLink?: string
-            effortRatio: number
-            xpEarned: number
-            shardsEarned: number
-            calculationNotes: string
-          }
-          
-          const completedTasks = result.data.rewards.activityRewards.map((reward: RewardItem) => ({
+          // Map rewards to completed tasks - ActivityReward type from backend already has the correct shape
+          const completedTasks = result.data.rewards.activityRewards.map((reward: any) => ({
             activityName: reward.activityName,
             matchType: reward.matchType,
-            category: reward.category,
+            category: reward.category as 'Strength' | 'Intelligence' | 'Charisma',
             matchedTask: reward.matchedTask,
             goalLink: reward.goalLink,
             effortRatio: reward.effortRatio,
@@ -523,8 +512,28 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       let allSuccess = true
       let leveledUp = false
       let newLevel = currentLevel
+      let totalBaseShards = 0
+      let totalFinalShards = 0
+      let hasMultipliers = false
       
       for (const [date, dateRewards] of activitiesByDate.entries()) {
+        // Calculate base shards breakdown for this date
+        const baseShardsBreakdown = {
+          strength: 0,
+          intelligence: 0,
+          charisma: 0
+        }
+        
+        dateRewards.activities.forEach(activity => {
+          if (activity.category === 'Strength') {
+            baseShardsBreakdown.strength += activity.shardsEarned
+          } else if (activity.category === 'Intelligence') {
+            baseShardsBreakdown.intelligence += activity.shardsEarned
+          } else if (activity.category === 'Charisma') {
+            baseShardsBreakdown.charisma += activity.shardsEarned
+          }
+        })
+
         const result = await userService.claimRewards({
           sessionId,
           totalXP: dateRewards.totalXP,
@@ -532,13 +541,26 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           strengthXP: dateRewards.strengthXP,
           intelligenceXP: dateRewards.intelligenceXP,
           charismaXP: dateRewards.charismaXP,
-          activityDate: date
+          activityDate: date,
+          baseShardsBreakdown
         })
         
         if (!result.success) {
           allSuccess = false
           console.error(`❌ Failed to claim rewards for date ${date}`)
         } else {
+          // Track base and final shards
+          if (result.baseShards !== undefined && result.finalShards !== undefined) {
+            totalBaseShards += result.baseShards
+            totalFinalShards += result.finalShards
+            if (result.baseShards !== result.finalShards) {
+              hasMultipliers = true
+            }
+          } else {
+            totalBaseShards += dateRewards.totalShards
+            totalFinalShards += dateRewards.totalShards
+          }
+
           // Check if we leveled up from this experience result
           const experienceMetadata = result.experienceResult?.metadata
           if (experienceMetadata?.leveledUp) {
@@ -569,12 +591,31 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             // Step 3: Refresh user data from server to sync UI
             await refreshUserTasks()
             
-            // Show level-up celebration if leveled up
+            // Build success message with multiplier info
+            let message = ''
             if (leveledUp) {
-              showSuccess(`🎊✨ LEVEL UP! ✨🎊\n\nCongratulations! You've reached Level ${newLevel}!\n\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nYou're becoming unstoppable!`)
+              message = `🎊✨ LEVEL UP! ✨🎊\n\nCongratulations! You've reached Level ${newLevel}!\n\n`
             } else {
-              showSuccess(`🎉 Congratulations!\n\nYou've claimed:\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nKeep up the great work!`)
+              message = `🎉 Congratulations!\n\nYou've claimed:\n`
             }
+            
+            message += `+${rewards.totalXP} XP\n`
+            
+            if (hasMultipliers && totalBaseShards !== totalFinalShards) {
+              message += `+${totalBaseShards.toFixed(2)} 💎 Base Shards\n`
+              message += `✨ Streak Bonus: ${(totalFinalShards - totalBaseShards).toFixed(2)} 💎\n`
+              message += `= ${totalFinalShards.toFixed(2)} 💎 Total Shards\n`
+            } else {
+              message += `+${totalFinalShards.toFixed(2)} 💎 Shards\n`
+            }
+            
+            if (!leveledUp) {
+              message += `\nKeep up the great work!`
+            } else {
+              message += `\nYou're becoming unstoppable!`
+            }
+            
+            showSuccess(message)
             setShowRewardClaimModal(false)
           } else {
             console.error('⚠️ Rewards applied but failed to clear unclaimed rewards in backend')
@@ -619,6 +660,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       const intelligenceXP = activity.category === 'Intelligence' ? activity.xpEarned : 0
       const charismaXP = activity.category === 'Charisma' ? activity.xpEarned : 0
 
+      // Calculate base shards breakdown
+      const baseShardsBreakdown = {
+        strength: activity.category === 'Strength' ? activity.shardsEarned : 0,
+        intelligence: activity.category === 'Intelligence' ? activity.shardsEarned : 0,
+        charisma: activity.category === 'Charisma' ? activity.shardsEarned : 0
+      }
+
       // Step 1: Use the userService API to claim individual reward
       const result = await userService.claimRewards({
         sessionId,
@@ -628,7 +676,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         intelligenceXP,
         charismaXP,
         // Fallback to today's date if activityDate is missing (for backward compatibility)
-        activityDate: activity.activityDate || new Date().toISOString().split('T')[0]
+        activityDate: activity.activityDate || new Date().toISOString().split('T')[0],
+        baseShardsBreakdown
       })
       
       if (result.success) {
@@ -679,12 +728,33 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             // Step 3: Refresh user data from server to sync UI
             await refreshUserTasks()
             
-            // Show level-up celebration if leveled up
+            // Get base and final shards for display
+            const baseShards = result.baseShards ?? activity.shardsEarned
+            const finalShards = result.finalShards ?? activity.shardsEarned
+            
+            // Build success message
+            let message = ''
             if (leveledUp) {
-              showSuccess(`🎊✨ LEVEL UP! ✨🎊\n\nCongratulations! You've reached Level ${newLevel}!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards\n\nYou're becoming unstoppable!`)
+              message = `🎊✨ LEVEL UP! ✨🎊\n\nCongratulations! You've reached Level ${newLevel}!\n\n`
             } else {
-              showSuccess(`🎉 Claimed reward!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards`)
+              message = `🎉 Claimed reward!\n\n`
             }
+            
+            message += `+${activity.xpEarned} XP (${activity.category})\n`
+            
+            if (baseShards !== finalShards) {
+              message += `+${baseShards.toFixed(2)} 💎 Base Shards\n`
+              message += `✨ Streak Bonus: ${(finalShards - baseShards).toFixed(2)} 💎\n`
+              message += `= ${finalShards.toFixed(2)} 💎 Total Shards`
+            } else {
+              message += `+${finalShards.toFixed(2)} 💎 Shards`
+            }
+            
+            if (leveledUp) {
+              message += `\n\nYou're becoming unstoppable!`
+            }
+            
+            showSuccess(message)
           } else {
             console.error('⚠️ Reward claimed but failed to update unclaimed rewards in backend')
             showWarning('Reward claimed successfully, but there was an issue updating. Please refresh the page.')
@@ -811,8 +881,75 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             <StatCard 
               icon="💎" 
               title="Shards"
-              value={user?.stats?.shards || 0}
+              value={(user?.stats?.shards || 0).toFixed(2)}
             />
+          </div>
+
+          {/* Streak Multipliers Section */}
+          <div className="streak-multipliers-section">
+            <h3 className="streak-section-title">🔥 Streak Multipliers</h3>
+            <div className="streak-cards">
+              {(() => {
+                // Calculate current streaks from activity history
+                const today = new Date().toISOString().split('T')[0]
+                const currentStreaks = calculateStreaksFromHistory(user?.activityHistory, today)
+                
+                return (
+                  <>
+                    <div className="streak-card strength-streak">
+                      <div className="streak-header">
+                        <span className="streak-icon">💪</span>
+                        <span className="streak-category">Strength</span>
+                      </div>
+                      <div className="streak-info">
+                        <div className="streak-count">
+                          {currentStreaks.strengthStreak} day{currentStreaks.strengthStreak !== 1 ? 's' : ''}
+                        </div>
+                        <div className="streak-multiplier">
+                          {formatMultiplier(calculateStreakMultiplier(currentStreaks.strengthStreak))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="streak-card intelligence-streak">
+                      <div className="streak-header">
+                        <span className="streak-icon">🧠</span>
+                        <span className="streak-category">Intelligence</span>
+                      </div>
+                      <div className="streak-info">
+                        <div className="streak-count">
+                          {currentStreaks.intelligenceStreak} day{currentStreaks.intelligenceStreak !== 1 ? 's' : ''}
+                        </div>
+                        <div className="streak-multiplier">
+                          {formatMultiplier(calculateStreakMultiplier(currentStreaks.intelligenceStreak))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="streak-card charisma-streak">
+                      <div className="streak-header">
+                        <span className="streak-icon">✨</span>
+                        <span className="streak-category">Charisma</span>
+                      </div>
+                      <div className="streak-info">
+                        <div className="streak-count">
+                          {currentStreaks.charismaStreak} day{currentStreaks.charismaStreak !== 1 ? 's' : ''}
+                        </div>
+                        <div className="streak-multiplier">
+                          {formatMultiplier(calculateStreakMultiplier(currentStreaks.charismaStreak))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+            <p className="streak-description">
+              Earn 10+ XP in a category daily to build your streak! Multipliers boost your shard rewards. 
+              {user?.activityHistory?.streakCache && 
+                ` Last calculated: ${new Date(user.activityHistory.streakCache.asOfDate).toLocaleDateString()}`
+              }
+            </p>
           </div>
         </div>
 

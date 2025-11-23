@@ -28,6 +28,11 @@ import {
 import type { UserStats } from '../../shared/types'
 import { logger } from '../../utils/logger'
 import { calculateActualLevel } from '../../utils/levelCalculation'
+import { 
+  calculateStreaksFromHistory,
+  getStreakMultipliers,
+  updateStreakCache
+} from '../../utils/streakCalculation'
 
 // Get current user by session
 export async function getCurrentUser(req: Request, res: Response) {
@@ -98,6 +103,9 @@ export async function updateExperience(req: Request, res: Response) {
     const intelligenceChange = intelligenceDelta || 0
     const charismaChange = charismaDelta || 0
 
+    // Use provided activityDate or default to today
+    const activityDateToUse = activityDate || new Date().toISOString().split('T')[0]
+
     // Verify session
     const session = await findSessionById(sessionId)
     if (!session) {
@@ -125,6 +133,11 @@ export async function updateExperience(req: Request, res: Response) {
     const oldExperience = user.stats.experience || 0
     const oldLevel = calculateActualLevel(oldExperience)
 
+    // STEP 1: Calculate streaks BEFORE applying today's XP
+    // This gives us yesterday's streak to use for today's multiplier
+    const currentStreaks = calculateStreaksFromHistory(user.activityHistory, activityDateToUse)
+    const multipliers = getStreakMultipliers(currentStreaks)
+
     // Calculate new attribute values (prevent negative values)
     const newStrength = Math.max(0, (user.stats.strength || 0) + strengthChange)
     const newIntelligence = Math.max(0, (user.stats.intelligence || 0) + intelligenceChange)
@@ -142,9 +155,7 @@ export async function updateExperience(req: Request, res: Response) {
     const newLevel = calculateActualLevel(user.stats.experience)
     const leveledUp = newLevel > oldLevel
 
-    // Update activity history for heatmap
-    // Use provided activityDate or default to today
-    const activityDateToUse = activityDate || new Date().toISOString().split('T')[0]
+    // STEP 2: Update activity history for heatmap
     if (!user.activityHistory) {
       user.activityHistory = {
         dailyActivities: [],
@@ -197,6 +208,9 @@ export async function updateExperience(req: Request, res: Response) {
       activity => activity.date >= cutoffDateStr
     )
 
+    // STEP 3: Update streak cache after saving activity
+    user.activityHistory.streakCache = updateStreakCache(user.activityHistory, activityDateToUse)
+
     // Update session last access and save user
     await updateSessionLastAccess(sessionId)
     const updatedUser = await updateUser(user.id, user)
@@ -205,7 +219,7 @@ export async function updateExperience(req: Request, res: Response) {
       return res.status(500).json(createErrorResponse('Failed to update user'))
     }
 
-    // Return updated stats
+    // Return updated stats with multipliers based on PREVIOUS day's streak
     res.json(createSuccessResponse(
       SuccessMessages.EXPERIENCE_UPDATED,
       undefined,
@@ -215,7 +229,17 @@ export async function updateExperience(req: Request, res: Response) {
         strengthChange,
         intelligenceChange,
         charismaChange,
-        totalExperienceChange: strengthChange + intelligenceChange + charismaChange
+        totalExperienceChange: strengthChange + intelligenceChange + charismaChange,
+        streaks: {
+          strength: currentStreaks.strengthStreak,
+          intelligence: currentStreaks.intelligenceStreak,
+          charisma: currentStreaks.charismaStreak
+        },
+        multipliers: {
+          strength: multipliers.strengthMultiplier,
+          intelligence: multipliers.intelligenceMultiplier,
+          charisma: multipliers.charismaMultiplier
+        }
       },
       {
         leveledUp,

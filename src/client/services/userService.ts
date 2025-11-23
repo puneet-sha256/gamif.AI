@@ -27,6 +27,12 @@ export interface ClaimRewardsData {
   intelligenceXP: number
   charismaXP: number
   activityDate?: string // Optional activity date (YYYY-MM-DD)
+  // Base shards breakdown by category (before multipliers)
+  baseShardsBreakdown?: {
+    strength: number
+    intelligence: number
+    charisma: number
+  }
 }
 
 class UserService {
@@ -70,16 +76,24 @@ class UserService {
   /**
    * Claim all pending rewards (XP and shards)
    * This is a convenience method that calls both updateExperience and updateShards
+   * The experience update will return multiplier information that will be used to calculate final shards
    */
   async claimRewards(data: ClaimRewardsData): Promise<{
     experienceResult: ApiResponse
     shardsResult: ApiResponse
     success: boolean
+    appliedMultipliers?: {
+      strength: number
+      intelligence: number
+      charisma: number
+    }
+    baseShards?: number
+    finalShards?: number
   }> {
     
 
     try {
-      // Update experience first
+      // Update experience first to get updated multipliers
       const experienceResult = await this.updateExperience({
         sessionId: data.sessionId,
         strengthDelta: data.strengthXP,
@@ -88,10 +102,28 @@ class UserService {
         activityDate: data.activityDate
       })
 
-      // Update shards
+      // Get multipliers from experience result
+      const multipliers = experienceResult.metadata?.multipliers
+
+      // Calculate final shards with multipliers
+      let finalShards = data.totalShards
+      let baseShards = data.totalShards
+
+      if (multipliers && data.baseShardsBreakdown) {
+        // Apply multipliers to each category's shards
+        const strengthShards = Number((data.baseShardsBreakdown.strength * multipliers.strength).toFixed(2))
+        const intelligenceShards = Number((data.baseShardsBreakdown.intelligence * multipliers.intelligence).toFixed(2))
+        const charismaShards = Number((data.baseShardsBreakdown.charisma * multipliers.charisma).toFixed(2))
+        
+        finalShards = Number((strengthShards + intelligenceShards + charismaShards).toFixed(2))
+        baseShards = Number((data.baseShardsBreakdown.strength + data.baseShardsBreakdown.intelligence + data.baseShardsBreakdown.charisma).toFixed(2))
+        
+      }
+
+      // Update shards with the multiplied amount
       const shardsResult = await this.updateShards({
         sessionId: data.sessionId,
-        shardsDelta: data.totalShards,
+        shardsDelta: finalShards,
         reason: 'Daily activity rewards claimed'
       })
 
@@ -104,7 +136,10 @@ class UserService {
       return {
         experienceResult,
         shardsResult,
-        success
+        success,
+        appliedMultipliers: multipliers,
+        baseShards,
+        finalShards
       }
     } catch (error: any) {
       console.error('❌ UserService: Failed to claim rewards:', error)

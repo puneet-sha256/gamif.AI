@@ -139,7 +139,7 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
                         </div>
                         <div className="reward-item shards">
                           <span className="reward-icon">💎</span>
-                          <span className="reward-value">+{activity.shardsEarned}</span>
+                          <span className="reward-value">+{activity.shardsEarned.toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
@@ -180,7 +180,7 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
                     </div>
                     <div className="total-item">
                       <span className="total-label">Total Shards:</span>
-                      <span className="total-value shards">+{unclaimedRewards.totalShards}</span>
+                      <span className="total-value shards">+{unclaimedRewards.totalShards.toFixed(2)}</span>
                     </div>
                   </div>
                   
