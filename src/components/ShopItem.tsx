@@ -44,7 +44,6 @@ const ShopItem: React.FC<ShopItemProps> = ({
       // If multiple purchases are allowed, ask for quantity
       if (allowMultiplePurchases) {
         const maxAffordable = Math.floor(userShards / price)
-        let quantity = 1
         
         // Use a simple prompt to ask for quantity
         const quantityStr = prompt(
@@ -63,17 +62,22 @@ const ShopItem: React.FC<ShopItemProps> = ({
         const parsedQuantity = parseInt(quantityStr, 10)
         
         if (isNaN(parsedQuantity) || parsedQuantity < 1) {
-          alert('Please enter a valid quantity (minimum 1)')
+          await showConfirm(
+            'Please enter a valid quantity (minimum 1)',
+            'OK'
+          )
           return
         }
         
         if (parsedQuantity > maxAffordable) {
-          alert(`You can only afford ${maxAffordable} items with your current ${userShards} 💎 shards.`)
+          await showConfirm(
+            `You can only afford ${maxAffordable} items with your current ${userShards} 💎 shards.`,
+            'OK'
+          )
           return
         }
         
-        quantity = parsedQuantity
-        onBuy(quantity)
+        onBuy(parsedQuantity)
       } else {
         // Single purchase
         onBuy(1)
