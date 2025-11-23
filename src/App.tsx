@@ -26,9 +26,7 @@ function AppContent() {
 
     const isProfileComplete = user.profileData && 
       user.profileData.name?.trim() && 
-      user.profileData.age > 0 && 
-      user.profileData.monthlyLimit !== undefined && 
-      user.profileData.currency?.trim()
+      user.profileData.age > 0
 
     const isGoalsComplete = user.goalsData && 
       user.goalsData.longTermGoals?.trim() && 
