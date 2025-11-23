@@ -462,9 +462,10 @@ export async function buyShopItem(
   // Check if user has enough shards for the total cost
   if (currentShards < totalCost) {
     logger.error(`Insufficient shards. User has ${currentShards}, needs ${totalCost} (${quantity}x ${itemPrice})`)
+    const itemWord = quantity === 1 ? 'item' : 'items'
     return { 
       success: false, 
-      message: `Insufficient shards. You have ${currentShards} 💎, but need ${totalCost} 💎 to buy ${quantity} items` 
+      message: `Insufficient shards. You have ${currentShards} 💎, but need ${totalCost} 💎 to buy ${quantity} ${itemWord}` 
     }
   }
   
