@@ -2023,6 +2023,8 @@
   box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
   border: 2px solid rgba(59, 130, 246, 0.3);
   animation: modalSlideUp 0.3s ease;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  scroll-behavior: smooth;
 }
 
 .modal-header {
@@ -2852,18 +2854,37 @@
 
   /* Better modal experience on mobile */
   .modal-overlay {
-    padding: 0;
+    padding: 16px;
+    align-items: center;
+    justify-content: center;
   }
 
   .modal-content {
     margin: 0;
-    border-radius: 20px 20px 0 0;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    border-radius: 20px;
+    position: relative;
     max-height: 90vh;
-    width: 100%;
+    width: 95%;
+    max-width: 95%;
+  }
+  
+  /* Mobile-friendly scrollbar for modal content */
+  .modal-content::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .modal-content::-webkit-scrollbar-track {
+    background: rgba(148, 163, 184, 0.1);
+    border-radius: 10px;
+  }
+  
+  .modal-content::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.4);
+    border-radius: 10px;
+  }
+  
+  .modal-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.6);
   }
 
   /* Improve form inputs for mobile */
