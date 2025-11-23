@@ -96,16 +96,18 @@ class ShopService {
       isConsumable?: boolean
       isKeyItem?: boolean
       allowMultiplePurchases?: boolean
-    }
+    },
+    quantity: number = 1
   ): Promise<ApiResponse> {
-    console.log('💰 ShopService: Buying shop item:', itemId, 'for', itemPrice, 'shards')
+    console.log('💰 ShopService: Buying shop item:', itemId, 'for', itemPrice, 'shards', 'quantity:', quantity)
 
     try {
       const response = await apiClient.post('/user/shop/buy', {
         sessionId,
         itemId,
         itemPrice,
-        itemDetails
+        itemDetails,
+        quantity
       })
 
       if (response.success) {

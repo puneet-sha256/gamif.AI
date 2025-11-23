@@ -670,7 +670,7 @@ export async function getUserShopItemsList(req: Request, res: Response) {
 // Buy a shop item
 export async function buyUserShopItem(req: Request, res: Response) {
   try {
-    const { sessionId, itemId, itemPrice, itemDetails } = req.body
+    const { sessionId, itemId, itemPrice, itemDetails, quantity } = req.body
 
     // Validate required fields
     if (!sessionId || !itemId || itemPrice === undefined) {
@@ -683,6 +683,14 @@ export async function buyUserShopItem(req: Request, res: Response) {
     if (typeof itemPrice !== 'number' || itemPrice < 0) {
       return res.status(400).json(createErrorResponse(
         'Item price must be a non-negative number'
+      ))
+    }
+
+    // Validate quantity if provided
+    const purchaseQuantity = quantity || 1
+    if (typeof purchaseQuantity !== 'number' || purchaseQuantity < 1) {
+      return res.status(400).json(createErrorResponse(
+        'Quantity must be a positive number'
       ))
     }
 
@@ -699,7 +707,7 @@ export async function buyUserShopItem(req: Request, res: Response) {
     }
 
     // Buy the shop item (itemDetails is optional for built-in shop items)
-    const result = await buyShopItem(user.id, itemId, itemPrice, itemDetails)
+    const result = await buyShopItem(user.id, itemId, itemPrice, itemDetails, purchaseQuantity)
 
     if (!result.success) {
       return res.status(400).json(createErrorResponse(

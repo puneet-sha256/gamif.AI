@@ -433,9 +433,10 @@ export async function buyShopItem(
     isConsumable?: boolean
     isKeyItem?: boolean
     allowMultiplePurchases?: boolean
-  }
+  },
+  quantity: number = 1
 ): Promise<{ success: boolean; message?: string }> {
-  logger.info(`User ${userId} attempting to buy shop item ${itemId} for ${itemPrice} shards`)
+  logger.info(`User ${userId} attempting to buy ${quantity}x shop item ${itemId} for ${itemPrice} shards each`)
   const users = await loadUsers()
   const user = users.find(u => u.id === userId)
   
@@ -456,13 +457,14 @@ export async function buyShopItem(
   }
   
   const currentShards = user.stats.shards || 0
+  const totalCost = itemPrice * quantity
   
-  // Check if user has enough shards
-  if (currentShards < itemPrice) {
-    logger.error(`Insufficient shards. User has ${currentShards}, needs ${itemPrice}`)
+  // Check if user has enough shards for the total cost
+  if (currentShards < totalCost) {
+    logger.error(`Insufficient shards. User has ${currentShards}, needs ${totalCost} (${quantity}x ${itemPrice})`)
     return { 
       success: false, 
-      message: `Insufficient shards. You have ${currentShards} 💎, but need ${itemPrice} 💎` 
+      message: `Insufficient shards. You have ${currentShards} 💎, but need ${totalCost} 💎 to buy ${quantity} items` 
     }
   }
   
@@ -491,8 +493,8 @@ export async function buyShopItem(
     allowMultiplePurchases: itemDetails?.allowMultiplePurchases || false
   }
   
-  // Deduct shards
-  user.stats.shards = currentShards - itemPrice
+  // Deduct total cost from shards
+  user.stats.shards = currentShards - totalCost
   
   // Remove item from shopItems (wishlist) ONLY if:
   // 1. It's a user-created wishlist item, AND
@@ -517,31 +519,31 @@ export async function buyShopItem(
   )
   
   if (existingInventoryItem) {
-    // Item already in inventory, increment count
-    existingInventoryItem.count += 1
+    // Item already in inventory, increment count by the quantity purchased
+    existingInventoryItem.count += quantity
     logger.info(`Incremented count for item "${itemInfo.title}" in inventory to ${existingInventoryItem.count}`)
   } else {
-    // Add new item to inventory with count 1
+    // Add new item to inventory with the specified quantity
     const inventoryItem = {
       id: itemInfo.id,
       title: itemInfo.title,
       description: itemInfo.description,
       price: itemInfo.price,
       image: itemInfo.image,
-      count: 1,
+      count: quantity,
       purchasedAt: new Date().toISOString(),
       isConsumable: itemInfo.isConsumable || false,
       isKeyItem: itemInfo.isKeyItem || false
     }
     user.inventory.push(inventoryItem)
-    logger.info(`Added new item "${itemInfo.title}" to inventory`)
+    logger.info(`Added new item "${itemInfo.title}" to inventory with count ${quantity}`)
   }
   
   await saveUsers(users)
-  logger.success(`Shop item purchased successfully. New shard balance: ${user.stats.shards}`)
+  logger.success(`Shop item purchased successfully. Purchased ${quantity}x "${itemInfo.title}" for ${totalCost} 💎. New shard balance: ${user.stats.shards}`)
   return { 
     success: true, 
-    message: `Successfully purchased item for ${itemPrice} 💎. Remaining shards: ${user.stats.shards} 💎` 
+    message: `Successfully purchased ${quantity}x "${itemInfo.title}" for ${totalCost} 💎. Remaining shards: ${user.stats.shards} 💎` 
   }
 }
 

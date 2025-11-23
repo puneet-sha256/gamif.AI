@@ -393,9 +393,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       isConsumable?: boolean
       isKeyItem?: boolean
       allowMultiplePurchases?: boolean
-    }
+    },
+    quantity: number = 1
   ): Promise<boolean> => {
-    console.log('🔄 AuthContext: Buying shop item:', itemId, 'for', itemPrice, 'shards')
+    console.log('🔄 AuthContext: Buying shop item:', itemId, 'for', itemPrice, 'shards', 'quantity:', quantity)
     
     if (!user) {
       console.log('❌ AuthContext: Cannot buy shop item - no user logged in')
@@ -409,7 +410,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return false
       }
 
-      const result = await shopService.buyShopItem(sessionId, itemId, itemPrice, itemDetails)
+      const result = await shopService.buyShopItem(sessionId, itemId, itemPrice, itemDetails, quantity)
       
       if (result.success) {
         console.log('✅ AuthContext: Shop item purchased successfully')

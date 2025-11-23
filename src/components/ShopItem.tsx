@@ -8,10 +8,11 @@ interface ShopItemProps {
   description: string
   price: number
   userShards?: number
-  onBuy?: () => void
+  onBuy?: (quantity?: number) => void
   onDelete?: () => void
   className?: string
   isUserItem?: boolean // Whether this is a user-created item
+  allowMultiplePurchases?: boolean // Whether multiple purchases are allowed
 }
 
 const ShopItem: React.FC<ShopItemProps> = ({
@@ -23,7 +24,8 @@ const ShopItem: React.FC<ShopItemProps> = ({
   onBuy,
   onDelete,
   className = '',
-  isUserItem = false
+  isUserItem = false,
+  allowMultiplePurchases = false
 }) => {
   const { showConfirm } = useConfirm()
   const canAfford = userShards >= price
@@ -39,7 +41,43 @@ const ShopItem: React.FC<ShopItemProps> = ({
     )
     
     if (confirmed && onBuy) {
-      onBuy()
+      // If multiple purchases are allowed, ask for quantity
+      if (allowMultiplePurchases) {
+        const maxAffordable = Math.floor(userShards / price)
+        let quantity = 1
+        
+        // Use a simple prompt to ask for quantity
+        const quantityStr = prompt(
+          `How many "${title}" would you like to buy?\n\n` +
+          `Price: ${price} 💎 each\n` +
+          `You can afford up to ${maxAffordable} items.\n\n` +
+          `Enter quantity:`,
+          '1'
+        )
+        
+        if (quantityStr === null) {
+          // User cancelled the prompt
+          return
+        }
+        
+        const parsedQuantity = parseInt(quantityStr, 10)
+        
+        if (isNaN(parsedQuantity) || parsedQuantity < 1) {
+          alert('Please enter a valid quantity (minimum 1)')
+          return
+        }
+        
+        if (parsedQuantity > maxAffordable) {
+          alert(`You can only afford ${maxAffordable} items with your current ${userShards} 💎 shards.`)
+          return
+        }
+        
+        quantity = parsedQuantity
+        onBuy(quantity)
+      } else {
+        // Single purchase
+        onBuy(1)
+      }
     }
   }
   

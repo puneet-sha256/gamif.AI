@@ -245,7 +245,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     itemImage?: string,
     isConsumable?: boolean,
     isKeyItem?: boolean,
-    allowMultiplePurchases?: boolean
+    allowMultiplePurchases?: boolean,
+    quantity: number = 1
   ) => {
     // Check if this is a user's wishlist item or a built-in shop item
     const isWishlistItem = user?.shopItems?.some(item => item.id === itemId)
@@ -260,9 +261,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       allowMultiplePurchases
     } : undefined
     
-    const success = await buyShopItem(itemId, itemPrice, itemDetails)
+    const success = await buyShopItem(itemId, itemPrice, itemDetails, quantity)
     if (success) {
-      showSuccess(`🎉 Congratulations! You've successfully purchased "${itemTitle}" for ${itemPrice} 💎 shards!`)
+      const totalCost = itemPrice * quantity
+      const message = quantity > 1 
+        ? `🎉 Congratulations! You've successfully purchased ${quantity}x "${itemTitle}" for ${totalCost} 💎 shards!`
+        : `🎉 Congratulations! You've successfully purchased "${itemTitle}" for ${itemPrice} 💎 shards!`
+      showSuccess(message)
     } else {
       showError('Failed to purchase item. Please make sure you have enough shards.')
     }
@@ -1168,7 +1173,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                     price={item.price}
                     userShards={user?.stats?.shards || 0}
                     isUserItem={true}
-                    onBuy={() => handleBuyShopItem(item.id, item.title, item.price, item.description, item.image, item.isConsumable, item.isKeyItem, item.allowMultiplePurchases)}
+                    allowMultiplePurchases={item.allowMultiplePurchases}
+                    onBuy={(quantity) => handleBuyShopItem(item.id, item.title, item.price, item.description, item.image, item.isConsumable, item.isKeyItem, item.allowMultiplePurchases, quantity)}
                     onDelete={() => handleDeleteShopItem(item.id)}
                   />
                 ))}
