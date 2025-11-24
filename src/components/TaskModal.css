@@ -493,6 +493,7 @@ aside.EmojiPickerReact .epr-icn-search {
   }
   
   .emoji-picker-container .epr-body {
+    /* Subtract approximate height of search bar and category tabs (~100px) */
     max-height: calc(70vh - 100px);
   }
   

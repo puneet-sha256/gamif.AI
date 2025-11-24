@@ -130,7 +130,7 @@ const EmojiPickerTest: React.FC = () => {
         }}>
           <strong>Test Instructions:</strong>
           <ul style={{ margin: '10px 0', paddingLeft: '20px' }}>
-            <li>Desktop (&gt;768px): Picker appears below button, 350px wide</li>
+            <li>Desktop (>768px): Picker appears below button, 350px wide</li>
             <li>Tablet (601-768px): Picker appears below button, 320px wide</li>
             <li>Mobile (≤600px): Picker appears centered with backdrop</li>
             <li>Resize window to test all breakpoints</li>
