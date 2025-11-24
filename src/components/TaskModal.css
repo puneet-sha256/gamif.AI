@@ -471,17 +471,17 @@ aside.EmojiPickerReact .epr-icn-search {
   max-width: 100%;
 }
 
-/* Desktop: Full width emoji picker */
-@media (min-width: 601px) {
+/* Tablet: Slightly smaller emoji picker */
+@media (min-width: 601px) and (max-width: 768px) {
   .emoji-picker-container {
-    width: 350px;
+    width: 320px;
   }
 }
 
-/* Tablet: Slightly smaller emoji picker */
-@media (max-width: 768px) and (min-width: 601px) {
+/* Desktop: Full width emoji picker */
+@media (min-width: 769px) {
   .emoji-picker-container {
-    width: 320px;
+    width: 350px;
   }
 }
 
@@ -500,7 +500,7 @@ aside.EmojiPickerReact .epr-icn-search {
   }
   
   .emoji-picker-container aside.EmojiPickerReact {
-    width: 100% !important;
+    width: 100%;
     max-height: 70vh;
   }
   
@@ -519,17 +519,15 @@ aside.EmojiPickerReact .epr-icn-search {
     background: rgba(0, 0, 0, 0.5);
     z-index: -1;
   }
+  
+  /* Fix for small screens - ensure picker content is scrollable */
+  .emoji-picker-container .epr-emoji-category-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* Ensure emoji picker doesn't cause horizontal scroll */
 .emoji-picker-container aside.EmojiPickerReact {
   box-sizing: border-box;
-}
-
-/* Fix for small screens - ensure picker content is scrollable */
-@media (max-width: 600px) {
-  .emoji-picker-container .epr-emoji-category-content {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-  }
 }
