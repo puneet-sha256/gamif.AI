@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { AlertProvider } from './contexts/AlertContext'
 import { ConfirmProvider } from './contexts/ConfirmContext'
+import { PromptProvider } from './contexts/PromptContext'
 import AuthScreen from './components/AuthScreen'
 import ProfileSetup from './components/ProfileSetup'
 import GoalsSetup from './components/GoalsSetup'
@@ -10,6 +11,7 @@ import Dashboard from './components/Dashboard'
 import LoadingScreen from './components/LoadingScreen'
 import AlertTest from './components/AlertTest'
 import ConfirmTest from './components/ConfirmTest'
+import PromptTest from './components/PromptTest'
 import type { ProfileData, GoalsData } from './types'
 import './App.css'
 
@@ -118,6 +120,7 @@ function AppContent() {
         <Routes>
           <Route path="/test-alerts" element={<AlertTest />} />
           <Route path="/test-confirm" element={<ConfirmTest />} />
+          <Route path="/test-prompt" element={<PromptTest />} />
           <Route path="*" element={renderCurrentStep()} />
         </Routes>
       </div>
@@ -130,7 +133,9 @@ function App() {
     <AuthProvider>
       <AlertProvider>
         <ConfirmProvider>
-          <AppContent />
+          <PromptProvider>
+            <AppContent />
+          </PromptProvider>
         </ConfirmProvider>
       </AlertProvider>
     </AuthProvider>

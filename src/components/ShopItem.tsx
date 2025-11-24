@@ -1,5 +1,6 @@
 import React from 'react'
 import { useConfirm } from '../contexts/ConfirmContext'
+import { usePrompt } from '../contexts/PromptContext'
 
 interface ShopItemProps {
   id?: string
@@ -28,6 +29,7 @@ const ShopItem: React.FC<ShopItemProps> = ({
   allowMultiplePurchases = false
 }) => {
   const { showConfirm } = useConfirm()
+  const { showPrompt } = usePrompt()
   const canAfford = userShards >= price
   
   const handleBuyClick = async () => {
@@ -45,13 +47,18 @@ const ShopItem: React.FC<ShopItemProps> = ({
       if (allowMultiplePurchases) {
         const maxAffordable = Math.floor(userShards / price)
         
-        // Use a simple prompt to ask for quantity
-        const quantityStr = prompt(
-          `How many "${title}" would you like to buy?\n\n` +
-          `Price: ${price} 💎 each\n` +
-          `You can afford up to ${maxAffordable} items.\n\n` +
-          `Enter quantity:`,
-          '1'
+        // Use styled prompt to ask for quantity
+        const quantityStr = await showPrompt(
+          `How many "${title}" would you like to buy?\n\nPrice: ${price} 💎 each\nYou can afford up to ${maxAffordable} items.`,
+          {
+            defaultValue: '1',
+            placeholder: 'Enter quantity',
+            inputType: 'number',
+            min: 1,
+            max: maxAffordable,
+            confirmText: 'Buy',
+            cancelText: 'Cancel'
+          }
         )
         
         if (quantityStr === null) {
