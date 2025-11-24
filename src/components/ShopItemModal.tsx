@@ -217,21 +217,12 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
               {showEmojiPicker && (
                 <div 
                   ref={emojiPickerRef}
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    marginTop: '8px',
-                    zIndex: 1001,
-                    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
-                    borderRadius: '12px',
-                    overflow: 'hidden'
-                  }}
+                  className="emoji-picker-container"
                 >
                   <EmojiPicker
                     onEmojiClick={handleEmojiClick}
                     searchPlaceHolder="Search emoji..."
-                    width={320}
+                    width="100%"
                     height={400}
                   />
                 </div>

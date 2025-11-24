@@ -457,3 +457,79 @@ aside.EmojiPickerReact .epr-search-container {
 aside.EmojiPickerReact .epr-icn-search {
   left: 12px !important;
 }
+
+/* Emoji Picker Container Responsive Styles */
+.emoji-picker-container {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  z-index: 1001;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+/* Desktop: Full width emoji picker */
+@media (min-width: 601px) {
+  .emoji-picker-container {
+    width: 350px;
+  }
+}
+
+/* Tablet: Slightly smaller emoji picker */
+@media (max-width: 768px) and (min-width: 601px) {
+  .emoji-picker-container {
+    width: 320px;
+  }
+}
+
+/* Mobile: Responsive emoji picker */
+@media (max-width: 600px) {
+  .emoji-picker-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+    margin-top: 0;
+    width: calc(100vw - 40px);
+    max-width: 340px;
+    max-height: 70vh;
+  }
+  
+  .emoji-picker-container aside.EmojiPickerReact {
+    width: 100% !important;
+    max-height: 70vh;
+  }
+  
+  .emoji-picker-container .epr-body {
+    max-height: calc(70vh - 100px);
+  }
+  
+  /* Add backdrop for mobile emoji picker */
+  .emoji-picker-container::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+}
+
+/* Ensure emoji picker doesn't cause horizontal scroll */
+.emoji-picker-container aside.EmojiPickerReact {
+  box-sizing: border-box;
+}
+
+/* Fix for small screens - ensure picker content is scrollable */
+@media (max-width: 600px) {
+  .emoji-picker-container .epr-emoji-category-content {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+}
