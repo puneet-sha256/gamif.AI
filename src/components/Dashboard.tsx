@@ -26,7 +26,7 @@ import { aiService } from '../client/services/aiService'
 import { userService } from '../client/services/userService'
 import { apiClient } from '../client/services/apiClient'
 import { calculateLevelProgress } from '../utils/levelCalculation'
-import { calculateStreakMultiplier, formatMultiplier, calculateStreaksFromHistory } from '../utils/streakCalculation'
+import { calculateStreakMultiplier, formatMultiplier, calculateStreaksFromHistory, calculateDisplayStreaks } from '../utils/streakCalculation'
 
 interface DashboardProps {
   onLogout: () => void
@@ -872,9 +872,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             <h3 className="streak-section-title">🔥 Streak Multipliers</h3>
             <div className="streak-cards">
               {(() => {
-                // Calculate current streaks from activity history
+                // Calculate display streaks (consecutive days with any XP) and multiplier streaks (10+ XP)
                 const today = new Date().toISOString().split('T')[0]
-                const currentStreaks = calculateStreaksFromHistory(user?.activityHistory, today)
+                const displayStreaks = calculateDisplayStreaks(user?.activityHistory?.dailyActivities || [], today)
+                const multiplierStreaks = calculateStreaksFromHistory(user?.activityHistory, today)
                 
                 return (
                   <>
@@ -885,10 +886,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                       </div>
                       <div className="streak-info">
                         <div className="streak-count">
-                          {currentStreaks.strengthStreak} day{currentStreaks.strengthStreak !== 1 ? 's' : ''}
+                          {displayStreaks.strengthStreak} day{displayStreaks.strengthStreak !== 1 ? 's' : ''}
                         </div>
                         <div className="streak-multiplier">
-                          {formatMultiplier(calculateStreakMultiplier(currentStreaks.strengthStreak))}
+                          {formatMultiplier(calculateStreakMultiplier(multiplierStreaks.strengthStreak))}
                         </div>
                       </div>
                     </div>
@@ -900,10 +901,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                       </div>
                       <div className="streak-info">
                         <div className="streak-count">
-                          {currentStreaks.intelligenceStreak} day{currentStreaks.intelligenceStreak !== 1 ? 's' : ''}
+                          {displayStreaks.intelligenceStreak} day{displayStreaks.intelligenceStreak !== 1 ? 's' : ''}
                         </div>
                         <div className="streak-multiplier">
-                          {formatMultiplier(calculateStreakMultiplier(currentStreaks.intelligenceStreak))}
+                          {formatMultiplier(calculateStreakMultiplier(multiplierStreaks.intelligenceStreak))}
                         </div>
                       </div>
                     </div>
@@ -915,10 +916,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                       </div>
                       <div className="streak-info">
                         <div className="streak-count">
-                          {currentStreaks.charismaStreak} day{currentStreaks.charismaStreak !== 1 ? 's' : ''}
+                          {displayStreaks.charismaStreak} day{displayStreaks.charismaStreak !== 1 ? 's' : ''}
                         </div>
                         <div className="streak-multiplier">
-                          {formatMultiplier(calculateStreakMultiplier(currentStreaks.charismaStreak))}
+                          {formatMultiplier(calculateStreakMultiplier(multiplierStreaks.charismaStreak))}
                         </div>
                       </div>
                     </div>
@@ -927,9 +928,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               })()}
             </div>
             <p className="streak-description">
-              Earn 10+ XP in a category daily to build your streak! Multipliers boost your shard rewards. 
+              Streak shows consecutive days with any activity. Multipliers require 10+ XP daily and use soft decay. 
               {user?.activityHistory?.streakCache && 
-                ` Last calculated: ${new Date(user.activityHistory.streakCache.asOfDate).toLocaleDateString()}`
+                ` Multipliers cached: ${new Date(user.activityHistory.streakCache.asOfDate).toLocaleDateString()}`
               }
             </p>
           </div>

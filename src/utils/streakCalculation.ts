@@ -6,7 +6,21 @@
 
 import type { ActivityHistory, DailyActivity, StreakCache } from '../shared/types/user.types'
 
+/**
+ * Multiplier streaks - used for calculating reward bonuses
+ * Requires 10+ XP per day, uses soft decay on missed days
+ */
 export interface CategoryStreaks {
+  strengthStreak: number
+  intelligenceStreak: number
+  charismaStreak: number
+}
+
+/**
+ * Display streaks - shown on dashboard
+ * Counts consecutive days with any XP (1+), breaks on missed day
+ */
+export interface DisplayStreaks {
   strengthStreak: number
   intelligenceStreak: number
   charismaStreak: number
@@ -74,8 +88,81 @@ export function getPreviousDate(dateStr: string): string {
 }
 
 /**
+ * Calculate display streaks (consecutive days with ANY XP)
+ * Pure consecutive day count, breaks on missed day
+ * Used for dashboard display to show user engagement
+ * 
+ * @param activities - Array of daily activities
+ * @param targetDate - Date to calculate streak up to (not including)
+ * @returns Display streaks (consecutive days with 1+ XP)
+ */
+export function calculateDisplayStreaks(
+  activities: DailyActivity[],
+  targetDate: string
+): DisplayStreaks {
+  const streaks: DisplayStreaks = {
+    strengthStreak: 0,
+    intelligenceStreak: 0,
+    charismaStreak: 0
+  }
+
+  if (activities.length === 0) {
+    return streaks
+  }
+
+  // Create a map for quick date lookup
+  const activityMap = new Map<string, DailyActivity>()
+  activities.forEach(a => activityMap.set(a.date, a))
+  
+  // Start from yesterday and work backwards
+  let currentDate = getPreviousDate(targetDate)
+  
+  // Count consecutive days - stop when any category has no activity
+  while (true) {
+    const activity = activityMap.get(currentDate)
+    
+    if (!activity) {
+      // No activity for this date - all streaks end
+      break
+    }
+    
+    // Count day if category has ANY XP (1+)
+    if (activity.strength > 0) {
+      streaks.strengthStreak++
+    } else {
+      // This category's streak ends here, but continue for other categories
+    }
+    
+    if (activity.intelligence > 0) {
+      streaks.intelligenceStreak++
+    }
+    
+    if (activity.charisma > 0) {
+      streaks.charismaStreak++
+    }
+    
+    // Move to previous day
+    currentDate = getPreviousDate(currentDate)
+    
+    // Safety check: don't go back more than 1 year
+    if (daysBetween(currentDate, targetDate) > 365) {
+      break
+    }
+    
+    // If all categories have failed (hit a day with 0 XP), we can stop
+    // But we need to continue as long as at least one category is active
+    const allFailed = activity.strength === 0 && activity.intelligence === 0 && activity.charisma === 0
+    if (allFailed) {
+      break
+    }
+  }
+
+  return streaks
+}
+
+/**
  * Calculate streak from scratch by iterating through activity history
- * Starts from the beginning and counts consecutive days with 10+ XP
+ * Works FORWARD through time, applying increments for qualifying days and decay for missing/failing days
  * 
  * @param activities - Sorted array of daily activities (oldest to newest)
  * @param targetDate - Date to calculate streak up to (not including)
@@ -105,52 +192,42 @@ function calculateStreakFromScratch(
     return streaks
   }
 
-  // Start from the most recent activity and work backwards
-  let currentDate = getPreviousDate(targetDate)
-  let expectedDate = currentDate
+  // Process forward through time
+  let lastProcessedDate: string | null = null
   
-  for (let i = relevantActivities.length - 1; i >= 0; i--) {
-    const activity = relevantActivities[i]
-    
-    // Check if this activity is on the expected date
-    if (activity.date === expectedDate) {
-      // Increment streaks for categories with 10+ XP
-      if (activity.strength >= 10) {
-        streaks.strengthStreak++
-      }
-      if (activity.intelligence >= 10) {
-        streaks.intelligenceStreak++
-      }
-      if (activity.charisma >= 10) {
-        streaks.charismaStreak++
-      }
+  for (const activity of relevantActivities) {
+    // Check for gaps (missed days between last activity and this one)
+    if (lastProcessedDate) {
+      const daysSince = daysBetween(lastProcessedDate, activity.date)
       
-      // Move to previous day
-      expectedDate = getPreviousDate(expectedDate)
-    } else if (activity.date < expectedDate) {
-      // Gap detected - apply decay for missed days
-      const daysMissed = daysBetween(activity.date, expectedDate)
-      
-      for (let j = 0; j < daysMissed; j++) {
+      // Apply decay for each missed day
+      for (let i = 1; i < daysSince; i++) {
         streaks.strengthStreak = applyStreakDecay(streaks.strengthStreak)
         streaks.intelligenceStreak = applyStreakDecay(streaks.intelligenceStreak)
         streaks.charismaStreak = applyStreakDecay(streaks.charismaStreak)
       }
-      
-      // Process this activity if it has 10+ XP
-      if (activity.strength >= 10) {
-        streaks.strengthStreak++
-      }
-      if (activity.intelligence >= 10) {
-        streaks.intelligenceStreak++
-      }
-      if (activity.charisma >= 10) {
-        streaks.charismaStreak++
-      }
-      
-      expectedDate = getPreviousDate(activity.date)
     }
-    // If activity.date > expectedDate, skip it (shouldn't happen with proper filtering)
+    
+    // Process this day's activity
+    if (activity.strength >= 10) {
+      streaks.strengthStreak++
+    } else {
+      streaks.strengthStreak = applyStreakDecay(streaks.strengthStreak)
+    }
+    
+    if (activity.intelligence >= 10) {
+      streaks.intelligenceStreak++
+    } else {
+      streaks.intelligenceStreak = applyStreakDecay(streaks.intelligenceStreak)
+    }
+    
+    if (activity.charisma >= 10) {
+      streaks.charismaStreak++
+    } else {
+      streaks.charismaStreak = applyStreakDecay(streaks.charismaStreak)
+    }
+    
+    lastProcessedDate = activity.date
   }
 
   return streaks
@@ -158,7 +235,8 @@ function calculateStreakFromScratch(
 
 /**
  * Calculate streak incrementally from cache
- * Only processes days between cache date and target date
+ * Uses cached values and only processes days after cache date
+ * Each category's streak continues independently based on consecutive days
  * 
  * @param cache - Cached streak data
  * @param activities - Array of daily activities
@@ -176,79 +254,59 @@ function calculateIncrementalStreak(
     charismaStreak: cache.charismaStreak
   }
 
-  // Get activities between cache date and target date (exclusive)
-  const relevantActivities = activities.filter(
-    a => a.date > cache.asOfDate && a.date < targetDate
-  ).sort((a, b) => a.date.localeCompare(b.date))
-
-  if (relevantActivities.length === 0) {
-    // No activities between cache and target - apply decay for all missed days
-    const daysMissed = daysBetween(cache.asOfDate, getPreviousDate(targetDate))
+  // Create a map for quick date lookup
+  const activityMap = new Map<string, DailyActivity>()
+  activities.forEach(a => activityMap.set(a.date, a))
+  
+  // Start from the day after cache date and go forward to yesterday
+  let currentDate = cache.asOfDate
+  const yesterday = getPreviousDate(targetDate)
+  
+  // Process each day from cache date to yesterday
+  while (currentDate < yesterday) {
+    currentDate = getNextDate(currentDate)
+    const activity = activityMap.get(currentDate)
     
-    for (let i = 0; i < daysMissed; i++) {
+    if (!activity) {
+      // No activity for this date - apply decay
       streaks.strengthStreak = applyStreakDecay(streaks.strengthStreak)
       streaks.intelligenceStreak = applyStreakDecay(streaks.intelligenceStreak)
       streaks.charismaStreak = applyStreakDecay(streaks.charismaStreak)
-    }
-    
-    return streaks
-  }
-
-  // Process each day from cache date to target date
-  let expectedDate = getPreviousDate(targetDate)
-  
-  for (let i = relevantActivities.length - 1; i >= 0; i--) {
-    const activity = relevantActivities[i]
-    
-    if (activity.date === expectedDate) {
-      // Activity on expected date
+    } else {
+      // Check each category independently
       if (activity.strength >= 10) {
         streaks.strengthStreak++
+      } else {
+        streaks.strengthStreak = applyStreakDecay(streaks.strengthStreak)
       }
+      
       if (activity.intelligence >= 10) {
         streaks.intelligenceStreak++
+      } else {
+        streaks.intelligenceStreak = applyStreakDecay(streaks.intelligenceStreak)
       }
+      
       if (activity.charisma >= 10) {
         streaks.charismaStreak++
-      }
-      
-      expectedDate = getPreviousDate(expectedDate)
-    } else if (activity.date < expectedDate) {
-      // Gap detected
-      const daysMissed = daysBetween(activity.date, expectedDate)
-      
-      for (let j = 0; j < daysMissed; j++) {
-        streaks.strengthStreak = applyStreakDecay(streaks.strengthStreak)
-        streaks.intelligenceStreak = applyStreakDecay(streaks.intelligenceStreak)
+      } else {
         streaks.charismaStreak = applyStreakDecay(streaks.charismaStreak)
       }
-      
-      if (activity.strength >= 10) {
-        streaks.strengthStreak++
-      }
-      if (activity.intelligence >= 10) {
-        streaks.intelligenceStreak++
-      }
-      if (activity.charisma >= 10) {
-        streaks.charismaStreak++
-      }
-      
-      expectedDate = getPreviousDate(activity.date)
-    }
-  }
-  
-  // Handle any remaining gap between earliest activity and cache date
-  if (expectedDate > cache.asOfDate) {
-    const daysMissed = daysBetween(cache.asOfDate, expectedDate)
-    
-    for (let i = 0; i < daysMissed; i++) {
-      streaks.strengthStreak = applyStreakDecay(streaks.strengthStreak)
-      streaks.intelligenceStreak = applyStreakDecay(streaks.intelligenceStreak)
-      streaks.charismaStreak = applyStreakDecay(streaks.charismaStreak)
     }
   }
 
   return streaks
+}
+
+/**
+ * Get the date for tomorrow relative to a given date
+ * 
+ * @param dateStr - ISO date string (YYYY-MM-DD)
+ * @returns ISO date string for the next day
+ */
+function getNextDate(dateStr: string): string {
+  const date = new Date(dateStr)
+  date.setDate(date.getDate() + 1)
+  return date.toISOString().split('T')[0]
 }
 
 /**
