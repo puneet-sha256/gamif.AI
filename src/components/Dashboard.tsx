@@ -526,6 +526,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           }
         })
 
+        console.log('📊 Claiming rewards for date:', date)
+        console.log('📦 Base shards breakdown:', baseShardsBreakdown)
+        console.log('💰 Total shards:', dateRewards.totalShards)
+        
         const result = await userService.claimRewards({
           sessionId,
           totalXP: dateRewards.totalXP,
@@ -535,6 +539,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           charismaXP: dateRewards.charismaXP,
           activityDate: date,
           baseShardsBreakdown
+        })
+        
+        console.log('🎯 Claim result:', {
+          baseShards: result.baseShards,
+          finalShards: result.finalShards,
+          multipliers: result.appliedMultipliers
         })
         
         if (!result.success) {

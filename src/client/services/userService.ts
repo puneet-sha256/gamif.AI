@@ -102,14 +102,20 @@ class UserService {
         activityDate: data.activityDate
       })
 
-      // Get multipliers from experience result
-      const multipliers = experienceResult.metadata?.multipliers
+      // Get multipliers from experience result (they're in changes, not metadata)
+      const multipliers = experienceResult.changes?.multipliers
+      
+      console.log('🔍 Experience result changes:', experienceResult.changes)
+      console.log('🔍 Experience result metadata:', experienceResult.metadata)
+      console.log('✨ Multipliers received:', multipliers)
+      console.log('📦 Base shards breakdown:', data.baseShardsBreakdown)
 
       // Calculate final shards with multipliers
       let finalShards = data.totalShards
       let baseShards = data.totalShards
 
       if (multipliers && data.baseShardsBreakdown) {
+        console.log('🎲 Applying multipliers...')
         // Apply multipliers to each category's shards
         const strengthShards = Number((data.baseShardsBreakdown.strength * multipliers.strength).toFixed(2))
         const intelligenceShards = Number((data.baseShardsBreakdown.intelligence * multipliers.intelligence).toFixed(2))
@@ -118,6 +124,15 @@ class UserService {
         finalShards = Number((strengthShards + intelligenceShards + charismaShards).toFixed(2))
         baseShards = Number((data.baseShardsBreakdown.strength + data.baseShardsBreakdown.intelligence + data.baseShardsBreakdown.charisma).toFixed(2))
         
+        console.log('💎 Shard calculations:', {
+          strengthShards,
+          intelligenceShards,
+          charismaShards,
+          baseShards,
+          finalShards
+        })
+      } else {
+        console.log('⚠️ No multipliers or breakdown, using base shards:', data.totalShards)
       }
 
       // Update shards with the multiplied amount

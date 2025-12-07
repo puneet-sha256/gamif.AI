@@ -52,7 +52,7 @@ export function calculateStreakMultiplier(streak: number): number {
  * Formula: floor(oldStreak * 0.65)
  * 
  * @param streak - Current streak value
- * @returns Decayed streak value
+ * @returns Decayed streak value (floored to integer)
  */
 export function applyStreakDecay(streak: number): number {
   if (streak <= 0) {
@@ -82,8 +82,8 @@ export function daysBetween(date1: string, date2: string): number {
  * @returns ISO date string for the previous day
  */
 export function getPreviousDate(dateStr: string): string {
-  const date = new Date(dateStr)
-  date.setDate(date.getDate() - 1)
+  const date = new Date(dateStr + 'T00:00:00.000Z')
+  date.setUTCDate(date.getUTCDate() - 1)
   return date.toISOString().split('T')[0]
 }
 
@@ -91,6 +91,7 @@ export function getPreviousDate(dateStr: string): string {
  * Calculate display streaks (consecutive days with ANY XP)
  * Pure consecutive day count, breaks on missed day
  * Used for dashboard display to show user engagement
+ * Each category tracks independently - gaps only affect that specific category
  * 
  * @param activities - Array of daily activities
  * @param targetDate - Date to calculate streak up to (not including)
@@ -114,47 +115,62 @@ export function calculateDisplayStreaks(
   const activityMap = new Map<string, DailyActivity>()
   activities.forEach(a => activityMap.set(a.date, a))
   
+  // Track which categories are still active (haven't broken yet)
+  const categoryActive = {
+    strength: true,
+    intelligence: true,
+    charisma: true
+  }
+  
   // Start from yesterday and work backwards
   let currentDate = getPreviousDate(targetDate)
   
-  // Count consecutive days - stop when any category has no activity
-  while (true) {
-    const activity = activityMap.get(currentDate)
+  // Count consecutive days - each category independently
+  let iterationCount = 0
+  const maxIterations = 365 // Safety limit
+  
+  while (iterationCount < maxIterations) {
+    iterationCount++
     
-    if (!activity) {
-      // No activity for this date - all streaks end
+    // If all categories have broken, we can stop
+    if (!categoryActive.strength && !categoryActive.intelligence && !categoryActive.charisma) {
       break
     }
     
-    // Count day if category has ANY XP (1+)
-    if (activity.strength > 0) {
-      streaks.strengthStreak++
-    } else {
-      // This category's streak ends here, but continue for other categories
+    const activity = activityMap.get(currentDate)
+    
+    if (!activity) {
+      // No activity for this date - all remaining active streaks end
+      break
     }
     
-    if (activity.intelligence > 0) {
-      streaks.intelligenceStreak++
+    // Count day if category has ANY XP (1+) and is still active
+    if (categoryActive.strength) {
+      if (activity.strength > 0) {
+        streaks.strengthStreak++
+      } else {
+        categoryActive.strength = false // This category's streak ends
+      }
     }
     
-    if (activity.charisma > 0) {
-      streaks.charismaStreak++
+    if (categoryActive.intelligence) {
+      if (activity.intelligence > 0) {
+        streaks.intelligenceStreak++
+      } else {
+        categoryActive.intelligence = false
+      }
+    }
+    
+    if (categoryActive.charisma) {
+      if (activity.charisma > 0) {
+        streaks.charismaStreak++
+      } else {
+        categoryActive.charisma = false
+      }
     }
     
     // Move to previous day
     currentDate = getPreviousDate(currentDate)
-    
-    // Safety check: don't go back more than 1 year
-    if (daysBetween(currentDate, targetDate) > 365) {
-      break
-    }
-    
-    // If all categories have failed (hit a day with 0 XP), we can stop
-    // But we need to continue as long as at least one category is active
-    const allFailed = activity.strength === 0 && activity.intelligence === 0 && activity.charisma === 0
-    if (allFailed) {
-      break
-    }
   }
 
   return streaks
@@ -210,19 +226,19 @@ function calculateStreakFromScratch(
     
     // Process this day's activity
     if (activity.strength >= 10) {
-      streaks.strengthStreak++
+      streaks.strengthStreak += 1
     } else {
       streaks.strengthStreak = applyStreakDecay(streaks.strengthStreak)
     }
     
     if (activity.intelligence >= 10) {
-      streaks.intelligenceStreak++
+      streaks.intelligenceStreak += 1
     } else {
       streaks.intelligenceStreak = applyStreakDecay(streaks.intelligenceStreak)
     }
     
     if (activity.charisma >= 10) {
-      streaks.charismaStreak++
+      streaks.charismaStreak += 1
     } else {
       streaks.charismaStreak = applyStreakDecay(streaks.charismaStreak)
     }
@@ -275,19 +291,19 @@ function calculateIncrementalStreak(
     } else {
       // Check each category independently
       if (activity.strength >= 10) {
-        streaks.strengthStreak++
+        streaks.strengthStreak += 1
       } else {
         streaks.strengthStreak = applyStreakDecay(streaks.strengthStreak)
       }
       
       if (activity.intelligence >= 10) {
-        streaks.intelligenceStreak++
+        streaks.intelligenceStreak += 1
       } else {
         streaks.intelligenceStreak = applyStreakDecay(streaks.intelligenceStreak)
       }
       
       if (activity.charisma >= 10) {
-        streaks.charismaStreak++
+        streaks.charismaStreak += 1
       } else {
         streaks.charismaStreak = applyStreakDecay(streaks.charismaStreak)
       }
@@ -304,8 +320,8 @@ function calculateIncrementalStreak(
  * @returns ISO date string for the next day
  */
 function getNextDate(dateStr: string): string {
-  const date = new Date(dateStr)
-  date.setDate(date.getDate() + 1)
+  const date = new Date(dateStr + 'T00:00:00.000Z')
+  date.setUTCDate(date.getUTCDate() + 1)
   return date.toISOString().split('T')[0]
 }
 
@@ -367,25 +383,39 @@ export function updateStreakCache(
   activityHistory: ActivityHistory,
   activityDate: string
 ): StreakCache {
-  // Calculate streaks up to and including this activity date
-  const streaks = calculateStreaksFromHistory(activityHistory, getPreviousDate(activityDate))
+  // Calculate streaks up to (but not including) this activity date
+  // This gives us the streak as of yesterday
+  const streaks = calculateStreaksFromHistory(activityHistory, activityDate)
   
-  // Find the activity for this date to check if streaks should increment
+  // Find the activity for this date to check if streaks should increment or decay
   const activity = activityHistory.dailyActivities.find(a => a.date === activityDate)
   
   const updatedStreaks = { ...streaks }
   
   if (activity) {
-    // Increment streaks for categories with 10+ XP
+    // Increment streaks for categories with 10+ XP, apply decay for < 10 XP
     if (activity.strength >= 10) {
-      updatedStreaks.strengthStreak++
+      updatedStreaks.strengthStreak += 1
+    } else {
+      updatedStreaks.strengthStreak = applyStreakDecay(updatedStreaks.strengthStreak)
     }
+    
     if (activity.intelligence >= 10) {
-      updatedStreaks.intelligenceStreak++
+      updatedStreaks.intelligenceStreak += 1
+    } else {
+      updatedStreaks.intelligenceStreak = applyStreakDecay(updatedStreaks.intelligenceStreak)
     }
+    
     if (activity.charisma >= 10) {
-      updatedStreaks.charismaStreak++
+      updatedStreaks.charismaStreak += 1
+    } else {
+      updatedStreaks.charismaStreak = applyStreakDecay(updatedStreaks.charismaStreak)
     }
+  } else {
+    // No activity found (edge case) - apply decay to all categories
+    updatedStreaks.strengthStreak = applyStreakDecay(updatedStreaks.strengthStreak)
+    updatedStreaks.intelligenceStreak = applyStreakDecay(updatedStreaks.intelligenceStreak)
+    updatedStreaks.charismaStreak = applyStreakDecay(updatedStreaks.charismaStreak)
   }
   
   return {
