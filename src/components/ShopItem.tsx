@@ -33,7 +33,7 @@ const ShopItem: React.FC<ShopItemProps> = ({
     
     // Show custom confirmation dialog before buying
     const confirmed = await showConfirm(
-      `Are you sure you want to buy "${title}" for ${price} 💎 shards?\n\nYou currently have ${userShards} 💎 shards.`,
+      `Are you sure you want to buy "${title}" for ${price.toFixed(2)} 💎 shards?\n\nYou currently have ${userShards.toFixed(2)} 💎 shards.`,
       'Buy',
       'Cancel'
     )
@@ -49,14 +49,14 @@ const ShopItem: React.FC<ShopItemProps> = ({
       <div className="item-info">
         <h4>{title}</h4>
         <p>{description}</p>
-        <div className="item-price">{price} 💎</div>
+        <div className="item-price">{price.toFixed(2)} 💎</div>
       </div>
       <div className="shop-item-actions">
         <button 
           className="buy-button" 
           disabled={!canAfford}
           onClick={handleBuyClick}
-          title={canAfford ? `Buy ${title} for ${price} 💎` : `Not enough shards (need ${price} 💎)`}
+          title={canAfford ? `Buy ${title} for ${price.toFixed(2)} 💎` : `Not enough shards (need ${price.toFixed(2)} 💎)`}
         >
           Buy
         </button>

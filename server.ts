@@ -24,7 +24,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
   : [
       'http://localhost:5173',
-      'https://turbo-couscous-4v94xq5rg6xfjpgg-5173.app.github.dev'
+      'https://stunning-enigma-q4grwvjxxpjh9g7r-5173.app.github.dev'
     ]
 
 // -----------------------------

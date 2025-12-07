@@ -18,6 +18,15 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 - **Persistent Rewards** - Rewards are saved until you're ready to claim them
 - **Batch Claiming** - Claim all pending rewards at once with a single click
 
+### 🔥 **Streak System & Multipliers**
+- **Category-Based Streaks** - Track separate streaks for Strength, Intelligence, and Charisma
+- **Daily Streak Requirements** - Earn 10+ XP in a category to maintain/increase its streak
+- **Soft Decay Mechanism** - Missed days apply gentle decay: `floor(oldStreak * 0.65)` instead of full reset
+- **Progressive Multipliers** - Streak bonuses apply to shard rewards: `1 + (streak ** 0.6) * 0.05`
+- **Visual Streak Display** - Dashboard cards show current streaks and active multipliers for each category
+- **Reward Breakdown** - Claim messages show base rewards, streak bonuses, and final totals
+- **Precision Tracking** - All shard values displayed with 2 decimal places for accurate streak impact
+
 ### 🔐 **Authentication & Profile System**
 - Secure user registration and login system
 - Personalized player profile creation

@@ -59,7 +59,7 @@ export const AI_CONFIGS: Record<AIPromptType, AIPromptConfig> = {
     deployment: 'gpt-4o',
     apiVersion: '2024-12-01-preview',
     modelName: 'gpt-4o',
-    temperature: 0.7,
+    temperature: 0.2,
     maxTokens: 2048,
     responseFormat: 'json'
   },
