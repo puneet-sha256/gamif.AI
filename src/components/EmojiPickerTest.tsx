@@ -91,29 +91,32 @@ const EmojiPickerTest: React.FC = () => {
                 ref={buttonRef}
                 type="button"
                 onClick={() => setShowPicker(!showPicker)}
-                className="btn btn-secondary"
-                style={{ 
-                  minWidth: 'auto',
-                  padding: '14px 20px',
-                  fontSize: '1.2rem'
-                }}
+                className="btn btn-secondary emoji-picker-btn"
+                style={{ fontSize: '1.2rem' }}
                 title="Pick an emoji"
               >
                 😀
               </button>
             </div>
             {showPicker && (
-              <div 
-                ref={pickerRef}
-                className="emoji-picker-container"
-              >
-                <EmojiPicker
-                  onEmojiClick={handleEmojiClick}
-                  searchPlaceHolder="Search emoji..."
-                  width="100%"
-                  height={400}
+              <>
+                {/* Backdrop for mobile view */}
+                <div 
+                  className="emoji-picker-backdrop"
+                  onClick={() => setShowPicker(false)}
                 />
-              </div>
+                <div 
+                  ref={pickerRef}
+                  className="emoji-picker-container"
+                >
+                  <EmojiPicker
+                    onEmojiClick={handleEmojiClick}
+                    searchPlaceHolder="Search emoji..."
+                    width="100%"
+                    height={400}
+                  />
+                </div>
+              </>
             )}
           </div>
           <small className="form-hint">
@@ -130,7 +133,7 @@ const EmojiPickerTest: React.FC = () => {
         }}>
           <strong>Test Instructions:</strong>
           <ul style={{ margin: '10px 0', paddingLeft: '20px' }}>
-            <li>Desktop (>768px): Picker appears below button, 350px wide</li>
+            <li>Desktop (&gt;768px): Picker appears below button, 350px wide</li>
             <li>Tablet (601-768px): Picker appears below button, 320px wide</li>
             <li>Mobile (≤600px): Picker appears centered with backdrop</li>
             <li>Resize window to test all breakpoints</li>

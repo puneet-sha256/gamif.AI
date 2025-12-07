@@ -219,6 +219,14 @@
   transform: translateY(-1px);
 }
 
+/* Emoji Picker Button - Override min-width */
+.emoji-picker-btn {
+  min-width: auto !important;
+  width: auto !important;
+  flex-shrink: 0;
+  padding: 14px 16px !important;
+}
+
 /* Form Select Styles */
 .form-select {
   width: 100%;
@@ -485,6 +493,7 @@ aside.EmojiPickerReact .epr-icn-search {
     width: calc(100vw - 40px);
     max-width: 340px;
     max-height: 70vh;
+    z-index: 10001; /* Higher z-index for mobile */
   }
   
   .emoji-picker-container aside.EmojiPickerReact {
@@ -495,25 +504,42 @@ aside.EmojiPickerReact .epr-icn-search {
   .emoji-picker-container .epr-body {
     /* Subtract approximate height of search bar and category tabs (~100px) */
     max-height: calc(70vh - 100px);
-  }
-  
-  /* Backdrop for mobile emoji picker - pointer events handled by parent */
-  .emoji-picker-container::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
-    pointer-events: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   /* Ensure picker content is scrollable on small screens */
   .emoji-picker-container .epr-emoji-category-content {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Backdrop overlay for mobile emoji picker */
+.emoji-picker-backdrop {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .emoji-picker-backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    animation: fadeIn 0.2s ease-in-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 

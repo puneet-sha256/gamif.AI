@@ -203,29 +203,32 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
                   type="button"
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                   disabled={isSaving}
-                  className="btn btn-secondary"
-                  style={{ 
-                    minWidth: 'auto',
-                    padding: '14px 20px',
-                    fontSize: '1.2rem'
-                  }}
+                  className="btn btn-secondary emoji-picker-btn"
+                  style={{ fontSize: '1.2rem' }}
                   title="Pick an emoji"
                 >
                   😀
                 </button>
               </div>
               {showEmojiPicker && (
-                <div 
-                  ref={emojiPickerRef}
-                  className="emoji-picker-container"
-                >
-                  <EmojiPicker
-                    onEmojiClick={handleEmojiClick}
-                    searchPlaceHolder="Search emoji..."
-                    width="100%"
-                    height={400}
+                <>
+                  {/* Backdrop for mobile view */}
+                  <div 
+                    className="emoji-picker-backdrop"
+                    onClick={() => setShowEmojiPicker(false)}
                   />
-                </div>
+                  <div 
+                    ref={emojiPickerRef}
+                    className="emoji-picker-container"
+                  >
+                    <EmojiPicker
+                      onEmojiClick={handleEmojiClick}
+                      searchPlaceHolder="Search emoji..."
+                      width="100%"
+                      height={400}
+                    />
+                  </div>
+                </>
               )}
             </div>
             <small className="form-hint">Use an emoji to represent this item</small>
