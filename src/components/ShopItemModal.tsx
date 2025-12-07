@@ -226,6 +226,10 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
                       searchPlaceHolder="Search emoji..."
                       width="100%"
                       height={400}
+                      skinTonesDisabled
+                      previewConfig={{ showPreview: false }}
+                      searchDisabled={false}
+                      lazyLoadEmojis={true}
                     />
                   </div>
                 </>

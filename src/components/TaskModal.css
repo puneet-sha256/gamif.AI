@@ -560,4 +560,34 @@ aside.EmojiPickerReact .epr-icn-search {
 /* Ensure emoji picker doesn't cause horizontal scroll */
 .emoji-picker-container aside.EmojiPickerReact {
   box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* Hide skin tone selector and preview */
+.emoji-picker-container .epr-skin-tones,
+.emoji-picker-container .epr-preview {
+  display: none !important;
+}
+
+/* Ensure emoji picker body fits properly */
+.emoji-picker-container .epr-body {
+  overflow-x: hidden !important;
+}
+
+/* Prevent horizontal overflow in mobile */
+@media (max-width: 600px) {
+  .emoji-picker-container aside.EmojiPickerReact {
+    overflow: hidden;
+  }
+  
+  .emoji-picker-container .epr-emoji-category-content {
+    overflow-x: hidden !important;
+  }
+  
+  /* Hide category navigation on mobile only */
+  .emoji-picker-container nav,
+  .emoji-picker-container [class*="category-nav"],
+  .emoji-picker-container .epr-category-nav {
+    display: none !important;
+  }
 }
