@@ -20,7 +20,7 @@ import {
   TASK_CATEGORIES,
   type MappedTaskItem
 } from '../utils/taskMapping'
-import type { GeneratedTasks, GeneratedTask } from '../types'
+import type { GeneratedTask } from '../types'
 import { userDatabase } from '../client/services/fileUserDatabase'
 import { aiService } from '../client/services/aiService'
 import { userService } from '../client/services/userService'
@@ -35,14 +35,13 @@ interface DashboardProps {
 type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
-  const { user, logout, getUserTasks, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, buyShopItem, useInventoryItem, updateUser, refreshUserTasks } = useAuth()
+  const { user, logout, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, buyShopItem, useInventoryItem, updateUser, refreshUserTasks } = useAuth()
   const { showSuccess, showError, showWarning, showInfo } = useAlert()
   const { showConfirm } = useConfirm()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
   const [showDailyInput, setShowDailyInput] = useState(false)
   const [dailyActivity, setDailyActivity] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [generatedTasks, setGeneratedTasks] = useState<GeneratedTasks | null>(null)
   const [isLoadingTasks, setIsLoadingTasks] = useState(false)
   
   // Task modal state (unified for add and edit)
@@ -63,16 +62,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   // Window width state for responsive chart sizing
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
-  useEffect(() => {
-    if (user) {
-      
-      
-      // Set generated tasks from user data
-      setGeneratedTasks(user.generatedTasks || null)
-    } else {
-    }
-  }, [user])
-
   // Track window resize for responsive chart
   useEffect(() => {
     const handleResize = () => {
@@ -83,59 +72,33 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Function to load fresh generated tasks
-  const loadGeneratedTasks = async () => {
-    setIsLoadingTasks(true)
-    try {
-      const tasks = await getUserTasks()
-      setGeneratedTasks(tasks)
-      
-      if (tasks && hasGeneratedTasks(tasks)) {
-        
-      } else {
-        
-        // Check if user has goals data to generate tasks from
-        if (user?.goalsData && user?.profileData) {
-          
-          const sessionId = userDatabase.getSessionId()
-          if (sessionId) {
-            try {
-              const result = await aiService.generateTasks(
-                sessionId,
-                user.goalsData,
-                user.profileData
-              )
-              
-              if (result.success && result.data?.generatedTasks) {
-                setGeneratedTasks(result.data.generatedTasks)
-                
-                // Refresh user data to sync with backend
-                const freshTasks = await getUserTasks()
-                if (freshTasks) {
-                  setGeneratedTasks(freshTasks)
-                }
-              } else {
-              }
-            } catch (error) {
-              console.error('❌ Dashboard: Error generating tasks:', error)
-            }
-          } else {
+  // Generate tasks if user has goals but no tasks yet
+  useEffect(() => {
+    const generateInitialTasks = async () => {
+      if (user && user.goalsData && user.profileData && !hasGeneratedTasks(user.generatedTasks)) {
+        setIsLoadingTasks(true)
+        const sessionId = userDatabase.getSessionId()
+        if (sessionId) {
+          try {
+            await aiService.generateTasks(sessionId, user.goalsData, user.profileData)
+            // User will be refreshed automatically by the AI service
+            await refreshUserTasks()
+          } catch (error) {
+            console.error('❌ Dashboard: Error generating tasks:', error)
+          } finally {
+            setIsLoadingTasks(false)
           }
-        } else {
         }
       }
-    } catch (error) {
-      console.error('❌ Dashboard: Error loading generated tasks:', error)
-    } finally {
-      setIsLoadingTasks(false)
     }
-  }
+    generateInitialTasks()
+  }, [user?.id, user?.goalsData, user?.profileData, refreshUserTasks])
 
   // Handle task edit - opens modal with task data
   const handleEditTask = (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma') => {
-    if (!generatedTasks) return
+    if (!user?.generatedTasks) return
     
-    const tasks = generatedTasks[category]
+    const tasks = user.generatedTasks[category]
     const task = tasks?.find(t => t.id === taskId)
     
     if (task) {
@@ -150,12 +113,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   // Handle task delete
   const handleDeleteTask = async (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma') => {
     const success = await deleteGeneratedTask(taskId, category)
-    if (success) {
-      // Refresh tasks
-      await loadGeneratedTasks()
-    } else {
+    if (!success) {
       showError('Failed to delete task. Please try again.')
     }
+    // User is already refreshed by deleteGeneratedTask in AuthContext
   }
 
   // Unified handler for both add and edit task
@@ -177,9 +138,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       
       const success = await editGeneratedTask(editingTask.id, editingTask.category as 'Strength' | 'Intelligence' | 'Charisma', updates)
       if (success) {
-        await loadGeneratedTasks()
         setShowTaskModal(false)
         setEditingTask(null)
+        // User is already refreshed by editGeneratedTask in AuthContext
       } else {
         throw new Error('Failed to update task')
       }
@@ -199,8 +160,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         shards: task.shards
       })
       if (success) {
-        await loadGeneratedTasks()
         setShowTaskModal(false)
+        // User is already refreshed by addUserTask in AuthContext
       } else {
         throw new Error('Failed to add task')
       }
@@ -291,8 +252,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       }
 
       // Prepare current tasks data to send to the AI
-      const currentTasks = generatedTasks ? {
-        Strength: generatedTasks.Strength?.map(task => ({
+      const currentTasks = user && user.generatedTasks ? {
+        Strength: user.generatedTasks.Strength?.map(task => ({
           id: task.id,
           title: task.title || '',
           description: task.description,
@@ -300,7 +261,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           xp: task.xp,
           shards: task.shards
         })),
-        Intelligence: generatedTasks.Intelligence?.map(task => ({
+        Intelligence: user.generatedTasks.Intelligence?.map(task => ({
           id: task.id,
           title: task.title || '',
           description: task.description,
@@ -308,7 +269,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           xp: task.xp,
           shards: task.shards
         })),
-        Charisma: generatedTasks.Charisma?.map(task => ({
+        Charisma: user.generatedTasks.Charisma?.map(task => ({
           id: task.id,
           title: task.title || '',
           description: task.description,
@@ -1088,7 +1049,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
   const renderTasksTab = () => {
     // Check if we have generated tasks
-    const hasUserTasks = hasGeneratedTasks(generatedTasks)
+    const hasUserTasks = hasGeneratedTasks(user?.generatedTasks)
     
     if (isLoadingTasks) {
       return (
@@ -1115,7 +1076,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               <h3>🎯 No Tasks Generated Yet</h3>
               <p>Complete your profile and goals setup to get personalized daily tasks!</p>
               <button 
-                onClick={loadGeneratedTasks}
+                onClick={() => refreshUserTasks()}
                 className="refresh-tasks-btn"
                 disabled={isLoadingTasks}
               >
@@ -1125,7 +1086,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                     Thinking...
                   </>
                 ) : (
-                  <>🔄 Generate Tasks</>
+                  <>🔄 Refresh Tasks</>
                 )}
               </button>
             </div>
@@ -1135,7 +1096,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
 
     // Convert generated tasks to mappable format
-    const mappedTasks = mapGeneratedTasksToTaskItems(generatedTasks!)
+    const mappedTasks = mapGeneratedTasksToTaskItems(user.generatedTasks!)
     const groupedTasks = groupMappedTasksByCategory(mappedTasks)
 
     return (
