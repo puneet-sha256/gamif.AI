@@ -354,21 +354,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           // Calculate combined totals
           const totalXP = (existingRewards?.totalXP || 0) + result.data.rewards.totalXP
           
-          const totalShards = (existingRewards?.totalShards || 0) + result.data.rewards.totalShards
+          const totalShards = Number(((existingRewards?.totalShards || 0) + result.data.rewards.totalShards).toFixed(2))
           
           // Merge category breakdowns
           const categoryBreakdown = {
             Strength: {
               xp: (existingRewards?.categoryBreakdown?.Strength?.xp || 0) + (result.data.rewards.categoryBreakdown?.Strength?.xp || 0),
-              shards: (existingRewards?.categoryBreakdown?.Strength?.shards || 0) + (result.data.rewards.categoryBreakdown?.Strength?.shards || 0)
+              shards: Number(((existingRewards?.categoryBreakdown?.Strength?.shards || 0) + (result.data.rewards.categoryBreakdown?.Strength?.shards || 0)).toFixed(2))
             },
             Intelligence: {
               xp: (existingRewards?.categoryBreakdown?.Intelligence?.xp || 0) + (result.data.rewards.categoryBreakdown?.Intelligence?.xp || 0),
-              shards: (existingRewards?.categoryBreakdown?.Intelligence?.shards || 0) + (result.data.rewards.categoryBreakdown?.Intelligence?.shards || 0)
+              shards: Number(((existingRewards?.categoryBreakdown?.Intelligence?.shards || 0) + (result.data.rewards.categoryBreakdown?.Intelligence?.shards || 0)).toFixed(2))
             },
             Charisma: {
               xp: (existingRewards?.categoryBreakdown?.Charisma?.xp || 0) + (result.data.rewards.categoryBreakdown?.Charisma?.xp || 0),
-              shards: (existingRewards?.categoryBreakdown?.Charisma?.shards || 0) + (result.data.rewards.categoryBreakdown?.Charisma?.shards || 0)
+              shards: Number(((existingRewards?.categoryBreakdown?.Charisma?.shards || 0) + (result.data.rewards.categoryBreakdown?.Charisma?.shards || 0)).toFixed(2))
             }
           }
           
@@ -489,7 +489,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         const dateGroup = activitiesByDate.get(date)!
         dateGroup.activities.push(activity)
         dateGroup.totalXP += activity.xpEarned
-        dateGroup.totalShards += activity.shardsEarned
+        dateGroup.totalShards = Number((dateGroup.totalShards + activity.shardsEarned).toFixed(2))
         
         if (activity.category === 'Strength') {
           dateGroup.strengthXP += activity.xpEarned
@@ -518,11 +518,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         
         dateRewards.activities.forEach(activity => {
           if (activity.category === 'Strength') {
-            baseShardsBreakdown.strength += activity.shardsEarned
+            baseShardsBreakdown.strength = Number((baseShardsBreakdown.strength + activity.shardsEarned).toFixed(2))
           } else if (activity.category === 'Intelligence') {
-            baseShardsBreakdown.intelligence += activity.shardsEarned
+            baseShardsBreakdown.intelligence = Number((baseShardsBreakdown.intelligence + activity.shardsEarned).toFixed(2))
           } else if (activity.category === 'Charisma') {
-            baseShardsBreakdown.charisma += activity.shardsEarned
+            baseShardsBreakdown.charisma = Number((baseShardsBreakdown.charisma + activity.shardsEarned).toFixed(2))
           }
         })
 
@@ -553,14 +553,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         } else {
           // Track base and final shards
           if (result.baseShards !== undefined && result.finalShards !== undefined) {
-            totalBaseShards += result.baseShards
-            totalFinalShards += result.finalShards
+            totalBaseShards = Number((totalBaseShards + result.baseShards).toFixed(2))
+            totalFinalShards = Number((totalFinalShards + result.finalShards).toFixed(2))
             if (result.baseShards !== result.finalShards) {
               hasMultipliers = true
             }
           } else {
-            totalBaseShards += dateRewards.totalShards
-            totalFinalShards += dateRewards.totalShards
+            totalBaseShards = Number((totalBaseShards + dateRewards.totalShards).toFixed(2))
+            totalFinalShards = Number((totalFinalShards + dateRewards.totalShards).toFixed(2))
           }
 
           // Check if we leveled up from this experience result
@@ -708,9 +708,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
         updatedActivities.forEach(act => {
           newTotalXP += act.xpEarned
-          newTotalShards += act.shardsEarned
+          newTotalShards = Number((newTotalShards + act.shardsEarned).toFixed(2))
           newCategoryBreakdown[act.category].xp += act.xpEarned
-          newCategoryBreakdown[act.category].shards += act.shardsEarned
+          newCategoryBreakdown[act.category].shards = Number((newCategoryBreakdown[act.category].shards + act.shardsEarned).toFixed(2))
         })
 
         const updatedRewards = updatedActivities.length > 0 ? {

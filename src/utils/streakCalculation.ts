@@ -353,14 +353,30 @@ export function calculateStreaksFromHistory(
     return calculateStreakFromScratch(activityHistory.dailyActivities, targetDate)
   }
 
-  // Cache is for target date or later - use cached values directly
+  // Cache stores streak AFTER processing that date
+  // We need streak BEFORE targetDate (i.e., as of yesterday)
+  // So cache is only valid if it's for the day before targetDate or earlier
   const cacheDate = cache.asOfDate
-  if (cacheDate >= getPreviousDate(targetDate)) {
+  const yesterdayDate = getPreviousDate(targetDate)
+  
+  if (cacheDate === yesterdayDate) {
+    // Cache is exactly for yesterday - perfect!
     return {
       strengthStreak: cache.strengthStreak,
       intelligenceStreak: cache.intelligenceStreak,
       charismaStreak: cache.charismaStreak
     }
+  }
+  
+  if (cacheDate === targetDate) {
+    // Cache is for today, but we need yesterday's streak
+    // We need to calculate from scratch or recalculate
+    return calculateStreakFromScratch(activityHistory.dailyActivities, targetDate)
+  }
+  
+  if (cacheDate > targetDate) {
+    // Cache is from the future? This shouldn't happen, but recalculate
+    return calculateStreakFromScratch(activityHistory.dailyActivities, targetDate)
   }
 
   // Calculate incrementally from cache
