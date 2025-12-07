@@ -113,7 +113,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                 </div>
                 <div className="summary-stat">
                   <span className="summary-label">Total Shards Earned</span>
-                  <span className="summary-value shards-value">{totals.shards} 💎</span>
+                  <span className="summary-value shards-value">{totals.shards.toFixed(2)} 💎</span>
                 </div>
                 <div className="summary-stat">
                   <span className="summary-label">Activities Completed</span>
@@ -160,7 +160,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                         </div>
                         <div className="reward-item">
                           <span className="reward-label">Shards:</span>
-                          <span className="reward-value shards">+{task.shardsEarned} 💎</span>
+                          <span className="reward-value shards">+{task.shardsEarned.toFixed(2)} 💎</span>
                         </div>
                         {task.effortRatio !== undefined && (
                           <div className="reward-item">

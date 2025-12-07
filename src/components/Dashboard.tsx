@@ -26,6 +26,7 @@ import { aiService } from '../client/services/aiService'
 import { userService } from '../client/services/userService'
 import { apiClient } from '../client/services/apiClient'
 import { calculateLevelProgress } from '../utils/levelCalculation'
+import { calculateStreakMultiplier, formatMultiplier, calculateStreaksFromHistory, calculateDisplayStreaks } from '../utils/streakCalculation'
 
 interface DashboardProps {
   onLogout: () => void
@@ -262,7 +263,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     
     const success = await buyShopItem(itemId, itemPrice, itemDetails)
     if (success) {
-      showSuccess(`🎉 Congratulations! You've successfully purchased "${itemTitle}" for ${itemPrice} 💎 shards!`)
+      showSuccess(`🎉 Congratulations! You've successfully purchased "${itemTitle}" for ${itemPrice.toFixed(2)} 💎 shards!`)
     } else {
       showError('Failed to purchase item. Please make sure you have enough shards.')
     }
@@ -275,14 +276,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     } catch (error) {
       console.error('❌ Dashboard: Error during logout:', error)
     }
-  }
-
-  const getCurrency = (code: string) => {
-    const currencies: { [key: string]: string } = {
-      'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥', 
-      'KRW': '₩', 'INR': '₹', 'CAD': 'C$', 'AUD': 'A$'
-    }
-    return currencies[code] || code
   }
 
   const analyzeDailyActivity = async (activityDate: string) => {
@@ -361,21 +354,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           // Calculate combined totals
           const totalXP = (existingRewards?.totalXP || 0) + result.data.rewards.totalXP
           
-          const totalShards = (existingRewards?.totalShards || 0) + result.data.rewards.totalShards
+          const totalShards = Number(((existingRewards?.totalShards || 0) + result.data.rewards.totalShards).toFixed(2))
           
           // Merge category breakdowns
           const categoryBreakdown = {
             Strength: {
               xp: (existingRewards?.categoryBreakdown?.Strength?.xp || 0) + (result.data.rewards.categoryBreakdown?.Strength?.xp || 0),
-              shards: (existingRewards?.categoryBreakdown?.Strength?.shards || 0) + (result.data.rewards.categoryBreakdown?.Strength?.shards || 0)
+              shards: Number(((existingRewards?.categoryBreakdown?.Strength?.shards || 0) + (result.data.rewards.categoryBreakdown?.Strength?.shards || 0)).toFixed(2))
             },
             Intelligence: {
               xp: (existingRewards?.categoryBreakdown?.Intelligence?.xp || 0) + (result.data.rewards.categoryBreakdown?.Intelligence?.xp || 0),
-              shards: (existingRewards?.categoryBreakdown?.Intelligence?.shards || 0) + (result.data.rewards.categoryBreakdown?.Intelligence?.shards || 0)
+              shards: Number(((existingRewards?.categoryBreakdown?.Intelligence?.shards || 0) + (result.data.rewards.categoryBreakdown?.Intelligence?.shards || 0)).toFixed(2))
             },
             Charisma: {
               xp: (existingRewards?.categoryBreakdown?.Charisma?.xp || 0) + (result.data.rewards.categoryBreakdown?.Charisma?.xp || 0),
-              shards: (existingRewards?.categoryBreakdown?.Charisma?.shards || 0) + (result.data.rewards.categoryBreakdown?.Charisma?.shards || 0)
+              shards: Number(((existingRewards?.categoryBreakdown?.Charisma?.shards || 0) + (result.data.rewards.categoryBreakdown?.Charisma?.shards || 0)).toFixed(2))
             }
           }
           
@@ -390,23 +383,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           // Also save to task history for permanent record
           const existingTaskHistory = user?.taskHistory
           
-          // Map rewards to completed tasks
-          interface RewardItem {
-            activityName: string
-            matchType: string
-            category: 'Strength' | 'Intelligence' | 'Charisma'
-            matchedTask?: string
-            goalLink?: string
-            effortRatio: number
-            xpEarned: number
-            shardsEarned: number
-            calculationNotes: string
-          }
-          
-          const completedTasks = result.data.rewards.activityRewards.map((reward: RewardItem) => ({
+          // Map rewards to completed tasks - ActivityReward type from backend already has the correct shape
+          const completedTasks = result.data.rewards.activityRewards.map((reward: any) => ({
             activityName: reward.activityName,
             matchType: reward.matchType,
-            category: reward.category,
+            category: reward.category as 'Strength' | 'Intelligence' | 'Charisma',
             matchedTask: reward.matchedTask,
             goalLink: reward.goalLink,
             effortRatio: reward.effortRatio,
@@ -508,7 +489,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         const dateGroup = activitiesByDate.get(date)!
         dateGroup.activities.push(activity)
         dateGroup.totalXP += activity.xpEarned
-        dateGroup.totalShards += activity.shardsEarned
+        dateGroup.totalShards = Number((dateGroup.totalShards + activity.shardsEarned).toFixed(2))
         
         if (activity.category === 'Strength') {
           dateGroup.strengthXP += activity.xpEarned
@@ -523,8 +504,32 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       let allSuccess = true
       let leveledUp = false
       let newLevel = currentLevel
+      let totalBaseShards = 0
+      let totalFinalShards = 0
+      let hasMultipliers = false
       
       for (const [date, dateRewards] of activitiesByDate.entries()) {
+        // Calculate base shards breakdown for this date
+        const baseShardsBreakdown = {
+          strength: 0,
+          intelligence: 0,
+          charisma: 0
+        }
+        
+        dateRewards.activities.forEach(activity => {
+          if (activity.category === 'Strength') {
+            baseShardsBreakdown.strength = Number((baseShardsBreakdown.strength + activity.shardsEarned).toFixed(2))
+          } else if (activity.category === 'Intelligence') {
+            baseShardsBreakdown.intelligence = Number((baseShardsBreakdown.intelligence + activity.shardsEarned).toFixed(2))
+          } else if (activity.category === 'Charisma') {
+            baseShardsBreakdown.charisma = Number((baseShardsBreakdown.charisma + activity.shardsEarned).toFixed(2))
+          }
+        })
+
+        console.log('📊 Claiming rewards for date:', date)
+        console.log('📦 Base shards breakdown:', baseShardsBreakdown)
+        console.log('💰 Total shards:', dateRewards.totalShards)
+        
         const result = await userService.claimRewards({
           sessionId,
           totalXP: dateRewards.totalXP,
@@ -532,13 +537,32 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           strengthXP: dateRewards.strengthXP,
           intelligenceXP: dateRewards.intelligenceXP,
           charismaXP: dateRewards.charismaXP,
-          activityDate: date
+          activityDate: date,
+          baseShardsBreakdown
+        })
+        
+        console.log('🎯 Claim result:', {
+          baseShards: result.baseShards,
+          finalShards: result.finalShards,
+          multipliers: result.appliedMultipliers
         })
         
         if (!result.success) {
           allSuccess = false
           console.error(`❌ Failed to claim rewards for date ${date}`)
         } else {
+          // Track base and final shards
+          if (result.baseShards !== undefined && result.finalShards !== undefined) {
+            totalBaseShards = Number((totalBaseShards + result.baseShards).toFixed(2))
+            totalFinalShards = Number((totalFinalShards + result.finalShards).toFixed(2))
+            if (result.baseShards !== result.finalShards) {
+              hasMultipliers = true
+            }
+          } else {
+            totalBaseShards = Number((totalBaseShards + dateRewards.totalShards).toFixed(2))
+            totalFinalShards = Number((totalFinalShards + dateRewards.totalShards).toFixed(2))
+          }
+
           // Check if we leveled up from this experience result
           const experienceMetadata = result.experienceResult?.metadata
           if (experienceMetadata?.leveledUp) {
@@ -569,12 +593,31 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             // Step 3: Refresh user data from server to sync UI
             await refreshUserTasks()
             
-            // Show level-up celebration if leveled up
+            // Build success message with multiplier info
+            let message = ''
             if (leveledUp) {
-              showSuccess(`🎊✨ LEVEL UP! ✨🎊\n\nCongratulations! You've reached Level ${newLevel}!\n\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nYou're becoming unstoppable!`)
+              message = `🎊✨ LEVEL UP! ✨🎊\n\nCongratulations! You've reached Level ${newLevel}!\n\n`
             } else {
-              showSuccess(`🎉 Congratulations!\n\nYou've claimed:\n+${rewards.totalXP} XP\n+${rewards.totalShards} Shards\n\nKeep up the great work!`)
+              message = `🎉 Congratulations!\n\nYou've claimed:\n`
             }
+            
+            message += `+${rewards.totalXP} XP\n`
+            
+            if (hasMultipliers && totalBaseShards !== totalFinalShards) {
+              message += `+${totalBaseShards.toFixed(2)} 💎 Base Shards\n`
+              message += `✨ Streak Bonus: ${(totalFinalShards - totalBaseShards).toFixed(2)} 💎\n`
+              message += `= ${totalFinalShards.toFixed(2)} 💎 Total Shards\n`
+            } else {
+              message += `+${totalFinalShards.toFixed(2)} 💎 Shards\n`
+            }
+            
+            if (!leveledUp) {
+              message += `\nKeep up the great work!`
+            } else {
+              message += `\nYou're becoming unstoppable!`
+            }
+            
+            showSuccess(message)
             setShowRewardClaimModal(false)
           } else {
             console.error('⚠️ Rewards applied but failed to clear unclaimed rewards in backend')
@@ -619,6 +662,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       const intelligenceXP = activity.category === 'Intelligence' ? activity.xpEarned : 0
       const charismaXP = activity.category === 'Charisma' ? activity.xpEarned : 0
 
+      // Calculate base shards breakdown
+      const baseShardsBreakdown = {
+        strength: activity.category === 'Strength' ? activity.shardsEarned : 0,
+        intelligence: activity.category === 'Intelligence' ? activity.shardsEarned : 0,
+        charisma: activity.category === 'Charisma' ? activity.shardsEarned : 0
+      }
+
       // Step 1: Use the userService API to claim individual reward
       const result = await userService.claimRewards({
         sessionId,
@@ -628,7 +678,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         intelligenceXP,
         charismaXP,
         // Fallback to today's date if activityDate is missing (for backward compatibility)
-        activityDate: activity.activityDate || new Date().toISOString().split('T')[0]
+        activityDate: activity.activityDate || new Date().toISOString().split('T')[0],
+        baseShardsBreakdown
       })
       
       if (result.success) {
@@ -657,9 +708,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
         updatedActivities.forEach(act => {
           newTotalXP += act.xpEarned
-          newTotalShards += act.shardsEarned
+          newTotalShards = Number((newTotalShards + act.shardsEarned).toFixed(2))
           newCategoryBreakdown[act.category].xp += act.xpEarned
-          newCategoryBreakdown[act.category].shards += act.shardsEarned
+          newCategoryBreakdown[act.category].shards = Number((newCategoryBreakdown[act.category].shards + act.shardsEarned).toFixed(2))
         })
 
         const updatedRewards = updatedActivities.length > 0 ? {
@@ -679,12 +730,33 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             // Step 3: Refresh user data from server to sync UI
             await refreshUserTasks()
             
-            // Show level-up celebration if leveled up
+            // Get base and final shards for display
+            const baseShards = result.baseShards ?? activity.shardsEarned
+            const finalShards = result.finalShards ?? activity.shardsEarned
+            
+            // Build success message
+            let message = ''
             if (leveledUp) {
-              showSuccess(`🎊✨ LEVEL UP! ✨🎊\n\nCongratulations! You've reached Level ${newLevel}!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards\n\nYou're becoming unstoppable!`)
+              message = `🎊✨ LEVEL UP! ✨🎊\n\nCongratulations! You've reached Level ${newLevel}!\n\n`
             } else {
-              showSuccess(`🎉 Claimed reward!\n\n+${activity.xpEarned} XP (${activity.category})\n+${activity.shardsEarned} Shards`)
+              message = `🎉 Claimed reward!\n\n`
             }
+            
+            message += `+${activity.xpEarned} XP (${activity.category})\n`
+            
+            if (baseShards !== finalShards) {
+              message += `+${baseShards.toFixed(2)} 💎 Base Shards\n`
+              message += `✨ Streak Bonus: ${(finalShards - baseShards).toFixed(2)} 💎\n`
+              message += `= ${finalShards.toFixed(2)} 💎 Total Shards`
+            } else {
+              message += `+${finalShards.toFixed(2)} 💎 Shards`
+            }
+            
+            if (leveledUp) {
+              message += `\n\nYou're becoming unstoppable!`
+            }
+            
+            showSuccess(message)
           } else {
             console.error('⚠️ Reward claimed but failed to update unclaimed rewards in backend')
             showWarning('Reward claimed successfully, but there was an issue updating. Please refresh the page.')
@@ -779,16 +851,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                   <span className="label">Age:</span>
                   <span className="value">{profileData.age} years</span>
                 </div>
-                <div className="profile-item">
-                  <span className="label">Monthly Limit:</span>
-                  <span className="value">
-                    {getCurrency(profileData.currency)}{profileData.monthlyLimit.toLocaleString()}
-                  </span>
-                </div>
-                <div className="profile-item">
-                  <span className="label">Currency:</span>
-                  <span className="value">{profileData.currency}</span>
-                </div>
               </div>
             </div>
           </div>
@@ -811,8 +873,76 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             <StatCard 
               icon="💎" 
               title="Shards"
-              value={user?.stats?.shards || 0}
+              value={(user?.stats?.shards || 0).toFixed(2)}
             />
+          </div>
+
+          {/* Streak Multipliers Section */}
+          <div className="streak-multipliers-section">
+            <h3 className="streak-section-title">🔥 Streak Multipliers</h3>
+            <div className="streak-cards">
+              {(() => {
+                // Calculate display streaks (consecutive days with any XP) and multiplier streaks (10+ XP)
+                const today = new Date().toISOString().split('T')[0]
+                const displayStreaks = calculateDisplayStreaks(user?.activityHistory?.dailyActivities || [], today)
+                const multiplierStreaks = calculateStreaksFromHistory(user?.activityHistory, today)
+                
+                return (
+                  <>
+                    <div className="streak-card strength-streak">
+                      <div className="streak-header">
+                        <span className="streak-icon">💪</span>
+                        <span className="streak-category">Strength</span>
+                      </div>
+                      <div className="streak-info">
+                        <div className="streak-count">
+                          {displayStreaks.strengthStreak} day{displayStreaks.strengthStreak !== 1 ? 's' : ''}
+                        </div>
+                        <div className="streak-multiplier">
+                          {formatMultiplier(calculateStreakMultiplier(multiplierStreaks.strengthStreak))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="streak-card intelligence-streak">
+                      <div className="streak-header">
+                        <span className="streak-icon">🧠</span>
+                        <span className="streak-category">Intelligence</span>
+                      </div>
+                      <div className="streak-info">
+                        <div className="streak-count">
+                          {displayStreaks.intelligenceStreak} day{displayStreaks.intelligenceStreak !== 1 ? 's' : ''}
+                        </div>
+                        <div className="streak-multiplier">
+                          {formatMultiplier(calculateStreakMultiplier(multiplierStreaks.intelligenceStreak))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="streak-card charisma-streak">
+                      <div className="streak-header">
+                        <span className="streak-icon">✨</span>
+                        <span className="streak-category">Charisma</span>
+                      </div>
+                      <div className="streak-info">
+                        <div className="streak-count">
+                          {displayStreaks.charismaStreak} day{displayStreaks.charismaStreak !== 1 ? 's' : ''}
+                        </div>
+                        <div className="streak-multiplier">
+                          {formatMultiplier(calculateStreakMultiplier(multiplierStreaks.charismaStreak))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+            <p className="streak-description">
+              Streak shows consecutive days with any activity. Multipliers require 10+ XP daily and use soft decay. 
+              {user?.activityHistory?.streakCache && 
+                ` Multipliers cached: ${new Date(user.activityHistory.streakCache.asOfDate).toLocaleDateString()}`
+              }
+            </p>
           </div>
         </div>
 

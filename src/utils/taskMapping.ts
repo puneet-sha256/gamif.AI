@@ -106,7 +106,7 @@ export function getTaskStatistics(generatedTasks: GeneratedTasks) {
       stats.totalTasks += tasks.length
       tasks.forEach((task: GeneratedTask) => {
         stats.totalXP += task.xp
-        stats.totalShards += task.shards
+        stats.totalShards = Number((stats.totalShards + task.shards).toFixed(2))
       })
     }
   })

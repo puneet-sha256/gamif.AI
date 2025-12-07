@@ -252,9 +252,9 @@ export function calculateRewardsFromAnalysis(
       }
     }
 
-    // Round XP to floor value, shards to floor value (always round down)
+    // Round XP to floor value, shards to 2 decimal places
     xpEarned = Math.floor(xpEarned)
-    shardsEarned = Math.floor(shardsEarned)
+    shardsEarned = Number(shardsEarned.toFixed(2))
 
     logger.custom('💰', `Earned: ${xpEarned} XP, ${shardsEarned} shards`)
 
@@ -280,9 +280,9 @@ export function calculateRewardsFromAnalysis(
     result.processedCount++
   })
 
-  // Round final totals - XP to floor, shards to floor (always round down)
+  // Round final totals - XP to floor, shards to 2 decimal places
   result.totalXP = Math.floor(result.totalXP)
-  result.totalShards = Math.floor(result.totalShards)
+  result.totalShards = Number(result.totalShards.toFixed(2))
 
   logger.custom('💰', '='.repeat(80))
   logger.custom('💰', 'REWARD CALCULATION SUMMARY')
