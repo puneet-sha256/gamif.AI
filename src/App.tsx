@@ -10,7 +10,6 @@ import Dashboard from './components/Dashboard'
 import LoadingScreen from './components/LoadingScreen'
 import AlertTest from './components/AlertTest'
 import ConfirmTest from './components/ConfirmTest'
-import TestEmojiPage from './TestEmojiPage'
 import type { ProfileData, GoalsData } from './types'
 import './App.css'
 
@@ -117,7 +116,6 @@ function AppContent() {
         <Routes>
           <Route path="/test-alerts" element={<AlertTest />} />
           <Route path="/test-confirm" element={<ConfirmTest />} />
-          <Route path="/test-emoji" element={<TestEmojiPage />} />
           <Route path="*" element={renderCurrentStep()} />
         </Routes>
       </div>
