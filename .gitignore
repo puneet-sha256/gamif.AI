@@ -42,3 +42,6 @@ data/backup/
 
 # Screenshots (used for testing/documentation)
 screenshots/
+
+# Temporary files
+tmp/

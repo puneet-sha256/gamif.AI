@@ -203,38 +203,36 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
                   type="button"
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                   disabled={isSaving}
-                  className="btn btn-secondary"
-                  style={{ 
-                    minWidth: 'auto',
-                    padding: '14px 20px',
-                    fontSize: '1.2rem'
-                  }}
+                  className="btn btn-secondary emoji-picker-btn"
+                  style={{ fontSize: '1.2rem' }}
                   title="Pick an emoji"
                 >
                   😀
                 </button>
               </div>
               {showEmojiPicker && (
-                <div 
-                  ref={emojiPickerRef}
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    marginTop: '8px',
-                    zIndex: 1001,
-                    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
-                    borderRadius: '12px',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <EmojiPicker
-                    onEmojiClick={handleEmojiClick}
-                    searchPlaceHolder="Search emoji..."
-                    width={320}
-                    height={400}
+                <>
+                  {/* Backdrop for mobile view */}
+                  <div 
+                    className="emoji-picker-backdrop"
+                    onClick={() => setShowEmojiPicker(false)}
                   />
-                </div>
+                  <div 
+                    ref={emojiPickerRef}
+                    className="emoji-picker-container"
+                  >
+                    <EmojiPicker
+                      onEmojiClick={handleEmojiClick}
+                      searchPlaceHolder="Search emoji..."
+                      width="100%"
+                      height={400}
+                      skinTonesDisabled
+                      previewConfig={{ showPreview: false }}
+                      searchDisabled={false}
+                      lazyLoadEmojis={true}
+                    />
+                  </div>
+                </>
               )}
             </div>
             <small className="form-hint">Use an emoji to represent this item</small>
