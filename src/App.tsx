@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { AlertProvider } from './contexts/AlertContext'
 import { ConfirmProvider } from './contexts/ConfirmContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import AuthScreen from './components/AuthScreen'
 import ProfileSetup from './components/ProfileSetup'
 import GoalsSetup from './components/GoalsSetup'
@@ -24,12 +25,12 @@ function AppContent() {
   const getOnboardingStatus = (user: any): { step: OnboardingStep, isComplete: boolean } => {
     if (!user) return { step: 'auth', isComplete: false }
 
-    const isProfileComplete = user.profileData && 
-      user.profileData.name?.trim() && 
+    const isProfileComplete = user.profileData &&
+      user.profileData.name?.trim() &&
       user.profileData.age > 0
 
-    const isGoalsComplete = user.goalsData && 
-      user.goalsData.longTermGoals?.trim() && 
+    const isGoalsComplete = user.goalsData &&
+      user.goalsData.longTermGoals?.trim() &&
       user.goalsData.longTermGoals.trim().length >= 50
 
     if (!isProfileComplete) {
@@ -49,7 +50,7 @@ function AppContent() {
       }
 
       const onboardingStatus = getOnboardingStatus(user)
-      
+
       if (user) {
         if (currentStep !== onboardingStatus.step) {
           setCurrentStep(onboardingStatus.step as OnboardingStep)
@@ -101,12 +102,12 @@ function AppContent() {
         return <GoalsSetup onComplete={handleGoalsComplete} onBack={handleGoalsBack} />
       case 'dashboard':
         return (
-          <Dashboard 
+          <Dashboard
             onLogout={handleLogout}
           />
         )
       default:
-        return <div style={{ color: 'white', padding: '20px', background: '#000' }}>Loading...</div>
+        return <div style={{ color: 'var(--text-primary)', padding: '20px', background: 'var(--bg-primary)' }}>Loading...</div>
     }
   }
 
@@ -125,13 +126,15 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AlertProvider>
-        <ConfirmProvider>
-          <AppContent />
-        </ConfirmProvider>
-      </AlertProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AlertProvider>
+          <ConfirmProvider>
+            <AppContent />
+          </ConfirmProvider>
+        </AlertProvider>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 
