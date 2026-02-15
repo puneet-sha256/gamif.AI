@@ -1,4 +1,6 @@
-/* Reward Claim Modal Styles */
+/* ============================================
+   RewardClaimModal — Premium Clean Design
+   ============================================ */
 
 .reward-modal-overlay {
   position: fixed;
@@ -6,7 +8,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--bg-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,56 +18,58 @@
 }
 
 .reward-modal-content {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border-radius: 20px;
+  background: var(--modal-bg);
+  border-radius: var(--radius-2xl);
   max-width: 700px;
   width: 100%;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  animation: slideUp 0.3s ease-out;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-default);
+  animation: slideUp 0.25s ease-out;
 }
 
+/* --- Header --- */
 .reward-modal-header {
   padding: 24px 28px;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  border-bottom: 1px solid var(--border-default);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(6, 182, 212, 0.02) 100%);
-  border-radius: 20px 20px 0 0;
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
 }
 
 .reward-modal-header h3 {
   margin: 0;
-  color: #1e293b;
-  font-size: 24px;
+  color: var(--text-primary);
+  font-size: 1.35rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 8px;
+  letter-spacing: -0.02em;
 }
 
 .reward-modal-close {
-  background: rgba(59, 130, 246, 0.1);
-  border: none;
-  color: #1e293b;
-  font-size: 24px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-default);
+  color: var(--text-muted);
+  font-size: 1.25rem;
   cursor: pointer;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .reward-modal-close:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.2);
-  transform: rotate(90deg);
+  background: var(--color-error-bg);
+  border-color: var(--color-error);
+  color: var(--color-error);
 }
 
 .reward-modal-close:disabled {
@@ -73,6 +77,7 @@
   cursor: not-allowed;
 }
 
+/* --- Body --- */
 .reward-modal-body {
   padding: 24px 28px;
   overflow-y: auto;
@@ -80,92 +85,92 @@
 }
 
 .reward-description {
-  color: #475569;
+  color: var(--text-secondary);
   margin: 0 0 20px 0;
-  font-size: 15px;
-  line-height: 1.5;
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
 
 .no-rewards-message {
   text-align: center;
   padding: 60px 20px;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .no-rewards-message p {
   margin: 8px 0;
-  font-size: 18px;
+  font-size: 1.1rem;
 }
 
 .no-rewards-message .subtitle {
-  font-size: 14px;
-  color: #94a3b8;
+  font-size: 0.85rem;
+  color: var(--text-faint);
 }
 
+/* --- Activity List --- */
 .activities-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 24px;
 }
 
 .activity-reward-card {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(59, 130, 246, 0.15);
-  border-radius: 12px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
   padding: 16px;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 .activity-reward-card:hover {
-  background: rgba(255, 255, 255, 1);
-  border-color: rgba(59, 130, 246, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+  background: var(--bg-surface-hover);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
 }
 
 .activity-claim-action {
   display: flex;
   justify-content: flex-end;
   padding-top: 8px;
-  border-top: 1px solid rgba(59, 130, 246, 0.1);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .activity-claim-btn {
   padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   border: none;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   display: flex;
   align-items: center;
   gap: 6px;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  color: #fff;
-  box-shadow: 0 2px 10px rgba(34, 197, 94, 0.3);
+  background: var(--color-success);
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
 }
 
 .activity-claim-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+  opacity: 0.9;
+  box-shadow: var(--shadow-md);
 }
 
 .activity-claim-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
 }
 
 .claim-icon {
-  font-size: 16px;
+  font-size: 0.9rem;
   font-weight: bold;
 }
 
+/* --- Activity Header & Details --- */
 .activity-header {
   margin-bottom: 12px;
 }
@@ -178,51 +183,52 @@
 }
 
 .match-type-icon {
-  font-size: 18px;
+  font-size: 1.1rem;
 }
 
 .activity-name {
-  color: #1e293b;
-  font-size: 16px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
   font-weight: 600;
   flex: 1;
   min-width: 150px;
 }
 
+/* --- Category Badge --- */
 .category-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: var(--radius-md);
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 }
 
 .category-badge.strength {
-  background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: var(--color-strength-bg);
+  color: var(--color-strength);
+  border: 1px solid var(--color-strength);
 }
 
 .category-badge.intelligence {
-  background: rgba(59, 130, 246, 0.1);
-  color: #2563eb;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: var(--color-intelligence-bg);
+  color: var(--color-intelligence);
+  border: 1px solid var(--color-intelligence);
 }
 
 .category-badge.charisma {
-  background: rgba(168, 85, 247, 0.1);
-  color: #9333ea;
-  border: 1px solid rgba(168, 85, 247, 0.3);
+  background: var(--color-charisma-bg);
+  color: var(--color-charisma);
+  border: 1px solid var(--color-charisma);
 }
 
 .category-badge.default {
-  background: rgba(107, 114, 128, 0.1);
-  color: #475569;
-  border: 1px solid rgba(107, 114, 128, 0.3);
+  background: var(--bg-surface-muted);
+  color: var(--text-muted);
+  border: 1px solid var(--border-default);
 }
 
 .activity-details {
@@ -242,64 +248,69 @@
 }
 
 .match-type-label {
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 500;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .matched-task,
 .goal-link {
-  color: #94a3b8;
-  font-size: 12px;
+  color: var(--text-faint);
+  font-size: 0.75rem;
   font-style: italic;
 }
 
+/* --- Reward Amounts --- */
 .reward-amounts {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .reward-item {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
   font-weight: 600;
 }
 
 .reward-item.xp {
-  background: rgba(251, 191, 36, 0.1);
-  color: #d97706;
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning);
 }
 
 .reward-item.shards {
-  background: rgba(59, 130, 246, 0.1);
-  color: #2563eb;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: var(--color-intelligence-bg);
+  color: var(--color-intelligence);
+  border: 1px solid var(--color-intelligence);
 }
 
 .reward-icon {
-  font-size: 14px;
+  font-size: 0.85rem;
 }
 
 .reward-value {
-  font-size: 14px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.8rem;
 }
 
+/* --- Summary --- */
 .rewards-summary {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(6, 182, 212, 0.03) 100%);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 16px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
   padding: 20px;
   margin-top: 24px;
 }
 
 .summary-header h4 {
   margin: 0 0 16px 0;
-  color: #1e293b;
-  font-size: 18px;
+  color: var(--text-primary);
+  font-size: 1.05rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -316,7 +327,7 @@
   display: flex;
   gap: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .total-item {
@@ -327,24 +338,28 @@
 }
 
 .total-label {
-  color: #475569;
-  font-size: 15px;
-  font-weight: 500;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .total-value {
-  font-size: 22px;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.35rem;
   font-weight: 700;
 }
 
 .total-value.xp {
-  color: #d97706;
+  color: var(--color-warning);
 }
 
 .total-value.shards {
-  color: #2563eb;
+  color: var(--color-intelligence);
 }
 
+/* --- Category Breakdown --- */
 .category-breakdown {
   display: flex;
   flex-direction: column;
@@ -352,9 +367,11 @@
 }
 
 .breakdown-title {
-  color: #475569;
-  font-size: 14px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   margin-bottom: 4px;
 }
 
@@ -369,96 +386,93 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
   font-weight: 500;
 }
 
 .breakdown-item.strength {
-  background: rgba(239, 68, 68, 0.08);
-  color: #dc2626;
+  background: var(--color-strength-bg);
+  color: var(--color-strength);
 }
 
 .breakdown-item.intelligence {
-  background: rgba(59, 130, 246, 0.08);
-  color: #2563eb;
+  background: var(--color-intelligence-bg);
+  color: var(--color-intelligence);
 }
 
 .breakdown-item.charisma {
-  background: rgba(168, 85, 247, 0.08);
-  color: #9333ea;
+  background: var(--color-charisma-bg);
+  color: var(--color-charisma);
 }
 
+/* --- Footer --- */
 .reward-modal-footer {
   padding: 20px 28px;
-  border-top: 1px solid rgba(59, 130, 246, 0.2);
+  border-top: 1px solid var(--border-default);
   display: flex;
   gap: 12px;
   justify-content: flex-end;
-  background: rgba(59, 130, 246, 0.03);
-  border-radius: 0 0 20px 20px;
+  border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
 }
 
 .reward-modal-btn-secondary,
 .reward-modal-btn-primary {
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-size: 15px;
+  padding: 10px 22px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   border: none;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .reward-modal-btn-secondary {
-  background: rgba(59, 130, 246, 0.08);
-  color: #1e293b;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: var(--bg-surface-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
 }
 
 .reward-modal-btn-secondary:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--bg-surface-hover);
+  border-color: var(--border-hover);
 }
 
 .reward-modal-btn-primary {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  background: var(--accent-primary);
   color: #ffffff;
-  box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .reward-modal-btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+  opacity: 0.9;
+  box-shadow: var(--shadow-md);
 }
 
 .reward-modal-btn-primary:disabled,
 .reward-modal-btn-secondary:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
 }
 
+/* --- Spinner --- */
 .loading-spinner {
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--border-subtle);
   border-top-color: currentColor;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
+/* --- Keyframes --- */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @keyframes slideUp {
@@ -473,12 +487,12 @@
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
-/* Responsive design */
+/* ============================================
+   Responsive — Tablet
+   ============================================ */
 @media (max-width: 768px) {
   .reward-modal-content {
     max-width: 95%;
@@ -490,9 +504,9 @@
   .reward-modal-footer {
     padding: 20px;
   }
-  
+
   .reward-modal-header h3 {
-    font-size: 20px;
+    font-size: 1.15rem;
   }
 
   .activity-details {
@@ -516,46 +530,49 @@
   }
 }
 
+/* ============================================
+   Responsive — Small Mobile
+   ============================================ */
 @media (max-width: 480px) {
   .reward-modal-header {
     padding: 16px;
   }
-  
+
   .reward-modal-body {
     padding: 16px;
   }
-  
+
   .reward-modal-footer {
     padding: 16px;
   }
-  
+
   .reward-modal-header h3 {
-    font-size: 18px;
+    font-size: 1.05rem;
   }
-  
+
   .activity-name {
-    font-size: 14px;
+    font-size: 0.85rem;
   }
-  
+
   .category-badge {
-    font-size: 11px;
-    padding: 3px 10px;
+    font-size: 0.65rem;
+    padding: 2px 8px;
   }
-  
+
   .reward-item {
-    padding: 5px 10px;
+    padding: 4px 8px;
   }
-  
+
   .reward-value,
   .reward-icon {
-    font-size: 13px;
+    font-size: 0.8rem;
   }
-  
+
   .total-value {
-    font-size: 20px;
+    font-size: 1.2rem;
   }
-  
+
   .summary-header h4 {
-    font-size: 16px;
+    font-size: 0.95rem;
   }
 }

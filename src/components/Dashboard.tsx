@@ -2,6 +2,7 @@ import './Dashboard.css'
 import { useAuth } from '../contexts/AuthContext'
 import { useAlert } from '../contexts/AlertContext'
 import { useConfirm } from '../contexts/ConfirmContext'
+import ThemeToggle from './ThemeToggle'
 import { useEffect, useState } from 'react'
 import StatCard from './StatCard'
 import TaskItem from './TaskItem'
@@ -1422,7 +1423,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       <div className="dashboard-header">
         <div className="dashboard-logo">
           <h1>GAMIF.AI</h1>
-          <div className="subtitle">Player Development System</div>
+          <div className="subtitle">Life Operating System</div>
         </div>
         <div className="user-info">
           {profileData && (
@@ -1438,6 +1439,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               <span className="reward-badge">{user.unclaimedRewards.activities.length}</span>
             )}
           </button>
+          <ThemeToggle />
           <button className="logout-button" onClick={handleLogout}>
             Logout
           </button>

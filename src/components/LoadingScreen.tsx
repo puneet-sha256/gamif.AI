@@ -6,13 +6,13 @@ const LoadingScreen: React.FC = () => {
     <div className="loading-container">
       <div className="loading-background" />
       <div className="shadows" />
-      
+
       <div className="loading-content">
         <div className="loading-logo">
-          <h1>SOLO LEVELING</h1>
-          <div className="subtitle">Player System</div>
+          <h1>GAMIF.AI</h1>
+          <div className="subtitle">Life Operating System</div>
         </div>
-        
+
         <div className="loading-spinner-container">
           <div className="loading-spinner"></div>
           <p>Initializing System...</p>

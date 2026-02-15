@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
-
+/* Profile Setup */
 .profile-setup-container {
   min-height: 100vh;
   position: relative;
@@ -7,7 +6,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+  background: var(--bg-primary);
 }
 
 .profile-setup-background {
@@ -16,48 +15,11 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: 
-    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 40% 60%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
   z-index: 1;
 }
 
-.profile-setup-background::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    linear-gradient(45deg, rgba(59, 130, 246, 0.02) 25%, transparent 25%),
-    linear-gradient(-45deg, rgba(59, 130, 246, 0.02) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, rgba(59, 130, 246, 0.02) 75%),
-    linear-gradient(-45deg, transparent 75%, rgba(59, 130, 246, 0.02) 75%);
-  background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-  animation: grid-move 20s linear infinite;
-}
-
 .shadows {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="shadow" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%233b82f6" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23shadow)"/></svg>');
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes grid-move {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(20px, 20px); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  display: none;
 }
 
 .profile-setup-content {
@@ -69,26 +31,22 @@
 }
 
 .profile-setup-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 15px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
   padding: 40px;
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.08),
-    0 0 60px rgba(59, 130, 246, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  animation: card-entrance 0.8s ease-out;
+  box-shadow: var(--shadow-lg);
+  animation: card-entrance 0.5s ease-out;
 }
 
 @keyframes card-entrance {
   0% {
     opacity: 0;
-    transform: translateY(30px) scale(0.95);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -101,33 +59,17 @@
   font-family: 'Orbitron', monospace;
   font-size: 2.2rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #3b82f6, #06b6d4, #10b981);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--accent-primary);
   margin: 0;
-  text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
-  animation: glow-pulse 2s ease-in-out infinite alternate;
 }
 
-.setup-subtitle {
-  font-family: 'Rajdhani', sans-serif;
+.subtitle {
   font-size: 1rem;
-  color: #3b82f6;
+  color: var(--text-secondary);
   font-weight: 600;
   letter-spacing: 2px;
   margin-top: 8px;
   text-transform: uppercase;
-}
-
-@keyframes glow-pulse {
-  0% { text-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
-  100% { text-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
-}
-
-.setup-header {
-  text-align: center;
-  margin-bottom: 40px;
 }
 
 .progress-indicator {
@@ -136,30 +78,29 @@
 
 .progress-bar {
   width: 100%;
-  height: 8px;
-  background: rgba(59, 130, 246, 0.2);
-  border-radius: 4px;
+  height: 6px;
+  background: var(--border-default);
+  border-radius: var(--radius-sm, 4px);
   overflow: hidden;
   margin-bottom: 10px;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(135deg, #3b82f6, #06b6d4);
-  border-radius: 4px;
-  transition: width 0.3s ease;
+  background: var(--accent-primary);
+  border-radius: var(--radius-sm, 4px);
+  transition: width var(--transition-fast);
 }
 
 .progress-text {
-  font-family: 'Rajdhani', sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-.profile-form {
+.setup-form {
   margin-bottom: 30px;
 }
 
@@ -172,9 +113,8 @@
 .input-group label {
   display: block;
   margin-bottom: 8px;
-  color: #3b82f6;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -185,14 +125,13 @@
 .input-group input,
 .input-group select {
   width: 100%;
-  padding: 15px;
-  background: rgba(248, 250, 252, 0.8);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 8px;
-  color: #1e293b;
-  font-family: 'Rajdhani', sans-serif;
+  padding: 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   box-sizing: border-box;
 }
 
@@ -201,34 +140,33 @@
 .input-group input:focus,
 .input-group select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
-  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+  background: var(--bg-input-focus);
 }
 
 .form-group input::placeholder,
 .input-group input::placeholder {
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .form-section {
   margin-bottom: 30px;
   padding: 20px;
-  background: rgba(248, 250, 252, 0.6);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 12px;
+  background: var(--bg-surface-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
 }
 
 .form-section h3 {
   margin: 0 0 20px 0;
-  color: #1e293b;
-  font-family: 'Orbitron', monospace;
-  font-size: 1.3rem;
+  color: var(--text-primary);
+  font-size: 1.1rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   padding-bottom: 10px;
-  border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .input-row {
@@ -246,26 +184,26 @@
 .profile-button,
 .setup-button {
   width: 100%;
-  padding: 18px;
-  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  padding: 16px;
+  background: var(--accent-primary);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: white;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 2px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
   position: relative;
   overflow: hidden;
 }
 
 .profile-button:hover:not(:disabled),
 .setup-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .profile-button:disabled,
@@ -300,7 +238,7 @@
 }
 
 .profile-button:disabled {
-  opacity: 0.7;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -318,10 +256,10 @@
   border: 2px solid transparent;
   border-top: 2px solid white;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin-centered 1s linear infinite;
 }
 
-@keyframes spin {
+@keyframes spin-centered {
   0% { transform: translate(-50%, -50%) rotate(0deg); }
   100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
@@ -329,25 +267,22 @@
 .message {
   padding: 12px 16px;
   margin-bottom: 20px;
-  border-radius: 8px;
-  font-family: 'Rajdhani', sans-serif;
+  border-radius: var(--radius-md);
   font-weight: 500;
   text-align: center;
   animation: messageSlide 0.3s ease-out;
 }
 
 .error-message {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
 }
 
 .success-message {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #10b981;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success);
+  color: var(--color-success);
 }
 
 @keyframes messageSlide {
@@ -362,76 +297,79 @@
 }
 
 .character-preview {
-  background: rgba(248, 250, 252, 0.6);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 12px;
+  background: var(--bg-surface-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   padding: 20px;
   margin-top: 20px;
   text-align: center;
 }
 
 .character-preview h4 {
-  color: #3b82f6;
-  font-family: 'Orbitron', monospace;
-  font-size: 1.2rem;
+  color: var(--accent-primary);
+  font-size: 1.1rem;
+  font-weight: 700;
   margin: 0 0 15px 0;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .preview-stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  color: #64748b;
-  font-family: 'Rajdhani', sans-serif;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
 @media (max-width: 768px) {
+  .profile-setup-container {
+    padding: 20px 16px;
+  }
+
   .profile-setup-content {
     max-width: 90%;
     padding: 15px;
   }
-  
+
   .profile-setup-card {
     padding: 30px 20px;
   }
-  
+
   .setup-logo h1 {
     font-size: 1.8rem;
   }
-  
-  .setup-subtitle {
+
+  .subtitle {
     font-size: 0.85rem;
     letter-spacing: 1.5px;
   }
-  
+
   .form-row,
   .input-row {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .form-section {
     padding: 16px;
     margin-bottom: 24px;
   }
-  
+
   .form-section h3 {
-    font-size: 1.15rem;
+    font-size: 1rem;
   }
-  
+
   .form-group,
   .input-group {
     margin-bottom: 20px;
   }
-  
+
   .form-group label,
   .input-group label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
-  
+
   .form-group input,
   .form-group select,
   .input-group input,
@@ -439,65 +377,31 @@
     padding: 12px;
     font-size: 0.95rem;
   }
-  
+
   .profile-button,
   .setup-button {
     padding: 14px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     letter-spacing: 1.5px;
   }
-  
+
   .character-preview {
     padding: 16px;
     margin-top: 16px;
   }
-  
+
   .character-preview h4 {
-    font-size: 1.05rem;
+    font-size: 1rem;
   }
-  
+
   .preview-stats {
     grid-template-columns: 1fr;
     gap: 8px;
     font-size: 0.95rem;
   }
-  
+
   .progress-text {
     font-size: 0.85rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .profile-setup-content {
-    max-width: 95%;
-    padding: 10px;
-  }
-  
-  .profile-setup-card {
-    padding: 25px 16px;
-  }
-  
-  .setup-logo h1 {
-    font-size: 1.5rem;
-  }
-  
-  .setup-subtitle {
-    font-size: 0.75rem;
-  }
-  
-  .form-section {
-    padding: 14px;
-  }
-  
-  .form-section h3 {
-    font-size: 1.05rem;
-  }
-}
-
-/* Mobile enhancements for Profile Setup */
-@media (max-width: 768px) {
-  .profile-setup-container {
-    padding: 20px 16px;
   }
 
   .setup-box {
@@ -506,14 +410,12 @@
     max-width: 100%;
   }
 
-  /* Prevent zoom on input focus */
   .input-field,
   .select-field {
     font-size: 16px;
     padding: 14px 16px;
   }
 
-  /* Better button sizing */
   .nav-button,
   .submit-button {
     min-height: 48px;
@@ -522,6 +424,31 @@
 }
 
 @media (max-width: 480px) {
+  .profile-setup-content {
+    max-width: 95%;
+    padding: 10px;
+  }
+
+  .profile-setup-card {
+    padding: 25px 16px;
+  }
+
+  .setup-logo h1 {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.75rem;
+  }
+
+  .form-section {
+    padding: 14px;
+  }
+
+  .form-section h3 {
+    font-size: 0.95rem;
+  }
+
   .setup-box {
     padding: 24px 16px;
   }

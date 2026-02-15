@@ -45,3 +45,9 @@ screenshots/
 
 # Temporary files
 tmp/
+
+# Claude Code
+.claude/
+
+# Misc
+nul
