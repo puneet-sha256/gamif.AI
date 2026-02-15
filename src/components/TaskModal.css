@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+/* ============================================
+   TaskModal — Premium Clean Design
+   ============================================ */
 
 .modal-overlay {
   position: fixed;
@@ -6,8 +8,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
+  background: var(--bg-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,32 +17,28 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .modal-content {
-  background: linear-gradient(135deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.95));
-  border-radius: 24px;
+  background: var(--modal-bg);
+  border-radius: var(--radius-3xl);
   padding: 0;
   max-width: 600px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(59, 130, 246, 0.3);
-  animation: slideUp 0.3s ease-out;
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-default);
+  animation: slideUp 0.25s ease-out;
+  -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
 }
 
 @keyframes slideUp {
   from {
-    transform: translateY(50px);
+    transform: translateY(24px);
     opacity: 0;
   }
   to {
@@ -50,30 +47,29 @@
   }
 }
 
+/* --- Header --- */
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 32px 32px 24px;
-  border-bottom: 2px solid rgba(59, 130, 246, 0.2);
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(6, 182, 212, 0.05));
+  padding: 28px 32px 24px;
+  border-bottom: 1px solid var(--border-default);
 }
 
 .modal-header h2 {
-  font-family: 'Orbitron', monospace;
-  font-size: 1.9rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
   margin: 0;
-  background: linear-gradient(135deg, #3b82f6, #06b6d4);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .close-btn {
   background: none;
   border: none;
-  font-size: 2rem;
-  color: #94a3b8;
+  font-size: 1.6rem;
+  color: var(--text-faint);
   cursor: pointer;
   padding: 0;
   width: 36px;
@@ -81,78 +77,77 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
 }
 
 .close-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: var(--color-error-bg);
+  color: var(--color-error);
 }
 
+/* --- Form --- */
 .edit-task-form,
 .task-form {
   padding: 32px;
 }
 
 .error-message {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #dc2626;
-  padding: 14px 18px;
-  border-radius: 10px;
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
   margin-bottom: 24px;
-  font-family: 'Rajdhani', sans-serif;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
 }
 
 .form-group {
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .form-group:last-of-type {
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .form-group label {
   display: block;
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: #1e293b;
-  margin-bottom: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 8px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 }
 
 .form-input,
 .form-textarea {
   width: 100%;
-  padding: 14px 18px;
-  border: 2px solid rgba(59, 130, 246, 0.2);
-  border-radius: 12px;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 1.05rem;
-  background: rgba(255, 255, 255, 0.9);
-  color: #1e293b;
-  transition: all 0.2s ease;
+  padding: 12px 16px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
   box-sizing: border-box;
 }
 
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #3b82f6;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  border-color: var(--accent-primary);
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 3px var(--accent-bg);
 }
 
 .form-input.disabled {
-  background: rgba(148, 163, 184, 0.15);
-  color: #64748b;
+  background: var(--bg-surface-muted);
+  color: var(--text-muted);
   cursor: not-allowed;
-  border-color: rgba(148, 163, 184, 0.3);
+  border-color: var(--border-muted);
 }
 
 .form-textarea {
@@ -164,30 +159,30 @@
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 20px;
 }
 
+/* --- Actions --- */
 .modal-actions {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   justify-content: flex-end;
-  margin-top: 32px;
+  margin-top: 28px;
   padding-top: 24px;
-  border-top: 2px solid rgba(59, 130, 246, 0.15);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .btn {
-  padding: 14px 28px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 12px;
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  font-size: 1.05rem;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  min-width: 120px;
+  transition: all var(--transition-fast);
+  letter-spacing: 0.02em;
+  min-width: 110px;
 }
 
 .btn:disabled {
@@ -197,123 +192,121 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #06b6d4);
-  color: white;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+  background: var(--accent-primary);
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45);
+  opacity: 0.9;
+  box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
-  background: rgba(148, 163, 184, 0.15);
-  color: #475569;
-  border: 2px solid rgba(148, 163, 184, 0.3);
+  background: var(--bg-surface-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(148, 163, 184, 0.25);
-  border-color: rgba(148, 163, 184, 0.4);
-  transform: translateY(-1px);
+  background: var(--bg-surface-hover);
+  border-color: var(--border-hover);
 }
 
-/* Emoji Picker Button - Override min-width */
+/* --- Emoji Picker Button --- */
 .emoji-picker-btn {
   min-width: auto !important;
   width: auto !important;
   flex-shrink: 0;
-  padding: 14px 16px !important;
+  padding: 12px 14px !important;
 }
 
-/* Form Select Styles */
+/* --- Form Select --- */
 .form-select {
   width: 100%;
-  padding: 14px 44px 14px 18px;
-  border: 2px solid rgba(59, 130, 246, 0.2);
-  border-radius: 12px;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.9);
-  color: #1e293b;
-  transition: all 0.2s ease;
+  padding: 12px 40px 12px 16px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
   box-sizing: border-box;
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
-  background-position: right 14px center;
-  background-size: 22px;
+  background-position: right 12px center;
+  background-size: 18px;
 }
 
 .form-select:focus {
   outline: none;
-  border-color: #3b82f6;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  border-color: var(--accent-primary);
+  background-color: var(--bg-input-focus);
+  box-shadow: 0 0 0 3px var(--accent-bg);
 }
 
 .form-select option {
-  padding: 14px;
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 600;
+  padding: 12px;
+  font-family: inherit;
 }
 
-/* Form Hint Styles */
+/* --- Form Hint --- */
 .form-hint {
   display: block;
-  margin-top: 8px;
-  font-size: 0.9rem;
-  color: #64748b;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
   font-style: italic;
   line-height: 1.5;
 }
 
-/* Checkbox Styles */
+/* --- Checkbox --- */
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   cursor: pointer;
   user-select: none;
-  padding: 16px 18px;
-  background: rgba(59, 130, 246, 0.03);
-  border: 2px solid rgba(59, 130, 246, 0.15);
-  border-radius: 12px;
-  transition: all 0.2s ease;
+  padding: 14px 16px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
 }
 
 .checkbox-label:hover {
-  background: rgba(59, 130, 246, 0.06);
-  border-color: rgba(59, 130, 246, 0.25);
+  background: var(--accent-bg-subtle);
+  border-color: var(--accent-primary);
 }
 
 .checkbox-label input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  accent-color: #3b82f6;
+  accent-color: var(--accent-primary);
   flex-shrink: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   margin: 0;
-  margin-right: 12px;
+  margin-right: 8px;
   position: relative;
-  top: 4px;
+  top: 2px;
 }
 
 .checkbox-label span {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
   line-height: 1.3;
   flex: 1;
   margin: 0;
 }
 
 .checkbox-label:hover span {
-  color: #3b82f6;
+  color: var(--accent-primary);
 }
 
 .checkbox-label input[type="checkbox"]:disabled {
@@ -327,15 +320,17 @@
 }
 
 .checkbox-label:has(input[type="checkbox"]:disabled):hover {
-  background: rgba(59, 130, 246, 0.03);
-  border-color: rgba(59, 130, 246, 0.15);
+  background: var(--bg-surface-subtle);
+  border-color: var(--border-default);
 }
 
 .checkbox-label:has(input[type="checkbox"]:disabled) span {
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
-/* Responsive Styles for Tablets */
+/* ============================================
+   Responsive — Tablet
+   ============================================ */
 @media (max-width: 768px) {
   .modal-content {
     width: 95%;
@@ -347,7 +342,7 @@
   }
 
   .modal-header h2 {
-    font-size: 1.6rem;
+    font-size: 1.3rem;
   }
 
   .task-form {
@@ -360,37 +355,38 @@
   }
 }
 
-/* Responsive Styles for Mobile */
+/* ============================================
+   Responsive — Mobile
+   ============================================ */
 @media (max-width: 600px) {
   .modal-overlay {
     padding: 10px;
     align-items: center;
     justify-content: center;
   }
-  
+
   .modal-content {
     width: 95%;
     max-height: 90vh;
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
   }
-  
-  /* Mobile-friendly scrollbar for modal content */
+
   .modal-content::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
-  
+
   .modal-content::-webkit-scrollbar-track {
-    background: rgba(148, 163, 184, 0.1);
+    background: var(--bg-surface-subtle);
     border-radius: 10px;
   }
-  
+
   .modal-content::-webkit-scrollbar-thumb {
-    background: rgba(59, 130, 246, 0.4);
+    background: var(--border-hover);
     border-radius: 10px;
   }
-  
+
   .modal-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(59, 130, 246, 0.6);
+    background: var(--border-strong);
   }
 
   .modal-header {
@@ -398,13 +394,13 @@
   }
 
   .modal-header h2 {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
   }
 
   .close-btn {
     width: 32px;
     height: 32px;
-    font-size: 1.6rem;
+    font-size: 1.4rem;
   }
 
   .task-form {
@@ -416,15 +412,15 @@
   }
 
   .form-group label {
-    font-size: 0.95rem;
-    margin-bottom: 8px;
+    font-size: 0.75rem;
+    margin-bottom: 6px;
   }
 
   .form-input,
   .form-textarea,
   .form-select {
-    padding: 12px 14px;
-    font-size: 1rem;
+    padding: 10px 14px;
+    font-size: 0.9rem;
   }
 
   .modal-actions {
@@ -441,19 +437,20 @@
   }
 
   .error-message {
-    padding: 12px 14px;
-    font-size: 0.9rem;
+    padding: 10px 14px;
+    font-size: 0.85rem;
     margin-bottom: 20px;
   }
 }
 
-/* Emoji Picker Search Input Fix */
+/* ============================================
+   Emoji Picker — Search Input Fix
+   ============================================ */
 .epr-search-container input.epr-search {
   padding-left: 45px !important;
   padding-right: 12px !important;
 }
 
-/* Additional emoji picker search styling */
 aside.EmojiPickerReact .epr-search-container input {
   padding-left: 45px !important;
 }
@@ -466,21 +463,22 @@ aside.EmojiPickerReact .epr-icn-search {
   left: 12px !important;
 }
 
-/* Emoji Picker Container Responsive Styles */
+/* ============================================
+   Emoji Picker — Container
+   ============================================ */
 .emoji-picker-container {
   position: absolute;
   top: 100%;
   right: 0;
   margin-top: 8px;
   z-index: 1001;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   max-width: 100%;
 }
 
-/* Mobile-first approach: Start with smallest breakpoint */
-/* Mobile: Responsive emoji picker with centered layout */
+/* Mobile: centered overlay */
 @media (max-width: 600px) {
   .emoji-picker-container {
     position: fixed;
@@ -489,26 +487,23 @@ aside.EmojiPickerReact .epr-icn-search {
     right: auto;
     transform: translate(-50%, -50%);
     margin-top: 0;
-    /* 20px padding on each side for mobile */
     width: calc(100vw - 40px);
     max-width: 340px;
     max-height: 70vh;
-    z-index: 10001; /* Higher z-index for mobile */
+    z-index: 10001;
   }
-  
+
   .emoji-picker-container aside.EmojiPickerReact {
     width: 100%;
     max-height: 70vh;
   }
-  
+
   .emoji-picker-container .epr-body {
-    /* Subtract approximate height of search bar and category tabs (~100px) */
     max-height: calc(70vh - 100px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
-  /* Ensure picker content is scrollable on small screens */
+
   .emoji-picker-container .epr-emoji-category-content {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -528,66 +523,72 @@ aside.EmojiPickerReact .epr-icn-search {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--bg-overlay);
     z-index: 10000;
     animation: fadeIn 0.2s ease-in-out;
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Tablet: Slightly smaller emoji picker */
+/* Tablet */
 @media (min-width: 601px) and (max-width: 768px) {
   .emoji-picker-container {
     width: 320px;
   }
 }
 
-/* Desktop: Full width emoji picker */
+/* Desktop */
 @media (min-width: 769px) {
   .emoji-picker-container {
     width: 350px;
   }
 }
 
-/* Ensure emoji picker doesn't cause horizontal scroll */
+/* Prevent overflow */
 .emoji-picker-container aside.EmojiPickerReact {
   box-sizing: border-box;
   max-width: 100%;
 }
 
-/* Hide skin tone selector and preview */
 .emoji-picker-container .epr-skin-tones,
 .emoji-picker-container .epr-preview {
   display: none !important;
 }
 
-/* Ensure emoji picker body fits properly */
 .emoji-picker-container .epr-body {
   overflow-x: hidden !important;
 }
 
-/* Prevent horizontal overflow in mobile */
 @media (max-width: 600px) {
   .emoji-picker-container aside.EmojiPickerReact {
     overflow: hidden;
   }
-  
+
   .emoji-picker-container .epr-emoji-category-content {
     overflow-x: hidden !important;
   }
-  
-  /* Hide category navigation on mobile only */
+
   .emoji-picker-container nav,
   .emoji-picker-container [class*="category-nav"],
   .emoji-picker-container .epr-category-nav {
     display: none !important;
   }
+}
+
+/* ============================================
+   Dark Mode — Native Form Elements
+   ============================================ */
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .form-input[type="date"] {
+  color-scheme: dark;
+}
+
+[data-theme="dark"] aside.EmojiPickerReact {
+  --epr-bg-color: var(--bg-surface) !important;
+  --epr-category-label-bg-color: var(--bg-surface) !important;
+  --epr-text-color: var(--text-primary) !important;
+  --epr-search-input-bg-color: var(--bg-input) !important;
+  --epr-hover-bg-color: var(--accent-bg) !important;
+  --epr-search-input-text-color: var(--text-primary) !important;
+  --epr-search-input-placeholder-color: var(--text-muted) !important;
+  border: 1px solid var(--border-default) !important;
 }

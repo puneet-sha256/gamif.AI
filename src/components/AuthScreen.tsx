@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import ThemeToggle from './ThemeToggle'
 import './AuthScreen.css'
 
 interface AuthScreenProps {
@@ -107,24 +108,25 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
       <div className="auth-background">
         <div className="shadows"></div>
       </div>
-      
+
       <div className="auth-content">
         <div className="auth-card">
           <div className="auth-header">
             <div className="solo-leveling-logo">
-              <h1>SOLO LEVELING</h1>
-              <div className="subtitle">Player System</div>
+              <h1>GAMIF.AI</h1>
+              <div className="subtitle">Life Operating System</div>
             </div>
+            <ThemeToggle />
           </div>
 
           <div className="auth-tabs">
-            <button 
+            <button
               className={`tab ${isLogin ? 'active' : ''}`}
               onClick={() => setIsLogin(true)}
             >
               Login
             </button>
-            <button 
+            <button
               className={`tab ${!isLogin ? 'active' : ''}`}
               onClick={() => setIsLogin(false)}
             >
@@ -138,7 +140,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                 {error}
               </div>
             )}
-            
+
             {success && (
               <div className="message success-message">
                 {success}
@@ -201,8 +203,8 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
               </div>
             )}
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className={`auth-button ${isLoading ? 'loading' : ''}`}
               disabled={isLoading}
             >
@@ -217,8 +219,8 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
           <div className="auth-footer">
             <p>
               {isLogin ? "New player? " : "Already registered? "}
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="link-button"
                 onClick={toggleMode}
               >
