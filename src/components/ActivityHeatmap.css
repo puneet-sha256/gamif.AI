@@ -57,6 +57,14 @@
   letter-spacing: 0.5px;
 }
 
+.heatmap-empty-message {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 8px 0;
+  margin: 0 0 16px 0;
+}
+
 .heatmap-filters {
   display: flex;
   gap: 10px;

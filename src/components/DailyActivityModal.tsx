@@ -36,7 +36,7 @@ const DailyActivityModal: React.FC<DailyActivityModalProps> = ({
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      onClose()
+      handleCancel()
     }
   }
 
@@ -56,9 +56,10 @@ const DailyActivityModal: React.FC<DailyActivityModalProps> = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>🤖 Daily Activity Analysis</h3>
-          <button 
+          <button
             className="modal-close"
-            onClick={onClose}
+            onClick={handleCancel}
+            aria-label="Close"
           >
             ✕
           </button>
