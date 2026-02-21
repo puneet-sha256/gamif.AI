@@ -1242,7 +1242,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           </div>
           <div className="shop-header-actions">
             <div className="currency-display">
-              <span className="currency-amount">{user?.stats?.shards || 0} 💎 Shards</span>
+              <span className="currency-amount">{(user?.stats?.shards || 0).toFixed(2)} 💎 Shards</span>
             </div>
             <button 
               onClick={() => setShowShopItemModal(true)}

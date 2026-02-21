@@ -77,7 +77,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
         <div className={`${isChallenge ? 'challenge-rewards' : 'task-rewards'}`}>
           {durationMinutes && <span className="duration-badge" title={`Spend ~${durationMinutes} min for full XP & shards. More effort = bonus rewards (up to 5x).`}>{durationMinutes} min</span>}
           <span className="xp-reward">+{xpReward} XP</span>
-          <span className="shard-reward">+{shardReward} 💎</span>
+          <span className="shard-reward">+{Number(shardReward).toFixed(2)} 💎</span>
         </div>
       </div>
       {isChallenge && progress && (
