@@ -125,14 +125,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     title?: string
     description: string
     category?: 'Strength' | 'Intelligence' | 'Charisma'
+    expected_duration_minutes?: number
     xp: number
     shards: number
   }) => {
     if (editingTask) {
       // Edit mode - use category from editingTask
-      const updates: { title?: string; description?: string; xp?: number; shards?: number } = {
+      const updates: { title?: string; description?: string; expected_duration_minutes?: number; xp?: number; shards?: number } = {
         title: task.title, // Always include title (can be empty or filled)
         description: task.description,
+        expected_duration_minutes: task.expected_duration_minutes,
         xp: task.xp,
         shards: task.shards
       }
@@ -157,6 +159,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         title: task.title,
         description: task.description,
         category: task.category,
+        expected_duration_minutes: task.expected_duration_minutes,
         xp: task.xp,
         shards: task.shards
       })
@@ -259,6 +262,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           title: task.title || '',
           description: task.description,
           category: 'Strength' as const,
+          expected_duration_minutes: task.expected_duration_minutes,
           xp: task.xp,
           shards: task.shards
         })),
@@ -267,6 +271,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           title: task.title || '',
           description: task.description,
           category: 'Intelligence' as const,
+          expected_duration_minutes: task.expected_duration_minutes,
           xp: task.xp,
           shards: task.shards
         })),
@@ -275,6 +280,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           title: task.title || '',
           description: task.description,
           category: 'Charisma' as const,
+          expected_duration_minutes: task.expected_duration_minutes,
           xp: task.xp,
           shards: task.shards
         }))
@@ -1141,6 +1147,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                     category={task.category + (task.originalTask.title ? ' ✨' : '')}
                     xpReward={task.xpReward}
                     shardReward={task.shardReward}
+                    durationMinutes={task.durationMinutes}
                     taskId={task.originalTask.id}
                     taskCategory={task.taskCategory}
                     onEdit={handleEditTask}
@@ -1164,6 +1171,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                     category={task.category + (task.originalTask.title ? ' ✨' : '')}
                     xpReward={task.xpReward}
                     shardReward={task.shardReward}
+                    durationMinutes={task.durationMinutes}
                     taskId={task.originalTask.id}
                     taskCategory={task.taskCategory}
                     onEdit={handleEditTask}
@@ -1187,6 +1195,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                     category={task.category + (task.originalTask.title ? ' ✨' : '')}
                     xpReward={task.xpReward}
                     shardReward={task.shardReward}
+                    durationMinutes={task.durationMinutes}
                     taskId={task.originalTask.id}
                     taskCategory={task.taskCategory}
                     onEdit={handleEditTask}
@@ -1233,7 +1242,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           </div>
           <div className="shop-header-actions">
             <div className="currency-display">
-              <span className="currency-amount">{user?.stats?.shards || 0} 💎 Shards</span>
+              <span className="currency-amount">{(user?.stats?.shards || 0).toFixed(2)} 💎 Shards</span>
             </div>
             <button 
               onClick={() => setShowShopItemModal(true)}

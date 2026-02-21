@@ -287,7 +287,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const editGeneratedTask = async (
     taskId: string,
     category: 'Strength' | 'Intelligence' | 'Charisma',
-    updates: { description?: string; xp?: number; shards?: number }
+    updates: { description?: string; expected_duration_minutes?: number; xp?: number; shards?: number }
   ): Promise<boolean> => {
     
     if (!user) {
@@ -343,6 +343,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     title: string
     description: string
     category: 'Strength' | 'Intelligence' | 'Charisma'
+    expected_duration_minutes?: number
     xp: number
     shards: number
   }): Promise<boolean> => {

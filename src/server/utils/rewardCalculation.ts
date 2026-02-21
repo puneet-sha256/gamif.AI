@@ -222,14 +222,15 @@ export function calculateRewardsFromAnalysis(
       }
 
       case 'similar': {
-        // Find the similar task
+        // Find the similar task and use similarity_score from AI analysis
         const matchedTask = findMatchingTask(match.matched_task || match.name, allTasks)
-        
+        const similarityMultiplier = match.similarity_score ?? 0.8
+
         if (matchedTask) {
-          xpEarned = matchedTask.xp * 0.8 * match.effort_ratio
-          shardsEarned = matchedTask.shards * 0.8 * match.effort_ratio
-          calculationNotes = `Similar match (80%): ${matchedTask.xp} XP × 0.8 × ${match.effort_ratio} effort = ${xpEarned.toFixed(1)} XP`
-          logger.custom('🔄', `Similar task found: ${matchedTask.title || matchedTask.description}`)
+          xpEarned = matchedTask.xp * similarityMultiplier * match.effort_ratio
+          shardsEarned = matchedTask.shards * similarityMultiplier * match.effort_ratio
+          calculationNotes = `Similar match (${(similarityMultiplier * 100).toFixed(0)}%): ${matchedTask.xp} XP × ${similarityMultiplier} × ${match.effort_ratio} effort = ${xpEarned.toFixed(1)} XP`
+          logger.custom('🔄', `Similar task found: ${matchedTask.title || matchedTask.description} (similarity: ${similarityMultiplier})`)
         } else {
           logger.warn('Similar match task not found, treating as goal-aligned')
           // Fallback to category average
@@ -242,12 +243,13 @@ export function calculateRewardsFromAnalysis(
       }
 
       case 'goal-aligned': {
-        // Use category average for goal-aligned activities
+        // Use category average scaled by alignment_factor from AI analysis
         const avg = calculateCategoryAverage(allTasks, category)
-        xpEarned = avg.avgXP * match.effort_ratio
-        shardsEarned = avg.avgShards * match.effort_ratio
-        calculationNotes = `Goal-aligned (category avg): ${avg.avgXP.toFixed(1)} XP × ${match.effort_ratio} effort = ${xpEarned.toFixed(1)} XP`
-        logger.custom('🎯', `Using ${category} category average`)
+        const alignmentMultiplier = match.alignment_factor ?? 0.6
+        xpEarned = avg.avgXP * alignmentMultiplier * match.effort_ratio
+        shardsEarned = avg.avgShards * alignmentMultiplier * match.effort_ratio
+        calculationNotes = `Goal-aligned (${(alignmentMultiplier * 100).toFixed(0)}% of category avg): ${avg.avgXP.toFixed(1)} XP × ${alignmentMultiplier} × ${match.effort_ratio} effort = ${xpEarned.toFixed(1)} XP`
+        logger.custom('🎯', `Using ${category} category average × ${alignmentMultiplier} alignment`)
         break
       }
     }

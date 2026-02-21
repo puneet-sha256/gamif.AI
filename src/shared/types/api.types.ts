@@ -71,6 +71,7 @@ export interface UpdateTaskRequest {
   updates: {
     title?: string;
     description?: string;
+    expected_duration_minutes?: number;
     xp?: number;
     shards?: number;
   };
@@ -87,6 +88,7 @@ export interface AddTaskRequest {
   title: string; // User-provided title for the task
   description: string;
   category: 'Strength' | 'Intelligence' | 'Charisma';
+  expected_duration_minutes?: number;
   xp: number;
   shards: number;
 }
@@ -96,29 +98,32 @@ export interface AnalyzeDailyActivityRequest {
   dailyActivity: string; // User's description of what they did today
   activityDate?: string; // Date of the activity (YYYY-MM-DD)
   currentTasks?: {
-    Strength?: Array<{ 
-      id: string; 
+    Strength?: Array<{
+      id: string;
       title?: string;
-      description: string; 
+      description: string;
       category: string;
-      xp: number; 
-      shards: number 
+      expected_duration_minutes?: number;
+      xp: number;
+      shards: number
     }>;
-    Intelligence?: Array<{ 
-      id: string; 
+    Intelligence?: Array<{
+      id: string;
       title?: string;
-      description: string; 
+      description: string;
       category: string;
-      xp: number; 
-      shards: number 
+      expected_duration_minutes?: number;
+      xp: number;
+      shards: number
     }>;
-    Charisma?: Array<{ 
-      id: string; 
+    Charisma?: Array<{
+      id: string;
       title?: string;
-      description: string; 
+      description: string;
       category: string;
-      xp: number; 
-      shards: number 
+      expected_duration_minutes?: number;
+      xp: number;
+      shards: number
     }>;
   };
 }
@@ -191,7 +196,7 @@ export interface ActivityMatch {
   goal_link: string | null; // Goal description if goal-aligned
   similarity_score: number | null; // 0.0-1.0 for similar matches
   alignment_factor: number | null; // 0.4-0.8 for goal-aligned activities
-  effort_ratio: number; // 0.0-2.0
+  effort_ratio: number; // 0.0-5.0
   notes: string; // Brief reasoning
 }
 

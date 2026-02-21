@@ -29,6 +29,7 @@ export interface MappedTaskItem {
   category: string
   xpReward: number
   shardReward: number
+  durationMinutes?: number
   originalTask: GeneratedTask
   taskCategory: TaskCategory
 }
@@ -48,6 +49,7 @@ export function mapGeneratedTaskToTaskItem(
     category: categoryInfo.displayName,
     xpReward: task.xp,
     shardReward: task.shards,
+    durationMinutes: task.expected_duration_minutes,
     originalTask: task,
     taskCategory: category
   }

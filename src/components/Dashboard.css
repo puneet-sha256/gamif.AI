@@ -80,7 +80,7 @@
 .unclaimed-rewards-button.has-rewards {
   background: var(--color-warning);
   border: none;
-  color: #1a1a2e;
+  color: var(--text-primary);
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
 }
 
@@ -1112,6 +1112,16 @@
   flex-wrap: wrap;
 }
 
+.duration-badge {
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-hover);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
 .xp-reward,
 .shard-reward {
   font-weight: 600;
@@ -1602,6 +1612,7 @@
   width: 100vw;
   height: 100vh;
   background: var(--bg-overlay);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -2199,6 +2210,7 @@
     font-size: 0.85rem;
   }
 
+  .duration-badge,
   .xp-reward,
   .shard-reward {
     font-size: 0.7rem;
@@ -2470,6 +2482,7 @@
     font-size: 0.8rem;
   }
 
+  .duration-badge,
   .xp-reward,
   .shard-reward {
     font-size: 0.65rem;

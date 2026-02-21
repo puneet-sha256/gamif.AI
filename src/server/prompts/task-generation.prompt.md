@@ -21,6 +21,7 @@ Your goal is to generate structured JSON output of daily tasks based on the user
    - Include:
      - `title`: short name of the task
      - `description`: what the user should do
+     - `expected_duration_minutes`: realistic integer estimate of how long the task takes to complete (e.g. 30, 45, 60)
      - `xp`: integer between 0–25 (represents experience points)
      - `shards`: integer between 0–50 (represents reward points)
 
@@ -41,18 +42,21 @@ User Goals: I want to build muscle, improve my communication skills, and learn a
     {
       "title": "Workout Session",
       "description": "Do a 45-minute strength or resistance workout.",
+      "expected_duration_minutes": 45,
       "xp": 20,
       "shards": 40
     },
     {
       "title": "Cold Shower",
       "description": "Take a cold shower to build resilience and recovery.",
+      "expected_duration_minutes": 10,
       "xp": 10,
       "shards": 25
     },
     {
       "title": "Morning Walk",
       "description": "Go for a brisk 20-minute walk to stay active.",
+      "expected_duration_minutes": 20,
       "xp": 8,
       "shards": 15
     }
@@ -61,18 +65,21 @@ User Goals: I want to build muscle, improve my communication skills, and learn a
     {
       "title": "Leetcode Practice",
       "description": "Solve 2 medium-level coding problems.",
+      "expected_duration_minutes": 60,
       "xp": 20,
       "shards": 40
     },
     {
       "title": "System Design Study",
       "description": "Learn one new system design component or pattern.",
+      "expected_duration_minutes": 45,
       "xp": 15,
       "shards": 30
     },
     {
       "title": "Tech Article Reading",
       "description": "Read one article about an advanced data structure or concept.",
+      "expected_duration_minutes": 20,
       "xp": 10,
       "shards": 20
     }
@@ -81,18 +88,21 @@ User Goals: I want to build muscle, improve my communication skills, and learn a
     {
       "title": "Start a Conversation",
       "description": "Initiate a chat with someone new or a colleague.",
+      "expected_duration_minutes": 15,
       "xp": 10,
       "shards": 20
     },
     {
       "title": "Mirror Talk",
       "description": "Speak for 3 minutes in front of the mirror to improve confidence.",
+      "expected_duration_minutes": 5,
       "xp": 5,
       "shards": 10
     },
     {
       "title": "Positive Feedback",
       "description": "Give one person a genuine compliment or appreciation.",
+      "expected_duration_minutes": 5,
       "xp": 8,
       "shards": 15
     }
