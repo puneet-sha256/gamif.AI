@@ -3,7 +3,9 @@ import {
   validateRegisterRequest,
   validateLoginRequest,
   validateSendOtpRequest,
-  validateVerifyOtpRequest
+  validateVerifyOtpRequest,
+  validateForgotPasswordRequest,
+  validateResetPasswordRequest
 } from '../utils/validation'
 import {
   loadUsers,
@@ -28,7 +30,8 @@ import {
 } from '../utils/responseHelpers'
 import type { User, LogoutRequest } from '../../shared/types'
 import { generateOtp, storeOtp, verifyOtp } from '../utils/otpStore'
-import { sendOtpEmail } from '../services/emailService'
+import { storeResetOtp, verifyResetOtp } from '../utils/resetOtpStore'
+import { sendOtpEmail, sendPasswordResetEmail } from '../services/emailService'
 import { logger } from '../../utils/logger'
 
 // Register new user
@@ -231,6 +234,111 @@ export async function verifyOtpAndRegister(req: Request, res: Response) {
 
   } catch (error) {
     logger.error('Verify OTP error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Send OTP for password reset
+export async function sendPasswordResetOtp(req: Request, res: Response) {
+  try {
+    if (!validateForgotPasswordRequest(req.body)) {
+      return res.status(400).json(createErrorResponse(
+        'Invalid request. A valid email address is required'
+      ))
+    }
+
+    const { email } = req.body
+
+    // Check if user exists
+    const user = await findUserByEmail(email)
+    if (!user) {
+      return res.status(400).json(createErrorResponse(ErrorMessages.PASSWORD_RESET_EMAIL_NOT_FOUND))
+    }
+
+    // Generate OTP and store for password reset
+    const otp = generateOtp()
+    storeResetOtp(email, otp)
+
+    // Send password reset email
+    const emailResult = await sendPasswordResetEmail(email, otp)
+
+    if (!emailResult.success) {
+      return res.status(500).json(createErrorResponse(ErrorMessages.PASSWORD_RESET_OTP_SEND_FAILED))
+    }
+
+    res.json(createSuccessResponse(SuccessMessages.PASSWORD_RESET_OTP_SENT))
+
+  } catch (error) {
+    logger.error('Send password reset OTP error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Verify password reset OTP (without consuming it)
+export async function verifyPasswordResetOtp(req: Request, res: Response) {
+  try {
+    if (!validateVerifyOtpRequest(req.body)) {
+      return res.status(400).json(createErrorResponse(
+        'Invalid request. Valid email and 6-digit verification code are required'
+      ))
+    }
+
+    const { email, otp } = req.body
+
+    // Verify OTP without consuming — keep it for the actual reset call
+    const result = verifyResetOtp(email, otp, false)
+
+    if (!result.valid) {
+      const message = result.reason === 'expired'
+        ? ErrorMessages.OTP_EXPIRED
+        : ErrorMessages.OTP_INVALID
+      return res.status(400).json(createErrorResponse(message))
+    }
+
+    res.json(createSuccessResponse('Verification code is valid'))
+
+  } catch (error) {
+    logger.error('Verify password reset OTP error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Verify OTP and reset password
+export async function resetPassword(req: Request, res: Response) {
+  try {
+    if (!validateResetPasswordRequest(req.body)) {
+      return res.status(400).json(createErrorResponse(
+        'Invalid request. Valid email, 6-digit code, and new password (min 6 chars) are required'
+      ))
+    }
+
+    const { email, otp, newPassword } = req.body
+
+    // Verify OTP
+    const result = verifyResetOtp(email, otp)
+
+    if (!result.valid) {
+      const message = result.reason === 'expired'
+        ? ErrorMessages.OTP_EXPIRED
+        : ErrorMessages.OTP_INVALID
+      return res.status(400).json(createErrorResponse(message))
+    }
+
+    // OTP valid — update the user's password
+    const users = await loadUsers()
+    const userIndex = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase())
+
+    if (userIndex === -1) {
+      return res.status(400).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    users[userIndex].passwordHash = hashPassword(newPassword)
+    await saveUsers(users)
+
+    res.json(createSuccessResponse(SuccessMessages.PASSWORD_RESET_SUCCESS))
+
+  } catch (error) {
+    logger.error('Reset password error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }

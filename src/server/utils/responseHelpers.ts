@@ -57,6 +57,8 @@ export const ErrorMessages = {
   OTP_INVALID: 'Invalid verification code. Please check and try again',
   OTP_EXPIRED: 'Verification code has expired. Please request a new one',
   OTP_SEND_FAILED: 'Failed to send verification email. Please try again',
+  PASSWORD_RESET_EMAIL_NOT_FOUND: 'No account found with this email address',
+  PASSWORD_RESET_OTP_SEND_FAILED: 'Failed to send password reset email. Please try again',
   INSUFFICIENT_SHARDS: 'Insufficient shards',
   VALIDATION_ERROR: (field: string) => `Invalid ${field} provided`
 } as const
@@ -65,6 +67,8 @@ export const ErrorMessages = {
 export const SuccessMessages = {
   OTP_SENT: 'Verification code sent to your email',
   OTP_VERIFIED: 'Email verified! Player registered successfully!',
+  PASSWORD_RESET_OTP_SENT: 'Password reset code sent to your email',
+  PASSWORD_RESET_SUCCESS: 'Password reset successfully! You can now log in with your new password',
   REGISTRATION_SUCCESS: 'Player registered successfully!',
   LOGIN_SUCCESS: 'Welcome back, Player!',
   LOGOUT_SUCCESS: 'Logged out successfully',
