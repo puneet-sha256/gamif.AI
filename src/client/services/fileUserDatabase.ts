@@ -90,6 +90,69 @@ class FileUserDatabase {
     }
   }
 
+  async sendPasswordResetOtp(email: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password/send-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      })
+
+      const result = await response.json()
+      return { success: result.success, message: result.message }
+    } catch (error) {
+      console.error('Database: Send password reset OTP error:', error)
+      return {
+        success: false,
+        message: 'Network error. Please check if the server is running.'
+      }
+    }
+  }
+
+  async verifyPasswordResetOtp(email: string, otp: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, otp }),
+      })
+
+      const result = await response.json()
+      return { success: result.success, message: result.message }
+    } catch (error) {
+      console.error('Database: Verify password reset OTP error:', error)
+      return {
+        success: false,
+        message: 'Network error. Please check if the server is running.'
+      }
+    }
+  }
+
+  async resetPassword(email: string, otp: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password/reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, otp, newPassword }),
+      })
+
+      const result = await response.json()
+      return { success: result.success, message: result.message }
+    } catch (error) {
+      console.error('Database: Reset password error:', error)
+      return {
+        success: false,
+        message: 'Network error. Please check if the server is running.'
+      }
+    }
+  }
+
   async register(userData: UserRegistration): Promise<{ success: boolean; message: string; user?: User }> {
     try {
       const response = await fetch(`${API_BASE_URL}/register`, {

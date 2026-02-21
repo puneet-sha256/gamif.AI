@@ -4,7 +4,9 @@ import type {
   ExperienceUpdateRequest,
   ShardsUpdateRequest,
   SendOtpRequest,
-  VerifyOtpRequest
+  VerifyOtpRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest
 } from '../../shared/types'
 
 // Server-specific validation helper functions
@@ -64,6 +66,24 @@ export function validateVerifyOtpRequest(body: any): body is VerifyOtpRequest {
     isValidEmail(body.email) &&
     isValidString(body.otp) &&
     /^\d{6}$/.test(body.otp)
+  );
+}
+
+export function validateForgotPasswordRequest(body: any): body is ForgotPasswordRequest {
+  return (
+    isValidString(body.email) &&
+    isValidEmail(body.email)
+  );
+}
+
+export function validateResetPasswordRequest(body: any): body is ResetPasswordRequest {
+  return (
+    isValidString(body.email) &&
+    isValidEmail(body.email) &&
+    isValidString(body.otp) &&
+    /^\d{6}$/.test(body.otp) &&
+    isValidString(body.newPassword) &&
+    body.newPassword.length >= 6
   );
 }
 

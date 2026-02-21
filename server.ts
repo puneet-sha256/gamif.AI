@@ -4,7 +4,8 @@ import cors from 'cors'
 import path from 'path'
 import { initializeData, DATA_DIR, USERS_FILE, SESSIONS_FILE } from './src/server/utils/dataOperations'
 import {
-  registerUser, loginUser, logoutUser, sendOtp, verifyOtpAndRegister
+  registerUser, loginUser, logoutUser, sendOtp, verifyOtpAndRegister,
+  sendPasswordResetOtp, verifyPasswordResetOtp, resetPassword
 } from './src/server/routes/authRoutes'
 import {
   getCurrentUser, updateUserData, updateExperience, updateShards,
@@ -77,6 +78,11 @@ app.post('/api/logout', logoutUser)
 // OTP verification routes
 app.post('/api/auth/send-otp', sendOtp)
 app.post('/api/auth/verify-otp', verifyOtpAndRegister)
+
+// Forgot password routes
+app.post('/api/auth/forgot-password/send-otp', sendPasswordResetOtp)
+app.post('/api/auth/forgot-password/verify-otp', verifyPasswordResetOtp)
+app.post('/api/auth/forgot-password/reset', resetPassword)
 
 // User management routes
 app.get('/api/user/session/:sessionId', getCurrentUser)
