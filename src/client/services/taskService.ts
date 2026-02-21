@@ -13,6 +13,7 @@ import type {
 export interface TaskUpdateData {
   title?: string
   description?: string
+  expected_duration_minutes?: number
   xp?: number
   shards?: number
 }
@@ -21,6 +22,7 @@ export interface NewTaskData {
   title: string
   description: string
   category: 'Strength' | 'Intelligence' | 'Charisma'
+  expected_duration_minutes?: number
   xp: number
   shards: number
 }

@@ -106,66 +106,73 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
     logger.custom('📝', 'User Activity:', dailyActivity)
 
     // Format daily planned tasks as a JSON array
-    const plannedTasks: Array<{ 
-      title: string; 
-      description: string; 
+    const plannedTasks: Array<{
+      title: string;
+      description: string;
       category: string;
-      xp: number; 
-      shards: number 
+      expected_duration_minutes?: number;
+      xp: number;
+      shards: number
     }> = []
     
     if (currentTasks) {
       if (currentTasks.Strength && currentTasks.Strength.length > 0) {
-        currentTasks.Strength.forEach((task: { 
-          id: string; 
+        currentTasks.Strength.forEach((task: {
+          id: string;
           title?: string;
-          description: string; 
+          description: string;
           category: string;
-          xp: number; 
-          shards: number 
+          expected_duration_minutes?: number;
+          xp: number;
+          shards: number
         }) => {
           plannedTasks.push({
             title: task.title || task.description,
             description: task.description,
             category: task.category || 'Strength',
+            expected_duration_minutes: task.expected_duration_minutes,
             xp: task.xp,
             shards: task.shards
           })
         })
       }
-      
+
       if (currentTasks.Intelligence && currentTasks.Intelligence.length > 0) {
-        currentTasks.Intelligence.forEach((task: { 
-          id: string; 
+        currentTasks.Intelligence.forEach((task: {
+          id: string;
           title?: string;
-          description: string; 
+          description: string;
           category: string;
-          xp: number; 
-          shards: number 
+          expected_duration_minutes?: number;
+          xp: number;
+          shards: number
         }) => {
           plannedTasks.push({
             title: task.title || task.description,
             description: task.description,
             category: task.category || 'Intelligence',
+            expected_duration_minutes: task.expected_duration_minutes,
             xp: task.xp,
             shards: task.shards
           })
         })
       }
-      
+
       if (currentTasks.Charisma && currentTasks.Charisma.length > 0) {
-        currentTasks.Charisma.forEach((task: { 
-          id: string; 
+        currentTasks.Charisma.forEach((task: {
+          id: string;
           title?: string;
-          description: string; 
+          description: string;
           category: string;
-          xp: number; 
-          shards: number 
+          expected_duration_minutes?: number;
+          xp: number;
+          shards: number
         }) => {
           plannedTasks.push({
             title: task.title || task.description,
             description: task.description,
             category: task.category || 'Charisma',
+            expected_duration_minutes: task.expected_duration_minutes,
             xp: task.xp,
             shards: task.shards
           })
