@@ -1,7 +1,9 @@
 import type { Request, Response } from 'express'
-import { 
+import {
   validateRegisterRequest,
-  validateLoginRequest
+  validateLoginRequest,
+  validateSendOtpRequest,
+  validateVerifyOtpRequest
 } from '../utils/validation'
 import {
   loadUsers,
@@ -25,6 +27,8 @@ import {
   SuccessMessages
 } from '../utils/responseHelpers'
 import type { User, LogoutRequest } from '../../shared/types'
+import { generateOtp, storeOtp, verifyOtp } from '../utils/otpStore'
+import { sendOtpEmail } from '../services/emailService'
 import { logger } from '../../utils/logger'
 
 // Register new user
@@ -126,6 +130,107 @@ export async function loginUser(req: Request, res: Response) {
 
   } catch (error) {
     logger.error('Login error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Send OTP for email verification during registration
+export async function sendOtp(req: Request, res: Response) {
+  try {
+    if (!validateSendOtpRequest(req.body)) {
+      return res.status(400).json(createErrorResponse(
+        'Invalid request. Username, valid email, and password (min 6 chars) are required'
+      ))
+    }
+
+    const { username, email, password } = req.body
+
+    // Check if user already exists
+    const existingUserByEmail = await findUserByEmail(email)
+    const existingUserByUsername = await findUserByUsername(username)
+
+    if (existingUserByEmail) {
+      return res.status(400).json(createErrorResponse(ErrorMessages.USER_EXISTS))
+    }
+
+    if (existingUserByUsername) {
+      return res.status(400).json(createErrorResponse(ErrorMessages.USERNAME_TAKEN))
+    }
+
+    // Generate OTP and store with hashed password
+    const otp = generateOtp()
+    const hashedPassword = hashPassword(password)
+    storeOtp(email, otp, username, hashedPassword)
+
+    // Send OTP email
+    const emailResult = await sendOtpEmail(email, otp)
+
+    if (!emailResult.success) {
+      return res.status(500).json(createErrorResponse(ErrorMessages.OTP_SEND_FAILED))
+    }
+
+    res.json(createSuccessResponse(SuccessMessages.OTP_SENT))
+
+  } catch (error) {
+    logger.error('Send OTP error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Verify OTP and complete registration
+export async function verifyOtpAndRegister(req: Request, res: Response) {
+  try {
+    if (!validateVerifyOtpRequest(req.body)) {
+      return res.status(400).json(createErrorResponse(
+        'Invalid request. Valid email and 6-digit verification code are required'
+      ))
+    }
+
+    const { email, otp } = req.body
+
+    // Verify OTP
+    const result = verifyOtp(email, otp)
+
+    if (!result.valid) {
+      const message = result.reason === 'expired'
+        ? ErrorMessages.OTP_EXPIRED
+        : ErrorMessages.OTP_INVALID
+      return res.status(400).json(createErrorResponse(message))
+    }
+
+    // OTP valid — create the user
+    const newUser: User = {
+      id: generateUserId(),
+      username: result.username,
+      email: result.email,
+      passwordHash: result.passwordHash,
+      createdAt: new Date().toISOString(),
+      stats: {
+        experience: 0,
+        shards: 0,
+        strength: 0,
+        intelligence: 0,
+        charisma: 0
+      }
+    }
+
+    const users = await loadUsers()
+    users.push(newUser)
+    await saveUsers(users)
+
+    // Auto-create session
+    const sessionId = generateSessionId()
+    await createSession(newUser.id, sessionId)
+
+    res.json(createSuccessResponse(
+      SuccessMessages.OTP_VERIFIED,
+      undefined,
+      sanitizeUser(newUser),
+      sessionId
+    ))
+
+  } catch (error) {
+    logger.error('Verify OTP error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }

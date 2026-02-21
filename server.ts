@@ -4,7 +4,7 @@ import cors from 'cors'
 import path from 'path'
 import { initializeData, DATA_DIR, USERS_FILE, SESSIONS_FILE } from './src/server/utils/dataOperations'
 import {
-  registerUser, loginUser, logoutUser
+  registerUser, loginUser, logoutUser, sendOtp, verifyOtpAndRegister
 } from './src/server/routes/authRoutes'
 import {
   getCurrentUser, updateUserData, updateExperience, updateShards,
@@ -24,6 +24,9 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
   : [
       'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:5175',
+      'http://localhost:5176',
       'https://stunning-enigma-q4grwvjxxpjh9g7r-5173.app.github.dev'
     ]
 
@@ -70,6 +73,10 @@ app.get('/api/health', healthCheck)
 app.post('/api/register', registerUser)
 app.post('/api/login', loginUser)
 app.post('/api/logout', logoutUser)
+
+// OTP verification routes
+app.post('/api/auth/send-otp', sendOtp)
+app.post('/api/auth/verify-otp', verifyOtpAndRegister)
 
 // User management routes
 app.get('/api/user/session/:sessionId', getCurrentUser)

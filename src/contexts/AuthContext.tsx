@@ -58,6 +58,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  const sendOtp = async (userData: UserRegistration): Promise<{ success: boolean; message: string }> => {
+    setIsLoading(true)
+    try {
+      const result = await userDatabase.sendOtp(userData)
+      return { success: result.success, message: result.message }
+    } catch (error) {
+      console.error('AuthContext: Send OTP error:', error)
+      return { success: false, message: 'An error occurred while sending verification code' }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const verifyOtp = async (email: string, otp: string): Promise<{ success: boolean; message: string }> => {
+    setIsLoading(true)
+    try {
+      const result = await userDatabase.verifyOtpAndRegister(email, otp)
+
+      if (result.success && result.user) {
+        setUser(result.user)
+      }
+      return { success: result.success, message: result.message }
+    } catch (error) {
+      console.error('AuthContext: Verify OTP error:', error)
+      return { success: false, message: 'An error occurred during verification' }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const register = async (userData: UserRegistration): Promise<{ success: boolean; message: string }> => {
     setIsLoading(true)
     try {
@@ -468,6 +498,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     login,
     register,
+    sendOtp,
+    verifyOtp,
     logout,
     updateUser,
     saveProfileData,

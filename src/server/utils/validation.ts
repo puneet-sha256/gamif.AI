@@ -1,8 +1,10 @@
-import type { 
+import type {
   RegisterRequest,
   LoginRequest,
   ExperienceUpdateRequest,
-  ShardsUpdateRequest
+  ShardsUpdateRequest,
+  SendOtpRequest,
+  VerifyOtpRequest
 } from '../../shared/types'
 
 // Server-specific validation helper functions
@@ -43,6 +45,25 @@ export function validateExperienceUpdateRequest(body: any): body is ExperienceUp
     (body.strengthDelta === undefined || isValidNumber(body.strengthDelta)) &&
     (body.intelligenceDelta === undefined || isValidNumber(body.intelligenceDelta)) &&
     (body.charismaDelta === undefined || isValidNumber(body.charismaDelta))
+  );
+}
+
+export function validateSendOtpRequest(body: any): body is SendOtpRequest {
+  return (
+    isValidString(body.username) &&
+    isValidString(body.email) &&
+    isValidEmail(body.email) &&
+    isValidString(body.password) &&
+    body.password.length >= 6
+  );
+}
+
+export function validateVerifyOtpRequest(body: any): body is VerifyOtpRequest {
+  return (
+    isValidString(body.email) &&
+    isValidEmail(body.email) &&
+    isValidString(body.otp) &&
+    /^\d{6}$/.test(body.otp)
   );
 }
 

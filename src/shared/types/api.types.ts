@@ -12,6 +12,17 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface SendOtpRequest {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export interface VerifyOtpRequest {
+  email: string;
+  otp: string;
+}
+
 export interface LogoutRequest {
   sessionId?: string;
 }
