@@ -5,6 +5,8 @@ export interface AuthContextType {
   user: User | null
   login: (credentials: UserLogin) => Promise<{ success: boolean; message: string }>
   register: (userData: UserRegistration) => Promise<{ success: boolean; message: string }>
+  sendOtp: (userData: UserRegistration) => Promise<{ success: boolean; message: string }>
+  verifyOtp: (email: string, otp: string) => Promise<{ success: boolean; message: string }>
   logout: () => Promise<void>
   updateUser: (updates: Partial<User>) => Promise<boolean>
   saveProfileData: (profileData: ProfileData) => Promise<boolean>

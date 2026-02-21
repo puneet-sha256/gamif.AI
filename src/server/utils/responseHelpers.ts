@@ -54,12 +54,17 @@ export const ErrorMessages = {
   INVALID_CREDENTIALS: 'Invalid email or password',
   INVALID_SESSION: 'Invalid session',
   INTERNAL_ERROR: 'Internal server error',
+  OTP_INVALID: 'Invalid verification code. Please check and try again',
+  OTP_EXPIRED: 'Verification code has expired. Please request a new one',
+  OTP_SEND_FAILED: 'Failed to send verification email. Please try again',
   INSUFFICIENT_SHARDS: 'Insufficient shards',
   VALIDATION_ERROR: (field: string) => `Invalid ${field} provided`
 } as const
 
 // Common success messages
 export const SuccessMessages = {
+  OTP_SENT: 'Verification code sent to your email',
+  OTP_VERIFIED: 'Email verified! Player registered successfully!',
   REGISTRATION_SUCCESS: 'Player registered successfully!',
   LOGIN_SUCCESS: 'Welcome back, Player!',
   LOGOUT_SUCCESS: 'Logged out successfully',
