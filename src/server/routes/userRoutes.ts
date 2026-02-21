@@ -486,7 +486,7 @@ export async function deleteGeneratedTask(req: Request, res: Response) {
 // Add a user-created task
 export async function addUserTask(req: Request, res: Response) {
   try {
-    const { sessionId, title, description, category, xp, shards } = req.body
+    const { sessionId, title, description, category, expected_duration_minutes, xp, shards } = req.body
 
     // Validate required fields
     if (!sessionId || !title || !description || !category || xp === undefined || shards === undefined) {
@@ -519,6 +519,7 @@ export async function addUserTask(req: Request, res: Response) {
       title,
       description,
       category,
+      expected_duration_minutes,
       xp,
       shards
     })

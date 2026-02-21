@@ -1112,6 +1112,16 @@
   flex-wrap: wrap;
 }
 
+.duration-badge {
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
 .xp-reward,
 .shard-reward {
   font-weight: 600;
@@ -2199,6 +2209,7 @@
     font-size: 0.85rem;
   }
 
+  .duration-badge,
   .xp-reward,
   .shard-reward {
     font-size: 0.7rem;
@@ -2470,6 +2481,7 @@
     font-size: 0.8rem;
   }
 
+  .duration-badge,
   .xp-reward,
   .shard-reward {
     font-size: 0.65rem;
