@@ -88,6 +88,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  const sendPasswordResetOtp = async (email: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const result = await userDatabase.sendPasswordResetOtp(email)
+      return { success: result.success, message: result.message }
+    } catch (error) {
+      console.error('AuthContext: Send password reset OTP error:', error)
+      return { success: false, message: 'An error occurred while sending the reset code' }
+    }
+  }
+
+  const verifyPasswordResetOtp = async (email: string, otp: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const result = await userDatabase.verifyPasswordResetOtp(email, otp)
+      return { success: result.success, message: result.message }
+    } catch (error) {
+      console.error('AuthContext: Verify password reset OTP error:', error)
+      return { success: false, message: 'An error occurred while verifying the code' }
+    }
+  }
+
+  const resetPassword = async (email: string, otp: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const result = await userDatabase.resetPassword(email, otp, newPassword)
+      return { success: result.success, message: result.message }
+    } catch (error) {
+      console.error('AuthContext: Reset password error:', error)
+      return { success: false, message: 'An error occurred while resetting the password' }
+    }
+  }
+
   const register = async (userData: UserRegistration): Promise<{ success: boolean; message: string }> => {
     setIsLoading(true)
     try {
@@ -501,6 +531,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     sendOtp,
     verifyOtp,
+    sendPasswordResetOtp,
+    verifyPasswordResetOtp,
+    resetPassword,
     logout,
     updateUser,
     saveProfileData,
