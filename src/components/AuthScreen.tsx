@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import ThemeToggle from './ThemeToggle'
 import './AuthScreen.css'
@@ -7,23 +7,98 @@ interface AuthScreenProps {
   onLogin: () => void
 }
 
+const OTP_LENGTH = 6
+const OTP_EXPIRY_SECONDS = 5 * 60 // 5 minutes
+const RESEND_COOLDOWN_SECONDS = 30 // 30 seconds before allowing resend
+
 const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
-  const { login, register, isLoading } = useAuth()
+  const { login, sendOtp, verifyOtp, isLoading } = useAuth()
   const [isLogin, setIsLogin] = useState(true)
+  const [registrationStep, setRegistrationStep] = useState<'form' | 'otp'>('form')
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     confirmPassword: ''
   })
+  const [otpDigits, setOtpDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''))
+  const [countdown, setCountdown] = useState(OTP_EXPIRY_SECONDS)
+  const [resendCooldown, setResendCooldown] = useState(0)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const resendTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Clear error and success messages when switching between login and register
   useEffect(() => {
     setError('')
     setSuccess('')
+    setRegistrationStep('form')
+    setOtpDigits(Array(OTP_LENGTH).fill(''))
+    stopCountdown()
+    stopResendTimer()
   }, [isLogin])
+
+  const stopCountdown = useCallback(() => {
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current)
+      countdownRef.current = null
+    }
+  }, [])
+
+  const stopResendTimer = useCallback(() => {
+    if (resendTimerRef.current) {
+      clearInterval(resendTimerRef.current)
+      resendTimerRef.current = null
+    }
+  }, [])
+
+  const startResendCooldown = useCallback(() => {
+    stopResendTimer()
+    setResendCooldown(RESEND_COOLDOWN_SECONDS)
+
+    resendTimerRef.current = setInterval(() => {
+      setResendCooldown(prev => {
+        if (prev <= 1) {
+          stopResendTimer()
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }, [stopResendTimer])
+
+  const startCountdown = useCallback(() => {
+    stopCountdown()
+    setCountdown(OTP_EXPIRY_SECONDS)
+    startResendCooldown()
+
+    countdownRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          stopCountdown()
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }, [stopCountdown, startResendCooldown])
+
+  // Cleanup intervals on unmount
+  useEffect(() => {
+    return () => {
+      stopCountdown()
+      stopResendTimer()
+    }
+  }, [stopCountdown, stopResendTimer])
+
+  const formatCountdown = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -32,13 +107,49 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
     })
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleOtpChange = (index: number, value: string) => {
+    // Only allow digits
+    if (value && !/^\d$/.test(value)) return
+
+    const newDigits = [...otpDigits]
+    newDigits[index] = value
+    setOtpDigits(newDigits)
+
+    // Auto-focus next input
+    if (value && index < OTP_LENGTH - 1) {
+      otpInputRefs.current[index + 1]?.focus()
+    }
+  }
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
+      // Move to previous input on backspace if current is empty
+      otpInputRefs.current[index - 1]?.focus()
+    }
+  }
+
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault()
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH)
+    if (pasted.length === 0) return
+
+    const newDigits = [...otpDigits]
+    for (let i = 0; i < pasted.length; i++) {
+      newDigits[i] = pasted[i]
+    }
+    setOtpDigits(newDigits)
+
+    // Focus last filled input or the next empty one
+    const focusIndex = Math.min(pasted.length, OTP_LENGTH - 1)
+    otpInputRefs.current[focusIndex]?.focus()
+  }
+
+  const handleSendOtp = async () => {
     setError('')
     setSuccess('')
 
     // Validation
-    if (!isLogin && formData.password !== formData.confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       return
     }
@@ -48,14 +159,101 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
       return
     }
 
-    if (!isLogin && !formData.username.trim()) {
+    if (!formData.username.trim()) {
       setError('Player name is required')
       return
     }
 
+    try {
+      const result = await sendOtp({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      })
+
+      if (result.success) {
+        setSuccess(result.message)
+        setRegistrationStep('otp')
+        setOtpDigits(Array(OTP_LENGTH).fill(''))
+        startCountdown()
+        // Focus first OTP input after state update
+        setTimeout(() => otpInputRefs.current[0]?.focus(), 100)
+      } else {
+        setError(result.message)
+      }
+    } catch (err) {
+      console.error('AuthScreen: Unexpected error sending OTP:', err)
+      setError('An unexpected error occurred. Please try again.')
+    }
+  }
+
+  const handleVerifyOtp = async () => {
+    setError('')
+    setSuccess('')
+
+    const otp = otpDigits.join('')
+    if (otp.length !== OTP_LENGTH) {
+      setError('Please enter the complete 6-digit code')
+      return
+    }
 
     try {
-      if (isLogin) {
+      const result = await verifyOtp(formData.email, otp)
+
+      if (result.success) {
+        setSuccess(result.message)
+        stopCountdown()
+        setTimeout(() => {
+          onLogin()
+        }, 1000)
+      } else {
+        setError(result.message)
+        setOtpDigits(Array(OTP_LENGTH).fill(''))
+        otpInputRefs.current[0]?.focus()
+      }
+    } catch (err) {
+      console.error('AuthScreen: Unexpected error verifying OTP:', err)
+      setError('An unexpected error occurred. Please try again.')
+    }
+  }
+
+  const handleResendOtp = async () => {
+    setError('')
+    setSuccess('')
+    setOtpDigits(Array(OTP_LENGTH).fill(''))
+
+    try {
+      const result = await sendOtp({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      })
+
+      if (result.success) {
+        setSuccess('New verification code sent!')
+        startCountdown() // resets both expiry and resend cooldown
+        otpInputRefs.current[0]?.focus()
+      } else {
+        setError(result.message)
+      }
+    } catch (err) {
+      setError('Failed to resend code. Please try again.')
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setSuccess('')
+
+    if (isLogin) {
+      // Login flow — unchanged
+      if (formData.password.length < 6) {
+        setError('Password must be at least 6 characters long')
+        return
+      }
+
+      try {
         const result = await login({
           email: formData.email,
           password: formData.password
@@ -69,26 +267,22 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
         } else {
           setError(result.message)
         }
-      } else {
-        const result = await register({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password
-        })
-
-        if (result.success) {
-          setSuccess(result.message)
-          setTimeout(() => {
-            onLogin()
-          }, 1000)
-        } else {
-          setError(result.message)
-        }
+      } catch (err) {
+        console.error('AuthScreen: Unexpected error during login:', err)
+        setError('An unexpected error occurred. Please try again.')
       }
-    } catch (error) {
-      console.error('❌ AuthScreen: Unexpected error during authentication:', error)
-      setError('An unexpected error occurred. Please try again.')
+    } else {
+      // Registration flow — send OTP
+      await handleSendOtp()
     }
+  }
+
+  const handleBackToForm = () => {
+    setRegistrationStep('form')
+    setOtpDigits(Array(OTP_LENGTH).fill(''))
+    setError('')
+    setSuccess('')
+    stopCountdown()
   }
 
   const toggleMode = () => {
@@ -101,6 +295,14 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
     })
     setError('')
     setSuccess('')
+  }
+
+  // Mask email for display: sh****@gmail.com
+  const getMaskedEmail = (email: string): string => {
+    const [local, domain] = email.split('@')
+    if (!domain) return email
+    const visible = local.slice(0, 2)
+    return `${visible}${'*'.repeat(Math.max(local.length - 2, 2))}@${domain}`
   }
 
   return (
@@ -119,115 +321,205 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
             <ThemeToggle />
           </div>
 
-          <div className="auth-tabs">
-            <button
-              className={`tab ${isLogin ? 'active' : ''}`}
-              onClick={() => setIsLogin(true)}
-            >
-              Login
-            </button>
-            <button
-              className={`tab ${!isLogin ? 'active' : ''}`}
-              onClick={() => setIsLogin(false)}
-            >
-              Register
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="auth-form">
-            {error && (
-              <div className="message error-message">
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="message success-message">
-                {success}
-              </div>
-            )}
-
-            {!isLogin && (
-              <div className="input-group">
-                <label htmlFor="username">Player Name</label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  placeholder="Enter your player name"
-                  required
-                />
-              </div>
-            )}
-
-            <div className="input-group">
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="Enter your email"
-                required
-              />
+          {/* Show tabs only when not in OTP step */}
+          {registrationStep === 'form' && (
+            <div className="auth-tabs">
+              <button
+                className={`tab ${isLogin ? 'active' : ''}`}
+                onClick={() => setIsLogin(true)}
+              >
+                Login
+              </button>
+              <button
+                className={`tab ${!isLogin ? 'active' : ''}`}
+                onClick={() => setIsLogin(false)}
+              >
+                Register
+              </button>
             </div>
+          )}
 
-            <div className="input-group">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                placeholder="Enter your password"
-                required
-              />
-            </div>
-
-            {!isLogin && (
-              <div className="input-group">
-                <label htmlFor="confirmPassword">Confirm Password</label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  placeholder="Confirm your password"
-                  required
-                />
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className={`auth-button ${isLoading ? 'loading' : ''}`}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <span className="loading-spinner"></span>
-              ) : (
-                isLogin ? 'Enter System' : 'Register Player'
+          {/* OTP Verification Step */}
+          {registrationStep === 'otp' && !isLogin ? (
+            <div className="otp-section">
+              {error && (
+                <div className="message error-message">
+                  {error}
+                </div>
               )}
-            </button>
-          </form>
 
-          <div className="auth-footer">
-            <p>
-              {isLogin ? "New player? " : "Already registered? "}
+              {success && (
+                <div className="message success-message">
+                  {success}
+                </div>
+              )}
+
+              <div className="otp-info">
+                <p className="otp-info-text">
+                  Enter the 6-digit code sent to
+                </p>
+                <p className="otp-email">{getMaskedEmail(formData.email)}</p>
+              </div>
+
+              <div className="otp-inputs">
+                {otpDigits.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={el => { otpInputRefs.current[index] = el }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    className="otp-input"
+                    value={digit}
+                    onChange={e => handleOtpChange(index, e.target.value)}
+                    onKeyDown={e => handleOtpKeyDown(index, e)}
+                    onPaste={index === 0 ? handleOtpPaste : undefined}
+                    autoFocus={index === 0}
+                  />
+                ))}
+              </div>
+
+              <div className="otp-timer">
+                {countdown > 0 ? (
+                  <span className="timer-text">Code expires in {formatCountdown(countdown)}</span>
+                ) : (
+                  <span className="timer-expired">Code expired</span>
+                )}
+              </div>
+
               <button
                 type="button"
-                className="link-button"
-                onClick={toggleMode}
+                className={`auth-button ${isLoading ? 'loading' : ''}`}
+                disabled={isLoading || otpDigits.join('').length !== OTP_LENGTH}
+                onClick={handleVerifyOtp}
               >
-                {isLogin ? "Register here" : "Login here"}
+                {isLoading ? (
+                  <span className="loading-spinner"></span>
+                ) : (
+                  'Verify & Register'
+                )}
               </button>
-            </p>
-          </div>
+
+              <div className="otp-actions">
+                <button
+                  type="button"
+                  className={`resend-button ${resendCooldown === 0 ? 'resend-ready' : ''}`}
+                  onClick={handleResendOtp}
+                  disabled={resendCooldown > 0 || isLoading}
+                >
+                  {resendCooldown > 0
+                    ? `Resend in 0:${resendCooldown.toString().padStart(2, '0')}`
+                    : 'Resend Code'
+                  }
+                </button>
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={handleBackToForm}
+                >
+                  Back
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Login / Registration Form */
+            <>
+              <form onSubmit={handleSubmit} className="auth-form">
+                {error && (
+                  <div className="message error-message">
+                    {error}
+                  </div>
+                )}
+
+                {success && (
+                  <div className="message success-message">
+                    {success}
+                  </div>
+                )}
+
+                {!isLogin && (
+                  <div className="input-group">
+                    <label htmlFor="username">Player Name</label>
+                    <input
+                      type="text"
+                      id="username"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleInputChange}
+                      placeholder="Enter your player name"
+                      required
+                    />
+                  </div>
+                )}
+
+                <div className="input-group">
+                  <label htmlFor="email">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label htmlFor="password">Password</label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+
+                {!isLogin && (
+                  <div className="input-group">
+                    <label htmlFor="confirmPassword">Confirm Password</label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      placeholder="Confirm your password"
+                      required
+                    />
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className={`auth-button ${isLoading ? 'loading' : ''}`}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <span className="loading-spinner"></span>
+                  ) : (
+                    isLogin ? 'Enter System' : 'Register Player'
+                  )}
+                </button>
+              </form>
+
+              <div className="auth-footer">
+                <p>
+                  {isLogin ? "New player? " : "Already registered? "}
+                  <button
+                    type="button"
+                    className="link-button"
+                    onClick={toggleMode}
+                  >
+                    {isLogin ? "Register here" : "Login here"}
+                  </button>
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

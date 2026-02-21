@@ -43,6 +43,53 @@ class FileUserDatabase {
     }
   }
 
+  async sendOtp(userData: UserRegistration): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/send-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+
+      const result = await response.json()
+      return { success: result.success, message: result.message }
+    } catch (error) {
+      console.error('Database: Send OTP error:', error)
+      return {
+        success: false,
+        message: 'Network error. Please check if the server is running.'
+      }
+    }
+  }
+
+  async verifyOtpAndRegister(email: string, otp: string): Promise<{ success: boolean; message: string; user?: User }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, otp }),
+      })
+
+      const result = await response.json()
+
+      if (result.success && result.sessionId) {
+        this.saveSession(result.sessionId)
+      }
+
+      return result
+    } catch (error) {
+      console.error('Database: Verify OTP error:', error)
+      return {
+        success: false,
+        message: 'Network error. Please check if the server is running.'
+      }
+    }
+  }
+
   async register(userData: UserRegistration): Promise<{ success: boolean; message: string; user?: User }> {
     try {
       const response = await fetch(`${API_BASE_URL}/register`, {
