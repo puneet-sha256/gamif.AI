@@ -236,6 +236,10 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory, onCe
         </button>
       </div>
 
+      {stats.activeDays === 0 && (
+        <p className="heatmap-empty-message">Complete daily activities to fill your heatmap</p>
+      )}
+
       <div className="heatmap-container">
         {/* Month labels */}
         <div className="heatmap-months">
