@@ -206,7 +206,7 @@ export async function updateTaskInGeneratedTasks(
   userId: string,
   taskId: string,
   category: 'Strength' | 'Intelligence' | 'Charisma',
-  updates: { title?: string; description?: string; xp?: number; shards?: number }
+  updates: { title?: string; description?: string; expected_duration_minutes?: number; xp?: number; shards?: number }
 ): Promise<boolean> {
   logger.custom('🔄', `Updating task ${taskId} in category ${category} for user: ${userId}`)
   const users = await loadUsers()
@@ -248,7 +248,10 @@ export async function updateTaskInGeneratedTasks(
   if (updates.shards !== undefined) {
     tasks[taskIndex].shards = updates.shards
   }
-  
+  if (updates.expected_duration_minutes !== undefined) {
+    tasks[taskIndex].expected_duration_minutes = updates.expected_duration_minutes
+  }
+
   await saveUsers(users)
   logger.success('Task updated successfully')
   return true
@@ -295,6 +298,7 @@ export async function addTaskToGeneratedTasks(
     title?: string; // Optional title for user-created tasks
     description: string;
     category: 'Strength' | 'Intelligence' | 'Charisma';
+    expected_duration_minutes?: number;
     xp: number;
     shards: number;
   }
@@ -323,6 +327,7 @@ export async function addTaskToGeneratedTasks(
     id: `${task.title ? 'custom' : 'ai'}-${task.category.toLowerCase()}-${Date.now()}`,
     ...(task.title && { title: task.title }), // Only add title if provided
     description: task.description,
+    ...(task.expected_duration_minutes && { expected_duration_minutes: task.expected_duration_minutes }),
     xp: task.xp,
     shards: task.shards
   }

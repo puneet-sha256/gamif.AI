@@ -8,12 +8,14 @@ interface TaskModalProps {
     title?: string
     description: string
     category?: 'Strength' | 'Intelligence' | 'Charisma'
+    expected_duration_minutes?: number
     xp: number
     shards: number
   }) => Promise<void>
   taskData?: {
     title?: string
     description: string
+    expected_duration_minutes?: number
     xp: number
     shards: number
     category: string
@@ -35,6 +37,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
   const [category, setCategory] = useState<'Strength' | 'Intelligence' | 'Charisma'>(
     taskData?.category as any || initialCategory
   )
+  const [duration, setDuration] = useState(taskData?.expected_duration_minutes?.toString() || '30')
   const [xp, setXp] = useState(taskData?.xp.toString() || '25')
   const [shards, setShards] = useState(taskData?.shards.toString() || '50')
   const [isSaving, setIsSaving] = useState(false)
@@ -45,6 +48,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
       setTitle(taskData?.title || '')
       setDescription(taskData?.description || '')
       setCategory(taskData?.category as any || initialCategory)
+      setDuration(taskData?.expected_duration_minutes?.toString() || '30')
       setXp(taskData?.xp.toString() || '25')
       setShards(taskData?.shards.toString() || '50')
       setError('')
@@ -61,8 +65,14 @@ const TaskModal: React.FC<TaskModalProps> = ({
       return
     }
 
+    const durationValue = parseInt(duration)
     const xpValue = parseInt(xp)
     const shardsValue = parseInt(shards)
+
+    if (isNaN(durationValue) || durationValue < 1) {
+      setError('Duration must be at least 1 minute')
+      return
+    }
 
     if (isNaN(xpValue) || xpValue < 0) {
       setError('XP must be a positive number')
@@ -79,6 +89,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
     try {
       const saveData: any = {
         description: description.trim(),
+        expected_duration_minutes: durationValue,
         xp: xpValue,
         shards: shardsValue
       }
@@ -106,6 +117,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
     setTitle('')
     setDescription('')
     setCategory('Strength')
+    setDuration('30')
     setXp('25')
     setShards('50')
     onClose()
@@ -185,6 +197,24 @@ const TaskModal: React.FC<TaskModalProps> = ({
               required
               maxLength={500}
             />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="duration">Est. Duration (minutes) *</label>
+            <input
+              type="number"
+              id="duration"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              className="form-input"
+              min="1"
+              max="480"
+              placeholder="30"
+              required
+            />
+            <small className="form-hint">
+              Time needed for full XP. More effort earns bonus rewards (up to 5x).
+            </small>
           </div>
 
           <div className="form-row">

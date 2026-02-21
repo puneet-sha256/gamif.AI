@@ -13,9 +13,9 @@ export interface AuthContextType {
   saveGoalsData: (goalsData: GoalsData) => Promise<boolean>
   getUserTasks: () => Promise<GeneratedTasks | null>
   refreshUserTasks: () => Promise<void>
-  editGeneratedTask: (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma', updates: { title?: string; description?: string; xp?: number; shards?: number }) => Promise<boolean>
+  editGeneratedTask: (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma', updates: { title?: string; description?: string; expected_duration_minutes?: number; xp?: number; shards?: number }) => Promise<boolean>
   deleteGeneratedTask: (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma') => Promise<boolean>
-  addUserTask: (task: { title: string; description: string; category: 'Strength' | 'Intelligence' | 'Charisma'; xp: number; shards: number }) => Promise<boolean>
+  addUserTask: (task: { title: string; description: string; category: 'Strength' | 'Intelligence' | 'Charisma'; expected_duration_minutes?: number; xp: number; shards: number }) => Promise<boolean>
   addShopItem: (item: { title: string; description?: string; price: number; image?: string; isConsumable?: boolean; isKeyItem?: boolean; allowMultiplePurchases?: boolean }) => Promise<boolean>
   deleteShopItem: (itemId: string) => Promise<boolean>
   getShopItems: () => ShopItem[]

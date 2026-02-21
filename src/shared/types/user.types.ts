@@ -21,6 +21,7 @@ export interface GeneratedTask {
   id: string // Unique identifier for the task
   title?: string // Optional: present for user-created tasks, absent for AI tasks
   description: string
+  expected_duration_minutes?: number // Estimated time to complete the task (used for effort_ratio calculation)
   xp: number
   shards: number
 }
