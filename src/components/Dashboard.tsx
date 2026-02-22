@@ -296,104 +296,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
       if (result.success && result.data) {
 
-        // Save unclaimed rewards to user data if there are any rewards
         if (result.data.rewards?.activityRewards && result.data.rewards.activityRewards.length > 0) {
-          // Get existing unclaimed rewards
-          const existingRewards = user?.unclaimedRewards
-          
-          // Map new rewards
-          const newActivities = result.data.rewards.activityRewards.map((reward: any) => ({
-            activityName: reward.activityName,
-            matchType: reward.matchType,
-            category: reward.category as 'Strength' | 'Intelligence' | 'Charisma',
-            matchedTask: reward.matchedTask,
-            goalLink: reward.goalLink,
-            effortRatio: reward.effortRatio,
-            xpEarned: reward.xpEarned,
-            shardsEarned: reward.shardsEarned,
-            calculationNotes: reward.calculationNotes,
-            timestamp: new Date().toISOString(),
-            activityDate: activityDate
-          }))
-          
-          // Merge with existing activities
-          const allActivities = [...(existingRewards?.activities || []), ...newActivities]
-          
-          // Calculate combined totals
-          const totalXP = (existingRewards?.totalXP || 0) + result.data.rewards.totalXP
-          
-          const totalShards = Number(((existingRewards?.totalShards || 0) + result.data.rewards.totalShards).toFixed(2))
-          
-          // Merge category breakdowns
-          const categoryBreakdown = {
-            Strength: {
-              xp: (existingRewards?.categoryBreakdown?.Strength?.xp || 0) + (result.data.rewards.categoryBreakdown?.Strength?.xp || 0),
-              shards: Number(((existingRewards?.categoryBreakdown?.Strength?.shards || 0) + (result.data.rewards.categoryBreakdown?.Strength?.shards || 0)).toFixed(2))
-            },
-            Intelligence: {
-              xp: (existingRewards?.categoryBreakdown?.Intelligence?.xp || 0) + (result.data.rewards.categoryBreakdown?.Intelligence?.xp || 0),
-              shards: Number(((existingRewards?.categoryBreakdown?.Intelligence?.shards || 0) + (result.data.rewards.categoryBreakdown?.Intelligence?.shards || 0)).toFixed(2))
-            },
-            Charisma: {
-              xp: (existingRewards?.categoryBreakdown?.Charisma?.xp || 0) + (result.data.rewards.categoryBreakdown?.Charisma?.xp || 0),
-              shards: Number(((existingRewards?.categoryBreakdown?.Charisma?.shards || 0) + (result.data.rewards.categoryBreakdown?.Charisma?.shards || 0)).toFixed(2))
-            }
-          }
-          
-          const unclaimedRewards = {
-            activities: allActivities,
-            totalXP,
-            totalShards,
-            categoryBreakdown,
-            lastUpdated: new Date().toISOString()
-          }
-
-          // Also save to task history for permanent record
-          const existingTaskHistory = user?.taskHistory
-          
-          // Map rewards to completed tasks - ActivityReward type from backend already has the correct shape
-          const completedTasks = result.data.rewards.activityRewards.map((reward: any) => ({
-            activityName: reward.activityName,
-            matchType: reward.matchType,
-            category: reward.category as 'Strength' | 'Intelligence' | 'Charisma',
-            matchedTask: reward.matchedTask,
-            goalLink: reward.goalLink,
-            effortRatio: reward.effortRatio,
-            xpEarned: reward.xpEarned,
-            shardsEarned: reward.shardsEarned,
-            calculationNotes: reward.calculationNotes,
-            timestamp: new Date().toISOString()
-          }))
-          
-          // Find or create daily task history for the activity date
-          let dailyTasks = existingTaskHistory?.dailyTasks || []
-          const existingDayIndex = dailyTasks.findIndex(dt => dt.date === activityDate)
-          
-          if (existingDayIndex >= 0) {
-            // Append to existing day's tasks efficiently
-            dailyTasks[existingDayIndex].tasks.push(...completedTasks)
-          } else {
-            // Create new day entry
-            dailyTasks.push({
-              date: activityDate,
-              tasks: completedTasks
-            })
-          }
-          
-          const taskHistory = {
-            dailyTasks,
-            lastUpdated: new Date().toISOString()
-          }
-
-          // Save to user data
-          const success = await updateUser({ unclaimedRewards, taskHistory })
-          
-          if (success) {
-            showSuccess(`🎉 Great job! You've earned rewards from ${result.data.rewards.activityRewards.length} activities.\n\nClick the "Unclaimed Rewards" button to view and claim them!`)
-          } else {
-            console.error('❌ Failed to save unclaimed rewards')
-            showError('Activity analyzed but failed to save rewards. Please try again.')
-          }
+          // Backend has already saved unclaimedRewards and taskHistory — just refresh user data
+          await refreshUserTasks()
+          showSuccess(`🎉 Great job! You've earned rewards from ${result.data.rewards.activityRewards.length} activities.\n\nClick the "Unclaimed Rewards" button to view and claim them!`)
         } else {
           showInfo('No activities were identified in your update that match your goals.')
         }
