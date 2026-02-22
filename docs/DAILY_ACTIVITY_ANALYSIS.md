@@ -31,27 +31,37 @@ Created a comprehensive prompt that:
 Added new prompt type:
 - **ACTIVITY_ANALYSIS**: Uses gpt-4o-mini model with temperature 0.7 and max tokens 2048
 
-### 4. API Route (`src/server/routes/aiRoutes.ts`)
-Created `analyzeDailyActivity` function that:
+### 4. Reward Calculation (`src/server/utils/rewardCalculation.ts`)
+Calculates XP and shards from AI activity matches:
+- **Exact match**: Full task XP × effort_ratio
+- **Similar match**: Task XP × similarity_score × effort_ratio
+- **Goal-aligned**: Category average XP × alignment_factor × effort_ratio
+- **Unrelated**: Skipped (no rewards)
+- Returns per-activity breakdown and category totals
+
+### 5. API Route (`src/server/routes/aiRoutes.ts`)
+`analyzeDailyActivity` function:
 - Validates session and user authentication
 - Formats current tasks as JSON array
 - Retrieves user's long-term goals from profile
 - Constructs structured input for the AI with tasks, goals, and daily update
 - Calls Azure OpenAI using the activity-analysis prompt
 - Parses the JSON response and extracts activity matches
-- Returns both structured matches and raw response
+- Calculates rewards using `rewardCalculation.ts`
+- **Saves `unclaimedRewards` and `taskHistory` to the user record on the backend**
+- Returns matches, rewards breakdown, and raw AI response
 
-### 5. Server Endpoint (`server.ts`)
+### 6. Server Endpoint (`server.ts`)
 Registered new endpoint:
 - **POST** `/api/ai/analyze-activity`
 
-### 6. Dashboard Component (`src/components/Dashboard.tsx`)
+### 7. Dashboard Component (`src/components/Dashboard.tsx`)
 Updated `analyzeDailyActivity` function to:
 - Collect current tasks from user's generatedTasks
 - Send daily activity input + current tasks to the API
-- Parse and display structured activity matches
-- Log detailed analysis to console with formatted output
-- Show user-friendly summary with emojis for match types
+- Refresh user data to pick up backend-saved rewards
+- Show success message prompting user to claim rewards
+- Rewards and task history are constructed and persisted entirely on the backend
 
 ## User Flow
 
@@ -62,8 +72,10 @@ Updated `analyzeDailyActivity` function to:
 5. Frontend sends activity text + current tasks to backend
 6. Backend retrieves user's goals and formats data for AI
 7. AI analyzes activities and classifies each one with effort ratios
-8. Response is parsed and displayed with match types and effort scores
-9. Detailed logs appear in both frontend and backend consoles
+8. Backend calculates XP/shard rewards from activity matches
+9. Backend saves `unclaimedRewards` and `taskHistory` to user record
+10. Frontend refreshes user data and shows success message
+11. User clicks "Unclaimed Rewards" to view and claim pending rewards
 
 ## Activity Classification
 
@@ -140,14 +152,20 @@ The AI estimates effort on a 0-2 scale:
 ================================================================================
 ```
 
-## Next Steps
+## Implemented Features
 
-The AI response provides structured classification data. Future implementations will:
-1. Calculate XP and shards based on effort_ratio and match_type
-2. Award XP/shards automatically through a separate calculation service
-3. Update user stats based on activity analysis
-4. Create a better UI component to display the analysis results
-5. Track historical activity patterns and progress over time
+The following have been built on top of the AI classification:
+1. ✅ **Reward calculation** — XP and shards computed based on effort_ratio, match_type, similarity_score, and alignment_factor (`src/server/utils/rewardCalculation.ts`)
+2. ✅ **Backend persistence** — `unclaimedRewards` and `taskHistory` saved to user record in `aiRoutes.ts`
+3. ✅ **Unclaimed rewards UI** — Dedicated portal to view and batch-claim pending rewards
+4. ✅ **Activity history heatmap** — Visual heatmap of daily activity across categories
+5. ✅ **Streak system** — Category-based streaks with soft decay and shard multipliers
+
+## Future Enhancements
+
+1. Create a richer UI component for detailed activity analysis breakdown
+2. Track activity patterns over time for personalized insights
+3. Adaptive task difficulty based on historical completion data
 
 ## Testing
 

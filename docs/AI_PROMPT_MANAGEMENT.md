@@ -31,6 +31,7 @@ src/server/
 
 Markdown files containing system prompts for different use cases:
 - `task-generation.prompt.md` - Generates daily tasks from user goals
+- `activity-analysis.prompt.md` - Classifies daily activities against planned tasks and goals
 
 **To modify a prompt:** Edit the `.prompt.md` file directly. No code changes needed.
 
@@ -41,6 +42,7 @@ Maps use cases to models and prompts:
 ```typescript
 export const AIPromptType = {
   TASK_GENERATION: 'task-generation',
+  ACTIVITY_ANALYSIS: 'activity-analysis',
 } as const;
 
 export const AI_CONFIGS = {
@@ -49,6 +51,13 @@ export const AI_CONFIGS = {
     modelName: 'gpt-4o-mini',  // Model selection
     temperature: 1,
     maxTokens: 4096
+  },
+  [AIPromptType.ACTIVITY_ANALYSIS]: {
+    promptFile: 'activity-analysis.prompt.md',
+    modelName: 'gpt-4o-mini',
+    temperature: 0.7,
+    maxTokens: 2048,
+    responseFormat: 'json_object'  // Structured JSON output
   },
 };
 ```

@@ -8,10 +8,10 @@ import {
   validateResetPasswordRequest
 } from '../utils/validation'
 import {
-  loadUsers,
-  saveUsers,
   findUserByEmail,
   findUserByUsername,
+  createUser,
+  updateUser,
   createSession,
   removeSession
 } from '../utils/dataOperations'
@@ -74,9 +74,7 @@ export async function registerUser(req: Request, res: Response) {
       }
     }
 
-    const users = await loadUsers()
-    users.push(newUser)
-    await saveUsers(users)
+    await createUser(newUser)
 
     res.json(createSuccessResponse(
       SuccessMessages.REGISTRATION_SUCCESS,
@@ -112,13 +110,7 @@ export async function loginUser(req: Request, res: Response) {
     }
 
     // Update last login
-    user.lastLogin = new Date().toISOString()
-    const users = await loadUsers()
-    const userIndex = users.findIndex(u => u.id === user.id)
-    if (userIndex !== -1) {
-      users[userIndex] = user
-      await saveUsers(users)
-    }
+    await updateUser(user.id, { lastLogin: new Date().toISOString() })
 
     // Create session
     const sessionId = generateSessionId()
@@ -217,9 +209,7 @@ export async function verifyOtpAndRegister(req: Request, res: Response) {
       }
     }
 
-    const users = await loadUsers()
-    users.push(newUser)
-    await saveUsers(users)
+    await createUser(newUser)
 
     // Auto-create session
     const sessionId = generateSessionId()
@@ -325,15 +315,12 @@ export async function resetPassword(req: Request, res: Response) {
     }
 
     // OTP valid — update the user's password
-    const users = await loadUsers()
-    const userIndex = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase())
-
-    if (userIndex === -1) {
+    const user = await findUserByEmail(email)
+    if (!user) {
       return res.status(400).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
     }
 
-    users[userIndex].passwordHash = hashPassword(newPassword)
-    await saveUsers(users)
+    await updateUser(user.id, { passwordHash: hashPassword(newPassword) })
 
     res.json(createSuccessResponse(SuccessMessages.PASSWORD_RESET_SUCCESS))
 
