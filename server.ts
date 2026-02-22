@@ -2,7 +2,7 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
-import { initializeData, DATA_DIR, USERS_FILE, SESSIONS_FILE } from './src/server/utils/dataOperations'
+import { initializeData, DATA_DIR } from './src/server/utils/dataOperations'
 import {
   registerUser, loginUser, logoutUser, sendOtp, verifyOtpAndRegister,
   sendPasswordResetOtp, verifyPasswordResetOtp, resetPassword
@@ -132,8 +132,7 @@ async function startServer() {
   app.listen(PORT, () => {
     logger.custom('🚀', `Solo Leveling API Server running on http://localhost:${PORT}`)
     logger.custom('📁', `Data directory: ${DATA_DIR}`)
-    logger.custom('👥', `Users file: ${USERS_FILE}`)
-    logger.custom('🔐', `Sessions file: ${SESSIONS_FILE}`)
+    logger.custom('💾', `Storage mode: ${process.env.STORAGE_MODE || 'file'}`)
   })
 }
 

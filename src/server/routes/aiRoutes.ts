@@ -1,12 +1,12 @@
 import type { Request, Response } from 'express'
 import { azureAIService } from '../services/azureAIService'
-import { findSessionById, findUserById, updateSessionLastAccess, updateUserGeneratedTasks } from '../utils/dataOperations'
+import { findSessionById, findUserById, updateSessionLastAccess, updateUserGeneratedTasks, updateUser } from '../utils/dataOperations'
 import {
   createSuccessResponse,
   createErrorResponse,
   ErrorMessages
 } from '../utils/responseHelpers'
-import type { GoalsData, ProfileData } from '../../types'
+import type { GoalsData, ProfileData, UnclaimedReward, CompletedTask } from '../../types'
 import { AIPromptType } from '../config/aiConfigs'
 import { calculateRewardsFromAnalysis } from '../utils/rewardCalculation'
 import { logger } from '../../utils/logger'
@@ -81,7 +81,8 @@ export async function generateTasks(req: Request, res: Response) {
 // Analyze daily activity using Azure AI
 export async function analyzeDailyActivity(req: Request, res: Response) {
   try {
-    const { sessionId, dailyActivity, currentTasks } = req.body
+    const { sessionId, dailyActivity, currentTasks, activityDate: reqActivityDate } = req.body
+    const activityDate = reqActivityDate || new Date().toISOString().split('T')[0]
 
     // Validate required fields
     if (!sessionId || !dailyActivity) {
@@ -249,7 +250,92 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
           currentTasks
         )
       }
-      
+
+      // Save unclaimedRewards and taskHistory on the backend
+      if (rewardCalculation?.activityRewards && rewardCalculation.activityRewards.length > 0) {
+        const existingRewards = user.unclaimedRewards
+
+        // Build unclaimed reward entries
+        const newActivities: UnclaimedReward[] = rewardCalculation.activityRewards.map((reward: {
+          activityName: string; matchType: string; category: string;
+          matchedTask?: string; goalLink?: string; effortRatio: number;
+          xpEarned: number; shardsEarned: number; calculationNotes: string;
+        }) => ({
+          activityName: reward.activityName,
+          matchType: reward.matchType,
+          category: reward.category as 'Strength' | 'Intelligence' | 'Charisma',
+          matchedTask: reward.matchedTask,
+          goalLink: reward.goalLink,
+          effortRatio: reward.effortRatio,
+          xpEarned: reward.xpEarned,
+          shardsEarned: reward.shardsEarned,
+          calculationNotes: reward.calculationNotes,
+          timestamp: new Date().toISOString(),
+          activityDate,
+        }))
+
+        const allActivities = [...(existingRewards?.activities || []), ...newActivities]
+        const totalXP = (existingRewards?.totalXP || 0) + rewardCalculation.totalXP
+        const totalShards = Number(((existingRewards?.totalShards || 0) + rewardCalculation.totalShards).toFixed(2))
+        const categoryBreakdown = {
+          Strength: {
+            xp: (existingRewards?.categoryBreakdown?.Strength?.xp || 0) + (rewardCalculation.categoryBreakdown?.Strength?.xp || 0),
+            shards: Number(((existingRewards?.categoryBreakdown?.Strength?.shards || 0) + (rewardCalculation.categoryBreakdown?.Strength?.shards || 0)).toFixed(2)),
+          },
+          Intelligence: {
+            xp: (existingRewards?.categoryBreakdown?.Intelligence?.xp || 0) + (rewardCalculation.categoryBreakdown?.Intelligence?.xp || 0),
+            shards: Number(((existingRewards?.categoryBreakdown?.Intelligence?.shards || 0) + (rewardCalculation.categoryBreakdown?.Intelligence?.shards || 0)).toFixed(2)),
+          },
+          Charisma: {
+            xp: (existingRewards?.categoryBreakdown?.Charisma?.xp || 0) + (rewardCalculation.categoryBreakdown?.Charisma?.xp || 0),
+            shards: Number(((existingRewards?.categoryBreakdown?.Charisma?.shards || 0) + (rewardCalculation.categoryBreakdown?.Charisma?.shards || 0)).toFixed(2)),
+          },
+        }
+
+        const unclaimedRewards = {
+          activities: allActivities,
+          totalXP,
+          totalShards,
+          categoryBreakdown,
+          lastUpdated: new Date().toISOString(),
+        }
+
+        // Build task history
+        const completedTasks: CompletedTask[] = rewardCalculation.activityRewards.map((reward: {
+          activityName: string; matchType: string; category: string;
+          matchedTask?: string; goalLink?: string; effortRatio: number;
+          xpEarned: number; shardsEarned: number; calculationNotes: string;
+        }) => ({
+          activityName: reward.activityName,
+          matchType: reward.matchType,
+          category: reward.category as 'Strength' | 'Intelligence' | 'Charisma',
+          matchedTask: reward.matchedTask,
+          goalLink: reward.goalLink,
+          effortRatio: reward.effortRatio,
+          xpEarned: reward.xpEarned,
+          shardsEarned: reward.shardsEarned,
+          calculationNotes: reward.calculationNotes,
+          timestamp: new Date().toISOString(),
+        }))
+
+        const dailyTasks = [...(user.taskHistory?.dailyTasks || [])]
+        const existingDayIndex = dailyTasks.findIndex(dt => dt.date === activityDate)
+        if (existingDayIndex >= 0) {
+          dailyTasks[existingDayIndex] = {
+            ...dailyTasks[existingDayIndex],
+            tasks: [...dailyTasks[existingDayIndex].tasks, ...completedTasks],
+          }
+        } else {
+          dailyTasks.push({ date: activityDate, tasks: completedTasks })
+        }
+
+        const taskHistory = { dailyTasks, lastUpdated: new Date().toISOString() }
+
+        // Persist both to user record
+        await updateUser(user.id, { unclaimedRewards, taskHistory })
+        logger.success('Unclaimed rewards and task history saved to user record')
+      }
+
       res.json(createSuccessResponse(
         'Daily activity analyzed successfully',
         {

@@ -68,7 +68,9 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 ### 💾 **Robust Data Architecture**
 - **Shared Type System** - Centralized TypeScript interfaces for frontend/backend consistency
 - **Experience-Only Storage** - Single source of truth for level calculations
-- **File-Based Database** - Persistent JSON storage with automatic data validation
+- **Pluggable Storage** - Repository pattern supporting file-based JSON or Azure Cosmos DB
+- **Azure Cosmos DB** - NoSQL split sub-document schema with lazy migration support
+- **Configurable Storage Mode** - Switch between `file`, `cosmos`, and `migration` modes via environment variable
 
 ## 🛠️ Tech Stack
 
@@ -84,7 +86,8 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 - **Express.js** - Web application framework
 - **TypeScript** - Type-safe server development
 - **Azure OpenAI** - AI agent for goal analysis and task generation
-- **File-based Storage** - JSON data persistence
+- **Azure Cosmos DB** - NoSQL database with split sub-document schema (serverless)
+- **File-based Storage** - JSON data persistence (legacy, used as fallback during migration)
 
 ### Development Tools
 - **ESLint** - Code linting
@@ -286,6 +289,10 @@ await userService.claimRewards({
    | `VITE_API_BASE_URL` | Backend API base URL (used by frontend) | `http://localhost:3001/api` |
    | `ALLOWED_ORIGINS` | CORS allowed origins for backend security | `http://localhost:5173,http://localhost:5174` |
    | `AZURE_OPENAI_API_KEY` | Your Azure OpenAI API key for AI features | `abc123...xyz` |
+   | `COSMOS_ENDPOINT` | Azure Cosmos DB endpoint URI | `https://account.documents.azure.com:443/` |
+   | `COSMOS_KEY` | Azure Cosmos DB primary key | `your-cosmos-key` |
+   | `COSMOS_DATABASE` | Azure Cosmos DB database name | `gamifai-db` |
+   | `STORAGE_MODE` | Data backend: `file`, `cosmos`, or `migration` | `file` |
 
    #### **Important Security Notes**
 
@@ -423,11 +430,22 @@ xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50
 │   │   │   ├── userRoutes.ts  # User management endpoints
 │   │   │   ├── healthRoutes.ts # Health check endpoints
 │   │   │   └── aiRoutes.ts    # Azure AI integration endpoints
+│   │   ├── db/                # Data storage layer (repository pattern)
+│   │   │   ├── interfaces.ts           # IUserRepository, ISessionRepository
+│   │   │   ├── types.ts               # Cosmos sub-document types + field mapping
+│   │   │   ├── cosmosClient.ts        # Azure Cosmos DB client singleton
+│   │   │   ├── cosmosUserRepository.ts # Cosmos DB user operations
+│   │   │   ├── cosmosSessionRepository.ts # Cosmos DB session operations
+│   │   │   ├── fileUserRepository.ts   # File-based user operations
+│   │   │   ├── fileSessionRepository.ts # File-based session operations
+│   │   │   ├── migrationRepository.ts  # Lazy file→Cosmos migration
+│   │   │   └── index.ts               # Storage mode factory
 │   │   ├── services/          # Server-side business logic
 │   │   │   ├── azureAIService.ts # Azure OpenAI integration
 │   │   │   └── promptManager.ts  # AI prompt management
 │   │   ├── utils/             # Server utilities
-│   │   │   ├── dataOperations.ts    # Database operations
+│   │   │   ├── dataOperations.ts    # Thin facade over active repository
+│   │   │   ├── rewardCalculation.ts # XP/shard calculation from activity analysis
 │   │   │   ├── validation.ts        # Request validation
 │   │   │   ├── authUtils.ts         # Authentication utilities
 │   │   │   └── responseHelpers.ts   # API response helpers
@@ -450,7 +468,7 @@ xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50
 │   │       ├── context.types.ts # Context types
 │   │       └── index.ts        # Unified exports
 │   └── assets/               # Static resources
-├── data/                     # JSON data storage
+├── data/                     # JSON data storage (file mode / migration fallback)
 │   ├── users.json           # User accounts and progress
 │   └── sessions.json        # Active user sessions
 ├── server.ts                # Express backend server
@@ -774,10 +792,32 @@ curl -X POST "http://localhost:3001/api/ai/analyze-goals" \
 
 ## 💾 Data Storage & Architecture
 
-### **File-Based Database System**
+### **Pluggable Storage with Repository Pattern**
+The backend uses a repository pattern (`IUserRepository` / `ISessionRepository`) with three storage modes controlled by the `STORAGE_MODE` environment variable:
+
+| Mode | Description | Use Case |
+|------|-------------|----------|
+| `file` | File-based JSON storage (`data/users.json`, `data/sessions.json`) | Local development |
+| `cosmos` | Azure Cosmos DB NoSQL (serverless) | Production |
+| `migration` | Lazy migration: Cosmos first → file fallback → auto-migrate on access | Transitioning to Cosmos |
+
+### **Azure Cosmos DB Schema**
+Each user is stored as up to 5 sub-documents in a single Cosmos partition (partition key: `/userId`):
+
+| Sub-document | Contents |
+|---|---|
+| `profile` | username, email, auth, stats, goals, profile data |
+| `tasks` | AI-generated and user-created tasks |
+| `shop` | shop items (wishlist) and inventory |
+| `history` | activity history (heatmap) and task completion history |
+| `rewards` | unclaimed rewards from daily activity analysis |
+
+Sessions are stored in a separate container with TTL-based auto-expiry (24 hours).
+
+### **File-Based Storage (Legacy)**
 - **User data**: `data/users.json` - Player profiles, stats, and progress
 - **Sessions**: `data/sessions.json` - Active authentication sessions
-- **Automatic validation**: Type-safe data operations
+- Used as fallback during migration mode
 
 ### **Shared Type System**
 Centralized TypeScript interfaces ensure consistency between frontend and backend:
@@ -786,7 +826,7 @@ interface UserStats {
   experience: number      // Single source of truth for level calculation
   shards: number         // In-game currency
   strength: number       // Physical/action attribute XP
-  intelligence: number   // Learning/mental attribute XP  
+  intelligence: number   // Learning/mental attribute XP
   charisma: number      // Social/communication attribute XP
 }
 ```
@@ -885,20 +925,21 @@ This project is licensed under the MIT License.
 ## 🎯 Future Enhancements
 
 ### **Phase 1 - Core Features**
-- [ ] **Task Management System** - Create, assign, and complete attribute-specific tasks
+- [x] **Task Management System** - Create, assign, and complete attribute-specific tasks ✅ **IMPLEMENTED**
 - [ ] **Achievement Engine** - Unlock badges and milestones
-- [ ] **Shop Functionality** - Purchase rewards with earned shards
+- [x] **Shop Functionality** - Purchase rewards with earned shards ✅ **IMPLEMENTED**
 - [ ] **XP Multipliers** - Temporary boosts and power-ups
 
 ### **Phase 2 - Advanced Features**
-- [ ] **Firebase Integration** - Cloud storage and real-time sync
+- [x] **Azure Cosmos DB** - Cloud NoSQL storage with split sub-document schema ✅ **IMPLEMENTED**
 - [ ] **Social Features** - Friend lists and progress sharing
 - [ ] **Leaderboards** - Community rankings and competitions
 - [ ] **Progress Analytics** - Detailed charts and insights
 
 ### **Phase 3 - Advanced AI Features**
 - [x] **Smart Task Generation** - AI-powered personalized challenges ✅ **IMPLEMENTED**
-- [x] **Goal Analysis** - AI insights and recommendations ✅ **IMPLEMENTED** 
+- [x] **Goal Analysis** - AI insights and recommendations ✅ **IMPLEMENTED**
+- [x] **Daily Activity Analysis** - AI-powered activity matching with reward calculation ✅ **IMPLEMENTED**
 - [ ] **Progress Predictions** - ML-based goal achievement forecasting
 - [ ] **Adaptive Difficulty** - Dynamic XP requirements based on user behavior
 - [ ] **Advanced Recommendations** - Context-aware development suggestions
