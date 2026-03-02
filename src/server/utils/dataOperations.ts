@@ -149,3 +149,9 @@ export async function useInventoryItem(
 ): Promise<{ success: boolean; message?: string }> {
   return getUserRepository().useInventoryItem(userId, itemId)
 }
+
+// ─── Push notification queries ─────────────────────────────────────────
+
+export async function findAllUsersWithPushSubscriptions(): Promise<User[]> {
+  return getUserRepository().findAllWithPushSubscriptions()
+}

@@ -31,17 +31,21 @@
     "emoji-picker-react": "^4.15.1",
     "express": "^5.1.0",
     "fs-extra": "^11.3.1",
+    "node-cron": "^4.2.1",
     "openai": "^6.3.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.2",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "@types/node": "^24.10.0",
+    "@types/node-cron": "^3.0.11",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
+    "@types/web-push": "^3.6.4",
     "@vitejs/plugin-react": "^5.0.0",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",

@@ -28,6 +28,7 @@ import { userService } from '../client/services/userService'
 import { apiClient } from '../client/services/apiClient'
 import { calculateLevelProgress } from '../utils/levelCalculation'
 import { calculateStreakMultiplier, formatMultiplier, calculateStreaksFromHistory, calculateDisplayStreaks } from '../utils/streakCalculation'
+import { notificationService } from '../client/services/notificationService'
 
 interface DashboardProps {
   onLogout: () => void
@@ -60,6 +61,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const [showTaskHistoryModal, setShowTaskHistoryModal] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
+  // Notification state
+  const [notifSupported] = useState(() => notificationService.isSupported())
+  const [notifSubscribed, setNotifSubscribed] = useState(false)
+  const [notifLoading, setNotifLoading] = useState(false)
+
   // Window width state for responsive chart sizing
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
@@ -68,10 +74,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth)
     }
-    
+
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  // Register service worker and check notification subscription status on mount
+  useEffect(() => {
+    if (!notifSupported) return
+    notificationService.registerServiceWorker()
+    notificationService.isCurrentlySubscribed().then(setNotifSubscribed)
+  }, [notifSupported])
 
   // Generate tasks if user has goals but no tasks yet
   useEffect(() => {
@@ -94,6 +107,53 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
     generateInitialTasks()
   }, [user?.id, user?.goalsData, user?.profileData, refreshUserTasks])
+
+  // Handle notification toggle
+  const handleToggleNotifications = async () => {
+    const sessionId = userDatabase.getSessionId()
+    if (!sessionId) {
+      console.error('[Notifications] No session ID')
+      return
+    }
+    console.log('[Notifications] Toggle clicked, subscribed:', notifSubscribed, 'sessionId:', sessionId)
+    console.log('[Notifications] Current permission:', Notification.permission)
+    console.log('[Notifications] SW support:', 'serviceWorker' in navigator, 'PushManager:', 'PushManager' in window)
+
+    setNotifLoading(true)
+    try {
+      if (notifSubscribed) {
+        const ok = await notificationService.unsubscribe(sessionId)
+        if (ok) {
+          setNotifSubscribed(false)
+          showSuccess('Streak reminders disabled.')
+        } else {
+          showError('Failed to disable reminders. Please try again.')
+        }
+      } else {
+        if (Notification.permission === 'denied') {
+          showWarning('Notifications are blocked. Please enable them in your browser settings.')
+          return
+        }
+        const ok = await notificationService.subscribe(sessionId)
+        if (ok) {
+          setNotifSubscribed(true)
+          showSuccess('Streak reminders enabled! You\'ll be reminded to log activities daily.')
+        } else {
+          // Check if permission changed during the subscribe attempt
+          const currentPerm = Notification.permission
+          if (currentPerm === 'denied') {
+            showWarning('Notifications were blocked. Please enable them in your browser settings (click the lock icon in the address bar).')
+          } else if (currentPerm === 'default') {
+            showError('Notification permission was dismissed. Please click the bell icon again and select "Allow".')
+          } else {
+            showError('Failed to enable reminders. Your network may be blocking the browser push service. Try a different network or check the console for details.')
+          }
+        }
+      }
+    } finally {
+      setNotifLoading(false)
+    }
+  }
 
   // Handle task edit - opens modal with task data
   const handleEditTask = (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma') => {
@@ -1354,6 +1414,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               <span className="reward-badge">{user.unclaimedRewards.activities.length}</span>
             )}
           </button>
+          {notifSupported && (
+            <button
+              className={`notification-toggle-btn ${notifSubscribed ? 'subscribed' : ''}`}
+              onClick={handleToggleNotifications}
+              disabled={notifLoading || Notification.permission === 'denied'}
+              title={
+                Notification.permission === 'denied'
+                  ? 'Notifications blocked — enable in browser settings'
+                  : notifSubscribed
+                  ? 'Disable streak reminders'
+                  : 'Enable streak reminders'
+              }
+            >
+              {notifLoading ? '...' : notifSubscribed ? '🔔' : '🔕'}
+            </button>
+          )}
           <ThemeToggle />
           <button className="logout-button" onClick={handleLogout}>
             Logout

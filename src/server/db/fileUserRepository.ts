@@ -418,4 +418,14 @@ export class FileUserRepository implements IUserRepository {
     logger.success('Item used successfully')
     return { success: true, message: `Used "${item.title}" successfully` }
   }
+
+  // ─── Push notification queries ────────────────────────────────────────
+
+  async findAllWithPushSubscriptions(): Promise<User[]> {
+    const users = await this.loadUsers()
+    return users.filter(
+      u => u.pushNotifications?.subscriptions?.length &&
+           u.pushNotifications?.preferences?.enabled
+    )
+  }
 }

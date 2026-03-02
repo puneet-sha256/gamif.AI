@@ -7,7 +7,8 @@ import type {
   InventoryItem,
   UnclaimedRewards,
   ActivityHistory,
-  TaskHistory
+  TaskHistory,
+  PushNotificationData
 } from '../../shared/types'
 
 // ─── Cosmos sub-document types ───────────────────────────────────────────────
@@ -26,6 +27,7 @@ export interface ProfileSubDoc {
   profileData?: ProfileData
   goalsData?: GoalsData
   stats?: UserStats
+  pushNotifications?: PushNotificationData
 }
 
 export interface TasksSubDoc {
@@ -99,4 +101,7 @@ export const FIELD_TO_SUBDOC: Record<string, SubDocType> = {
 
   // rewards sub-doc
   unclaimedRewards: 'rewards',
+
+  // push notifications (stored in profile sub-doc)
+  pushNotifications: 'profile',
 }

@@ -15,6 +15,11 @@ import {
 } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
 import { generateTasks, analyzeDailyActivity } from './src/server/routes/aiRoutes'
+import {
+  getVapidKey, subscribe, unsubscribe,
+  updatePreferences, getNotificationStatus
+} from './src/server/routes/notificationRoutes'
+import { startNotificationScheduler } from './src/server/services/notificationScheduler'
 import { logger } from './src/utils/logger'
 
 const app = express()
@@ -111,6 +116,13 @@ app.patch('/api/user/shards', updateShards)
 app.post('/api/ai/generate-tasks', generateTasks)
 app.post('/api/ai/analyze-activity', analyzeDailyActivity)
 
+// Push notification routes
+app.get('/api/notifications/vapid-public-key', getVapidKey)
+app.post('/api/notifications/subscribe', subscribe)
+app.post('/api/notifications/unsubscribe', unsubscribe)
+app.put('/api/notifications/preferences', updatePreferences)
+app.get('/api/notifications/status/:sessionId', getNotificationStatus)
+
 // -----------------------------
 //  Serve built frontend (Vite dist)
 // -----------------------------
@@ -133,6 +145,9 @@ async function startServer() {
     logger.custom('🚀', `Solo Leveling API Server running on http://localhost:${PORT}`)
     logger.custom('📁', `Data directory: ${DATA_DIR}`)
     logger.custom('💾', `Storage mode: ${process.env.STORAGE_MODE || 'file'}`)
+
+    // Start push notification scheduler (non-blocking; skips if VAPID keys not set)
+    startNotificationScheduler()
   })
 }
 

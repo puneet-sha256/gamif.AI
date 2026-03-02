@@ -20,6 +20,7 @@
     "server.ts",
     "src/server/**/*.ts",
     "src/utils/logger.ts",             // <- include only server-safe utils
+    "src/utils/streakCalculation.ts",   // <- used by notification scheduler
     "src/shared/types/**/*.ts"
   ],
   "exclude": [

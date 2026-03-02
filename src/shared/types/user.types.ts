@@ -133,6 +133,28 @@ export interface TaskHistory {
   lastUpdated: string
 }
 
+export interface PushSubscriptionKeys {
+  p256dh: string
+  auth: string
+}
+
+export interface PushSubscriptionData {
+  endpoint: string
+  keys: PushSubscriptionKeys
+}
+
+export interface NotificationPreferences {
+  enabled: boolean
+  quietHoursStart?: number  // Hour 0-23
+  quietHoursEnd?: number    // Hour 0-23
+}
+
+export interface PushNotificationData {
+  subscriptions: PushSubscriptionData[]
+  preferences: NotificationPreferences
+  lastNotifiedDate?: string  // YYYY-MM-DD — prevents duplicate daily notifications
+}
+
 export interface User {
   id: string
   username: string
@@ -149,6 +171,7 @@ export interface User {
   unclaimedRewards?: UnclaimedRewards // Pending rewards from daily activities
   activityHistory?: ActivityHistory // Historical daily XP data for heatmap
   taskHistory?: TaskHistory // Detailed task history for each date
+  pushNotifications?: PushNotificationData // Push notification subscriptions and preferences
 }
 
 export interface UserRegistration {

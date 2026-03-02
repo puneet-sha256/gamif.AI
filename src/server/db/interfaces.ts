@@ -67,6 +67,9 @@ export interface IUserRepository {
     }
   ): Promise<{ success: boolean; message?: string }>
   useInventoryItem(userId: string, itemId: string): Promise<{ success: boolean; message?: string }>
+
+  // Push notification queries
+  findAllWithPushSubscriptions(): Promise<User[]>
 }
 
 // ─── Session Repository Interface ───────────────────────────────────────────

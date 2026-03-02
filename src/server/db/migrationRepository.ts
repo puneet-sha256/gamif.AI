@@ -199,6 +199,18 @@ export class MigratingUserRepository implements IUserRepository {
     }
     return this.file.useInventoryItem(userId, itemId)
   }
+
+  async findAllWithPushSubscriptions(): Promise<User[]> {
+    // Merge results from both backends, deduplicating by user id
+    const cosmosUsers = await this.cosmos.findAllWithPushSubscriptions()
+    const fileUsers = await this.file.findAllWithPushSubscriptions()
+    const seen = new Set(cosmosUsers.map(u => u.id))
+    const merged = [...cosmosUsers]
+    for (const u of fileUsers) {
+      if (!seen.has(u.id)) merged.push(u)
+    }
+    return merged
+  }
 }
 
 // ─── Migrating Session Repository ───────────────────────────────────────────

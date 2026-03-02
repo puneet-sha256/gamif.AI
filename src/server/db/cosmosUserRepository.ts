@@ -39,6 +39,7 @@ export class CosmosUserRepository implements IUserRepository {
       activityHistory: history?.activityHistory,
       taskHistory: history?.taskHistory,
       unclaimedRewards: rewards?.unclaimedRewards,
+      pushNotifications: profile.pushNotifications,
     }
   }
 
@@ -125,6 +126,7 @@ export class CosmosUserRepository implements IUserRepository {
       profileData: user.profileData,
       goalsData: user.goalsData,
       stats: user.stats,
+      pushNotifications: user.pushNotifications,
     }
     operations.push({ operationType: 'Upsert', resourceBody: profileDoc as unknown as JSONObject })
 
@@ -585,5 +587,26 @@ export class CosmosUserRepository implements IUserRepository {
     await this.upsertSubDoc(shopDoc)
     logger.success('Item used successfully')
     return { success: true, message: `Used "${item.title}" successfully` }
+  }
+
+  // ─── Push notification queries ────────────────────────────────────────
+
+  async findAllWithPushSubscriptions(): Promise<User[]> {
+    // Query profile sub-docs that have push notifications enabled with subscriptions
+    const { resources } = await this.container.items
+      .query<ProfileSubDoc>({
+        query: `SELECT * FROM c WHERE c.type = "profile"
+                AND c.pushNotifications.preferences.enabled = true
+                AND ARRAY_LENGTH(c.pushNotifications.subscriptions) > 0`,
+      })
+      .fetchAll()
+
+    // Assemble full user for each matching profile
+    const users: User[] = []
+    for (const profile of resources) {
+      const user = await this.findById(profile.userId)
+      if (user) users.push(user)
+    }
+    return users
   }
 }
