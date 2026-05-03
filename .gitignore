@@ -43,6 +43,11 @@ data/backup/
 # Screenshots (used for testing/documentation)
 screenshots/
 
+# Playwright
+playwright-report/
+test-results/
+playwright/.cache/
+
 # Temporary files
 tmp/
 

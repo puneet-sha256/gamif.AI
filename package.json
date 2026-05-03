@@ -14,7 +14,10 @@
     "dev": "vite",
     "copy:prompts": "shx mkdir -p build/src/server/prompts && shx cp -r src/server/prompts/* build/src/server/prompts/",
     "build": "npm run build:server && npm run copy:prompts && npm run build:client",
-    "start": "node build/server.js"
+    "start": "node build/server.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed"
   },
   "dependencies": {
     "@azure/ai-projects": "^1.0.0",
@@ -39,6 +42,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^24.10.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
