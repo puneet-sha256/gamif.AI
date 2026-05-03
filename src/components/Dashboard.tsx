@@ -14,9 +14,11 @@ import ShopItemModal from './ShopItemModal'
 import RewardClaimModal from './RewardClaimModal'
 import TaskHistoryModal from './TaskHistoryModal'
 import ActivityHeatmap from './ActivityHeatmap'
-import { 
-  mapGeneratedTasksToTaskItems, 
-  groupMappedTasksByCategory, 
+import OnboardingTour from './OnboardingTour'
+import { ONBOARDING_TOUR_STEPS } from './onboardingTourSteps'
+import {
+  mapGeneratedTasksToTaskItems,
+  groupMappedTasksByCategory,
   hasGeneratedTasks,
   TASK_CATEGORIES,
   type MappedTaskItem
@@ -62,6 +64,36 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
   // Window width state for responsive chart sizing
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
+
+  // Onboarding tour state — initialized lazily from localStorage based on userId.
+  const tourStorageKey = user?.id ? `gamifai_tour_completed_${user.id}` : null
+  const [showTour, setShowTour] = useState(false)
+
+  useEffect(() => {
+    if (!tourStorageKey) {
+      setShowTour(false)
+      return
+    }
+    try {
+      const seen = window.localStorage.getItem(tourStorageKey) === 'true'
+      setShowTour(!seen)
+    } catch {
+      setShowTour(false) // localStorage blocked → don't loop the tour
+    }
+  }, [tourStorageKey])
+
+  const closeTour = (markCompleted: boolean) => {
+    setShowTour(false)
+    if (markCompleted && tourStorageKey) {
+      try { window.localStorage.setItem(tourStorageKey, 'true') } catch { /* no-op */ }
+    }
+  }
+
+  const relaunchTour = () => {
+    // Ensure the user lands on the profile tab so the welcome step has the right context.
+    setActiveTab('profile')
+    setShowTour(true)
+  }
 
   // Track window resize for responsive chart
   useEffect(() => {
@@ -709,6 +741,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       <div className="profile-overview">
         <h2>Player Profile</h2>
         <p>Your journey in the development realm continues...</p>
+        <button
+          type="button"
+          className="tour-relaunch-link"
+          onClick={relaunchTour}
+          aria-label="Replay the onboarding tour"
+        >
+          <span aria-hidden="true">🧭</span> Show tour
+        </button>
       </div>
       
       <div className="profile-content">
@@ -732,27 +772,31 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
         <div className="player-stats-section">
           <div className="stats-row">
-            <StatCard 
-              icon="⚔️" 
-              title={`Level ${calculateLevelProgress(user?.stats?.experience || 0).actualLevel}`}
-              className="level-card"
-            >
-              <ProgressBar
-                current={calculateLevelProgress(user?.stats?.experience || 0).current}
-                max={calculateLevelProgress(user?.stats?.experience || 0).needed}
-                percentage={calculateLevelProgress(user?.stats?.experience || 0).percentage}
+            <div className="tour-anchor" data-tour="level-card">
+              <StatCard
+                icon="⚔️"
+                title={`Level ${calculateLevelProgress(user?.stats?.experience || 0).actualLevel}`}
+                className="level-card"
+              >
+                <ProgressBar
+                  current={calculateLevelProgress(user?.stats?.experience || 0).current}
+                  max={calculateLevelProgress(user?.stats?.experience || 0).needed}
+                  percentage={calculateLevelProgress(user?.stats?.experience || 0).percentage}
+                />
+              </StatCard>
+            </div>
+
+            <div className="tour-anchor" data-tour="shards-card">
+              <StatCard
+                icon="💎"
+                title="Shards"
+                value={(user?.stats?.shards || 0).toFixed(2)}
               />
-            </StatCard>
-            
-            <StatCard 
-              icon="💎" 
-              title="Shards"
-              value={(user?.stats?.shards || 0).toFixed(2)}
-            />
+            </div>
           </div>
 
           {/* Streak Multipliers Section */}
-          <div className="streak-multipliers-section">
+          <div className="streak-multipliers-section" data-tour="streak-multipliers">
             <h3 className="streak-section-title">🔥 Streak Multipliers</h3>
             <div className="streak-cards">
               {(() => {
@@ -821,7 +865,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         </div>
 
         <div className="experience-section">
-          <div className="experience-card">
+          <div className="experience-card" data-tour="ring-chart">
             <h3>Experience Distribution</h3>
             {(() => {
               const distribution = calculateAttributeDistribution()
@@ -950,9 +994,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Activity Heatmap Section */}
-        <div className="heatmap-section">
-          <ActivityHeatmap 
-            activityHistory={user?.activityHistory} 
+        <div className="heatmap-section" data-tour="activity-heatmap">
+          <ActivityHeatmap
+            activityHistory={user?.activityHistory}
             onCellClick={handleHeatmapCellClick}
           />
         </div>
@@ -1014,20 +1058,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
     return (
       <div className="tab-content">
-        <div className="tasks-header">
+        <div className="tasks-header" data-tour="tasks-tab">
           <div className="tasks-header-content">
             <h2>Tasks</h2>
             <p>Complete your personalized AI-generated tasks to earn experience and shards</p>
           </div>
           <div className="tasks-header-actions">
-            <button 
+            <button
               className="daily-activity-btn-header"
               onClick={() => setShowDailyInput(true)}
+              data-tour="log-activity-btn"
             >
               <span className="btn-icon">🤖</span>
               <span className="btn-text">Log Daily Activities</span>
             </button>
-            <button 
+            <button
               onClick={() => {
                 setEditingTask(null)
                 setShowTaskModal(true)
@@ -1141,7 +1186,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
     return (
       <div className="tab-content">
-        <div className="shop-header">
+        <div className="shop-header" data-tour="shop-tab">
           <div className="shop-header-content">
             <h2>Shop</h2>
             <p>Spend your shards on rewards and upgrades</p>
@@ -1335,7 +1380,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
   return (
     <div className="dashboard-container">
-      <div className="dashboard-header">
+      <div className="dashboard-header" data-tour="header-greeting">
         <div className="dashboard-logo">
           <h1>GAMIF.AI</h1>
           <div className="subtitle">Life Operating System</div>
@@ -1344,9 +1389,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           {profileData && (
             <span className="welcome-text">Welcome, {profileData.name}!</span>
           )}
-          <button 
+          <button
             className={`unclaimed-rewards-button ${user?.unclaimedRewards && user.unclaimedRewards.activities.length > 0 ? 'has-rewards' : ''}`}
             onClick={() => setShowRewardClaimModal(true)}
+            data-tour="unclaimed-rewards"
           >
             <span className="reward-icon">🎁</span>
             <span className="reward-text">Unclaimed Rewards</span>
@@ -1354,7 +1400,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               <span className="reward-badge">{user.unclaimedRewards.activities.length}</span>
             )}
           </button>
-          <ThemeToggle />
+          <span data-tour="theme-toggle" className="theme-toggle-anchor">
+            <ThemeToggle />
+          </span>
           <button className="logout-button" onClick={handleLogout}>
             Logout
           </button>
@@ -1362,7 +1410,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       </div>
       
       <div className="dashboard-navigation">
-        <div className="nav-tabs">
+        <div className="nav-tabs" data-tour="tab-nav">
           <button 
             className={`nav-tab ${activeTab === 'profile' ? 'active' : ''}`}
             onClick={() => setActiveTab('profile')}
@@ -1417,6 +1465,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         }}
         date={selectedDate}
         taskHistory={getTaskHistoryForDate(selectedDate)}
+      />
+
+      {/* First-time onboarding tour */}
+      <OnboardingTour
+        isOpen={showTour}
+        steps={ONBOARDING_TOUR_STEPS}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onComplete={() => closeTour(true)}
+        onSkip={() => closeTour(true)}
       />
     </div>
   )
