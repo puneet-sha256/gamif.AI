@@ -43,11 +43,17 @@ data/backup/
 # Screenshots (used for testing/documentation)
 screenshots/
 
+# Playwright
+playwright-report/
+test-results/
+playwright/.cache/
+
 # Temporary files
 tmp/
 
 # Claude Code
-.claude/
+.claude/*
+!.claude/skills/
 
 # Misc
 nul
