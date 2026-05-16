@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gamif.AI · Add task (mobile)</title>
+<link rel="stylesheet" href="theme.css">
+<script src="app.js" defer></script>
+<style>
+  body { background: var(--bg-overlay); }
+
+  .seg {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+    padding: 4px; background: var(--bg-muted); border-radius: var(--r-md);
+  }
+  .seg button {
+    height: 34px; border-radius: 7px;
+    font-size: 12.5px; font-weight: 500;
+    color: var(--text-secondary);
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .seg button.on {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-xs);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; }
+
+  .pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill-row button {
+    height: 30px; padding: 0 12px; border-radius: var(--r-pill);
+    border: 1px solid var(--border); background: var(--bg-surface);
+    color: var(--text-secondary); font-size: 12.5px;
+    font-weight: 500;
+  }
+  .pill-row button.on { background: var(--accent-soft); color: var(--accent-text); border-color: transparent; }
+
+  .reward-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+
+  /* Background context (faint dashboard behind) */
+  .bg-context {
+    position: fixed; inset: 0;
+    background: var(--bg-app);
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  .theme-fab { left: 16px; right: auto; bottom: 16px; }
+</style>
+</head>
+<body>
+
+<div class="bg-context"></div>
+
+<div class="sheet-back">
+  <div class="sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__head">
+      <div>
+        <div class="sheet__title">Add task</div>
+        <div class="muted" style="font-size: 12.5px; margin-top: 2px;">Custom tasks count toward XP and shards.</div>
+      </div>
+      <button class="icon-btn" aria-label="Close">
+        <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <form class="sheet__body" onsubmit="event.preventDefault()">
+      <div class="field">
+        <label class="field__label">Category</label>
+        <div class="seg">
+          <button type="button"><span class="dot" style="color:var(--strength)"></span> Strength</button>
+          <button type="button" class="on"><span class="dot" style="color:var(--intel)"></span> Intelligence</button>
+          <button type="button"><span class="dot" style="color:var(--charisma)"></span> Charisma</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field__label">Title</label>
+        <input class="input" placeholder="e.g. Read 30 minutes" value="Read 30 minutes of fiction">
+        <span class="field__hint">Adding a title marks this as your custom task.</span>
+      </div>
+
+      <div class="field">
+        <label class="field__label">What does it involve?</label>
+        <textarea class="textarea" rows="3" placeholder="Add any context that helps you remember why this matters.">Pick up the new novel from the bedside. No phone in the room.</textarea>
+      </div>
+
+      <div class="field">
+        <label class="field__label">Estimated duration</label>
+        <div class="pill-row">
+          <button type="button">10m</button>
+          <button type="button">20m</button>
+          <button type="button" class="on">30m</button>
+          <button type="button">45m</button>
+          <button type="button">60m</button>
+          <button type="button">Custom</button>
+        </div>
+        <span class="field__hint">More effort earns bonus rewards (up to 5×).</span>
+      </div>
+
+      <div class="reward-grid">
+        <div class="field">
+          <label class="field__label">XP</label>
+          <input class="input" type="number" value="25" min="0">
+        </div>
+        <div class="field">
+          <label class="field__label">Shards</label>
+          <input class="input" type="number" value="5" min="0">
+        </div>
+      </div>
+    </form>
+
+    <div class="sheet__foot">
+      <a class="btn btn--ghost" href="06-dashboard-tasks-mobile.html">Cancel</a>
+      <button class="btn btn--accent">Add task</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

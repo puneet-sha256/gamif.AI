@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gamif.AI · Reward Vault (mobile)</title>
+<link rel="stylesheet" href="theme.css">
+<script src="app.js" defer></script>
+<style>
+  .head { padding: 14px 0 4px; }
+  .head h1 { font-size: 24px; text-transform: uppercase; letter-spacing: -0.025em; margin-top: 4px; }
+  .head h1 .ember {
+    background: linear-gradient(120deg, #ff3030 0%, #ff7a18 60%, #facc15 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .head p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  /* Wallet hero */
+  .wallet {
+    position: relative;
+    overflow: hidden;
+    margin: 12px 0 16px;
+    padding: 18px 18px 16px;
+    border-radius: var(--r-md);
+    border: 1px solid rgba(255, 48, 48, 0.18);
+    background:
+      radial-gradient(420px 240px at 0% 0%, rgba(255, 48, 48, 0.32), transparent 60%),
+      radial-gradient(380px 260px at 100% 100%, rgba(255, 122, 24, 0.26), transparent 60%),
+      linear-gradient(135deg, #0a0b10, #14151c);
+    color: #fff;
+    box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.5);
+  }
+  .wallet::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255, 48, 48, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 48, 48, 0.06) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(80% 70% at 50% 50%, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(80% 70% at 50% 50%, black 30%, transparent 80%);
+    pointer-events: none;
+  }
+  .wallet > * { position: relative; z-index: 1; }
+
+  .wallet__head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .wallet__lbl {
+    font-size: 9.5px; font-weight: 600;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .wallet__delta {
+    background: rgba(132, 204, 22, 0.16);
+    color: var(--success);
+    padding: 3px 8px;
+    border-radius: var(--r-pill);
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .wallet__num {
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .wallet__num-shard {
+    width: 28px; height: 28px;
+    align-self: center;
+    flex: 0 0 auto;
+    filter: drop-shadow(0 0 10px rgba(255, 122, 24, 0.5));
+  }
+  .wallet__num-val {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 800;
+    font-size: 38px;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(120deg, #ffffff 0%, #ffffff 50%, #ff7a18 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .wallet__num-unit {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 9.5px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .wallet__foot {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
+    flex-wrap: wrap;
+  }
+  .wallet__foot strong { color: #fff; font-weight: 700; }
+
+  .wallet__add {
+    position: absolute;
+    top: 16px; right: 16px;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: #fff;
+    display: inline-flex; align-items: center; gap: 5px;
+    z-index: 2;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .wallet__add svg { width: 12px; height: 12px; flex: 0 0 auto; }
+
+  /* Filters */
+  .filter-row {
+    display: flex; gap: 6px;
+    margin: 0 -16px 12px;
+    padding: 0 16px 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto;
+    height: 30px; padding: 0 12px;
+    border-radius: var(--r-sm);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .chip--on {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border-color: rgba(255, 48, 48, 0.32);
+  }
+  .chip .count { font-size: 10px; color: var(--text-faint); font-weight: 500; letter-spacing: 0; }
+  .chip--on .count { color: var(--accent-text); }
+
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 0 10px;
+  }
+  .section-head__left { display: flex; align-items: center; gap: 8px; }
+  .section-head__title {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .section-head__count {
+    font-size: 10px; font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 2px 7px;
+    border-radius: var(--r-pill);
+  }
+
+  /* Reward grid + cards */
+  .reward-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .reward-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .reward-card[data-locked="true"] .reward-card__art { opacity: 0.5; }
+
+  .reward-card--featured {
+    border-color: rgba(255, 48, 48, 0.42);
+    box-shadow: 0 0 0 1px rgba(255, 48, 48, 0.30);
+  }
+  .reward-card--featured::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    z-index: 2;
+  }
+
+  .reward-card__art {
+    aspect-ratio: 4 / 3;
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: #0d0e12;
+  }
+  .reward-card__art::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 50%, var(--art-glow, rgba(255, 48, 48, 0.32)), transparent 70%);
+  }
+  .reward-card__art .emoji {
+    position: relative; z-index: 1;
+    font-size: 38px;
+    filter: drop-shadow(0 0 14px var(--art-color, #ff7a18));
+  }
+  .reward-card__pin {
+    position: absolute; top: 6px; left: 6px; z-index: 2;
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 6px;
+    background: rgba(255, 48, 48, 0.18);
+    border: 1px solid rgba(255, 48, 48, 0.45);
+    border-radius: var(--r-pill);
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #ff8080;
+  }
+  .reward-card__pin::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 5px var(--accent);
+  }
+
+  .reward-card__body {
+    padding: 10px;
+    display: flex; flex-direction: column; gap: 4px;
+    flex: 1;
+  }
+  .reward-card__cat {
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .reward-card__title {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .reward-card__foot {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 8px;
+    margin-top: auto;
+    border-top: 1px solid var(--border-faint);
+    gap: 6px;
+  }
+  .price { display: inline-flex; align-items: center; gap: 4px; }
+  .price__shard { width: 11px; height: 11px; flex: 0 0 auto; }
+  .price__num {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--text-primary);
+    letter-spacing: -0.025em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .buy-btn {
+    height: 26px;
+    padding: 0 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    box-shadow: 0 3px 10px -2px rgba(255, 48, 48, 0.45), inset 0 1px 0 rgba(255,255,255,0.20);
+  }
+
+  .lock-progress {
+    margin-top: 4px;
+    width: 100%;
+  }
+  .lock-progress__bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .lock-progress__fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  }
+  .lock-progress__count {
+    font-size: 9px;
+    margin-top: 4px;
+    color: var(--accent);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .add-card {
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--r-sm);
+    background: transparent;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 22px 10px;
+    color: var(--text-secondary);
+    text-align: center;
+    gap: 8px;
+    min-height: 200px;
+  }
+  .add-card__ic {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .add-card__ic svg { width: 20px; height: 20px; stroke-width: 2.2; }
+  .add-card .lbl {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 12px; font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .add-card .sub { font-size: 10.5px; color: var(--text-muted); }
+
+  .bell-mini {
+    position: relative; width: 36px; height: 36px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 10px; color: var(--text-secondary);
+  }
+  .bell-mini .badge {
+    position: absolute; top: 4px; right: 4px;
+    background: var(--accent); color: #fff;
+    font-size: 9px; font-weight: 700;
+    border-radius: var(--r-pill);
+    padding: 0 4px; min-width: 14px; height: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    line-height: 1;
+  }
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #ff5e2e, #ff7a18);
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .theme-fab { left: 16px; right: auto; }
+</style>
+</head>
+<body class="mobile-page">
+
+<header class="appbar appbar--mobile">
+  <div class="brand"><div class="brand__mark">G</div><span class="brand__name">Gamif.AI</span></div>
+  <div class="appbar__right">
+    <button class="bell-mini"><svg class="ic" viewBox="0 0 24 24"><path d="M20 5l-9 4M20 5v6l-9 4M20 5H4l3 6-3 6 7-3"/></svg><span class="badge">3</span></button>
+    <span class="avatar">PS</span>
+  </div>
+</header>
+
+<main class="mobile-shell">
+  <section class="head">
+    <span class="eyebrow eyebrow--accent">REWARD VAULT</span>
+    <h1>Spend what you've <span class="ember">earned.</span></h1>
+    <p>Spoils for the disciplined.</p>
+  </section>
+
+  <!-- Wallet -->
+  <div class="wallet">
+    <div class="wallet__head">
+      <span class="wallet__lbl">YOUR BALANCE</span>
+      <span class="wallet__delta">+85 today</span>
+    </div>
+    <div class="wallet__num">
+      <svg class="wallet__num-shard shard-spin" viewBox="0 0 24 24">
+        <path d="M12 2 L20 12 L12 22 L4 12 Z" fill="url(#shard-grad)"/>
+        <path d="M12 2 L20 12 L12 12 Z" fill="rgba(255,255,255,0.25)"/>
+      </svg>
+      <span class="wallet__num-val">428.50</span>
+      <span class="wallet__num-unit">SHARDS</span>
+    </div>
+    <div class="wallet__foot">
+      <span><strong>1,230</strong> spent</span>
+      <span style="color: rgba(255,255,255,0.2);">·</span>
+      <span><strong>9</strong> claimed</span>
+      <span style="color: rgba(255,255,255,0.2);">·</span>
+      <span style="color: var(--accent-2); font-weight: 700;">×1.4 streak</span>
+    </div>
+    <button class="wallet__add">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Add
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-row">
+    <button class="chip chip--on">All <span class="count">5</span></button>
+    <button class="chip">Affordable <span class="count">3</span></button>
+    <button class="chip">Locked <span class="count">2</span></button>
+  </div>
+
+  <!-- Wishlist -->
+  <div class="section-head">
+    <div class="section-head__left">
+      <span class="rule-accent"></span>
+      <span class="section-head__title">Wishlist</span>
+      <span class="section-head__count">5</span>
+    </div>
+  </div>
+
+  <div class="reward-grid">
+    <!-- Featured -->
+    <div class="reward-card reward-card--featured" style="--art-glow: rgba(255, 122, 24, 0.36); --art-color: #ff7a18;">
+      <div class="reward-card__art">
+        <span class="reward-card__pin">UNLOCKED</span>
+        <span class="emoji">🎮</span>
+      </div>
+      <div class="reward-card__body">
+        <span class="reward-card__cat">ENTERTAINMENT</span>
+        <h4 class="reward-card__title">Steam Game</h4>
+        <div class="reward-card__foot">
+          <span class="price">
+            <svg class="price__shard" viewBox="0 0 24 24"><path d="M12 2 L20 12 L12 22 L4 12 Z" fill="url(#shard-grad)"/></svg>
+            <span class="price__num">250</span>
+          </span>
+          <button class="buy-btn">Claim</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sushi -->
+    <div class="reward-card" style="--art-glow: rgba(132, 204, 22, 0.32); --art-color: #84cc16;">
+      <div class="reward-card__art"><span class="emoji">🍣</span></div>
+      <div class="reward-card__body">
+        <span class="reward-card__cat">DINING</span>
+        <h4 class="reward-card__title">Sushi Night</h4>
+        <div class="reward-card__foot">
+          <span class="price">
+            <svg class="price__shard" viewBox="0 0 24 24"><path d="M12 2 L20 12 L12 22 L4 12 Z" fill="url(#shard-grad)"/></svg>
+            <span class="price__num">180</span>
+          </span>
+          <button class="buy-btn">Claim</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Movie -->
+    <div class="reward-card" style="--art-glow: rgba(6, 214, 244, 0.28); --art-color: #06d6f4;">
+      <div class="reward-card__art"><span class="emoji">🎬</span></div>
+      <div class="reward-card__body">
+        <span class="reward-card__cat">DOWNTIME</span>
+        <h4 class="reward-card__title">Movie Night</h4>
+        <div class="reward-card__foot">
+          <span class="price">
+            <svg class="price__shard" viewBox="0 0 24 24"><path d="M12 2 L20 12 L12 22 L4 12 Z" fill="url(#shard-grad)"/></svg>
+            <span class="price__num">60</span>
+          </span>
+          <button class="buy-btn">Claim</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Long weekend - locked -->
+    <div class="reward-card" data-locked="true" style="--art-glow: rgba(236, 72, 153, 0.28); --art-color: #ec4899;">
+      <div class="reward-card__art"><span class="emoji">🏖</span></div>
+      <div class="reward-card__body">
+        <span class="reward-card__cat">TRAVEL · LOCKED</span>
+        <h4 class="reward-card__title">Weekend Trip</h4>
+        <div class="reward-card__foot" style="flex-direction: column; align-items: stretch; gap: 6px;">
+          <div class="row row--between">
+            <span class="price">
+              <svg class="price__shard" viewBox="0 0 24 24"><path d="M12 2 L20 12 L12 22 L4 12 Z" fill="url(#shard-grad)" opacity="0.65"/></svg>
+              <span class="price__num" style="color: var(--text-muted);">800</span>
+            </span>
+          </div>
+          <div class="lock-progress">
+            <div class="lock-progress__bar"><div class="lock-progress__fill" style="width: 53.5%;"></div></div>
+            <div class="lock-progress__count">372 SHARDS TO GO</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add new -->
+    <button class="add-card">
+      <span class="add-card__ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </span>
+      <span class="lbl">Add reward</span>
+      <span class="sub">Title · price</span>
+    </button>
+  </div>
+
+  <div style="height: 24px;"></div>
+</main>
+
+<nav class="bottomnav">
+  <a class="bottomnav__btn" href="05-dashboard-overview-mobile.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>Overview</a>
+  <a class="bottomnav__btn" href="06-dashboard-tasks-mobile.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Tasks</a>
+  <a class="bottomnav__btn" href="07-dashboard-inventory-mobile.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l-2 12H5z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>Loadout</a>
+  <a class="bottomnav__btn bottomnav__btn--active" href="08-dashboard-shop-mobile.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l3 12h12l2-8H6"/></svg>Vault</a>
+</nav>
+
+</body>
+</html>

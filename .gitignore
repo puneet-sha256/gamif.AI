@@ -40,8 +40,12 @@ data/backup/
 .env
 .env.local
 
-# Screenshots (used for testing/documentation)
+# Screenshots and feedback artifacts (used for design/QA, not source)
 screenshots/
+test-screenshots/
+test-feedback/
+review.mjs
+review-*.mjs
 
 # Playwright
 playwright-report/

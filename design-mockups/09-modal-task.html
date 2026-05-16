@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Gamif.AI · Add task modal</title>
+<link rel="stylesheet" href="theme.css">
+<script src="app.js" defer></script>
+<style>
+  /* Subtle dim background to make the modal pop */
+  .stage-bg {
+    background:
+      linear-gradient(180deg, rgba(247,247,245,0.96), rgba(247,247,245,0.96)),
+      url('06-dashboard-tasks.html');
+    min-height: 100vh;
+  }
+
+  .seg {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+    padding: 4px; background: var(--bg-muted); border-radius: var(--r-md);
+  }
+  .seg button {
+    height: 34px; border-radius: 7px;
+    font-size: 13px; font-weight: 500;
+    color: var(--text-secondary);
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .seg button.on {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-xs);
+  }
+  .seg .dot { width: 7px; height: 7px; }
+
+  .pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill-row button {
+    height: 30px; padding: 0 12px; border-radius: var(--r-pill);
+    border: 1px solid var(--border); background: var(--bg-surface);
+    color: var(--text-secondary); font-size: 13px;
+    cursor: pointer; font-weight: 500;
+  }
+  .pill-row button:hover { border-color: var(--border-strong); }
+  .pill-row button.on { background: var(--accent-soft); color: var(--accent-text); border-color: transparent; }
+</style>
+</head>
+<body class="stage-bg page page--centered">
+
+<div class="modal-back" style="position: relative; background: transparent; padding: 0;">
+  <div class="modal" style="max-width: 520px;">
+    <div class="modal__head">
+      <div>
+        <span class="card__title">Add task</span>
+        <div class="muted" style="font-size: 12.5px; margin-top: 2px;">Custom tasks count toward the same XP and shards.</div>
+      </div>
+      <button class="icon-btn" aria-label="Close">
+        <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <form class="modal__body" onsubmit="event.preventDefault()">
+      <div class="field">
+        <label class="field__label">Category</label>
+        <div class="seg">
+          <button type="button"><span class="dot" style="color:var(--strength)"></span> Strength</button>
+          <button type="button" class="on"><span class="dot" style="color:var(--intel)"></span> Intelligence</button>
+          <button type="button"><span class="dot" style="color:var(--charisma)"></span> Charisma</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field__label">Title</label>
+        <input class="input" placeholder="e.g. Read 30 minutes of fiction" value="Read 30 minutes of fiction">
+        <span class="field__hint">Adding a title marks this as your custom task.</span>
+      </div>
+
+      <div class="field">
+        <label class="field__label">What does it involve?</label>
+        <textarea class="textarea" rows="3" placeholder="Add any context that helps you remember why this matters.">Pick up the new novel from the bedside. No phone in the room.</textarea>
+      </div>
+
+      <div class="grid grid--2">
+        <div class="field">
+          <label class="field__label">Estimated duration</label>
+          <div class="pill-row">
+            <button type="button">10m</button>
+            <button type="button">20m</button>
+            <button type="button" class="on">30m</button>
+            <button type="button">45m</button>
+            <button type="button">60m</button>
+            <button type="button">Custom</button>
+          </div>
+          <span class="field__hint">More effort earns bonus rewards (up to 5×).</span>
+        </div>
+        <div class="field">
+          <label class="field__label">Reward</label>
+          <div class="row gap-2">
+            <div style="flex:1;">
+              <input class="input" type="number" value="25" min="0" placeholder="XP">
+              <span class="field__hint">XP</span>
+            </div>
+            <div style="flex:1;">
+              <input class="input" type="number" value="5" min="0" placeholder="Shards">
+              <span class="field__hint">Shards</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="modal__foot">
+      <button class="btn btn--ghost">Cancel</button>
+      <button class="btn btn--accent">Add task</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

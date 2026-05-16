@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Gamif.AI · Set up your profile</title>
+<link rel="stylesheet" href="theme.css">
+<script src="app.js" defer></script>
+</head>
+<body class="page page--centered" style="position: relative; overflow: hidden;">
+
+<div class="dot-grid"></div>
+<span class="glow-orb glow-orb--violet" style="width: 360px; height: 360px; top: -100px; right: -120px;"></span>
+<span class="glow-orb glow-orb--rose"   style="width: 280px; height: 280px; bottom: -100px; left: -80px; animation-delay: 5s;"></span>
+<div class="floaters">
+  <span class="floater floater--circle floater--slow" style="top:12%; left:12%; width:48px; height:48px;"></span>
+  <span class="floater floater--diamond floater--delay-2" style="bottom:18%; right:14%;"></span>
+  <span class="floater floater--dot floater--delay-3" style="top:56%; left:8%;"></span>
+</div>
+
+<div class="auth" style="max-width: 460px; position: relative; z-index: 1;">
+  <div class="steps">
+    <span class="steps__dot steps__dot--active"></span>
+    <span class="steps__dot"></span>
+    <span class="steps__label">Step 1 of 2 · About you</span>
+  </div>
+
+  <!-- Welcome badge -->
+  <div style="display:inline-flex; align-items:center; gap:8px; padding: 5px 12px 5px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); font-size: 12.5px; font-weight: 600; margin-bottom: 14px;">
+    <span style="width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5, #7c3aed); display: inline-flex; align-items: center; justify-content: center; color: #fff;">
+      <svg viewBox="0 0 24 24" style="width:12px;height:12px" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12l5 5 9-9"/></svg>
+    </span>
+    Email verified · let's set you up
+  </div>
+
+  <div class="auth__head">
+    <h1>
+      Tell us about yourself
+      <svg class="sparkle sparkle--amber" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: 2px; margin-left: 2px;">
+        <path d="M12 2 L13.5 9 L21 10 L13.5 11.5 L12 18.5 L10.5 11.5 L3 10 L10.5 9 Z"/>
+      </svg>
+    </h1>
+    <p>This helps us tune the difficulty and tone of your tasks.</p>
+  </div>
+
+  <form class="auth__form" onsubmit="event.preventDefault()">
+    <div class="field">
+      <label class="field__label" for="n">Name</label>
+      <input class="input" id="n" type="text" placeholder="What should we call you?">
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="a">Age</label>
+      <input class="input" id="a" type="number" min="13" max="100" placeholder="e.g. 28">
+      <span class="field__hint">Used only to keep recommendations age-appropriate.</span>
+    </div>
+
+    <button type="submit" class="btn btn--accent btn--lg btn--block mt-2">
+      Continue
+      <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+  </form>
+</div>
+
+</body>
+</html>

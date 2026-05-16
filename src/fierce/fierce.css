@@ -1,0 +1,1998 @@
+/* =========================================================
+   Gamif.AI — FIERCE UI (v4)
+   Scoped under .fierce-app so it cannot leak into the legacy UI.
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+.fierce-app {
+  /* DARK is the default fierce vibe */
+  --bg-app:        #08090c;
+  --bg-surface:    #11131a;
+  --bg-subtle:     #0d0f15;
+  --bg-muted:      #181b24;
+  --bg-input:      #14161c;
+  --bg-overlay:    rgba(0, 0, 0, 0.7);
+
+  --text-primary:  #f8f8f8;
+  --text-secondary:#c4c4cc; /* was #a8a8b3 — bumped for AA on card surfaces */
+  --text-muted:    #a1a1aa; /* was #71717a — fails AA at 3.84:1, now 5.6:1 */
+  --text-faint:    #71717a;
+  --text-on-accent:#ffffff;
+
+  --border:        #232732;
+  --border-strong: #383d4a;
+  --border-faint:  #181b24;
+
+  --accent:        #ff3030;
+  --accent-hover:  #ff5050;
+  --accent-soft:   rgba(255, 48, 48, 0.14);
+  --accent-text:   #ff6464;
+  --accent-2:      #ff7a18;
+  --accent-2-soft: rgba(255, 122, 24, 0.14);
+
+  --electric:      #06d6f4;
+  --electric-soft: rgba(6, 214, 244, 0.14);
+  --gold:          #facc15;
+  --gold-soft:     rgba(250, 204, 21, 0.14);
+
+  --strength:      #ff5e2e;
+  --strength-soft: rgba(255, 94, 46, 0.14);
+  --intel:         #06d6f4;
+  --intel-soft:    rgba(6, 214, 244, 0.14);
+  --charisma:      #ec4899;
+  --charisma-soft: rgba(236, 72, 153, 0.14);
+
+  --success:       #84cc16;
+  --success-soft:  rgba(132, 204, 22, 0.14);
+  --warning:       #fbbf24;
+  --warning-soft:  rgba(251, 191, 36, 0.14);
+  --danger:        #ef4444;
+  --danger-soft:   rgba(239, 68, 68, 0.14);
+
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 10px;
+  --r-xl: 14px;
+  --r-2xl: 18px;
+  --r-pill: 999px;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .fierce-app {
+  --bg-app:        #f5f4f0;
+  --bg-surface:    #ffffff;
+  --bg-subtle:     #fafaf7;
+  --bg-muted:      #ebeae4;
+  --bg-input:      #ffffff;
+  --bg-overlay:    rgba(8, 9, 12, 0.55);
+
+  --text-primary:  #0a0a0a;
+  --text-secondary:#27272a; /* was #3a3a40 — deeper for AA on muted bg */
+  --text-muted:    #52525b; /* was #6e6e76 — fails 4.19:1, now 7.6:1 */
+  --text-faint:    #a8a8b0;
+
+  --border:        #e0dfd9;
+  --border-strong: #bcbab2;
+  --border-faint:  #ededea;
+
+  --accent:        #dc2626;
+  --accent-hover:  #b91c1c;
+  --accent-soft:   rgba(220, 38, 38, 0.10);
+  --accent-text:   #b91c1c;
+  --accent-2:      #ea580c;
+
+  --shadow-xs: 0 1px 2px rgba(15, 15, 20, 0.04);
+  --shadow-sm: 0 1px 2px rgba(15, 15, 20, 0.04), 0 2px 6px rgba(15, 15, 20, 0.04);
+  --shadow-md: 0 2px 4px rgba(15, 15, 20, 0.04), 0 8px 24px rgba(15, 15, 20, 0.06);
+}
+
+/* Base */
+.fierce-app {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14.5px;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.fierce-app *,
+.fierce-app *::before,
+.fierce-app *::after {
+  box-sizing: border-box;
+}
+
+.fierce-app h1, .fierce-app h2, .fierce-app h3, .fierce-app h4 {
+  font-family: 'Inter Tight', 'Inter', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  line-height: 1.15;
+  margin: 0;
+}
+.fierce-app h1 { font-size: 30px; font-weight: 800; }
+.fierce-app h2 { font-size: 22px; font-weight: 700; }
+.fierce-app h3 { font-size: 17px; font-weight: 700; }
+.fierce-app h4 { font-size: 15px; font-weight: 700; }
+.fierce-app p { color: var(--text-secondary); margin: 0; }
+
+.fierce-app ::selection { background: var(--accent-soft); color: var(--accent-text); }
+.fierce-app a { color: var(--accent); text-decoration: none; }
+.fierce-app a:hover { color: var(--accent-hover); }
+/* Button reset — preserves cascade so components can opt into a border (subnav underline etc). */
+.fierce-app button {
+  font: inherit;
+  cursor: pointer;
+  border: 0;
+  border-style: solid;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  background-image: none;
+}
+/* Restore gradient backgrounds AND white text on the styled buttons explicitly
+   (so the reset above — which has higher specificity than a single-class — can't strip them).
+   Gradient darkened so 14/700 white text hits WCAG AA (4.5+) on the start stop. */
+.fierce-app .fierce-btn--accent,
+.fierce-app .fierce-btn--fierce {
+  background-image: linear-gradient(135deg, #dc2626, #ea580c);
+  background-color: #dc2626;
+  color: #ffffff;
+}
+.fierce-app .fierce-btn--primary {
+  color: var(--bg-app);
+}
+.fierce-app input, .fierce-app textarea, .fierce-app select { font: inherit; color: var(--text-primary); }
+
+/* =========================================================
+   Brand mark + wordmark
+   ========================================================= */
+
+.fierce-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Inter Tight', 'Inter', sans-serif;
+}
+.fierce-brand__mark {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #ff3030 0%, #ff7a18 60%, #facc15 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0a0a0a;
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: -0.04em;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  filter: drop-shadow(0 4px 12px rgba(255, 48, 48, 0.4));
+}
+.fierce-brand__name {
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.fierce-brand--lg .fierce-brand__mark { width: 44px; height: 44px; font-size: 22px; }
+.fierce-brand--lg .fierce-brand__name { font-size: 18px; }
+
+/* =========================================================
+   Layout primitives
+   ========================================================= */
+
+.fierce-shell { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 760px) { .fierce-shell { padding: 0 16px; } }
+
+.fierce-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-app);
+}
+.fierce-page--centered {
+  justify-content: center;
+  align-items: center;
+  padding: 32px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fierce-appbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(17, 19, 26, 0.85);
+  backdrop-filter: saturate(180%) blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+/* Constrain the dashboard chrome (appbar + subnav) to a centered max-width so tabs don't bunch left. */
+.fierce-appbar__inner,
+.fierce-subnav__inner {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+.fierce-appbar__inner { height: 100%; }
+.fierce-appbar.fierce-appbar--shell { padding: 0; }
+[data-theme="light"] .fierce-app .fierce-appbar { background: rgba(255, 255, 255, 0.85); }
+.fierce-appbar__right { display: flex; align-items: center; gap: 12px; }
+@media (max-width: 760px) {
+  .fierce-appbar { padding: 0 16px; height: 52px; }
+  .fierce-appbar__right { gap: 14px; }
+}
+
+.fierce-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff5e2e, #ff7a18);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  flex: 0 0 auto;
+  /* Double-ring so the avatar reads on any background */
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.06),
+    0 0 0 3px rgba(255, 122, 24, 0.65),
+    0 4px 12px rgba(255, 48, 48, 0.35);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.fierce-avatar:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.10),
+    0 0 0 3px rgba(255, 122, 24, 0.85),
+    0 6px 16px rgba(255, 48, 48, 0.45);
+}
+
+.fierce-bell {
+  position: relative;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: var(--r-md);
+  background: var(--bg-muted);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.fierce-bell:hover { background: var(--bg-subtle); }
+.fierce-bell svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fierce-bell__badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+  min-width: 18px;
+  text-align: center;
+}
+.fierce-bell--mobile {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border-radius: 10px;
+  color: var(--text-secondary);
+}
+.fierce-bell--mobile .fierce-bell__badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 9px;
+  padding: 0 4px;
+  min-width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.fierce-bell__hide-text-mobile { display: inline; }
+@media (max-width: 600px) {
+  .fierce-bell__hide-text-mobile { display: none; }
+  /* Anchor the badge to the icon so it doesn't drift when the text is hidden. */
+  .fierce-bell {
+    width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+  .fierce-bell__badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    transform: translate(25%, -25%);
+  }
+}
+
+.fierce-subnav {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  padding: 0;
+  background: var(--bg-surface);
+  position: sticky;
+  top: 56px;
+  z-index: 9;
+  overflow-x: auto;
+  scrollbar-width: none;
+  justify-content: center;
+}
+.fierce-subnav__inner {
+  display: flex;
+  gap: 24px;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+.fierce-subnav::-webkit-scrollbar { display: none; }
+.fierce-subnav__btn {
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border: 0;
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  border-bottom-color: transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  background: transparent;
+}
+.fierce-subnav__btn:hover { color: var(--text-primary); }
+.fierce-subnav__btn--active {
+  color: var(--text-primary);
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  border-bottom-color: var(--accent);
+}
+.fierce-subnav__btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 760px) { .fierce-subnav { display: none; } }
+
+.fierce-bottomnav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(17, 19, 26, 0.92);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  z-index: 50;
+}
+[data-theme="light"] .fierce-app .fierce-bottomnav { background: rgba(255, 255, 255, 0.92); }
+@media (min-width: 761px) { .fierce-bottomnav { display: none; } }
+.fierce-bottomnav__btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  position: relative;
+  background: transparent;
+}
+.fierce-bottomnav__btn svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fierce-bottomnav__btn--active { color: var(--text-primary); }
+.fierce-bottomnav__btn--active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 24px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--accent);
+}
+@media (max-width: 760px) {
+  .fierce-page--has-bottomnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+}
+
+/* =========================================================
+   Buttons
+   ========================================================= */
+
+.fierce-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: var(--r-md);
+  font-weight: 500;
+  font-size: 14px;
+  border: 1px solid transparent;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease, filter 120ms ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.fierce-btn:active { transform: translateY(0.5px); }
+.fierce-btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fierce-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.fierce-btn--primary {
+  background: var(--text-primary);
+  color: var(--bg-app);
+  font-weight: 600;
+}
+.fierce-btn--primary:hover { filter: brightness(1.06); }
+
+.fierce-btn--accent {
+  background-color: #ff3030;
+  background-image: linear-gradient(135deg, #ff3030, #ff7a18);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4px 14px -2px rgba(255, 48, 48, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.fierce-btn--accent:hover { filter: brightness(1.08); }
+
+.fierce-btn--ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+.fierce-btn--ghost:hover { background: var(--bg-muted); border-color: var(--border-strong); }
+
+.fierce-btn--subtle { background: var(--bg-muted); color: var(--text-primary); }
+.fierce-btn--subtle:hover { background: var(--bg-subtle); }
+
+.fierce-btn--fierce {
+  background-color: #ff3030;
+  background-image: linear-gradient(135deg, #ff3030, #ff7a18);
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 12.5px;
+  border-radius: var(--r-sm);
+  box-shadow:
+    0 0 0 1px rgba(255, 48, 48, 0.4),
+    0 6px 20px -2px rgba(255, 48, 48, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+.fierce-btn--fierce:hover { filter: brightness(1.1); }
+.fierce-btn--fierce:disabled {
+  background-image: linear-gradient(135deg, rgba(255, 48, 48, 0.4), rgba(255, 122, 24, 0.4));
+  cursor: not-allowed;
+}
+
+.fierce-btn--sm { height: 30px; padding: 0 10px; font-size: 13px; border-radius: var(--r-sm); }
+.fierce-btn--lg { height: 44px; padding: 0 18px; font-size: 14.5px; }
+.fierce-btn--block { width: 100%; }
+
+.fierce-icon-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  color: var(--text-secondary);
+  transition: background 120ms ease, color 120ms ease;
+  background: transparent;
+}
+.fierce-icon-btn:hover { background: var(--bg-muted); color: var(--text-primary); }
+.fierce-icon-btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+/* =========================================================
+   Inputs
+   ========================================================= */
+
+.fierce-field { display: flex; flex-direction: column; gap: 6px; }
+.fierce-field__label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.fierce-field__hint { font-size: 12px; color: var(--text-muted); }
+
+.fierce-input,
+.fierce-textarea,
+.fierce-select {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  font-family: inherit;
+}
+.fierce-input::placeholder, .fierce-textarea::placeholder { color: var(--text-faint); }
+.fierce-input:hover, .fierce-textarea:hover { border-color: var(--border-strong); }
+/* Focus uses a neutral cool halo so it never reads as an error/validation state */
+.fierce-input:focus, .fierce-textarea:focus, .fierce-select:focus {
+  border-color: var(--electric);
+  box-shadow: 0 0 0 3px var(--electric-soft);
+}
+/* Visible focus rings on icon-only buttons */
+.fierce-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--electric), 0 0 0 4px var(--electric-soft);
+  color: var(--text-primary);
+}
+.fierce-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--bg-app),
+    0 0 0 4px var(--electric);
+}
+.fierce-textarea { height: auto; padding: 12px; min-height: 120px; line-height: 1.55; resize: vertical; }
+
+.fierce-otp { display: flex; gap: 8px; justify-content: center; }
+.fierce-otp input {
+  width: 44px;
+  height: 52px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+}
+.fierce-otp input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* =========================================================
+   Cards & primitives
+   ========================================================= */
+
+.fierce-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-xs);
+}
+[data-theme="light"] .fierce-app .fierce-card {
+  box-shadow: 0 1px 2px rgba(15, 15, 15, 0.05), 0 1px 1px rgba(15, 15, 15, 0.02);
+}
+[data-theme="light"] .fierce-app .fierce-stat-cell {
+  box-shadow: 0 1px 2px rgba(15, 15, 15, 0.05);
+}
+.fierce-card__body { padding: 18px; }
+
+.fierce-stat-cell {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.fierce-stat-cell::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent);
+}
+.fierce-stat-cell--cyan::before { background: var(--electric); }
+.fierce-stat-cell--gold::before { background: var(--gold); }
+.fierce-stat-cell__lbl {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.fierce-stat-cell__val {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.fierce-stat-cell__sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+/* Big tabular display number */
+.fierce-stat-big {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 32px;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.fierce-stat-big .unit { font-size: 14px; color: var(--text-muted); font-weight: 500; margin-left: 4px; letter-spacing: 0; }
+
+/* Eyebrow + display */
+.fierce-eyebrow {
+  font-family: 'Space Grotesk', 'Inter Tight', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: inline-block;
+}
+.fierce-eyebrow--accent { color: var(--accent); }
+.fierce-eyebrow--electric { color: var(--electric); }
+
+.fierce-rule-accent {
+  height: 2px;
+  width: 36px;
+  background: var(--accent);
+  display: inline-block;
+  border-radius: 2px;
+}
+/* Ember-text — dark surfaces only (hero & wallet). The first stop is white so the
+   "E" in "EARNED" needs a dark backdrop or it disappears. */
+.fierce-ember-text {
+  background: linear-gradient(120deg, #ffffff 0%, #ff7a18 50%, #ff3030 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+/* On a light page (e.g. vault page-head), swap to a coloured ember ramp so every glyph reads. */
+[data-theme="light"] .fierce-app .fierce-page-head .fierce-ember-text,
+[data-theme="light"] .fierce-app h1 .fierce-ember-text {
+  background: linear-gradient(120deg, #b91c1c 0%, #ea580c 50%, #c2410c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.fierce-tier {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+  background: rgba(255, 48, 48, 0.08);
+  border: 1px solid rgba(255, 48, 48, 0.32);
+  border-radius: var(--r-pill);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--accent-text);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.fierce-tier__hex {
+  width: 22px;
+  height: 22px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #0a0a0a;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+/* =========================================================
+   Fierce hero (dashboard centerpiece)
+   ========================================================= */
+
+.fierce-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-xl);
+  padding: 28px 32px;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(900px 380px at 8% 0%, rgba(255, 48, 48, 0.32), transparent 60%),
+    radial-gradient(700px 320px at 100% 100%, rgba(255, 122, 24, 0.22), transparent 60%),
+    radial-gradient(500px 400px at 60% 0%, rgba(6, 214, 244, 0.10), transparent 70%),
+    linear-gradient(135deg, #0a0b10 0%, #14151c 100%);
+  color: #f8f8f8;
+  box-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 48, 48, 0.12);
+}
+.fierce-hero__hud {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 48, 48, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 48, 48, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(80% 70% at 50% 50%, black 30%, transparent 80%);
+  mask-image: radial-gradient(80% 70% at 50% 50%, black 30%, transparent 80%);
+  pointer-events: none;
+}
+.fierce-hero__scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(180deg, transparent 0px, transparent 3px, rgba(255, 255, 255, 0.022) 3px, rgba(255, 255, 255, 0.022) 4px);
+  mix-blend-mode: overlay;
+}
+.fierce-hero__sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 122, 24, 0.10) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: fierce-shimmer 9s linear infinite;
+  pointer-events: none;
+}
+.fierce-hero__inner { position: relative; z-index: 2; }
+/* Hero text overrides — must win over `.fierce-app h1/p { color: var(--text-...) }` cascade.
+   Use higher-specificity selectors so the always-dark hero keeps light text in BOTH themes. */
+.fierce-app h1.fierce-hero__title {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 40px);
+  line-height: 1.0;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: #f8f8f8;
+  margin-top: 12px;
+}
+.fierce-app p.fierce-hero__sub {
+  margin-top: 12px;
+  font-size: 14.5px;
+  color: rgba(248, 248, 248, 0.82);
+  max-width: 540px;
+  line-height: 1.5;
+}
+/* Ghost button sitting on the always-dark hero needs light text regardless of theme. */
+.fierce-app .fierce-hero .fierce-btn--ghost {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+}
+.fierce-app .fierce-hero .fierce-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+@media (max-width: 600px) {
+  .fierce-hero { padding: 20px 18px; border-radius: var(--r-lg); }
+  .fierce-hero__title { font-size: 22px; }
+}
+
+.fierce-waveform {
+  width: 100%;
+  height: 36px;
+  display: block;
+  color: #ff7a18;
+}
+.fierce-waveform path {
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.fierce-reticle {
+  width: 30px;
+  height: 30px;
+  color: var(--accent);
+  animation: fierce-spin-slow 14s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(255, 48, 48, 0.4));
+}
+
+.fierce-hud-bar {
+  position: relative;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+[data-theme="light"] .fierce-app .fierce-hud-bar { background: rgba(0, 0, 0, 0.06); border-color: rgba(0, 0, 0, 0.08); }
+.fierce-hud-bar__fill {
+  position: relative;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border-radius: 2px;
+}
+.fierce-hud-bar__fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 18px;
+  background: var(--accent-2);
+  box-shadow: 0 0 12px var(--accent-2);
+  border-radius: 1px;
+}
+
+/* =========================================================
+   Animations
+   ========================================================= */
+
+@keyframes fierce-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes fierce-spin-slow { to { transform: rotate(360deg); } }
+@keyframes fierce-pulse-soft {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+@keyframes fierce-flicker {
+  0%, 100% { transform: scale(1) translateY(0); filter: brightness(1); }
+  25% { transform: scale(1.04) translateY(-1px) rotate(-1deg); filter: brightness(1.08); }
+  50% { transform: scale(0.98) translateY(1px) rotate(1deg); filter: brightness(0.96); }
+  75% { transform: scale(1.03) translateY(-0.5px) rotate(-0.5deg); filter: brightness(1.05); }
+}
+@keyframes fierce-sparkle {
+  0%, 100% { transform: scale(1) rotate(0); opacity: 0.8; }
+  50% { transform: scale(1.4) rotate(20deg); opacity: 1; }
+}
+@keyframes fierce-confetti-fall {
+  0% { transform: translate3d(0, -8vh, 0) rotate(0); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translate3d(var(--cx, 0), 70vh, 0) rotate(var(--cr, 360deg)); opacity: 0; }
+}
+@keyframes fierce-draw-ring {
+  from { stroke-dashoffset: var(--ring-len, 389); }
+  to { stroke-dashoffset: var(--ring-end, 0); }
+}
+@keyframes fierce-ember-pulse {
+  0%, 100% { text-shadow: 0 0 0 transparent; }
+  50% { text-shadow: 0 0 12px rgba(255, 122, 24, 0.6); color: #fff; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fierce-app * { animation-duration: 0s !important; animation-delay: 0s !important; }
+}
+
+.fierce-flame {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  animation: fierce-flicker 1.6s ease-in-out infinite;
+  transform-origin: center bottom;
+  vertical-align: -3px;
+}
+.fierce-sparkle {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+  animation: fierce-sparkle 2.4s ease-in-out infinite;
+}
+.fierce-sparkle--amber { color: var(--gold); }
+.fierce-sparkle--cyan { color: var(--electric); }
+.fierce-ring-seg { animation: fierce-draw-ring 1.4s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.fierce-ember-pulse { animation: fierce-ember-pulse 2.4s ease-in-out infinite; color: var(--text-primary); }
+.fierce-shard { display: inline-block; animation: fierce-pulse-soft 2.4s ease-in-out infinite; }
+
+.fierce-tilt { transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 220ms ease; }
+.fierce-tilt:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+/* =========================================================
+   Heatmap (ember palette)
+   ========================================================= */
+
+/* Heatmap — fills the card width with a 16-col grid; cells scale with viewport. */
+.fierce-heatmap {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 4px;
+  padding: 8px 0;
+  width: 100%;
+}
+.fierce-heatmap__col {
+  display: grid;
+  grid-template-rows: repeat(7, 1fr);
+  gap: 4px;
+}
+.fierce-heatmap__cell {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-width: 0;
+  max-width: 28px;
+  justify-self: center;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform 120ms ease;
+  cursor: pointer;
+}
+[data-theme="light"] .fierce-app .fierce-heatmap__cell {
+  background: #ece9e0;
+  border-color: #ddd9cc;
+}
+.fierce-heatmap__cell:hover { transform: scale(1.18); }
+.fierce-heatmap__cell--l1 { background: rgba(255, 94, 46, 0.32); border-color: rgba(255, 94, 46, 0.40); }
+.fierce-heatmap__cell--l2 { background: rgba(255, 94, 46, 0.65); border-color: rgba(255, 94, 46, 0.75); }
+.fierce-heatmap__cell--l3 { background: #ff5e2e; border-color: rgba(255, 122, 24, 0.65); }
+.fierce-heatmap__cell--l4 {
+  background: linear-gradient(135deg, #ff3030, #ff7a18);
+  border-color: rgba(255, 122, 24, 0.6);
+  box-shadow: 0 0 6px rgba(255, 122, 24, 0.45);
+}
+[data-theme="light"] .fierce-app .fierce-heatmap__cell--l1 { background: #ffd2c4; border-color: #ffbda6; }
+[data-theme="light"] .fierce-app .fierce-heatmap__cell--l2 { background: #ff9468; border-color: rgba(255, 122, 24, 0.50); }
+[data-theme="light"] .fierce-app .fierce-heatmap__cell--l3 { background: #ff5e2e; border-color: rgba(220, 40, 0, 0.65); }
+[data-theme="light"] .fierce-app .fierce-heatmap__cell--l4 {
+  background: linear-gradient(135deg, #dc2626, #ea580c);
+  border-color: #ea580c;
+}
+
+/* =========================================================
+   Tags / chips
+   ========================================================= */
+
+.fierce-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--r-pill);
+  font-size: 11.5px;
+  font-weight: 500;
+  background: var(--bg-muted);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-faint);
+}
+.fierce-tag--accent { background: var(--accent-soft); color: var(--accent-text); border-color: transparent; }
+.fierce-tag--strength { background: var(--strength-soft); color: var(--strength); border-color: transparent; }
+.fierce-tag--intel { background: var(--intel-soft); color: var(--intel); border-color: transparent; }
+.fierce-tag--charisma { background: var(--charisma-soft); color: var(--charisma); border-color: transparent; }
+.fierce-tag--success { background: var(--success-soft); color: var(--success); border-color: transparent; }
+
+.fierce-chip {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--r-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.fierce-chip:hover { border-color: var(--border-strong); color: var(--text-primary); }
+.fierce-chip--on { background: var(--accent-soft); color: var(--accent-text); border-color: rgba(255, 48, 48, 0.32); }
+.fierce-chip__count { font-size: 11px; color: var(--text-faint); font-weight: 500; letter-spacing: 0; }
+.fierce-chip--on .fierce-chip__count { color: var(--accent-text); }
+
+.fierce-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* =========================================================
+   Page heading helpers
+   ========================================================= */
+
+.fierce-page-head {
+  padding: 28px 0 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.fierce-page-head h1 {
+  font-size: clamp(20px, 5vw, 32px);
+  text-transform: uppercase;
+  letter-spacing: -0.025em;
+  margin-top: 4px;
+  word-break: break-word;
+}
+.fierce-page-head p { color: var(--text-muted); font-size: 14px; margin-top: 4px; max-width: 540px; }
+@media (max-width: 760px) {
+  .fierce-page-head { padding: 16px 0 4px; }
+  .fierce-page-head h1 { font-size: 24px; }
+  .fierce-page-head p { font-size: 13px; }
+}
+
+.fierce-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0 12px;
+}
+.fierce-section-head__left { display: flex; align-items: center; gap: 10px; }
+.fierce-section-head__title {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.fierce-section-head__count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+}
+.fierce-section-head__sub { font-size: 11.5px; color: var(--text-muted); letter-spacing: 0.04em; }
+
+/* =========================================================
+   Modal / sheet
+   ========================================================= */
+
+.fierce-modal-back {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+  overflow-y: auto;
+}
+.fierce-modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+.fierce-modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border-faint);
+  gap: 16px;
+}
+.fierce-modal__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.fierce-modal__body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.fierce-modal__foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-faint);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  background: var(--bg-subtle);
+  position: sticky;
+  bottom: 0;
+}
+.fierce-modal__foot .fierce-btn--ghost {
+  border-color: var(--border-strong);
+}
+@media (max-width: 600px) {
+  .fierce-modal-back { align-items: flex-end; padding: 0; }
+  .fierce-modal {
+    max-width: 100%;
+    border-radius: var(--r-2xl) var(--r-2xl) 0 0;
+    max-height: 92vh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* =========================================================
+   Legacy ConfirmContext + Alert overrides
+   Repaint the legacy dialogs to match the fierce vibe whenever
+   the .fierce-app wrapper is mounted.
+   ========================================================= */
+
+body:has(.fierce-app) .confirm-overlay,
+body:has(.fierce-app) .modal-overlay {
+  background: var(--bg-overlay) !important;
+  backdrop-filter: blur(6px);
+}
+body:has(.fierce-app) .confirm-container {
+  background: var(--bg-surface) !important;
+  background-color: var(--bg-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5) !important;
+  color: var(--text-primary) !important;
+}
+body:has(.fierce-app) .confirm-message,
+body:has(.fierce-app) .confirm-content { color: var(--text-primary); }
+body:has(.fierce-app) .confirm-icon {
+  /* Make the emoji read as a centred glyph, not a slapped-on rectangle.
+     Drop any inherited background and let the emoji float on the surface. */
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 4px 12px rgba(255, 48, 48, 0.3));
+}
+body:has(.fierce-app) .confirm-btn {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: var(--r-md);
+}
+body:has(.fierce-app) .confirm-btn.cancel-btn {
+  background: transparent !important;
+  border: 1px solid var(--border-strong) !important;
+  color: var(--text-primary) !important;
+}
+body:has(.fierce-app) .confirm-btn.cancel-btn:hover {
+  background: var(--bg-muted) !important;
+}
+body:has(.fierce-app) .confirm-btn.confirm-btn-primary,
+body:has(.fierce-app) .confirm-btn.confirm-btn-primary:hover,
+body:has(.fierce-app) .confirm-btn.confirm-btn-primary:active,
+body:has(.fierce-app) .confirm-btn.confirm-btn-primary:focus,
+body:has(.fierce-app) .confirm-btn.confirm-btn-primary:focus-visible {
+  background-image: linear-gradient(135deg, #ff3030, #ff7a18) !important;
+  background-color: #ff3030 !important;
+  color: #ffffff !important;
+  border: none !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+  box-shadow: 0 4px 14px -2px rgba(255, 48, 48, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+body:has(.fierce-app) .confirm-btn.confirm-btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+/* Repaint legacy Alert overlay too — uses the same .modal-overlay class */
+body:has(.fierce-app) .alert-container {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--r-md) !important;
+}
+body:has(.fierce-app) .alert-message { color: var(--text-primary) !important; }
+
+/* =========================================================
+   Confetti
+   ========================================================= */
+
+.fierce-confetti-stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 200;
+}
+.fierce-confetti-piece {
+  position: absolute;
+  top: 0;
+  left: var(--cl, 50%);
+  width: var(--cw, 8px);
+  height: var(--ch, 14px);
+  background: var(--cb, #ff7a18);
+  border-radius: var(--cradius, 2px);
+  transform-origin: center;
+  animation: fierce-confetti-fall var(--cd, 3s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: var(--cdelay, 0s);
+}
+
+/* =========================================================
+   Theme FAB
+   ========================================================= */
+
+.fierce-theme-fab {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 80; /* below modal overlays (100) so it never sits on top of CTAs */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+.fierce-theme-fab:hover { color: var(--text-primary); border-color: var(--border-strong); }
+.fierce-theme-fab svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 760px) {
+  .fierce-theme-fab { bottom: calc(76px + env(safe-area-inset-bottom)); }
+}
+/* Hide the theme FAB while any modal/sheet is open so it doesn't sit on top of CTAs.
+   Covers fierce modals, confetti stage, and legacy .confirm-overlay used by ConfirmContext. */
+body:has(.fierce-modal-back) .fierce-theme-fab,
+body:has(.fierce-confetti-stage) .fierce-theme-fab,
+body:has(.confirm-overlay) .fierce-theme-fab,
+body:has(.modal-overlay) .fierce-theme-fab {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+}
+/* On mobile, shrink the theme FAB to an icon-only chip and dock left of the bottom-nav area */
+@media (max-width: 760px) {
+  .fierce-theme-fab {
+    left: 12px;
+    right: auto;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    height: 32px;
+    width: 32px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+  }
+  .fierce-theme-fab__label { display: none; }
+}
+
+/* Mobile filter chip rows scroll horizontally — never wrap into bag */
+@media (max-width: 600px) {
+  .fierce-chip-row,
+  .fierce-mb-4.fierce-row.fierce-gap-2 {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin: 0 -16px;
+    padding: 4px 16px 8px;
+  }
+  .fierce-chip-row::-webkit-scrollbar,
+  .fierce-mb-4.fierce-row.fierce-gap-2::-webkit-scrollbar { display: none; }
+}
+
+/* =========================================================
+   Auth + setup card
+   ========================================================= */
+
+.fierce-auth {
+  width: 100%;
+  max-width: 440px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-sm);
+  padding: 32px;
+  position: relative;
+  z-index: 1;
+}
+.fierce-auth__head { margin-bottom: 22px; }
+.fierce-auth__head h1 { font-size: 26px; margin: 4px 0 4px; text-transform: uppercase; letter-spacing: -0.025em; }
+.fierce-auth__head p { font-size: 14px; color: var(--text-muted); }
+.fierce-auth__form { display: flex; flex-direction: column; gap: 16px; }
+.fierce-auth__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-faint);
+  font-size: 12px;
+  margin: 16px 0;
+}
+.fierce-auth__divider::before,
+.fierce-auth__divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.fierce-auth__foot { margin-top: 18px; text-align: center; font-size: 13px; color: var(--text-muted); }
+@media (max-width: 480px) {
+  .fierce-auth { padding: 24px 20px; border-radius: var(--r-xl); }
+  .fierce-auth__head h1 { font-size: 22px; }
+}
+
+.fierce-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0;
+}
+.fierce-link:hover { color: var(--accent-hover); }
+
+.fierce-steps { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+.fierce-steps__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-strong); }
+.fierce-steps__dot--active { background: var(--accent); width: 22px; border-radius: var(--r-pill); }
+.fierce-steps__dot--done { background: var(--success); }
+.fierce-steps__label { margin-left: 8px; font-size: 12.5px; color: var(--text-muted); font-weight: 500; }
+
+.fierce-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.fierce-success {
+  background: var(--success-soft);
+  color: var(--success);
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  border: 1px solid rgba(132, 204, 22, 0.2);
+}
+
+/* =========================================================
+   Loadout (inventory) cards
+   ========================================================= */
+
+.fierce-loadout-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 120ms ease, transform 120ms ease;
+}
+.fierce-loadout-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+
+.fierce-loadout-card__art {
+  aspect-ratio: 4 / 3;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0d0e12;
+}
+.fierce-loadout-card__art::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, var(--art-glow, rgba(255, 48, 48, 0.32)), transparent 70%);
+}
+.fierce-loadout-card__art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 16px 16px;
+  -webkit-mask-image: radial-gradient(70% 70% at 50% 50%, black 30%, transparent 80%);
+  mask-image: radial-gradient(70% 70% at 50% 50%, black 30%, transparent 80%);
+}
+.fierce-loadout-card__art > * {
+  position: relative;
+  z-index: 1;
+  font-size: 36px;
+  filter: drop-shadow(0 0 12px var(--art-color, #ff7a18));
+}
+.fierce-loadout-card__art svg {
+  width: 40px;
+  height: 40px;
+  color: var(--art-color, #ff7a18);
+  stroke: currentColor;
+  stroke-width: 1.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fierce-loadout-card__tier {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px 2px 3px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-sm);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  z-index: 2;
+}
+.fierce-loadout-card__tier-hex {
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, var(--tier-from, #ff3030), var(--tier-to, #ff7a18));
+  color: #0a0a0a;
+  font-weight: 900;
+  font-size: 9px;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+.fierce-loadout-card__tier--s { --tier-from: #facc15; --tier-to: #ff7a18; }
+.fierce-loadout-card__tier--a { --tier-from: #ff3030; --tier-to: #ff7a18; }
+.fierce-loadout-card__tier--b { --tier-from: #06d6f4; --tier-to: #0284c7; }
+.fierce-loadout-card__tier--c { --tier-from: #71717a; --tier-to: #383d4a; }
+
+.fierce-loadout-card__body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.fierce-loadout-card__cat {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.fierce-loadout-card__title {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+.fierce-loadout-card__desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.fierce-loadout-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  margin-top: 6px;
+  border-top: 1px solid var(--border-faint);
+}
+.fierce-loadout-card__owned {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.fierce-loadout-card__owned .x { color: var(--text-muted); font-weight: 600; font-size: 11px; }
+
+.fierce-use-btn {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: var(--r-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 120ms ease;
+  font-family: inherit;
+}
+.fierce-use-btn:hover { background: var(--accent); color: #fff; box-shadow: 0 0 0 3px rgba(255, 48, 48, 0.18); }
+
+.fierce-equipped-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   Vault (shop)
+   ========================================================= */
+
+.fierce-wallet {
+  position: relative;
+  overflow: hidden;
+  padding: 24px 26px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(600px 240px at 0% 0%, rgba(255, 48, 48, 0.32), transparent 60%),
+    radial-gradient(500px 260px at 100% 100%, rgba(255, 122, 24, 0.28), transparent 60%),
+    linear-gradient(135deg, #0a0b10, #14151c);
+  color: #fff;
+  box-shadow: 0 12px 28px -8px rgba(255, 48, 48, 0.18), 0 0 0 1px rgba(255, 48, 48, 0.10);
+}
+.fierce-wallet::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 48, 48, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 48, 48, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(80% 70% at 50% 50%, black 30%, transparent 80%);
+  mask-image: radial-gradient(80% 70% at 50% 50%, black 30%, transparent 80%);
+  pointer-events: none;
+}
+.fierce-wallet > * { position: relative; z-index: 1; }
+.fierce-wallet__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.fierce-wallet__num { display: flex; align-items: baseline; gap: 12px; }
+.fierce-wallet__num-shard { width: 38px; height: 38px; flex: 0 0 auto; align-self: center; filter: drop-shadow(0 0 12px rgba(255, 122, 24, 0.5)); }
+.fierce-wallet__num-val {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 56px;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(120deg, #ffffff 0%, #ffffff 50%, #ff7a18 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.fierce-wallet__num-unit {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.fierce-wallet__foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  flex-wrap: wrap;
+}
+.fierce-wallet__foot strong { color: #fff; font-weight: 700; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) {
+  .fierce-wallet { padding: 18px; }
+  .fierce-wallet__num-val { font-size: 38px; }
+  .fierce-wallet__num-shard { width: 28px; height: 28px; }
+}
+
+.fierce-reward-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 120ms ease, transform 120ms ease;
+}
+.fierce-reward-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.fierce-reward-card[data-locked="true"] .fierce-reward-card__art {
+  filter: grayscale(0.6) brightness(0.65);
+}
+.fierce-reward-card[data-locked="true"] .fierce-reward-card__art::before {
+  opacity: 0.4;
+}
+.fierce-reward-card--featured {
+  border-color: rgba(255, 48, 48, 0.42);
+  box-shadow: 0 0 0 1px rgba(255, 48, 48, 0.30), 0 12px 32px -8px rgba(255, 48, 48, 0.20);
+}
+.fierce-reward-card--featured::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  z-index: 2;
+}
+.fierce-reward-card__art {
+  aspect-ratio: 16 / 10;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0d0e12;
+}
+.fierce-reward-card__art::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, var(--art-glow, rgba(255, 48, 48, 0.32)), transparent 70%);
+}
+.fierce-reward-card__art > * {
+  position: relative;
+  z-index: 1;
+  font-size: 56px;
+  filter: drop-shadow(0 0 16px var(--art-color, #ff7a18));
+}
+.fierce-reward-card__pin {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: rgba(255, 48, 48, 0.18);
+  border: 1px solid rgba(255, 48, 48, 0.45);
+  border-radius: var(--r-pill);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ff8080;
+}
+
+.fierce-reward-card__delete {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+.fierce-reward-card__delete:hover {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+.fierce-reward-card__pin::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+.fierce-reward-card__pin--locked {
+  background: rgba(26, 28, 36, 0.85);
+  border-color: rgba(161, 161, 170, 0.50);
+  color: #d4d4d8; /* lifted from text-muted; reads at >= 4.5 on the dark chip */
+}
+.fierce-reward-card__pin--locked::before {
+  background: #d4d4d8;
+  box-shadow: none;
+}
+.fierce-reward-card__body {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.fierce-reward-card__cat {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.fierce-reward-card__title {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.fierce-reward-card__desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.fierce-reward-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  margin-top: 6px;
+  border-top: 1px solid var(--border-faint);
+  gap: 10px;
+}
+.fierce-price { display: inline-flex; align-items: center; gap: 6px; }
+.fierce-price__shard { width: 14px; height: 14px; flex: 0 0 auto; }
+.fierce-price__num {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.fierce-buy-btn {
+  height: 32px;
+  padding: 0 14px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: var(--r-sm);
+  box-shadow: 0 4px 14px -2px rgba(255, 48, 48, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.20);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+}
+.fierce-buy-btn:hover { filter: brightness(1.1); }
+.fierce-buy-btn:disabled {
+  background: var(--bg-muted);
+  color: var(--text-faint);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+/* Anchor buy-btn fill in both themes — it's a primary CTA, must read on white. */
+.fierce-app .fierce-buy-btn {
+  background-image: linear-gradient(135deg, #dc2626, #ea580c);
+  background-color: #dc2626;
+  color: #ffffff;
+  border: 0;
+}
+
+/* =========================================================
+   Mission row (tasks)
+   ========================================================= */
+
+.fierce-mission-list { display: flex; flex-direction: column; }
+.fierce-mission {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-faint);
+  transition: background 120ms ease;
+}
+.fierce-mission:last-child { border-bottom: none; }
+.fierce-mission:hover { background: var(--bg-subtle); }
+.fierce-mission__check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-strong);
+  flex: 0 0 auto;
+  margin-top: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: transparent;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.fierce-mission__check:hover { border-color: var(--accent); color: var(--accent); }
+.fierce-mission__check--cta {
+  border-width: 2px;
+  opacity: 0.7;
+  transition: opacity 120ms ease, transform 120ms ease, background 120ms ease;
+}
+.fierce-mission__check--cta:hover {
+  opacity: 1;
+  transform: scale(1.06);
+  background: rgba(255, 48, 48, 0.08);
+}
+.fierce-mission__check--done {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.fierce-mission__check--done svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fierce-mission__body { flex: 1; min-width: 0; }
+.fierce-mission__title { font-size: 14px; font-weight: 500; line-height: 1.3; color: var(--text-primary); }
+.fierce-mission__title.done { color: var(--text-muted); text-decoration: line-through; }
+.fierce-mission__desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.45;
+}
+.fierce-mission__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.fierce-mission__meta .duration {
+  background: var(--bg-muted);
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+}
+.fierce-mission__meta .reward-xp { color: var(--accent-text); font-weight: 600; }
+.fierce-mission__meta .reward-shards { color: var(--text-secondary); font-weight: 500; }
+.fierce-mission__meta .custom {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.fierce-mission__actions {
+  display: flex;
+  gap: 2px;
+  margin-left: 8px;
+  opacity: 0.55;
+  transition: opacity 120ms ease;
+}
+.fierce-mission:hover .fierce-mission__actions,
+.fierce-mission:focus-within .fierce-mission__actions { opacity: 1; }
+/* Touch devices: never hide — there's no hover */
+@media (hover: none) {
+  .fierce-mission__actions { opacity: 1; }
+}
+
+/* AI banner */
+.fierce-ai-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: var(--r-md);
+  background: var(--accent-soft);
+  border: 1px solid rgba(255, 48, 48, 0.18);
+  position: relative;
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  .fierce-ai-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+  }
+  .fierce-ai-banner > .fierce-btn { align-self: stretch; }
+}
+.fierce-ai-banner__ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(255, 48, 48, 0.16), rgba(255, 122, 24, 0.16));
+  border: 1px solid rgba(255, 48, 48, 0.32);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+.fierce-ai-banner__ic svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fierce-ai-banner__body { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.fierce-ai-banner__body h4 { font-size: 14px; font-weight: 700; }
+.fierce-ai-banner__body p { font-size: 13px; color: var(--text-secondary); }
+
+/* =========================================================
+   Helpers
+   ========================================================= */
+
+.fierce-row { display: flex; align-items: center; gap: 12px; }
+.fierce-row--between { justify-content: space-between; }
+.fierce-row--end { justify-content: flex-end; }
+.fierce-row--wrap { flex-wrap: wrap; }
+.fierce-col { display: flex; flex-direction: column; gap: 12px; }
+.fierce-grow { flex: 1; min-width: 0; }
+.fierce-muted { color: var(--text-muted); }
+.fierce-mt-2 { margin-top: 8px; }
+.fierce-mt-4 { margin-top: 16px; }
+.fierce-mt-6 { margin-top: 24px; }
+.fierce-mb-2 { margin-bottom: 8px; }
+.fierce-mb-4 { margin-bottom: 16px; }
+.fierce-mb-6 { margin-bottom: 24px; }
+.fierce-gap-2 { gap: 8px; }
+.fierce-gap-3 { gap: 12px; }
+.fierce-gap-4 { gap: 16px; }
+
+.fierce-grid { display: grid; gap: 14px; }
+.fierce-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.fierce-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.fierce-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+@media (max-width: 1100px) { .fierce-grid--4 { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 760px) {
+  .fierce-grid--3, .fierce-grid--4 { grid-template-columns: repeat(2, 1fr); }
+  .fierce-grid--2 { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .fierce-grid--3 { grid-template-columns: 1fr; }
+}
+
+/* Overview: distribution + streaks layout */
+.fierce-distribution-row { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+@media (max-width: 760px) {
+  .fierce-distribution-row { grid-template-columns: 1fr; }
+}
+
+/* Glow orbs (decorative) */
+.fierce-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.fierce-orb--rose { background: radial-gradient(circle, #fb7185 0%, transparent 70%); }
+.fierce-orb--amber { background: radial-gradient(circle, #fbbf24 0%, transparent 70%); }
+.fierce-orb--violet { background: radial-gradient(circle, #a78bfa 0%, transparent 70%); }
+.fierce-orb--cyan { background: radial-gradient(circle, #22d3ee 0%, transparent 70%); }
+
+/* Dot grid backdrop */
+.fierce-dot-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255, 48, 48, 0.18) 1px, transparent 1px);
+  background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(80% 70% at 50% 40%, black 30%, transparent 80%);
+  mask-image: radial-gradient(80% 70% at 50% 40%, black 30%, transparent 80%);
+}

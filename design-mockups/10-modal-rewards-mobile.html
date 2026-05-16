@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gamif.AI · Claim rewards (mobile)</title>
+<link rel="stylesheet" href="theme.css">
+<script src="app.js" defer></script>
+<style>
+  body { background: var(--bg-overlay); }
+
+  .summary {
+    background: var(--accent-soft);
+    border: 1px solid transparent;
+    border-radius: var(--r-md);
+    padding: 14px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .summary__cell .lbl { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+  .summary__cell .val {
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-size: 22px; font-weight: 700;
+    letter-spacing: -0.022em; line-height: 1;
+  }
+  .summary__cell .delta {
+    display: inline-block;
+    font-size: 11px; font-weight: 600;
+    color: var(--success);
+    background: var(--success-soft);
+    padding: 2px 6px;
+    border-radius: var(--r-pill);
+    margin-top: 6px;
+  }
+
+  .multiplier-note {
+    font-size: 11.5px; color: var(--text-muted);
+    margin-top: 8px;
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .multiplier-note .tag { background: var(--success-soft); color: var(--success); }
+
+  .reward-list .item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-faint);
+  }
+  .reward-list .item:last-child { border-bottom: none; }
+  .reward-list .item__ic {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .reward-list .item__ic--str { background: var(--strength-soft); color: var(--strength);}
+  .reward-list .item__ic--int { background: var(--intel-soft); color: var(--intel);}
+  .reward-list .item__ic--cha { background: var(--charisma-soft); color: var(--charisma);}
+  .reward-list .item__main { flex: 1; min-width: 0; }
+  .reward-list .item__title { font-size: 13.5px; font-weight: 500; color: var(--text-primary); }
+  .reward-list .item__sub { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+  .reward-list .item__rewards {
+    display: flex; gap: 8px; align-items: center;
+    margin-top: 6px;
+    font-size: 11.5px; font-weight: 500;
+    color: var(--text-secondary);
+  }
+  .reward-list .item__rewards .xp { color: var(--accent-text); font-weight: 600; }
+
+  .bg-context { position: fixed; inset: 0; background: var(--bg-app); pointer-events: none; opacity: 0.4; }
+  .theme-fab { left: 16px; right: auto; bottom: 16px; }
+</style>
+</head>
+<body style="overflow: hidden;">
+
+<div class="bg-context"></div>
+<div class="confetti-stage" id="confetti-stage" style="z-index: 50;"></div>
+
+<div class="sheet-back" style="z-index: 60;">
+  <div class="sheet">
+    <div class="sheet__handle"></div>
+    <div class="sheet__head" style="position: relative; padding-top: 32px;">
+      <div style="position:absolute; top: -28px; left: 50%; transform: translateX(-50%); width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #facc15, #fb923c); display:flex; align-items:center; justify-content:center; box-shadow: 0 10px 22px rgba(251, 146, 60, 0.45);">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="#fff"><path d="M3 6l4 4 5-6 5 6 4-4-2 11H5L3 6z"/></svg>
+      </div>
+      <div>
+        <span class="eyebrow eyebrow--accent">MISSION COMPLETE</span>
+        <div style="font-family:'Inter Tight'; font-weight:800; font-size:18px; letter-spacing:-0.025em; text-transform:uppercase; margin-top:4px;">
+          You earned this.
+          <svg class="sparkle sparkle--amber sparkle--sm" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: -2px; margin-left: 2px;">
+            <path d="M12 2 L13.5 9 L21 10 L13.5 11.5 L12 18.5 L10.5 11.5 L3 10 L10.5 9 Z"/>
+          </svg>
+        </div>
+        <div class="muted" style="font-size: 12px; margin-top: 2px;">3 activities · claim your spoils</div>
+      </div>
+      <button class="icon-btn" aria-label="Close">
+        <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="sheet__body">
+      <div class="summary">
+        <div class="summary__cell">
+          <div class="lbl">Total XP</div>
+          <div class="val">+85</div>
+          <span class="delta">Reaches Level 12</span>
+        </div>
+        <div class="summary__cell">
+          <div class="lbl">Total shards</div>
+          <div class="val">+18.40 <span style="font-size:13px; color: var(--text-muted); font-weight:500;">◆</span></div>
+          <span class="delta">×1.4 streak</span>
+        </div>
+      </div>
+      <div class="multiplier-note">
+        <span class="tag">Strength streak ×1.4</span>
+        Base 13.20 → final 18.40
+      </div>
+
+      <div class="reward-list">
+        <div class="item">
+          <span class="item__ic item__ic--str">
+            <svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 4v16M18 4v16M3 8h6M3 16h6M15 8h6M15 16h6"/></svg>
+          </span>
+          <div class="item__main">
+            <div class="item__title">Morning run · 3.2 km</div>
+            <div class="item__sub">Strength · matched task "Morning run"</div>
+            <div class="item__rewards">
+              <span class="xp">+25 XP</span>
+              <span>+8.40 ◆</span>
+              <button class="btn btn--ghost btn--sm" style="margin-left: auto; height: 24px; padding: 0 8px; font-size: 11.5px;">Claim</button>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <span class="item__ic item__ic--int">
+            <svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14M4 19l4-2 4 2 4-2 4 2"/></svg>
+          </span>
+          <div class="item__main">
+            <div class="item__title">Read 35 min "Atomic Habits"</div>
+            <div class="item__sub">Intelligence · matched task "Read 30 min"</div>
+            <div class="item__rewards">
+              <span class="xp">+30 XP</span>
+              <span>+6.00 ◆</span>
+              <button class="btn btn--ghost btn--sm" style="margin-left: auto; height: 24px; padding: 0 8px; font-size: 11.5px;">Claim</button>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <span class="item__ic item__ic--cha">
+            <svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM3 21a9 9 0 0 1 18 0"/></svg>
+          </span>
+          <div class="item__main">
+            <div class="item__title">Called mom for 20 min</div>
+            <div class="item__sub">Charisma · matched task "Call mom"</div>
+            <div class="item__rewards">
+              <span class="xp">+30 XP</span>
+              <span>+4.00 ◆</span>
+              <button class="btn btn--ghost btn--sm" style="margin-left: auto; height: 24px; padding: 0 8px; font-size: 11.5px;">Claim</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet__foot">
+      <a class="btn btn--ghost" href="05-dashboard-overview-mobile.html">Later</a>
+      <button class="btn btn--accent">Claim all rewards</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function fireConfetti() {
+    const stage = document.getElementById('confetti-stage');
+    if (stage && window.gamifaiConfetti) window.gamifaiConfetti(stage, { count: 60 });
+  }
+  if (document.readyState === 'complete') fireConfetti();
+  else window.addEventListener('load', fireConfetti);
+  setInterval(fireConfetti, 6000);
+</script>
+
+</body>
+</html>

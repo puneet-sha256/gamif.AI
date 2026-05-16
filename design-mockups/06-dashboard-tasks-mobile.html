@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gamif.AI · Tasks (mobile)</title>
+<link rel="stylesheet" href="theme.css">
+<script src="app.js" defer></script>
+<style>
+  .head { padding: 16px 0 8px; }
+  .head h1 { font-size: 22px; }
+  .head p { font-size: 13.5px; color: var(--text-muted); margin-top: 2px;}
+
+  .filter-scroll {
+    display: flex; gap: 6px;
+    overflow-x: auto;
+    padding: 8px 16px 12px;
+    margin: 0 -16px;
+    scrollbar-width: none;
+  }
+  .filter-scroll::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: var(--r-pill);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .chip--on { background: var(--text-primary); color: var(--bg-surface); border-color: transparent; }
+  .chip .count { color: var(--text-faint); font-weight: 500; font-size: 12px; }
+  .chip--on .count { color: rgba(255,255,255,0.7); }
+
+  .ai-banner {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px;
+    border-radius: var(--r-md);
+    background: var(--accent-soft);
+    margin-bottom: 12px;
+  }
+  .ai-banner__ic {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-faint);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    flex: 0 0 auto;
+  }
+  .ai-banner h4 { font-size: 13.5px; font-weight: 600; }
+  .ai-banner p { font-size: 12.5px; color: var(--text-secondary); }
+
+  .group { margin-bottom: 16px; }
+  .group__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 4px;
+  }
+  .group__title {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 600; font-size: 14.5px;
+  }
+  .group__title .count { font-size: 11.5px; color: var(--text-muted); background: var(--bg-muted); padding: 2px 7px; border-radius: var(--r-pill); font-weight: 500; }
+
+  /* mobile task row */
+  .m-task {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-faint);
+  }
+  .m-task:last-child { border-bottom: none; }
+  .m-task__check {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    flex: 0 0 auto;
+    margin-top: 2px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .m-task__check--done {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .m-task__check--done svg { width: 12px; height: 12px; stroke-width: 2.5; }
+  .m-task__body { flex: 1; min-width: 0; }
+  .m-task__title { font-size: 14px; font-weight: 500; line-height: 1.3; }
+  .m-task__title.done { color: var(--text-muted); text-decoration: line-through; }
+  .m-task__desc {
+    font-size: 12.5px; color: var(--text-muted);
+    margin-top: 2px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .m-task__meta {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 6px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+  .m-task__meta .duration {
+    background: var(--bg-muted);
+    padding: 2px 7px;
+    border-radius: var(--r-pill);
+  }
+  .m-task__meta .reward-xp { color: var(--accent-text); font-weight: 600; }
+  .m-task__meta .reward-shards { color: var(--text-secondary); font-weight: 500; }
+  .m-task__meta .custom {
+    color: var(--accent-text); background: var(--accent-soft);
+    padding: 2px 7px; border-radius: var(--r-pill);
+    font-weight: 600; font-size: 10.5px; letter-spacing: 0.02em; text-transform: uppercase;
+  }
+
+  /* FAB add */
+  .fab-add {
+    position: fixed;
+    bottom: calc(82px + env(safe-area-inset-bottom));
+    right: 16px;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+    display: inline-flex; align-items: center; justify-content: center;
+    z-index: 30;
+  }
+  .fab-add svg { width: 22px; height: 22px; stroke-width: 2; }
+
+  /* Move theme fab up so it doesn't overlap the FAB */
+  .theme-fab { left: 16px; right: auto; }
+  @media (max-width: 600px) {
+    .theme-fab { left: 16px; right: auto; }
+  }
+
+  .bell-mini { position: relative; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; color: var(--text-secondary);}
+  .bell-mini .badge { position: absolute; top: 4px; right: 4px; background: var(--accent); color: #fff; font-size: 9px; font-weight: 700; border-radius: var(--r-pill); padding: 0 4px; min-width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #c084fc, #818cf8); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;}
+</style>
+</head>
+<body class="mobile-page">
+
+<header class="appbar appbar--mobile">
+  <div class="brand"><div class="brand__mark">G</div><span class="brand__name">Gamif.AI</span></div>
+  <div class="appbar__right">
+    <button class="bell-mini" aria-label="Rewards"><svg class="ic" viewBox="0 0 24 24"><path d="M20 5l-9 4M20 5v6l-9 4M20 5H4l3 6-3 6 7-3"/></svg><span class="badge">3</span></button>
+    <span class="avatar">PS</span>
+  </div>
+</header>
+
+<main class="mobile-shell">
+  <section class="head">
+    <span class="eyebrow eyebrow--accent">DAY 47 · MISSION BOARD</span>
+    <h1 style="text-transform: uppercase; letter-spacing: -0.025em; margin-top: 4px;">Today's missions</h1>
+    <p>5 of 12 done · <span style="color: var(--accent); font-weight: 600;">+240 XP</span></p>
+  </section>
+
+  <!-- AI banner -->
+  <div class="ai-banner" style="position: relative; overflow: hidden;">
+    <span class="sparkle sparkle--violet sparkle--sm" style="position: absolute; top: 8px; right: 60px;">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 9 L21 10 L13.5 11.5 L12 18.5 L10.5 11.5 L3 10 L10.5 9 Z"/></svg>
+    </span>
+    <span class="sparkle sparkle--amber sparkle--sm sparkle--delay" style="position: absolute; bottom: 10px; right: 80px;">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 9 L21 10 L13.5 11.5 L12 18.5 L10.5 11.5 L3 10 L10.5 9 Z"/></svg>
+    </span>
+
+    <div class="ai-banner__ic">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"/></svg>
+    </div>
+    <div style="flex:1; min-width:0; position: relative; z-index: 1;">
+      <h4>Tell us about your day</h4>
+      <p>AI will turn it into XP & shards.</p>
+    </div>
+    <button class="btn btn--accent btn--sm" style="position: relative; z-index: 1;">Log</button>
+  </div>
+
+  <!-- Filter chips -->
+  <div class="filter-scroll">
+    <button class="chip chip--on">All <span class="count">12</span></button>
+    <button class="chip"><span class="dot" style="color:var(--strength); width:7px; height:7px; border-radius:50%; background: currentColor; display:inline-block;"></span> Strength <span class="count">4</span></button>
+    <button class="chip"><span class="dot" style="color:var(--intel); width:7px; height:7px; border-radius:50%; background: currentColor; display:inline-block;"></span> Intelligence <span class="count">5</span></button>
+    <button class="chip"><span class="dot" style="color:var(--charisma); width:7px; height:7px; border-radius:50%; background: currentColor; display:inline-block;"></span> Charisma <span class="count">3</span></button>
+  </div>
+
+  <!-- Strength group -->
+  <div class="group">
+    <div class="group__head">
+      <div class="group__title">
+        <span class="dot" style="color:var(--strength); width:9px; height:9px; border-radius:50%; background: currentColor; display:inline-block;"></span>
+        Strength <span class="count">4</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="m-task">
+        <span class="m-task__check"></span>
+        <div class="m-task__body">
+          <div class="m-task__title">Morning run · 3 km easy pace</div>
+          <div class="m-task__desc">Aim for zone 2. Strap on the watch and don't check the clock.</div>
+          <div class="m-task__meta">
+            <span class="duration">25 min</span>
+            <span class="reward-xp">+25 XP</span>
+            <span class="reward-shards">+5.00 ◆</span>
+            <span class="custom">Custom</span>
+          </div>
+        </div>
+      </div>
+      <div class="m-task">
+        <span class="m-task__check m-task__check--done">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M5 12l5 5 9-9"/></svg>
+        </span>
+        <div class="m-task__body">
+          <div class="m-task__title done">Push-ups · 3 sets to failure</div>
+          <div class="m-task__desc">Form over reps. Stop when you can't keep elbows tight.</div>
+          <div class="m-task__meta">
+            <span class="duration">15 min</span>
+            <span class="reward-xp">+15 XP</span>
+            <span class="reward-shards">+3.00 ◆</span>
+          </div>
+        </div>
+      </div>
+      <div class="m-task">
+        <span class="m-task__check"></span>
+        <div class="m-task__body">
+          <div class="m-task__title">Stretch &amp; mobility</div>
+          <div class="m-task__desc">10-min hip openers and shoulder rotations after the run.</div>
+          <div class="m-task__meta">
+            <span class="duration">10 min</span>
+            <span class="reward-xp">+10 XP</span>
+            <span class="reward-shards">+2.00 ◆</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Intelligence group -->
+  <div class="group">
+    <div class="group__head">
+      <div class="group__title">
+        <span class="dot" style="color:var(--intel); width:9px; height:9px; border-radius:50%; background: currentColor; display:inline-block;"></span>
+        Intelligence <span class="count">5</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="m-task">
+        <span class="m-task__check"></span>
+        <div class="m-task__body">
+          <div class="m-task__title">Spanish · Duolingo + journaling</div>
+          <div class="m-task__desc">15 min app + write 5 sentences about yesterday in Spanish.</div>
+          <div class="m-task__meta">
+            <span class="duration">30 min</span>
+            <span class="reward-xp">+30 XP</span>
+            <span class="reward-shards">+6.00 ◆</span>
+          </div>
+        </div>
+      </div>
+      <div class="m-task">
+        <span class="m-task__check m-task__check--done">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M5 12l5 5 9-9"/></svg>
+        </span>
+        <div class="m-task__body">
+          <div class="m-task__title done">Read · 30 minutes of "Atomic Habits"</div>
+          <div class="m-task__desc">Highlight the bits you'd want to revisit.</div>
+          <div class="m-task__meta">
+            <span class="duration">30 min</span>
+            <span class="reward-xp">+25 XP</span>
+            <span class="reward-shards">+5.00 ◆</span>
+          </div>
+        </div>
+      </div>
+      <div class="m-task">
+        <span class="m-task__check"></span>
+        <div class="m-task__body">
+          <div class="m-task__title">Side project · land the auth route refactor</div>
+          <div class="m-task__desc">PR ready by EOD. Tests green.</div>
+          <div class="m-task__meta">
+            <span class="duration">90 min</span>
+            <span class="reward-xp">+60 XP</span>
+            <span class="reward-shards">+12.00 ◆</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charisma group -->
+  <div class="group">
+    <div class="group__head">
+      <div class="group__title">
+        <span class="dot" style="color:var(--charisma); width:9px; height:9px; border-radius:50%; background: currentColor; display:inline-block;"></span>
+        Charisma <span class="count">3</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="m-task">
+        <span class="m-task__check"></span>
+        <div class="m-task__body">
+          <div class="m-task__title">Call mom</div>
+          <div class="m-task__desc">It's been a week. Just check in.</div>
+          <div class="m-task__meta">
+            <span class="duration">15 min</span>
+            <span class="reward-xp">+20 XP</span>
+            <span class="reward-shards">+4.00 ◆</span>
+          </div>
+        </div>
+      </div>
+      <div class="m-task">
+        <span class="m-task__check"></span>
+        <div class="m-task__body">
+          <div class="m-task__title">Reach out to one old colleague</div>
+          <div class="m-task__desc">Send a thoughtful message — no pitch.</div>
+          <div class="m-task__meta">
+            <span class="duration">10 min</span>
+            <span class="reward-xp">+15 XP</span>
+            <span class="reward-shards">+3.00 ◆</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 16px;"></div>
+</main>
+
+<!-- FAB add task -->
+<a class="fab-add" href="09-modal-task-mobile.html" aria-label="Add task">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</a>
+
+<!-- Bottom nav -->
+<nav class="bottomnav">
+  <a class="bottomnav__btn" href="05-dashboard-overview-mobile.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>Overview</a>
+  <a class="bottomnav__btn bottomnav__btn--active" href="06-dashboard-tasks-mobile.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Tasks</a>
+  <a class="bottomnav__btn" href="07-dashboard-inventory-mobile.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l-2 12H5z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>Loadout</a>
+  <a class="bottomnav__btn" href="08-dashboard-shop-mobile.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l3 12h12l2-8H6"/></svg>Vault</a>
+</nav>
+
+</body>
+</html>

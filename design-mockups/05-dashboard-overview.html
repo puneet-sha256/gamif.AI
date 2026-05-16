@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Gamif.AI · Overview</title>
+<link rel="stylesheet" href="theme.css">
+<script src="app.js" defer></script>
+<style>
+  /* Hero — mesh gradient celebration card */
+  .hero {
+    margin: 24px 0 8px;
+  }
+  .hero__greeting {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .hero h1 {
+    font-size: 30px;
+    margin-bottom: 4px;
+    line-height: 1.15;
+  }
+  .hero h1 .accent {
+    background: linear-gradient(120deg, #4f46e5, #a78bfa, #22d3ee);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .hero p {
+    color: var(--text-secondary);
+    font-size: 14.5px;
+    max-width: 560px;
+  }
+  .hero__row {
+    display: flex; align-items: center; gap: 24px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+  .hero__cta {
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+
+  /* Inline mini-progress chip */
+  .progress-chip {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 8px 14px 8px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(15, 15, 20, 0.06);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  [data-theme="dark"] .progress-chip {
+    background: rgba(22, 22, 24, 0.65);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  .progress-chip__lvl {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.35);
+  }
+
+  /* Level card */
+  .level-card .row { gap: 16px; }
+  .level-badge {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    flex: 0 0 auto;
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.25);
+  }
+  .level-badge .lv { font-size: 9px; font-weight: 600; opacity: 0.85; letter-spacing: 0.08em; line-height: 1; margin-bottom: 2px; }
+  .level-badge .num { line-height: 1; font-size: 20px; }
+
+  .ring-wrap {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .ring-svg { width: 160px; height: 160px; flex: 0 0 auto; }
+  .ring-center {
+    position: relative;
+  }
+  .ring-center__inner {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  .ring-center__inner .num {
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 700; font-size: 26px; letter-spacing: -0.02em;
+  }
+  .ring-center__inner .lbl { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  .legend {
+    display: flex; flex-direction: column; gap: 10px; flex: 1;
+  }
+  .legend-row {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-faint);
+  }
+  .legend-row:last-child { border-bottom: none; }
+  .legend-row .left { display: flex; align-items: center; gap: 10px; color: var(--text-secondary); font-weight: 500;}
+  .legend-row .right { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .legend-row .right strong { color: var(--text-primary); font-weight: 600; }
+
+  /* Streak cards row */
+  .streak-card {
+    padding: 16px 18px;
+  }
+  .streak-card h4 {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .streak-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+  }
+  .streak-num {
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .streak-num .unit { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-left: 3px; }
+  .streak-mult {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--success);
+    background: var(--success-soft);
+    padding: 3px 8px;
+    border-radius: var(--r-pill);
+  }
+
+  /* Heatmap */
+  .heatmap-box .heatmap { gap: 4px; }
+  .heatmap-box .heatmap__cell { width: 13px; height: 13px; border-radius: 3px; }
+  .heatmap-legend {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11.5px; color: var(--text-muted);
+  }
+  .heatmap-legend .heatmap__cell { width: 10px; height: 10px; }
+
+  /* Quick actions */
+  .quick-action {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+  }
+  .quick-action:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+  .quick-action__ic {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .quick-action__title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+  .quick-action__sub { font-size: 12.5px; color: var(--text-muted); }
+
+  /* Reward bell */
+  .bell-btn {
+    position: relative;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: var(--r-md);
+    background: var(--bg-muted);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .bell-btn:hover { background: var(--border-faint); }
+  .bell-btn .badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: var(--r-pill);
+    min-width: 18px;
+    text-align: center;
+  }
+
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c084fc, #818cf8);
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body class="page">
+
+<!-- App bar -->
+<header class="appbar">
+  <div class="brand">
+    <div class="brand__mark">G</div>
+    <span class="brand__name">Gamif.AI</span>
+  </div>
+  <div class="appbar__right">
+    <button class="bell-btn">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M20 5l-9 4M20 5v6l-9 4M20 5H4l3 6-3 6 7-3"/></svg>
+      Unclaimed rewards
+      <span class="badge">3</span>
+    </button>
+    <span class="avatar" title="Profile">PS</span>
+  </div>
+</header>
+
+<!-- Sub navigation -->
+<nav class="subnav">
+  <button class="subnav__btn subnav__btn--active">
+    <svg class="ic" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+    Overview
+  </button>
+  <button class="subnav__btn">
+    <svg class="ic" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    Tasks
+  </button>
+  <button class="subnav__btn">
+    <svg class="ic" viewBox="0 0 24 24"><path d="M3 7h18l-2 12H5z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>
+    Inventory
+  </button>
+  <button class="subnav__btn">
+    <svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l3 12h12l2-8H6"/></svg>
+    Shop
+  </button>
+</nav>
+
+<main class="shell">
+  <!-- FIERCE HERO -->
+  <section class="hero">
+    <div class="fierce-hero brackets">
+      <span class="br-corner-bl"></span>
+      <span class="br-corner-br"></span>
+
+      <!-- HUD chrome + ambient -->
+      <div class="hud-grid"></div>
+      <div class="scanlines"></div>
+      <div class="fierce-hero__sheen"></div>
+      <div class="fierce-hero__decor">
+        <span class="glow-orb glow-orb--rose" style="width: 320px; height: 320px; top: -60px; left: -40px; opacity: 0.55;"></span>
+        <span class="glow-orb glow-orb--amber" style="width: 280px; height: 280px; bottom: -80px; right: -30px; opacity: 0.5; animation-delay: 4s;"></span>
+        <svg class="reticle" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" style="position: absolute; top: 22px; right: 26px; width: 30px; height: 30px;">
+          <circle cx="16" cy="16" r="13"/><circle cx="16" cy="16" r="6"/>
+          <path d="M16 1v6M16 25v6M1 16h6M25 16h6"/>
+        </svg>
+      </div>
+
+      <div style="position: relative; z-index: 2;">
+        <div class="row row--between" style="margin-bottom: 14px;">
+          <span class="tier-badge"><span class="tier-badge__hex">A</span> Tier — Ardent</span>
+          <span class="eyebrow" style="color: rgba(248,248,248,0.55);">SUN · MAY 3 · 10:24</span>
+        </div>
+
+        <!-- Heart-rate waveform -->
+        <svg class="waveform" viewBox="0 0 600 36" preserveAspectRatio="none" style="margin-bottom: 6px;">
+          <path d="M0 18 L80 18 L96 18 L104 6 L116 30 L128 18 L210 18 L226 18 L236 4 L246 32 L258 18 L380 18 L392 18 L404 9 L414 27 L424 18 L600 18"/>
+        </svg>
+
+        <p class="eyebrow">DAY 47 OF THE GRIND</p>
+        <h1 class="fierce-hero__title">
+          GOOD MORNING, PUNEET.<br/>
+          <span class="ember">NOW EARN IT.</span>
+        </h1>
+        <p class="fierce-hero__sub">
+          <strong style="color:#fff;">320 XP</strong> from your next level. A solid run and a 30-min reading session would do it. <strong class="ember-pulse" style="color:#fff;">No off days.</strong>
+        </p>
+
+        <div class="row gap-4 mt-4" style="flex-wrap: wrap; align-items: flex-end;">
+          <div style="min-width: 220px;">
+            <div class="eyebrow" style="color: rgba(248,248,248,0.55); margin-bottom: 8px;">PROGRESS TO LEVEL 13</div>
+            <div class="row gap-3" style="align-items: center;">
+              <span class="font-display" style="font-size: 28px; color: #fff; font-variant-numeric: tabular-nums;">68<span style="font-size:18px; color: rgba(248,248,248,0.55);">%</span></span>
+              <div style="flex: 1; min-width: 160px;">
+                <div class="hud-bar"><div class="hud-bar__fill" style="width: 68%;"></div></div>
+                <div style="font-size: 11px; color: rgba(248,248,248,0.55); margin-top: 4px; font-variant-numeric: tabular-nums;">680 / 1,000 XP</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn btn--ghost" style="background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.14);">
+              <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v6h-6"/></svg>
+              Regenerate plan
+            </button>
+            <button class="btn btn--fierce">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>
+              Start the grind
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Top stats row -->
+  <section class="grid grid--3 mt-4">
+    <!-- Today -->
+    <div class="card tilt">
+      <div class="card__body">
+        <div class="stat">
+          <span class="stat__label">Today</span>
+          <span class="stat__value">5<span class="unit">/ 12 quests</span></span>
+        </div>
+        <div class="row mt-2" style="gap: 6px; align-items: center;">
+          <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px;color:var(--accent)"><path d="M3 12l5 5 13-13"/></svg>
+          <span style="color: var(--accent-text); font-weight: 600; font-size: 12.5px;">+85 XP</span>
+          <span class="muted" style="font-size: 12.5px;">earned so far</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total XP with shimmer -->
+    <div class="card tilt">
+      <div class="card__body">
+        <div class="stat">
+          <span class="stat__label">Total experience</span>
+          <span class="stat__value stat-shine">7,420<span class="unit">XP</span></span>
+        </div>
+        <div class="row mt-2 muted" style="font-size:12.5px; gap: 6px;">
+          <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px;color:var(--success)"><path d="M7 14l5-5 5 5"/></svg>
+          <span style="color:var(--success); font-weight:600;">+240</span>
+          <span>this week</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shards balance with animated icon -->
+    <div class="card tilt">
+      <div class="card__body">
+        <div class="stat">
+          <span class="stat__label">Shards balance</span>
+          <span class="stat__value" style="display:inline-flex; align-items:center; gap:8px;">
+            <svg class="shard-spin shard-glow" width="22" height="22" viewBox="0 0 24 24" style="display:inline-block;">
+              <path d="M12 2 L20 12 L12 22 L4 12 Z" fill="url(#shard-grad)"/>
+            </svg>
+            428.50
+          </span>
+        </div>
+        <div class="row mt-2" style="gap: 8px;">
+          <a href="08-dashboard-shop.html" style="font-size:12.5px; font-weight:500; color: var(--accent);">Spend in shop →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mid section: Distribution + Streaks -->
+  <section class="grid grid--12 mt-4" style="grid-template-columns: 1.4fr 1fr;">
+    <!-- Experience distribution -->
+    <div class="card">
+      <div class="card__header">
+        <span class="card__title">Experience distribution</span>
+        <span class="muted" style="font-size: 12.5px;">All time</span>
+      </div>
+      <div class="card__body">
+        <div class="ring-wrap">
+          <div class="ring-center">
+            <svg class="ring-svg ring-anim" viewBox="0 0 160 160">
+              <defs>
+                <linearGradient id="ring-strength" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#fb923c"/><stop offset="100%" stop-color="#d97757"/>
+                </linearGradient>
+                <linearGradient id="ring-intel" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#0e7490"/>
+                </linearGradient>
+                <linearGradient id="ring-charisma" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#7c3aed"/>
+                </linearGradient>
+                <filter id="ring-glow"><feGaussianBlur stdDeviation="1.4"/></filter>
+              </defs>
+              <circle cx="80" cy="80" r="62" fill="none" stroke="var(--bg-muted)" stroke-width="14"/>
+              <!-- Strength: 38% (148 of 389) -->
+              <circle class="ring-track-anim" style="--ring-len: 389; --ring-end: 241;"
+                cx="80" cy="80" r="62" fill="none" stroke="url(#ring-strength)" stroke-width="14"
+                stroke-dasharray="148 389" stroke-dashoffset="0" transform="rotate(-90 80 80)" stroke-linecap="round"/>
+              <!-- Intelligence: 42% (163 of 389), offset 148 -->
+              <circle class="ring-track-anim" style="--ring-len: 389; --ring-end: 226; animation-delay: 0.18s;"
+                cx="80" cy="80" r="62" fill="none" stroke="url(#ring-intel)" stroke-width="14"
+                stroke-dasharray="163 389" stroke-dashoffset="-148" transform="rotate(-90 80 80)" stroke-linecap="round"/>
+              <!-- Charisma: 20% (78 of 389), offset 311 -->
+              <circle class="ring-track-anim" style="--ring-len: 389; --ring-end: 311; animation-delay: 0.36s;"
+                cx="80" cy="80" r="62" fill="none" stroke="url(#ring-charisma)" stroke-width="14"
+                stroke-dasharray="78 389" stroke-dashoffset="-311" transform="rotate(-90 80 80)" stroke-linecap="round"/>
+            </svg>
+            <div class="ring-center__inner">
+              <div class="num">7,420</div>
+              <div class="lbl">Total XP</div>
+            </div>
+          </div>
+
+          <div class="legend">
+            <div class="legend-row">
+              <span class="left"><span class="dot" style="color:var(--strength);"></span> Strength</span>
+              <span class="right"><strong>2,820</strong> · 38%</span>
+            </div>
+            <div class="legend-row">
+              <span class="left"><span class="dot" style="color:var(--intel);"></span> Intelligence</span>
+              <span class="right"><strong>3,116</strong> · 42%</span>
+            </div>
+            <div class="legend-row">
+              <span class="left"><span class="dot" style="color:var(--charisma);"></span> Charisma</span>
+              <span class="right"><strong>1,484</strong> · 20%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Streaks -->
+    <div class="card">
+      <div class="card__header">
+        <span class="card__title">Streaks</span>
+        <span class="muted" style="font-size: 12.5px;">Soft decay</span>
+      </div>
+      <div class="card__body" style="padding:0;">
+        <div class="streak-card" style="border-bottom: 1px solid var(--border-faint);">
+          <h4>
+            <svg class="flame flame--warm" viewBox="0 0 24 28" aria-hidden="true">
+              <path class="fl-body" d="M12 1 C13 6 18 8 18 14 a6 6 0 0 1 -12 0 C6 11 8 9 9 7 c1 2 2 3 3 3 c0 -3 -1 -6 0 -9z"/>
+              <path d="M12 14 c1 2 3 3 3 6 a3 3 0 0 1 -6 0 c0 -1 1 -2 2 -3 c0 1 1 1 1 1 c0 -1 0 -3 0 -4z" fill="rgba(255,255,255,0.5)"/>
+            </svg>
+            Strength
+          </h4>
+          <div class="streak-row">
+            <div class="streak-num">12<span class="unit">days</span></div>
+            <span class="streak-mult">×1.4 multiplier</span>
+          </div>
+        </div>
+        <div class="streak-card" style="border-bottom: 1px solid var(--border-faint);">
+          <h4>
+            <svg class="flame flame--cool" viewBox="0 0 24 28" aria-hidden="true">
+              <path class="fl-body" d="M12 1 C13 6 18 8 18 14 a6 6 0 0 1 -12 0 C6 11 8 9 9 7 c1 2 2 3 3 3 c0 -3 -1 -6 0 -9z"/>
+              <path d="M12 14 c1 2 3 3 3 6 a3 3 0 0 1 -6 0 c0 -1 1 -2 2 -3 c0 1 1 1 1 1 c0 -1 0 -3 0 -4z" fill="rgba(255,255,255,0.5)"/>
+            </svg>
+            Intelligence
+          </h4>
+          <div class="streak-row">
+            <div class="streak-num">7<span class="unit">days</span></div>
+            <span class="streak-mult">×1.2</span>
+          </div>
+        </div>
+        <div class="streak-card">
+          <h4>
+            <svg class="flame flame--violet" viewBox="0 0 24 28" aria-hidden="true">
+              <path class="fl-body" d="M12 1 C13 6 18 8 18 14 a6 6 0 0 1 -12 0 C6 11 8 9 9 7 c1 2 2 3 3 3 c0 -3 -1 -6 0 -9z"/>
+              <path d="M12 14 c1 2 3 3 3 6 a3 3 0 0 1 -6 0 c0 -1 1 -2 2 -3 c0 1 1 1 1 1 c0 -1 0 -3 0 -4z" fill="rgba(255,255,255,0.5)"/>
+            </svg>
+            Charisma
+          </h4>
+          <div class="streak-row">
+            <div class="streak-num">2<span class="unit">days</span></div>
+            <span class="streak-mult" style="background:var(--bg-muted); color:var(--text-muted);">×1.0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Activity heatmap -->
+  <section class="card mt-4">
+    <div class="card__header">
+      <div>
+        <span class="card__title">Activity</span>
+        <div class="muted" style="font-size:12.5px; margin-top:2px;">Last 16 weeks · click a day to review</div>
+      </div>
+      <div class="heatmap-legend">
+        Less
+        <span class="heatmap__cell"></span>
+        <span class="heatmap__cell heatmap__cell--l1"></span>
+        <span class="heatmap__cell heatmap__cell--l2"></span>
+        <span class="heatmap__cell heatmap__cell--l3"></span>
+        <span class="heatmap__cell heatmap__cell--l4"></span>
+        More
+      </div>
+    </div>
+    <div class="card__body heatmap-box">
+      <div class="heatmap" id="heatmap"></div>
+    </div>
+  </section>
+
+  <!-- Quick actions -->
+  <section class="grid grid--3 mt-4 mb-4">
+    <button class="quick-action">
+      <span class="quick-action__ic">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"/></svg>
+      </span>
+      <span>
+        <div class="quick-action__title">Log today's activity</div>
+        <div class="quick-action__sub">Type what you did. AI scores it.</div>
+      </span>
+    </button>
+    <button class="quick-action">
+      <span class="quick-action__ic" style="background: var(--success-soft); color: var(--success);">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </span>
+      <span>
+        <div class="quick-action__title">Open today's tasks</div>
+        <div class="quick-action__sub">5 left to complete</div>
+      </span>
+    </button>
+    <button class="quick-action">
+      <span class="quick-action__ic" style="background: var(--strength-soft); color: var(--strength);">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 1v22M1 12h22"/></svg>
+      </span>
+      <span>
+        <div class="quick-action__title">Update goals</div>
+        <div class="quick-action__sub">Refine direction or pace</div>
+      </span>
+    </button>
+  </section>
+
+</main>
+
+<script>
+// Generate a mock activity heatmap (16 cols, 7 rows)
+(function(){
+  const root = document.getElementById('heatmap');
+  if (!root) return;
+  const levels = ['', 'heatmap__cell--l1','heatmap__cell--l2','heatmap__cell--l3','heatmap__cell--l4'];
+  const seed = [3,1,2,0,4,3,1,0,2,1,3,4,2,1,0,3,
+                2,3,1,0,2,4,3,2,1,2,3,4,3,1,0,1,
+                0,2,3,1,2,3,4,1,0,1,2,3,4,2,1,0,
+                1,0,2,3,4,2,1,3,2,1,0,3,4,2,1,0,
+                2,3,4,1,0,2,3,1,4,2,3,2,1,3,2,4,
+                0,1,2,3,1,4,2,1,0,3,4,2,1,3,2,1,
+                3,4,2,1,2,3,1,0,2,4,3,2,1,3,2,4];
+  let i = 0;
+  for (let c = 0; c < 16; c++){
+    const col = document.createElement('div');
+    col.className = 'heatmap__col';
+    for (let r = 0; r < 7; r++){
+      const cell = document.createElement('div');
+      cell.className = 'heatmap__cell ' + (levels[seed[i++ % seed.length]] || '');
+      col.appendChild(cell);
+    }
+    root.appendChild(col);
+  }
+})();
+</script>
+
+</body>
+</html>

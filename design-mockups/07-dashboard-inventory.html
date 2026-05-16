@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Gamif.AI · Loadout</title>
+<link rel="stylesheet" href="theme.css">
+<script src="app.js" defer></script>
+<style>
+  /* ── PAGE HEAD ── */
+  .page-head {
+    padding: 28px 0 8px;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .page-head h1 { font-size: 32px; text-transform: uppercase; letter-spacing: -0.025em; margin-top: 4px; }
+  .page-head p { color: var(--text-muted); font-size: 14px; margin-top: 4px; max-width: 520px; }
+
+  /* ── FILTER ROW ── */
+  .filter-row {
+    display: flex; gap: 6px;
+    padding: 12px 0 8px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    height: 32px; padding: 0 14px;
+    border-radius: var(--r-sm);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: border-color 120ms ease, color 120ms ease;
+  }
+  .chip:hover { border-color: var(--border-strong); color: var(--text-primary); }
+  .chip--on {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border-color: rgba(255, 48, 48, 0.32);
+  }
+  .chip .count { font-size: 11px; color: var(--text-faint); font-weight: 500; letter-spacing: 0; }
+  .chip--on .count { color: var(--accent-text); }
+
+  /* ── STAT STRIP ── */
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 18px 0 28px;
+  }
+  @media (max-width: 760px) { .stat-strip { grid-template-columns: 1fr; } }
+  .stat-cell {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-cell::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+  }
+  .stat-cell--cyan::before  { background: var(--electric); }
+  .stat-cell--gold::before  { background: var(--gold); }
+  .stat-cell .lbl {
+    font-size: 10.5px; font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .stat-cell .val {
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-cell .sub {
+    font-size: 12px; color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* ── SECTION HEAD ── */
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 0 12px;
+  }
+  .section-head__left {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-head__title {
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+  .section-head__count {
+    font-size: 11px; font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    letter-spacing: 0.04em;
+  }
+  .section-head__sub {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── LOADOUT GRID & CARD ── */
+  .loadout-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 1100px) { .loadout-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 760px)  { .loadout-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .loadout-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    position: relative;
+    display: flex; flex-direction: column;
+    transition: border-color 120ms ease, transform 120ms ease;
+  }
+  .loadout-card:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+  }
+
+  .loadout-card__art {
+    aspect-ratio: 4 / 3;
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: #0d0e12;
+  }
+  /* Category backlights — radial glow behind icon */
+  .loadout-card__art::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, var(--art-glow, rgba(255,48,48,0.32)), transparent 70%);
+    opacity: 0.9;
+  }
+  .loadout-card__art::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 16px 16px;
+    mask-image: radial-gradient(70% 70% at 50% 50%, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(70% 70% at 50% 50%, black 30%, transparent 80%);
+  }
+  .loadout-card__art svg, .loadout-card__art .emoji {
+    position: relative;
+    z-index: 1;
+    width: 44px; height: 44px;
+    color: var(--art-color, #ff7a18);
+    filter: drop-shadow(0 0 12px var(--art-color, #ff7a18));
+  }
+  .loadout-card__art .emoji {
+    font-size: 36px; line-height: 1;
+    width: auto; height: auto;
+    filter: drop-shadow(0 0 14px var(--art-color, #ff7a18));
+  }
+
+  /* Tier indicator — top-right */
+  .loadout-card__tier {
+    position: absolute;
+    top: 10px; right: 10px;
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 6px 2px 3px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--r-sm);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    z-index: 2;
+  }
+  .loadout-card__tier-hex {
+    width: 14px; height: 14px;
+    background: linear-gradient(135deg, var(--tier-from, #ff3030), var(--tier-to, #ff7a18));
+    color: #0a0a0a;
+    font-weight: 900;
+    font-size: 9px;
+    letter-spacing: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+  .loadout-card__tier--s { --tier-from: #facc15; --tier-to: #ff7a18; }
+  .loadout-card__tier--a { --tier-from: #ff3030; --tier-to: #ff7a18; }
+  .loadout-card__tier--b { --tier-from: #06d6f4; --tier-to: #0284c7; }
+  .loadout-card__tier--c { --tier-from: #71717a; --tier-to: #383d4a; }
+
+  /* Active pulse */
+  .loadout-card__active {
+    position: absolute;
+    top: 10px; left: 10px;
+    z-index: 2;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 8px;
+    background: rgba(132, 204, 22, 0.16);
+    border: 1px solid rgba(132, 204, 22, 0.4);
+    border-radius: var(--r-pill);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--success);
+  }
+  .loadout-card__active::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+    animation: pulse-soft 1.4s ease-in-out infinite;
+  }
+
+  .loadout-card__body {
+    padding: 12px 14px 14px;
+    display: flex; flex-direction: column; gap: 4px;
+    flex: 1;
+  }
+  .loadout-card__cat {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cat-color, var(--text-muted));
+  }
+  .loadout-card__title {
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+  .loadout-card__desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.45;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .loadout-card__foot {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 10px;
+    margin-top: 6px;
+    border-top: 1px solid var(--border-faint);
+  }
+  .loadout-card__owned {
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .loadout-card__owned .x {
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-right: 1px;
+    font-size: 11px;
+  }
+
+  .use-btn {
+    height: 26px;
+    padding: 0 10px;
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: var(--r-xs);
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: all 120ms ease;
+  }
+  .use-btn:hover {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(255, 48, 48, 0.18);
+  }
+
+  .equipped-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ── HEADER (re-themed) ── */
+  .bell-btn {
+    position: relative; height: 34px; padding: 0 12px;
+    border-radius: var(--r-md);
+    background: var(--bg-muted);
+    color: var(--text-primary);
+    font-size: 13px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .bell-btn .badge {
+    background: var(--accent); color: #fff;
+    font-size: 11px; font-weight: 600;
+    padding: 1px 7px; border-radius: var(--r-pill);
+    min-width: 18px; text-align: center;
+  }
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #ff5e2e, #ff7a18);
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+</style>
+</head>
+<body class="page">
+
+<header class="appbar">
+  <div class="brand"><div class="brand__mark">G</div><span class="brand__name">Gamif.AI</span></div>
+  <div class="appbar__right">
+    <button class="bell-btn"><svg class="ic" viewBox="0 0 24 24"><path d="M20 5l-9 4M20 5v6l-9 4M20 5H4l3 6-3 6 7-3"/></svg>Unclaimed rewards<span class="badge">3</span></button>
+    <span class="avatar" title="Profile">PS</span>
+  </div>
+</header>
+
+<nav class="subnav">
+  <a href="05-dashboard-overview.html" class="subnav__btn"><svg class="ic" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>Overview</a>
+  <a href="06-dashboard-tasks.html" class="subnav__btn"><svg class="ic" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Tasks</a>
+  <a href="07-dashboard-inventory.html" class="subnav__btn subnav__btn--active"><svg class="ic" viewBox="0 0 24 24"><path d="M3 7h18l-2 12H5z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>Loadout</a>
+  <a href="08-dashboard-shop.html" class="subnav__btn"><svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l3 12h12l2-8H6"/></svg>Vault</a>
+</nav>
+
+<main class="shell">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow eyebrow--accent">ARMORY</span>
+      <h1>Your loadout.</h1>
+      <p>Twelve items earned the hard way. Use them when it counts — none of this came free.</p>
+    </div>
+    <a href="08-dashboard-shop.html" class="btn btn--ghost btn--sm">
+      Open vault
+      <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M9 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-row">
+    <button class="chip chip--on">All <span class="count">12</span></button>
+    <button class="chip">Key <span class="count">2</span></button>
+    <button class="chip">Consumable <span class="count">3</span></button>
+    <button class="chip">Trophy <span class="count">7</span></button>
+  </div>
+
+  <!-- Stat strip -->
+  <section class="stat-strip">
+    <div class="stat-cell">
+      <div class="lbl">TOTAL ITEMS EARNED</div>
+      <div class="val">12</div>
+      <div class="sub">+3 this month</div>
+    </div>
+    <div class="stat-cell stat-cell--gold">
+      <div class="lbl">SHARDS INVESTED</div>
+      <div class="val">1,230</div>
+      <div class="sub">Across 9 purchases</div>
+    </div>
+    <div class="stat-cell stat-cell--cyan">
+      <div class="lbl">MOST PRIZED</div>
+      <div class="val" style="font-size: 16px;">AI Weekly Review</div>
+      <div class="sub">Tier S · permanent</div>
+    </div>
+  </section>
+
+  <!-- KEY ITEMS -->
+  <section>
+    <div class="section-head">
+      <div class="section-head__left">
+        <span class="rule-accent"></span>
+        <span class="section-head__title">Key Items</span>
+        <span class="section-head__count">2</span>
+      </div>
+      <span class="section-head__sub">PERMANENT · CANNOT BE LOST</span>
+    </div>
+
+    <div class="loadout-grid">
+      <!-- AI Weekly Review (Tier S) -->
+      <div class="loadout-card" style="--art-glow: rgba(250, 204, 21, 0.32); --art-color: #facc15; --cat-color: var(--gold);">
+        <div class="loadout-card__art">
+          <span class="loadout-card__tier loadout-card__tier--s">
+            <span class="loadout-card__tier-hex">S</span> Legendary
+          </span>
+          <span class="loadout-card__active">Active</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 12l2 2 4-4"/>
+            <path d="M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9 9 4 9 9z"/>
+          </svg>
+        </div>
+        <div class="loadout-card__body">
+          <span class="loadout-card__cat">KEY ITEM</span>
+          <h4 class="loadout-card__title">AI Weekly Review</h4>
+          <p class="loadout-card__desc">Deep AI breakdown of your week, every Sunday morning. Patterns, lapses, momentum.</p>
+          <div class="loadout-card__foot">
+            <span class="loadout-card__owned"><span class="x">×</span>1</span>
+            <span class="equipped-tag">Equipped</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium theme pack (Tier A) -->
+      <div class="loadout-card" style="--art-glow: rgba(236, 72, 153, 0.30); --art-color: #ec4899; --cat-color: var(--charisma);">
+        <div class="loadout-card__art">
+          <span class="loadout-card__tier loadout-card__tier--a">
+            <span class="loadout-card__tier-hex">A</span> Rare
+          </span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l3 6 6 1-4.5 4 1 6L12 16l-5.5 3 1-6L3 9l6-1z"/>
+          </svg>
+        </div>
+        <div class="loadout-card__body">
+          <span class="loadout-card__cat">KEY ITEM</span>
+          <h4 class="loadout-card__title">Premium Theme Pack</h4>
+          <p class="loadout-card__desc">Four monochrome theme variants. Switch any time — no penalty.</p>
+          <div class="loadout-card__foot">
+            <span class="loadout-card__owned"><span class="x">×</span>1</span>
+            <span class="equipped-tag">Owned</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONSUMABLES -->
+  <section>
+    <div class="section-head">
+      <div class="section-head__left">
+        <span class="rule-accent"></span>
+        <span class="section-head__title">Consumables</span>
+        <span class="section-head__count">3</span>
+      </div>
+      <span class="section-head__sub">SINGLE-USE · STRATEGIC</span>
+    </div>
+
+    <div class="loadout-grid">
+      <div class="loadout-card" style="--art-glow: rgba(255, 122, 24, 0.36); --art-color: #ff7a18; --cat-color: var(--accent-2);">
+        <div class="loadout-card__art">
+          <span class="loadout-card__tier loadout-card__tier--a">
+            <span class="loadout-card__tier-hex">A</span> Rare
+          </span>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>
+        </div>
+        <div class="loadout-card__body">
+          <span class="loadout-card__cat">BOOST</span>
+          <h4 class="loadout-card__title">2× XP — 24 Hours</h4>
+          <p class="loadout-card__desc">Doubles XP from every task today. Use it on a heavy day — make it count.</p>
+          <div class="loadout-card__foot">
+            <span class="loadout-card__owned"><span class="x">×</span>3</span>
+            <button class="use-btn">Deploy →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="loadout-card" style="--art-glow: rgba(132, 204, 22, 0.30); --art-color: #84cc16; --cat-color: var(--success);">
+        <div class="loadout-card__art">
+          <span class="loadout-card__tier loadout-card__tier--b">
+            <span class="loadout-card__tier-hex">B</span> Uncommon
+          </span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="loadout-card__body">
+          <span class="loadout-card__cat">DEFENSE</span>
+          <h4 class="loadout-card__title">Streak Shield</h4>
+          <p class="loadout-card__desc">Protects your streak through one missed day. Auto-deploys when needed.</p>
+          <div class="loadout-card__foot">
+            <span class="loadout-card__owned"><span class="x">×</span>2</span>
+            <span class="equipped-tag" style="color: var(--success);">Auto-armed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="loadout-card" style="--art-glow: rgba(6, 214, 244, 0.30); --art-color: #06d6f4; --cat-color: var(--electric);">
+        <div class="loadout-card__art">
+          <span class="loadout-card__tier loadout-card__tier--b">
+            <span class="loadout-card__tier-hex">B</span> Uncommon
+          </span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-3-6.7"/>
+            <path d="M21 4v6h-6"/>
+          </svg>
+        </div>
+        <div class="loadout-card__body">
+          <span class="loadout-card__cat">UTILITY</span>
+          <h4 class="loadout-card__title">Plan Reroll</h4>
+          <p class="loadout-card__desc">Burns the day's plan. AI generates a fresh slate if today's missions don't fit.</p>
+          <div class="loadout-card__foot">
+            <span class="loadout-card__owned"><span class="x">×</span>1</span>
+            <button class="use-btn">Deploy →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TROPHIES -->
+  <section>
+    <div class="section-head">
+      <div class="section-head__left">
+        <span class="rule-accent"></span>
+        <span class="section-head__title">Trophies</span>
+        <span class="section-head__count">7</span>
+      </div>
+      <span class="section-head__sub">EARNED · NOT BORROWED</span>
+    </div>
+
+    <div class="loadout-grid">
+      <div class="loadout-card" style="--art-glow: rgba(255, 122, 24, 0.30); --art-color: #ff7a18;">
+        <div class="loadout-card__art">
+          <span class="loadout-card__tier loadout-card__tier--s">
+            <span class="loadout-card__tier-hex">S</span> Legendary
+          </span>
+          <span class="emoji">📚</span>
+        </div>
+        <div class="loadout-card__body">
+          <span class="loadout-card__cat">READING · 30 DAY STREAK</span>
+          <h4 class="loadout-card__title">"Deep Work" Hardcover</h4>
+          <p class="loadout-card__desc">Earned the day you cleared a full month of reading without missing.</p>
+          <div class="loadout-card__foot">
+            <span class="loadout-card__owned"><span class="x">×</span>1</span>
+            <span class="equipped-tag">Mar 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="loadout-card" style="--art-glow: rgba(255, 48, 48, 0.32); --art-color: #ff5e2e;">
+        <div class="loadout-card__art">
+          <span class="loadout-card__tier loadout-card__tier--s">
+            <span class="loadout-card__tier-hex">S</span> Legendary
+          </span>
+          <span class="emoji">🎧</span>
+        </div>
+        <div class="loadout-card__body">
+          <span class="loadout-card__cat">STRENGTH · 30 DAY STREAK</span>
+          <h4 class="loadout-card__title">Running Headphones</h4>
+          <p class="loadout-card__desc">Hit a 30-day Strength streak. The grind earned the gear.</p>
+          <div class="loadout-card__foot">
+            <span class="loadout-card__owned"><span class="x">×</span>1</span>
+            <span class="equipped-tag">Apr 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="loadout-card" style="--art-glow: rgba(250, 204, 21, 0.28); --art-color: #facc15;">
+        <div class="loadout-card__art">
+          <span class="loadout-card__tier loadout-card__tier--a">
+            <span class="loadout-card__tier-hex">A</span> Rare
+          </span>
+          <span class="emoji">☕</span>
+        </div>
+        <div class="loadout-card__body">
+          <span class="loadout-card__cat">SHIPPED A MILESTONE</span>
+          <h4 class="loadout-card__title">Saturday Coffee Ritual</h4>
+          <p class="loadout-card__desc">Three weekends of side-project shipping. Earned the slow morning.</p>
+          <div class="loadout-card__foot">
+            <span class="loadout-card__owned"><span class="x">×</span>3</span>
+            <span class="equipped-tag">Recurring</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="loadout-card" style="--art-glow: rgba(6, 214, 244, 0.28); --art-color: #06d6f4;">
+        <div class="loadout-card__art">
+          <span class="loadout-card__tier loadout-card__tier--b">
+            <span class="loadout-card__tier-hex">B</span> Uncommon
+          </span>
+          <span class="emoji">🍣</span>
+        </div>
+        <div class="loadout-card__body">
+          <span class="loadout-card__cat">CHARISMA · CALLED MOM 4×</span>
+          <h4 class="loadout-card__title">Sushi Night Out</h4>
+          <p class="loadout-card__desc">Family-streak reward. Booked Maru for Friday — earned twice over.</p>
+          <div class="loadout-card__foot">
+            <span class="loadout-card__owned"><span class="x">×</span>1</span>
+            <span class="equipped-tag">Apr 2026</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="height: 24px;"></div>
+</main>
+
+</body>
+</html>

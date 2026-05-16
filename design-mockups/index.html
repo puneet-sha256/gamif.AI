@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gamif.AI · UI redesign mockups</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+  body { padding-bottom: 80px; }
+
+  .header {
+    padding: 56px 0 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-surface);
+  }
+  .header__inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  .header h1 { font-size: 36px; line-height: 1.1; }
+  .header p { color: var(--text-secondary); font-size: 15px; margin-top: 8px; max-width: 700px; }
+  .meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .meta .tag { font-size: 12px; }
+
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+  }
+  .controls__inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .controls__group {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12.5px; color: var(--text-muted); font-weight: 500;
+  }
+
+  .toggle-group {
+    display: inline-flex;
+    background: var(--bg-muted);
+    padding: 3px;
+    border-radius: var(--r-md);
+    gap: 2px;
+  }
+  .toggle-group button {
+    height: 30px;
+    padding: 0 14px;
+    border-radius: 7px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .toggle-group button:hover { color: var(--text-primary); }
+  .toggle-group button.on {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-xs);
+  }
+  .toggle-group button .ic { width: 14px; height: 14px; }
+
+  .section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 36px 24px 0;
+  }
+  .section h2 { font-size: 18px; margin-bottom: 6px; }
+  .section .lead { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; max-width: 640px; }
+
+  /* Cards grid for previews */
+  .grid-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  @media (max-width: 760px) { .grid-cards { grid-template-columns: 1fr; } }
+
+  /* Each preview tile */
+  .preview {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+  }
+  .preview:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+
+  .preview__frame {
+    background: var(--bg-app);
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .preview__frame iframe {
+    border: none;
+    background: var(--bg-app);
+    pointer-events: none;
+  }
+
+  /* Desktop preview frame: scaled-down 1280×800 view */
+  .preview[data-device="desktop"] iframe {
+    width: 1280px;
+    height: 800px;
+    transform: scale(0.42);
+    transform-origin: top left;
+    position: absolute; top: 0; left: 0;
+  }
+
+  /* Mobile preview: render the iframe at a real 390×760 viewport, then scale the phone shell down.
+     This way the mobile mockup gets a phone-sized viewport (not a 230px squish). */
+  .preview[data-device="mobile"] .preview__frame {
+    aspect-ratio: 16 / 10;
+    background: var(--bg-app);
+  }
+  .preview[data-device="mobile"] .phone {
+    width: 390px;
+    height: 760px;
+    border-radius: 44px;
+    background: #000;
+    padding: 12px;
+    box-shadow: 0 12px 32px rgba(15, 15, 20, 0.18);
+    overflow: hidden;
+    transform: scale(0.46);
+    transform-origin: center center;
+  }
+  .preview[data-device="mobile"] .phone iframe {
+    width: 100%;
+    height: 100%;
+    border-radius: 32px;
+    background: var(--bg-app);
+    transform: none;
+    position: static;
+  }
+
+  .preview__body {
+    padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-faint);
+  }
+  .preview__title { font-size: 14px; font-weight: 600; }
+  .preview__sub { font-size: 12.5px; color: var(--text-muted); }
+  .preview__open {
+    font-size: 12.5px; color: var(--text-muted);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+
+  .principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 760px) { .principles { grid-template-columns: 1fr; } }
+  .principle {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 18px;
+  }
+  .principle h4 { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .principle .num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-text); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .principle p { font-size: 13.5px; color: var(--text-secondary); }
+  .principle code { background: var(--bg-muted); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+  .tokens { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; }
+  .swatch { aspect-ratio: 1 / 1; border-radius: var(--r-md); border: 1px solid var(--border); position: relative; overflow: hidden; }
+  .swatch span { position: absolute; bottom: 6px; left: 8px; font-size: 11px; font-weight: 500; color: rgba(0,0,0,0.7); background: rgba(255,255,255,0.7); backdrop-filter: blur(4px); padding: 1px 6px; border-radius: 4px; }
+  .swatch.dark span { color: rgba(255,255,255,0.85); background: rgba(0,0,0,0.3); }
+
+  .note {
+    background: var(--bg-muted);
+    padding: 10px 14px;
+    border-radius: var(--r-md);
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+</style>
+</head>
+<body data-no-fab="true">
+
+<header class="header">
+  <div class="header__inner">
+    <span class="eyebrow eyebrow--accent" style="margin-bottom: 14px; display: inline-block;">v4.2 · EMBER HEATMAP · LABEL POLISH</span>
+    <h1 style="text-transform: uppercase; letter-spacing: -0.03em; font-weight: 800;">Gamif.AI — for the <span style="background: linear-gradient(120deg, #ff3030, #ff7a18, #facc15); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">unstoppable</span>.</h1>
+    <p>Black-dominant, ember-accented, HUD-style chrome. New hex-shaped brand mark in ember gradient. Loadout (inventory) and Vault (shop) fully redone with tier badges, atmospheric category backlights, and a new wallet hero with a real shard SVG.</p>
+    <div class="meta">
+      <span class="tag">Hex brand mark · ember gradient</span>
+      <span class="tag">Loadout: tier badges · atmospheric tiles</span>
+      <span class="tag">Vault: wallet hero · "earn X more" progress</span>
+      <span class="tag">Subnav: Overview · Tasks · Loadout · Vault</span>
+    </div>
+  </div>
+</header>
+
+<!-- Sticky controls: theme + device toggle -->
+<div class="controls">
+  <div class="controls__inner">
+    <div class="controls__group">
+      Theme
+      <div class="toggle-group" id="theme-toggle">
+        <button data-theme-value="light">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>
+          Light
+        </button>
+        <button data-theme-value="dark" class="on">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Dark
+        </button>
+      </div>
+    </div>
+
+    <div class="controls__group">
+      Device
+      <div class="toggle-group" id="device-toggle">
+        <button data-device-value="desktop" class="on">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          Desktop
+        </button>
+        <button data-device-value="mobile">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
+          Mobile
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Design principles -->
+<section class="section">
+  <h2>The fierce shift</h2>
+  <p class="lead">The bones from v3 stay (clean structure, single hero color, native mobile, motion that earns its keep). What changed is the attitude.</p>
+  <div class="principles">
+    <div class="principle">
+      <h4><span class="num">1</span> Black is the canvas</h4>
+      <p>Dark by default. Warm near-black (<code>#08090c</code>) surfaces with hairline <code>#232732</code> borders. Light mode still works, but the energy lives in the dark.</p>
+    </div>
+    <div class="principle">
+      <h4><span class="num">2</span> Ember + electric</h4>
+      <p>Intense red (<code>#ff3030</code>) into orange (<code>#ff7a18</code>) for primary actions and accents. Cyan and gold as secondaries. No more pastel.</p>
+    </div>
+    <div class="principle">
+      <h4><span class="num">3</span> HUD chrome</h4>
+      <p>Corner brackets, scanline overlays, faint grid backdrops, aim reticles, heart-rate waveforms. Borrowed from cockpits and combat displays — used sparingly.</p>
+    </div>
+    <div class="principle">
+      <h4><span class="num">4</span> Display type that speaks louder</h4>
+      <p>Inter Tight 800 in uppercase for hero copy, with letter-spacing tightened and ember-gradient text on the punchline.</p>
+    </div>
+    <div class="principle">
+      <h4><span class="num">5</span> Tier system + new logo</h4>
+      <p>Hex-shaped rank badge ("Tier — Ardent") in the hero. The brand mark itself is now a hex in ember gradient — same motif, scaled down. Status that's earned, not given.</p>
+    </div>
+    <div class="principle">
+      <h4><span class="num">6</span> Copy that doesn't apologize</h4>
+      <p>"Now earn it." "No off days." "Mission complete." "Back to the grind." Words that respect the user's seriousness instead of cushioning it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Tokens -->
+<section class="section">
+  <h2>Color tokens</h2>
+  <p class="lead">All tokens live in <code>theme.css</code>. Light and dark are token-driven — flip the switch above to see them.</p>
+  <div class="tokens">
+    <div class="swatch dark" style="background:#08090c;"><span>app · jet</span></div>
+    <div class="swatch dark" style="background:#11131a;"><span>surface</span></div>
+    <div class="swatch dark" style="background:#ff3030;"><span>accent</span></div>
+    <div class="swatch dark" style="background:#ff7a18;"><span>ember</span></div>
+    <div class="swatch dark" style="background:#06d6f4;"><span>electric</span></div>
+    <div class="swatch dark" style="background:#facc15;"><span>gold</span></div>
+    <div class="swatch dark" style="background:#ec4899;"><span>charisma</span></div>
+    <div class="swatch dark" style="background:#84cc16;"><span>success</span></div>
+  </div>
+</section>
+
+<!-- Onboarding -->
+<section class="section">
+  <h2>Onboarding flow</h2>
+  <p class="lead">Sign-in / sign-up, OTP, and a 2-step setup. These pages adapt fluidly — the mobile preview is the same file at phone width.</p>
+  <div class="grid-cards" id="grid-onboarding"></div>
+</section>
+
+<!-- Dashboard -->
+<section class="section">
+  <h2>Dashboard</h2>
+  <p class="lead">Mobile gets dedicated layouts with a bottom tab bar; desktop keeps the top sub-nav.</p>
+  <div class="grid-cards" id="grid-dashboard"></div>
+</section>
+
+<!-- Modals -->
+<section class="section">
+  <h2>Modals</h2>
+  <p class="lead">Centered dialogs on desktop, bottom sheets on mobile.</p>
+  <div class="grid-cards" id="grid-modals"></div>
+</section>
+
+<section class="section">
+  <h2>How to review</h2>
+  <p class="lead">Toggle Light/Dark and Desktop/Mobile at the top of this page to see all variants in place. Open any tile in a new tab for the full-size view. Once you're happy with the direction, I'll port the design tokens and component patterns into the React app, screen by screen.</p>
+</section>
+
+<script>
+const SCREENS = {
+  onboarding: [
+    { title: '1 · Sign in / Sign up',    sub: 'Split layout, brand pane, single hero CTA',         desktop: '01-signin.html',           mobile: '01-signin.html' },
+    { title: '2 · Email OTP',            sub: 'Centered card, monospace digit boxes, timer',        desktop: '02-otp.html',              mobile: '02-otp.html' },
+    { title: '3 · Tell us about yourself', sub: 'Step 1 of 2 — name & age, plain copy',             desktop: '03-profile-setup.html',    mobile: '03-profile-setup.html' },
+    { title: '4 · What you\'re aiming for', sub: 'Step 2 of 2 — focus pills + goals textarea',     desktop: '04-goals-setup.html',      mobile: '04-goals-setup.html' },
+  ],
+  dashboard: [
+    { title: '5 · Overview',  sub: 'Level + XP + shards row, ring chart, streaks, heatmap', desktop: '05-dashboard-overview.html',  mobile: '05-dashboard-overview-mobile.html' },
+    { title: '6 · Tasks',     sub: 'Things-style rows, AI activity logger, category filters', desktop: '06-dashboard-tasks.html',     mobile: '06-dashboard-tasks-mobile.html' },
+    { title: '7 · Loadout',   sub: 'Tier badges, atmospheric category tiles, deploy/equip', desktop: '07-dashboard-inventory.html', mobile: '07-dashboard-inventory-mobile.html' },
+    { title: '8 · Reward Vault', sub: 'Wallet hero, "EARN X MORE" progress, locked + unlocked rewards', desktop: '08-dashboard-shop.html', mobile: '08-dashboard-shop-mobile.html' },
+  ],
+  modals: [
+    { title: '9 · Add / edit task',  sub: 'Centered dialog (desktop) / bottom sheet (mobile)', desktop: '09-modal-task.html',    mobile: '09-modal-task-mobile.html' },
+    { title: '10 · Claim rewards',   sub: 'Summary tiles + per-activity rows',                 desktop: '10-modal-rewards.html', mobile: '10-modal-rewards-mobile.html' },
+  ],
+};
+
+let currentTheme = 'light';
+let currentDevice = 'desktop';
+
+function makeTile(s) {
+  const a = document.createElement('a');
+  a.className = 'preview';
+  a.target = '_blank';
+  a.dataset.desktop = s.desktop;
+  a.dataset.mobile = s.mobile;
+
+  const frame = document.createElement('div');
+  frame.className = 'preview__frame';
+
+  const iframe = document.createElement('iframe');
+  iframe.loading = 'lazy';
+  iframe.scrolling = 'no';
+  iframe.title = s.title;
+
+  const body = document.createElement('div');
+  body.className = 'preview__body';
+  body.innerHTML =
+    '<div>' +
+    '  <div class="preview__title">' + s.title + '</div>' +
+    '  <div class="preview__sub">' + s.sub + '</div>' +
+    '</div>' +
+    '<span class="preview__open">Open ↗</span>';
+
+  frame.appendChild(iframe);
+  a.appendChild(frame);
+  a.appendChild(body);
+  return a;
+}
+
+function renderGrid(rootId, list) {
+  const root = document.getElementById(rootId);
+  root.innerHTML = '';
+  list.forEach(s => root.appendChild(makeTile(s)));
+}
+
+renderGrid('grid-onboarding', SCREENS.onboarding);
+renderGrid('grid-dashboard',  SCREENS.dashboard);
+renderGrid('grid-modals',     SCREENS.modals);
+
+function applyDevice(device) {
+  document.querySelectorAll('.preview').forEach(tile => {
+    const file = tile.dataset[device];
+    tile.dataset.device = device;
+    tile.href = file + '?theme=' + currentTheme;
+
+    const frame = tile.querySelector('.preview__frame');
+    let iframe = tile.querySelector('iframe');
+
+    if (device === 'mobile') {
+      // Mount iframe inside a faux phone shell, centered in the frame
+      if (!frame.querySelector('.phone')) {
+        const phone = document.createElement('div');
+        phone.className = 'phone';
+        // Move iframe inside phone
+        phone.appendChild(iframe);
+        frame.appendChild(phone);
+      }
+    } else {
+      // Move iframe back to frame root if it was inside .phone
+      const phone = frame.querySelector('.phone');
+      if (phone) {
+        frame.appendChild(iframe);
+        phone.remove();
+      }
+    }
+
+    // Update src to current theme
+    iframe.src = file + '?theme=' + currentTheme;
+  });
+}
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+  // Update each iframe (cheaper than reload: postMessage if loaded, else update src)
+  document.querySelectorAll('.preview iframe').forEach(f => {
+    try { f.contentWindow.postMessage({ type: 'set-theme', value: theme }, '*'); } catch (_) {}
+    // Also set src so a reload picks the right theme
+    const file = (currentDevice === 'mobile' ? f.closest('.preview').dataset.mobile : f.closest('.preview').dataset.desktop);
+    if (f.dataset.lastSrc !== file + '?theme=' + theme) {
+      f.dataset.lastSrc = file + '?theme=' + theme;
+    }
+  });
+}
+
+document.getElementById('theme-toggle').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-theme-value]');
+  if (!btn) return;
+  document.querySelectorAll('#theme-toggle button').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  applyTheme(btn.dataset.themeValue);
+});
+
+document.getElementById('device-toggle').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-device-value]');
+  if (!btn) return;
+  document.querySelectorAll('#device-toggle button').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  currentDevice = btn.dataset.deviceValue;
+  applyDevice(currentDevice);
+});
+
+// Initial render — fierce defaults to dark
+currentTheme = 'dark';
+document.documentElement.setAttribute('data-theme', 'dark');
+applyDevice(currentDevice);
+applyTheme(currentTheme);
+</script>
+
+</body>
+</html>

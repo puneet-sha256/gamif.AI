@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Gamif.AI · Sign in</title>
+<link rel="stylesheet" href="theme.css">
+<script src="app.js" defer></script>
+<style>
+  .auth-grid {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (max-width: 900px) { .auth-grid { grid-template-columns: 1fr; } }
+
+  .auth-side {
+    /* Fierce side: jet black, ember backlight */
+    background:
+      radial-gradient(800px 400px at 12% 0%, rgba(255, 48, 48, 0.32), transparent 60%),
+      radial-gradient(600px 400px at 90% 90%, rgba(255, 122, 24, 0.22), transparent 60%),
+      radial-gradient(500px 400px at 50% 60%, rgba(6, 214, 244, 0.10), transparent 60%),
+      linear-gradient(160deg, #08090c 0%, #14151c 60%, #0a0b10 100%);
+    padding: 64px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: #f8f8f8;
+    position: relative;
+    overflow: hidden;
+  }
+  .auth-side::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255, 48, 48, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 48, 48, 0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(80% 70% at 50% 30%, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(80% 70% at 50% 30%, black 30%, transparent 80%);
+    pointer-events: none;
+  }
+  /* Subtle scanline over the panel */
+  .auth-side::after {
+    content: ''; position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(180deg, transparent 0, transparent 3px, rgba(255,255,255,0.022) 3px, rgba(255,255,255,0.022) 4px);
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+
+  /* Abstract journey path (decorative SVG) */
+  .journey-svg {
+    position: absolute;
+    top: 18%;
+    right: -60px;
+    width: 360px;
+    height: 320px;
+    pointer-events: none;
+    opacity: 0.9;
+  }
+  .journey-svg path.path-line {
+    stroke-dasharray: 6 10;
+    animation: shimmer 12s linear infinite;
+    background-size: 200% 100%;
+  }
+  .journey-svg .star {
+    transform-origin: center;
+    animation: pulse-soft 2.5s ease-in-out infinite;
+  }
+  @keyframes drift {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-6px); }
+  }
+  .journey-svg .wp { animation: drift 4s ease-in-out infinite; }
+  .journey-svg .wp:nth-child(2) { animation-delay: 0.4s; }
+  .journey-svg .wp:nth-child(3) { animation-delay: 0.8s; }
+  .auth-side > * { position: relative; }
+  @media (max-width: 900px) { .auth-side { display: none; } }
+
+  .auth-side h2 {
+    font-size: 36px;
+    line-height: 1.05;
+    max-width: 420px;
+    margin-bottom: 14px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+  .auth-side h2 .ember {
+    background: linear-gradient(120deg, #ffffff 0%, #ff7a18 50%, #ff3030 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .auth-side p {
+    max-width: 420px;
+    color: rgba(248, 248, 248, 0.72);
+    font-size: 14.5px;
+  }
+  .auth-side .quote {
+    margin-top: 32px;
+    font-size: 12px;
+    color: rgba(255, 48, 48, 0.85);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-left: 2px solid var(--accent);
+    padding-left: 10px;
+  }
+
+  .auth-side .feature {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+  .feature__ic {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: rgba(255, 48, 48, 0.10);
+    border: 1px solid rgba(255, 48, 48, 0.32);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    flex: 0 0 auto;
+  }
+  .feature h4 { font-size: 14px; margin-bottom: 2px; color: #f8f8f8; }
+  .feature p { font-size: 13px; color: rgba(248, 248, 248, 0.6); }
+
+  .auth-stage {
+    display: flex; align-items: center; justify-content: center;
+    padding: 48px 32px;
+  }
+
+  .tabs-pill {
+    display: flex;
+    background: var(--bg-muted);
+    padding: 3px;
+    border-radius: var(--r-md);
+    margin-bottom: 22px;
+  }
+  .tabs-pill button {
+    flex: 1;
+    height: 34px;
+    border-radius: 7px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  .tabs-pill button.active {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .password-row {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .password-row a { font-size: 12.5px; color: var(--text-secondary); }
+  .password-row a:hover { color: var(--accent); }
+
+  .legal {
+    font-size: 12px; color: var(--text-muted); text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="auth-grid">
+  <!-- Left: brand pane -->
+  <aside class="auth-side">
+
+    <!-- Floating shapes -->
+    <div class="floaters">
+      <span class="floater floater--circle" style="top:8%; right:18%;"></span>
+      <span class="floater floater--diamond floater--delay-1" style="top:32%; left:8%;"></span>
+      <span class="floater floater--ring floater--slow floater--delay-2" style="bottom:24%; right:8%;"></span>
+      <span class="floater floater--plus floater--delay-3" style="bottom:14%; left:18%;"></span>
+      <span class="floater floater--dot floater--delay-4" style="top:52%; left:54%;"></span>
+      <span class="floater floater--squiggle floater--slow" style="top:20%; right:50%;"></span>
+    </div>
+
+    <!-- Glow orbs (ember palette) -->
+    <span class="glow-orb glow-orb--rose"  style="width: 280px; height: 280px; top: 6%; right: 4%;"></span>
+    <span class="glow-orb glow-orb--amber" style="width: 220px; height: 220px; bottom: 10%; left: 6%; animation-delay: 4s;"></span>
+
+    <!-- Abstract climb: dashed ember path rising to a peak target -->
+    <svg class="journey-svg" viewBox="0 0 360 320" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="journey-grad" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%"  stop-color="#ff3030"/>
+          <stop offset="50%" stop-color="#ff7a18"/>
+          <stop offset="100%" stop-color="#facc15"/>
+        </linearGradient>
+        <radialGradient id="star-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stop-color="#ff7a18" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#ff7a18" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Dashed climb path -->
+      <path class="path-line" d="M 30 290 C 90 230, 110 220, 160 200 S 240 130, 290 60"
+            stroke="url(#journey-grad)" stroke-width="2.5" stroke-linecap="round"/>
+
+      <!-- Waypoints -->
+      <g>
+        <circle class="wp" cx="30"  cy="290" r="6"  fill="#ff3030"/>
+        <circle class="wp" cx="120" cy="220" r="5"  fill="#ff5e2e"/>
+        <circle class="wp" cx="220" cy="150" r="5"  fill="#ff7a18"/>
+      </g>
+
+      <!-- Reticle / target at end -->
+      <g class="star">
+        <circle cx="290" cy="60" r="38" fill="url(#star-glow)"/>
+        <circle cx="290" cy="60" r="22" stroke="#facc15" stroke-width="1.6" fill="none"/>
+        <circle cx="290" cy="60" r="10" stroke="#facc15" stroke-width="1.6" fill="none"/>
+        <path d="M290 40 v8 M290 72 v8 M270 60 h8 M302 60 h8" stroke="#facc15" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="290" cy="60" r="3" fill="#ff3030"/>
+      </g>
+    </svg>
+
+    <div>
+      <div class="brand" style="margin-bottom: 64px;">
+        <div class="brand__mark">G</div>
+        <span class="brand__name">Gamif.AI</span>
+      </div>
+      <span class="eyebrow eyebrow--accent" style="margin-bottom: 14px; display: inline-block;">FOR THE ONES WHO REFUSE TO DRIFT</span>
+      <h2>Become who you said you'd <span class="ember">be.</span></h2>
+      <p>An AI coach that takes the goals you keep deferring, turns them into daily missions, and makes you accountable for every rep.</p>
+
+      <div style="margin-top: 48px;">
+        <div class="feature">
+          <div class="feature__ic">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M12 2v6m0 12v-2M2 12h6m12 0h-2"/><circle cx="12" cy="12" r="4"/></svg>
+          </div>
+          <div>
+            <h4>Goals into daily quests</h4>
+            <p>Tell us what you want to become. We turn it into bite-sized, prioritized tasks.</p>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="feature__ic">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M3 12l3 3 7-7"/><path d="M14 17l3 3 4-4"/></svg>
+          </div>
+          <div>
+            <h4>Track effort, not just streaks</h4>
+            <p>Real progress through Strength, Intelligence, and Charisma — measured fairly.</p>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="feature__ic">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+          </div>
+          <div>
+            <h4>Reflect with AI</h4>
+            <p>Log your day in plain English. We'll classify it, score it, and reward what counts.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="quote">Discipline > motivation</p>
+  </aside>
+
+  <!-- Right: form -->
+  <main class="auth-stage">
+    <div class="auth">
+      <div class="auth__head">
+        <span class="eyebrow eyebrow--accent" style="margin-bottom: 8px; display: inline-block;">WELCOME BACK</span>
+        <h1 style="text-transform: uppercase; letter-spacing: -0.025em;">Back to the grind.</h1>
+        <p>Sign in to pick up where you left off.</p>
+      </div>
+
+      <div class="tabs-pill">
+        <button class="active">Sign in</button>
+        <button>Create account</button>
+      </div>
+
+      <form class="auth__form" onsubmit="event.preventDefault()">
+        <div class="field">
+          <label class="field__label" for="e">Email</label>
+          <input class="input" id="e" type="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+
+        <div class="field">
+          <div class="password-row">
+            <label class="field__label" for="p">Password</label>
+            <a href="#">Forgot password?</a>
+          </div>
+          <input class="input" id="p" type="password" placeholder="Enter your password" autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn--fierce btn--lg btn--block" style="margin-top: 4px;">
+          ENTER
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+
+      <div class="auth__divider">or</div>
+
+      <button class="btn btn--ghost btn--block">
+        <svg class="ic" viewBox="0 0 24 24" stroke="none" fill="currentColor"><path d="M21.35 11.1H12v3.2h5.35a4.6 4.6 0 0 1-2 3v2.5h3.25c1.9-1.75 3-4.35 3-7.45 0-.45-.05-.9-.15-1.25z" fill="#4285F4"/><path d="M12 21c2.7 0 4.95-.9 6.6-2.4l-3.25-2.5c-.9.6-2.05.95-3.35.95-2.55 0-4.7-1.7-5.45-4H3.2v2.55A9 9 0 0 0 12 21z" fill="#34A853"/><path d="M6.55 13.05a5.4 5.4 0 0 1 0-3.1V7.4H3.2a9 9 0 0 0 0 9.2z" fill="#FBBC04"/><path d="M12 5.85c1.45 0 2.75.5 3.75 1.5l2.85-2.85A8.95 8.95 0 0 0 12 2 9 9 0 0 0 3.2 7.4l3.35 2.55c.75-2.3 2.9-4.1 5.45-4.1z" fill="#EA4335"/></svg>
+          Continue with Google
+      </button>
+
+      <div class="auth__foot">
+        New to Gamif.AI? <a href="#">Create an account</a>
+      </div>
+
+      <p class="legal mt-4">By signing in you agree to our Terms and Privacy Policy.</p>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

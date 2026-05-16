@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Gamif.AI · Verify email</title>
+<link rel="stylesheet" href="theme.css">
+<script src="app.js" defer></script>
+<style>
+  .otp-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .otp-back:hover { color: var(--text-primary); }
+
+  .timer {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .timer strong { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+  .resend {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .resend button {
+    color: var(--accent);
+    font-weight: 500;
+    margin-left: 4px;
+  }
+  .resend button:disabled { color: var(--text-faint); cursor: not-allowed; }
+</style>
+</head>
+<body class="page page--centered" style="position: relative; overflow: hidden;">
+
+<!-- Decorative backdrop -->
+<div class="dot-grid"></div>
+<span class="glow-orb glow-orb--violet" style="width: 320px; height: 320px; top: -80px; left: -80px;"></span>
+<span class="glow-orb glow-orb--cyan"   style="width: 280px; height: 280px; bottom: -100px; right: -60px; animation-delay: 5s;"></span>
+<div class="floaters">
+  <span class="floater floater--diamond floater--slow" style="top:14%; right:14%;"></span>
+  <span class="floater floater--dot floater--delay-2" style="bottom:18%; left:12%;"></span>
+  <span class="floater floater--ring floater--delay-3" style="top:62%; right:8%;"></span>
+</div>
+
+<div class="auth" style="position: relative; z-index: 1;">
+  <a href="01-signin.html" class="otp-back">
+    <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M15 18l-6-6 6-6"/></svg>
+    Back
+  </a>
+
+  <div class="auth__head">
+    <h1>
+      Check your email
+      <svg class="sparkle sparkle--violet sparkle--lg" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: -2px; margin-left: 4px;">
+        <path d="M12 2 L13.5 9 L21 10 L13.5 11.5 L12 18.5 L10.5 11.5 L3 10 L10.5 9 Z"/>
+      </svg>
+    </h1>
+    <p>We sent a 6-digit code to <strong style="color: var(--text-primary)">sh****@microsoft.com</strong></p>
+  </div>
+
+  <div class="otp">
+    <input maxlength="1" inputmode="numeric" value="4">
+    <input maxlength="1" inputmode="numeric" value="2">
+    <input maxlength="1" inputmode="numeric" value="9">
+    <input maxlength="1" inputmode="numeric" value="">
+    <input maxlength="1" inputmode="numeric" value="">
+    <input maxlength="1" inputmode="numeric" value="">
+  </div>
+
+  <div class="timer">
+    Code expires in <strong>4:23</strong>
+  </div>
+
+  <button class="btn btn--accent btn--lg btn--block mt-4">
+    Verify and continue
+  </button>
+
+  <div class="resend">
+    Didn't get the code?
+    <button>Resend in 0:25</button>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Gamif.AI · Reward Vault</title>
+<link rel="stylesheet" href="theme.css">
+<script src="app.js" defer></script>
+<style>
+  /* ── PAGE HEAD ── */
+  .page-head {
+    padding: 28px 0 8px;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .page-head h1 { font-size: 32px; text-transform: uppercase; letter-spacing: -0.025em; margin-top: 4px; }
+  .page-head h1 .ember {
+    background: linear-gradient(120deg, #ff3030 0%, #ff7a18 60%, #facc15 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .page-head p { color: var(--text-muted); font-size: 14px; margin-top: 4px; max-width: 520px; }
+
+  /* ── WALLET HERO ── */
+  .wallet-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 14px;
+    margin: 18px 0 28px;
+  }
+  @media (max-width: 900px) { .wallet-row { grid-template-columns: 1fr; } }
+
+  /* Big wallet card with ember backlight */
+  .wallet {
+    position: relative;
+    overflow: hidden;
+    padding: 24px 26px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(600px 240px at 0% 0%, rgba(255, 48, 48, 0.32), transparent 60%),
+      radial-gradient(500px 260px at 100% 100%, rgba(255, 122, 24, 0.28), transparent 60%),
+      linear-gradient(135deg, #0a0b10, #14151c);
+    color: #fff;
+    box-shadow: 0 12px 28px -8px rgba(255, 48, 48, 0.18), 0 0 0 1px rgba(255, 48, 48, 0.10);
+  }
+  .wallet::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255, 48, 48, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 48, 48, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: radial-gradient(80% 70% at 50% 50%, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(80% 70% at 50% 50%, black 30%, transparent 80%);
+    pointer-events: none;
+  }
+  .wallet > * { position: relative; z-index: 1; }
+
+  .wallet__head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .wallet__num {
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .wallet__num-shard {
+    width: 38px; height: 38px;
+    flex: 0 0 auto;
+    align-self: center;
+    filter: drop-shadow(0 0 12px rgba(255, 122, 24, 0.5));
+  }
+  .wallet__num-val {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 800;
+    font-size: 56px;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(120deg, #ffffff 0%, #ffffff 50%, #ff7a18 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .wallet__num-unit {
+    font-family: 'Space Grotesk', 'Inter Tight', sans-serif;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .wallet__foot {
+    display: flex; align-items: center; gap: 14px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .wallet__foot strong {
+    color: #fff;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wallet-stat {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .wallet-stat::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+  }
+  .wallet-stat--cyan::before { background: var(--electric); }
+  .wallet-stat__lbl {
+    font-size: 10.5px; font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .wallet-stat__val {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .wallet-stat__sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+  .wallet-stat__sub .pos { color: var(--success); font-weight: 600; }
+  .wallet-stat__progress {
+    margin-top: 10px;
+  }
+
+  /* ── FILTER ROW ── */
+  .filter-row {
+    display: flex; gap: 6px;
+    padding: 4px 0 16px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    height: 32px; padding: 0 14px;
+    border-radius: var(--r-sm);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .chip--on {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border-color: rgba(255, 48, 48, 0.32);
+  }
+  .chip .count { font-size: 11px; color: var(--text-faint); font-weight: 500; letter-spacing: 0; }
+  .chip--on .count { color: var(--accent-text); }
+
+  /* ── SECTION HEAD ── */
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 0 14px;
+  }
+  .section-head__left {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-head__title {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .section-head__count {
+    font-size: 11px; font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    letter-spacing: 0.04em;
+  }
+  .section-head__sub {
+    font-size: 11.5px; color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── REWARD CARD ── */
+  .reward-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 1100px) { .reward-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 760px)  { .reward-grid { grid-template-columns: 1fr; } }
+
+  .reward-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    position: relative;
+    display: flex; flex-direction: column;
+    transition: border-color 120ms ease, transform 120ms ease;
+  }
+  .reward-card:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+  }
+  .reward-card[data-locked="true"] .reward-card__art { opacity: 0.55; }
+
+  /* Featured / can afford card has ember outline */
+  .reward-card--featured {
+    border-color: rgba(255, 48, 48, 0.42);
+    box-shadow: 0 0 0 1px rgba(255, 48, 48, 0.30), 0 12px 32px -8px rgba(255, 48, 48, 0.20);
+  }
+  .reward-card--featured::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    z-index: 2;
+  }
+
+  .reward-card__art {
+    aspect-ratio: 16 / 10;
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: #0d0e12;
+  }
+  .reward-card__art::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 50%, var(--art-glow, rgba(255, 48, 48, 0.32)), transparent 70%);
+  }
+  .reward-card__art::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 18px 18px;
+    mask-image: radial-gradient(70% 70% at 50% 50%, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(70% 70% at 50% 50%, black 30%, transparent 80%);
+  }
+  .reward-card__art .emoji {
+    position: relative; z-index: 1;
+    font-size: 56px;
+    filter: drop-shadow(0 0 16px var(--art-color, #ff7a18));
+  }
+
+  .reward-card__menu {
+    position: absolute; top: 10px; right: 10px;
+    z-index: 2;
+    width: 28px; height: 28px;
+    border-radius: var(--r-sm);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255, 255, 255, 0.7);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  .reward-card__pin {
+    position: absolute; top: 10px; left: 10px; z-index: 2;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 8px;
+    background: rgba(255, 48, 48, 0.18);
+    border: 1px solid rgba(255, 48, 48, 0.45);
+    border-radius: var(--r-pill);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #ff8080;
+  }
+  .reward-card__pin::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  .reward-card__body {
+    padding: 16px 18px 18px;
+    display: flex; flex-direction: column; gap: 6px;
+    flex: 1;
+  }
+  .reward-card__cat {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .reward-card__title {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+  .reward-card__desc {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .reward-card__foot {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 12px;
+    margin-top: 6px;
+    border-top: 1px solid var(--border-faint);
+    gap: 10px;
+  }
+  .price {
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .price__shard {
+    width: 14px; height: 14px;
+    flex: 0 0 auto;
+  }
+  .price__num {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--text-primary);
+    letter-spacing: -0.025em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .buy-btn {
+    height: 32px;
+    padding: 0 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: var(--r-sm);
+    box-shadow: 0 4px 14px -2px rgba(255, 48, 48, 0.45), inset 0 1px 0 rgba(255,255,255,0.20);
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: filter 120ms ease;
+  }
+  .buy-btn:hover { filter: brightness(1.1); }
+  .buy-btn svg { width: 12px; height: 12px; stroke-width: 2.5; }
+
+  .lock-bar {
+    display: flex; align-items: center; gap: 10px;
+    flex: 1;
+  }
+  .lock-bar__label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex: 0 0 auto;
+  }
+  .lock-bar__progress {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .lock-bar__fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: 2px;
+  }
+  .lock-bar__count {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--text-secondary);
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    flex: 0 0 auto;
+  }
+
+  /* Add reward — empty card */
+  .add-card {
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--r-md);
+    background: transparent;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 32px 16px;
+    color: var(--text-secondary);
+    text-align: center;
+    gap: 10px;
+    min-height: 280px;
+    cursor: pointer;
+    transition: border-color 120ms ease, color 120ms ease;
+  }
+  .add-card:hover { border-color: var(--accent); color: var(--accent); }
+  .add-card__ic {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .add-card__ic svg { width: 22px; height: 22px; stroke-width: 2.2; }
+  .add-card .lbl {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 14px; font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .add-card .sub { font-size: 11.5px; color: var(--text-muted); }
+
+  /* ── HEADER ── */
+  .bell-btn {
+    position: relative; height: 34px; padding: 0 12px;
+    border-radius: var(--r-md);
+    background: var(--bg-muted);
+    color: var(--text-primary);
+    font-size: 13px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .bell-btn .badge {
+    background: var(--accent); color: #fff;
+    font-size: 11px; font-weight: 600;
+    padding: 1px 7px; border-radius: var(--r-pill);
+    min-width: 18px; text-align: center;
+  }
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #ff5e2e, #ff7a18);
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+</style>
+</head>
+<body class="page">
+
+<header class="appbar">
+  <div class="brand"><div class="brand__mark">G</div><span class="brand__name">Gamif.AI</span></div>
+  <div class="appbar__right">
+    <button class="bell-btn"><svg class="ic" viewBox="0 0 24 24"><path d="M20 5l-9 4M20 5v6l-9 4M20 5H4l3 6-3 6 7-3"/></svg>Unclaimed rewards<span class="badge">3</span></button>
+    <span class="avatar" title="Profile">PS</span>
+  </div>
+</header>
+
+<nav class="subnav">
+  <a href="05-dashboard-overview.html" class="subnav__btn"><svg class="ic" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>Overview</a>
+  <a href="06-dashboard-tasks.html" class="subnav__btn"><svg class="ic" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Tasks</a>
+  <a href="07-dashboard-inventory.html" class="subnav__btn"><svg class="ic" viewBox="0 0 24 24"><path d="M3 7h18l-2 12H5z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>Loadout</a>
+  <a href="08-dashboard-shop.html" class="subnav__btn subnav__btn--active"><svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l3 12h12l2-8H6"/></svg>Vault</a>
+</nav>
+
+<main class="shell">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow eyebrow--accent">REWARD VAULT</span>
+      <h1>Spend what you've <span class="ember">earned.</span></h1>
+      <p>Spoils for the disciplined. Pick rewards that pull you forward, and don't cash them in until you've earned them.</p>
+    </div>
+    <button class="btn btn--fierce">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
+      Add reward
+    </button>
+  </div>
+
+  <!-- Wallet hero strip -->
+  <section class="wallet-row">
+    <div class="wallet">
+      <div class="wallet__head">
+        <span class="eyebrow" style="color: rgba(255,255,255,0.55);">YOUR BALANCE</span>
+        <span class="tag" style="background: rgba(132, 204, 22, 0.16); border-color: transparent; color: var(--success); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">+85 today</span>
+      </div>
+      <div class="wallet__num">
+        <svg class="wallet__num-shard shard-spin" viewBox="0 0 24 24">
+          <path d="M12 2 L20 12 L12 22 L4 12 Z" fill="url(#shard-grad)"/>
+          <path d="M12 2 L20 12 L12 12 Z" fill="rgba(255,255,255,0.25)"/>
+        </svg>
+        <span class="wallet__num-val">428.50</span>
+        <span class="wallet__num-unit">SHARDS</span>
+      </div>
+      <div class="wallet__foot">
+        <span><strong>1,230</strong> spent total</span>
+        <span style="color: rgba(255, 255, 255, 0.2);">·</span>
+        <span><strong>9</strong> rewards claimed</span>
+        <span style="color: rgba(255, 255, 255, 0.2);">·</span>
+        <span>Streak bonus <strong style="color: var(--accent-2);">×1.4</strong> active</span>
+      </div>
+    </div>
+
+    <div class="wallet-stat wallet-stat--cyan">
+      <div class="wallet-stat__lbl">SPENT THIS WEEK</div>
+      <div class="wallet-stat__val">320 <span style="font-size:12px; color: var(--text-muted); font-weight: 500;">shards</span></div>
+      <div class="wallet-stat__sub"><span class="pos">↑ 180%</span> vs last week — measured</div>
+    </div>
+
+    <div class="wallet-stat">
+      <div class="wallet-stat__lbl">NEXT TARGET</div>
+      <div class="wallet-stat__val" style="font-size: 16px;">Steam game · 250</div>
+      <div class="wallet-stat__progress">
+        <div class="hud-bar"><div class="hud-bar__fill" style="width: 100%;"></div></div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-variant-numeric: tabular-nums;">FULLY UNLOCKED · GO BUY IT</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <div class="filter-row">
+    <button class="chip chip--on">All <span class="count">5</span></button>
+    <button class="chip">Affordable <span class="count">3</span></button>
+    <button class="chip">Locked <span class="count">2</span></button>
+    <button class="chip">Recurring <span class="count">2</span></button>
+  </div>
+
+  <!-- Wishlist -->
+  <section>
+    <div class="section-head">
+      <div class="section-head__left">
+        <span class="rule-accent"></span>
+        <span class="section-head__title">Your Wishlist</span>
+        <span class="section-head__count">5</span>
+      </div>
+      <span class="section-head__sub">SPEND ONLY ON WHAT MATTERS</span>
+    </div>
+
+    <div class="reward-grid">
+      <!-- Featured / unlocked: Steam game -->
+      <div class="reward-card reward-card--featured" style="--art-glow: rgba(255, 122, 24, 0.36); --art-color: #ff7a18;">
+        <div class="reward-card__art">
+          <span class="reward-card__pin">UNLOCKED</span>
+          <button class="reward-card__menu" aria-label="More options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:14px;height:14px"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>
+          <span class="emoji">🎮</span>
+        </div>
+        <div class="reward-card__body">
+          <span class="reward-card__cat">ENTERTAINMENT</span>
+          <h4 class="reward-card__title">New Game on Steam</h4>
+          <p class="reward-card__desc">The one that's been on your wishlist for weeks. You earned it. Treat the discipline.</p>
+          <div class="reward-card__foot">
+            <span class="price">
+              <svg class="price__shard" viewBox="0 0 24 24"><path d="M12 2 L20 12 L12 22 L4 12 Z" fill="url(#shard-grad)"/></svg>
+              <span class="price__num">250</span>
+            </span>
+            <button class="buy-btn">
+              Claim
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sushi night - affordable -->
+      <div class="reward-card" style="--art-glow: rgba(132, 204, 22, 0.32); --art-color: #84cc16;">
+        <div class="reward-card__art">
+          <button class="reward-card__menu" aria-label="More options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:14px;height:14px"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>
+          <span class="emoji">🍣</span>
+        </div>
+        <div class="reward-card__body">
+          <span class="reward-card__cat">DINING</span>
+          <h4 class="reward-card__title">Sushi Night Out</h4>
+          <p class="reward-card__desc">Reservations at Maru this Friday. Earned, not borrowed.</p>
+          <div class="reward-card__foot">
+            <span class="price">
+              <svg class="price__shard" viewBox="0 0 24 24"><path d="M12 2 L20 12 L12 22 L4 12 Z" fill="url(#shard-grad)"/></svg>
+              <span class="price__num">180</span>
+            </span>
+            <button class="buy-btn">Claim →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Movie night - affordable -->
+      <div class="reward-card" style="--art-glow: rgba(6, 214, 244, 0.28); --art-color: #06d6f4;">
+        <div class="reward-card__art">
+          <button class="reward-card__menu" aria-label="More options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:14px;height:14px"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>
+          <span class="emoji">🎬</span>
+        </div>
+        <div class="reward-card__body">
+          <span class="reward-card__cat">DOWNTIME</span>
+          <h4 class="reward-card__title">Movie Night</h4>
+          <p class="reward-card__desc">Two tickets, popcorn, no laptop, no phone.</p>
+          <div class="reward-card__foot">
+            <span class="price">
+              <svg class="price__shard" viewBox="0 0 24 24"><path d="M12 2 L20 12 L12 22 L4 12 Z" fill="url(#shard-grad)"/></svg>
+              <span class="price__num">60</span>
+            </span>
+            <button class="buy-btn">Claim →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Long weekend trip - locked -->
+      <div class="reward-card" data-locked="true" style="--art-glow: rgba(236, 72, 153, 0.28); --art-color: #ec4899;">
+        <div class="reward-card__art">
+          <button class="reward-card__menu" aria-label="More options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:14px;height:14px"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>
+          <span class="emoji">🏖</span>
+        </div>
+        <div class="reward-card__body">
+          <span class="reward-card__cat">TRAVEL · LOCKED</span>
+          <h4 class="reward-card__title">Long Weekend Trip</h4>
+          <p class="reward-card__desc">Two nights anywhere within a 3-hour flight. The big one.</p>
+          <div class="reward-card__foot" style="flex-direction: column; align-items: stretch; gap: 10px;">
+            <div class="row row--between">
+              <span class="price">
+                <svg class="price__shard" viewBox="0 0 24 24"><path d="M12 2 L20 12 L12 22 L4 12 Z" fill="url(#shard-grad)" opacity="0.65"/></svg>
+                <span class="price__num" style="color: var(--text-muted);">800</span>
+              </span>
+              <span class="lock-bar__count" style="color: var(--accent);">372 to go</span>
+            </div>
+            <div class="lock-bar">
+              <div class="lock-bar__progress"><div class="lock-bar__fill" style="width: 53.5%;"></div></div>
+            </div>
+            <span style="font-size: 10.5px; color: var(--text-muted); letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600;">~17 DAYS AT CURRENT PACE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Book - locked at higher price -->
+      <div class="reward-card" data-locked="true" style="--art-glow: rgba(250, 204, 21, 0.28); --art-color: #facc15;">
+        <div class="reward-card__art">
+          <button class="reward-card__menu" aria-label="More options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:14px;height:14px"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>
+          <span class="emoji">📚</span>
+        </div>
+        <div class="reward-card__body">
+          <span class="reward-card__cat">LEARNING · LOCKED</span>
+          <h4 class="reward-card__title">"Designing Data-Intensive Apps"</h4>
+          <p class="reward-card__desc">Kleppmann book. Has been on the wishlist long enough.</p>
+          <div class="reward-card__foot" style="flex-direction: column; align-items: stretch; gap: 10px;">
+            <div class="row row--between">
+              <span class="price">
+                <svg class="price__shard" viewBox="0 0 24 24"><path d="M12 2 L20 12 L12 22 L4 12 Z" fill="url(#shard-grad)" opacity="0.65"/></svg>
+                <span class="price__num" style="color: var(--text-muted);">120</span>
+              </span>
+              <span class="lock-bar__count" style="color: var(--text-muted);">UNLOCKS NEXT</span>
+            </div>
+            <div class="lock-bar">
+              <div class="lock-bar__progress"><div class="lock-bar__fill" style="width: 100%;"></div></div>
+            </div>
+            <span style="font-size: 10.5px; color: var(--success); letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;">▰ AFFORDABLE NOW</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add new -->
+      <button class="add-card">
+        <span class="add-card__ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </span>
+        <span class="lbl">Add a reward</span>
+        <span class="sub">Title · image · price</span>
+      </button>
+    </div>
+  </section>
+
+  <div style="height: 24px;"></div>
+</main>
+
+</body>
+</html>

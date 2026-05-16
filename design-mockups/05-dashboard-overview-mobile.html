@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gamif.AI · Overview (mobile)</title>
+<link rel="stylesheet" href="theme.css">
+<script src="app.js" defer></script>
+<style>
+  /* FIERCE mobile greet */
+  .greet {
+    margin: 12px 0 4px;
+    padding: 20px 18px 18px;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 48, 48, 0.18);
+    background:
+      radial-gradient(420px 240px at 0% 0%, rgba(255, 48, 48, 0.32), transparent 60%),
+      radial-gradient(380px 240px at 100% 100%, rgba(255, 122, 24, 0.24), transparent 60%),
+      radial-gradient(360px 200px at 60% 0%, rgba(6, 214, 244, 0.10), transparent 70%),
+      linear-gradient(135deg, #0a0b10, #14151c);
+    color: #fff;
+    box-shadow: 0 12px 28px -8px rgba(0,0,0,0.5);
+  }
+  .greet__day { font-size: 10.5px; color: rgba(255,255,255,0.55); font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
+  .greet h1 {
+    font-size: 22px;
+    margin-top: 8px;
+    line-height: 1.05;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.025em;
+    color: #fff;
+  }
+  .greet h1 .accent {
+    background: linear-gradient(120deg, #ffffff 0%, #ff7a18 50%, #ff3030 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .greet p { font-size: 12.5px; color: rgba(255,255,255,0.7); margin-top: 6px; max-width: 280px; }
+  .greet__decor { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .greet__decor::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255, 48, 48, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 48, 48, 0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(70% 70% at 30% 30%, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(70% 70% at 30% 30%, black 30%, transparent 80%);
+  }
+  .greet__hud-bar {
+    margin-top: 12px;
+  }
+  .greet__tier {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px 3px 3px;
+    background: rgba(255, 48, 48, 0.10);
+    border: 1px solid rgba(255, 48, 48, 0.32);
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-weight: 600;
+    color: #ff8080;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .greet__tier .hex {
+    width: 18px; height: 18px;
+    background: linear-gradient(135deg, #ff3030, #ff7a18);
+    color: #fff;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+
+  .level-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px;
+  }
+  .level-badge {
+    width: 50px; height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.25);
+  }
+  .level-badge .lv { font-size: 8px; font-weight: 600; opacity: 0.85; letter-spacing: 0.08em; line-height: 1; margin-bottom: 1px; }
+  .level-badge .num { font-size: 18px; line-height: 1;}
+  .level-info { flex: 1; min-width: 0; }
+  .level-info .row { justify-content: space-between; margin-bottom: 6px; }
+  .level-info .lbl { font-size: 12.5px; color: var(--text-muted); }
+  .level-info .val { font-family: 'Inter Tight'; font-size: 15px; font-weight: 600; }
+  .level-info .val .muted { font-weight: 500; }
+
+  .stat-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-top: 10px;
+  }
+
+  /* Compact ring */
+  .ring-card { padding: 16px; }
+  .ring-svg { width: 132px; height: 132px; margin: 0 auto; display: block; }
+  .ring-center { position: relative; }
+  .ring-center__inner {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .ring-center__inner .num {
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 700; font-size: 22px; letter-spacing: -0.025em;
+  }
+  .ring-center__inner .lbl { font-size: 10px; color: var(--text-muted); margin-top: 1px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  .legend { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .legend-row {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-faint);
+  }
+  .legend-row:last-child { border-bottom: none; }
+  .legend-row .left { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-weight: 500; }
+  .legend-row .right { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .legend-row .right strong { color: var(--text-primary); font-weight: 600; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; }
+
+  /* Streak rows */
+  .streak {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-faint);
+  }
+  .streak:last-child { border-bottom: none; }
+  .streak__l { display: flex; align-items: center; gap: 10px; }
+  .streak__name { font-size: 13.5px; font-weight: 500; }
+  .streak__num {
+    font-family: 'Inter Tight';
+    font-size: 18px; font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .streak__num .unit { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-left: 3px; }
+  .streak__mult {
+    font-size: 11.5px; font-weight: 600;
+    color: var(--success); background: var(--success-soft);
+    padding: 2px 8px; border-radius: var(--r-pill);
+    margin-left: 8px;
+  }
+  .streak__mult--off { color: var(--text-muted); background: var(--bg-muted); }
+
+  /* Heatmap horizontal scroll on mobile */
+  .heatmap-scroll {
+    overflow-x: auto;
+    margin: 0 -16px;
+    padding: 0 16px 4px;
+  }
+  .heatmap-scroll::-webkit-scrollbar { height: 0; }
+
+  /* Bell icon (compact) */
+  .bell-mini {
+    position: relative;
+    width: 36px; height: 36px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    color: var(--text-secondary);
+  }
+  .bell-mini:hover { background: var(--bg-muted); color: var(--text-primary); }
+  .bell-mini .badge {
+    position: absolute; top: 4px; right: 4px;
+    background: var(--accent); color: #fff;
+    font-size: 9px; font-weight: 700;
+    border-radius: var(--r-pill);
+    padding: 0 4px; min-width: 14px; height: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    line-height: 1;
+  }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #c084fc, #818cf8); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;}
+
+  .card { margin-top: 10px; }
+  .card-head-mini {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px 0;
+  }
+  .card-head-mini .t { font-size: 13.5px; font-weight: 600; }
+  .card-head-mini .s { font-size: 11.5px; color: var(--text-muted); }
+</style>
+</head>
+<body class="mobile-page">
+
+<!-- Compact appbar -->
+<header class="appbar appbar--mobile">
+  <div class="brand">
+    <div class="brand__mark">G</div>
+    <span class="brand__name">Gamif.AI</span>
+  </div>
+  <div class="appbar__right">
+    <button class="bell-mini" aria-label="Unclaimed rewards">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M20 5l-9 4M20 5v6l-9 4M20 5H4l3 6-3 6 7-3"/></svg>
+      <span class="badge">3</span>
+    </button>
+    <span class="avatar">PS</span>
+  </div>
+</header>
+
+<main class="mobile-shell">
+  <section class="greet">
+    <div class="greet__decor"></div>
+
+    <span class="greet__tier"><span class="hex">A</span> Tier — Ardent</span>
+    <div class="greet__day">DAY 47 · MAY 3</div>
+
+    <!-- Heart-rate waveform -->
+    <svg class="waveform" viewBox="0 0 600 36" preserveAspectRatio="none" style="margin-top: 4px; height: 26px; color: #ff7a18;">
+      <path d="M0 18 L80 18 L96 18 L104 6 L116 30 L128 18 L210 18 L226 18 L236 4 L246 32 L258 18 L380 18 L392 18 L404 9 L414 27 L424 18 L600 18"/>
+    </svg>
+
+    <h1>GOOD MORNING.<br/><span class="accent">NOW EARN IT.</span></h1>
+    <p style="position: relative; z-index: 1;"><strong style="color:#fff;">320 XP</strong> from level 13. <strong class="ember-pulse" style="color:#fff;">No off days.</strong></p>
+
+    <div class="greet__hud-bar" style="position: relative; z-index: 1;">
+      <div class="hud-bar"><div class="hud-bar__fill" style="width: 68%;"></div></div>
+      <div style="font-size: 10.5px; color: rgba(255,255,255,0.6); margin-top: 4px; font-variant-numeric: tabular-nums; display: flex; justify-content: space-between;">
+        <span>Lv 12 · 680 / 1,000 XP</span>
+        <span style="color: #ff7a18; font-weight: 600;">68%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Level card -->
+  <div class="card">
+    <div class="level-row">
+      <div class="level-badge">
+        <div class="lv">LEVEL</div>
+        <div class="num">12</div>
+      </div>
+      <div class="level-info">
+        <div class="row">
+          <div>
+            <div class="lbl">Progress to 13</div>
+            <div class="val">680 <span class="muted">/ 1,000 XP</span></div>
+          </div>
+          <span class="tag tag--accent">68%</span>
+        </div>
+        <div class="progress"><div class="progress__fill" style="width:68%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- XP + shards -->
+  <div class="stat-grid">
+    <div class="card">
+      <div class="card__body" style="padding:14px;">
+        <div class="stat__label">Total XP</div>
+        <div class="stat__value" style="font-size:22px;">7,420</div>
+        <div class="row mt-2 muted" style="font-size:11.5px; gap: 4px;">
+          <span style="color:var(--success); font-weight:600;">+240</span>
+          <span>this week</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__body" style="padding:14px;">
+        <div class="stat__label">Shards</div>
+        <div class="stat__value" style="font-size:22px;">428.50</div>
+        <a href="08-dashboard-shop-mobile.html" style="font-size:12px; font-weight:500; color: var(--accent);">Spend in shop →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Distribution ring -->
+  <div class="card">
+    <div class="card-head-mini">
+      <span class="t">Experience distribution</span>
+      <span class="s">All time</span>
+    </div>
+    <div class="card__body ring-card">
+      <div class="ring-center">
+        <svg class="ring-svg ring-anim" viewBox="0 0 160 160">
+          <defs>
+            <linearGradient id="m-ring-strength" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fb923c"/><stop offset="100%" stop-color="#d97757"/></linearGradient>
+            <linearGradient id="m-ring-intel"    x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#0e7490"/></linearGradient>
+            <linearGradient id="m-ring-charisma" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient>
+          </defs>
+          <circle cx="80" cy="80" r="62" fill="none" stroke="var(--bg-muted)" stroke-width="14"/>
+          <circle class="ring-track-anim" style="--ring-len: 389; --ring-end: 241;"
+            cx="80" cy="80" r="62" fill="none" stroke="url(#m-ring-strength)" stroke-width="14"
+            stroke-dasharray="148 389" stroke-dashoffset="0" transform="rotate(-90 80 80)" stroke-linecap="round"/>
+          <circle class="ring-track-anim" style="--ring-len: 389; --ring-end: 226; animation-delay: 0.18s;"
+            cx="80" cy="80" r="62" fill="none" stroke="url(#m-ring-intel)" stroke-width="14"
+            stroke-dasharray="163 389" stroke-dashoffset="-148" transform="rotate(-90 80 80)" stroke-linecap="round"/>
+          <circle class="ring-track-anim" style="--ring-len: 389; --ring-end: 311; animation-delay: 0.36s;"
+            cx="80" cy="80" r="62" fill="none" stroke="url(#m-ring-charisma)" stroke-width="14"
+            stroke-dasharray="78 389" stroke-dashoffset="-311" transform="rotate(-90 80 80)" stroke-linecap="round"/>
+        </svg>
+        <div class="ring-center__inner">
+          <div class="num">7,420</div>
+          <div class="lbl">Total XP</div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-row">
+          <span class="left"><span class="dot" style="color:var(--strength)"></span> Strength</span>
+          <span class="right"><strong>2,820</strong> · 38%</span>
+        </div>
+        <div class="legend-row">
+          <span class="left"><span class="dot" style="color:var(--intel)"></span> Intelligence</span>
+          <span class="right"><strong>3,116</strong> · 42%</span>
+        </div>
+        <div class="legend-row">
+          <span class="left"><span class="dot" style="color:var(--charisma)"></span> Charisma</span>
+          <span class="right"><strong>1,484</strong> · 20%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Streaks -->
+  <div class="card">
+    <div class="card-head-mini">
+      <span class="t">Streaks</span>
+      <span class="s">Soft decay</span>
+    </div>
+    <div class="card__body" style="padding:0;">
+      <div class="streak">
+        <div class="streak__l">
+          <svg class="flame flame--warm" viewBox="0 0 24 28">
+            <path class="fl-body" d="M12 1 C13 6 18 8 18 14 a6 6 0 0 1 -12 0 C6 11 8 9 9 7 c1 2 2 3 3 3 c0 -3 -1 -6 0 -9z"/>
+            <path d="M12 14 c1 2 3 3 3 6 a3 3 0 0 1 -6 0 c0 -1 1 -2 2 -3 c0 1 1 1 1 1 c0 -1 0 -3 0 -4z" fill="rgba(255,255,255,0.5)"/>
+          </svg>
+          <span class="streak__name">Strength</span>
+        </div>
+        <div>
+          <span class="streak__num">12<span class="unit">days</span></span>
+          <span class="streak__mult">×1.4</span>
+        </div>
+      </div>
+      <div class="streak">
+        <div class="streak__l">
+          <svg class="flame flame--cool" viewBox="0 0 24 28">
+            <path class="fl-body" d="M12 1 C13 6 18 8 18 14 a6 6 0 0 1 -12 0 C6 11 8 9 9 7 c1 2 2 3 3 3 c0 -3 -1 -6 0 -9z"/>
+            <path d="M12 14 c1 2 3 3 3 6 a3 3 0 0 1 -6 0 c0 -1 1 -2 2 -3 c0 1 1 1 1 1 c0 -1 0 -3 0 -4z" fill="rgba(255,255,255,0.5)"/>
+          </svg>
+          <span class="streak__name">Intelligence</span>
+        </div>
+        <div>
+          <span class="streak__num">7<span class="unit">days</span></span>
+          <span class="streak__mult">×1.2</span>
+        </div>
+      </div>
+      <div class="streak">
+        <div class="streak__l">
+          <svg class="flame flame--violet" viewBox="0 0 24 28">
+            <path class="fl-body" d="M12 1 C13 6 18 8 18 14 a6 6 0 0 1 -12 0 C6 11 8 9 9 7 c1 2 2 3 3 3 c0 -3 -1 -6 0 -9z"/>
+            <path d="M12 14 c1 2 3 3 3 6 a3 3 0 0 1 -6 0 c0 -1 1 -2 2 -3 c0 1 1 1 1 1 c0 -1 0 -3 0 -4z" fill="rgba(255,255,255,0.5)"/>
+          </svg>
+          <span class="streak__name">Charisma</span>
+        </div>
+        <div>
+          <span class="streak__num">2<span class="unit">days</span></span>
+          <span class="streak__mult streak__mult--off">×1.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Heatmap -->
+  <div class="card">
+    <div class="card-head-mini">
+      <span class="t">Activity</span>
+      <span class="s">Last 16 weeks</span>
+    </div>
+    <div class="card__body" style="padding: 12px 16px 18px;">
+      <div class="heatmap-scroll">
+        <div class="heatmap" id="heatmap"></div>
+      </div>
+      <div class="row" style="justify-content: flex-end; gap: 6px; font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+        Less
+        <span class="heatmap__cell" style="width:9px;height:9px;"></span>
+        <span class="heatmap__cell heatmap__cell--l1" style="width:9px;height:9px;"></span>
+        <span class="heatmap__cell heatmap__cell--l2" style="width:9px;height:9px;"></span>
+        <span class="heatmap__cell heatmap__cell--l3" style="width:9px;height:9px;"></span>
+        <span class="heatmap__cell heatmap__cell--l4" style="width:9px;height:9px;"></span>
+        More
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 16px;"></div>
+</main>
+
+<!-- Bottom navigation -->
+<nav class="bottomnav">
+  <a class="bottomnav__btn bottomnav__btn--active" href="05-dashboard-overview-mobile.html">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+    Overview
+  </a>
+  <a class="bottomnav__btn" href="06-dashboard-tasks-mobile.html">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    Tasks
+  </a>
+  <a class="bottomnav__btn" href="07-dashboard-inventory-mobile.html">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l-2 12H5z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>
+    Inventory
+  </a>
+  <a class="bottomnav__btn" href="08-dashboard-shop-mobile.html">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l3 12h12l2-8H6"/></svg>
+    Shop
+  </a>
+</nav>
+
+<script>
+(function(){
+  const root = document.getElementById('heatmap');
+  if (!root) return;
+  const levels = ['', 'heatmap__cell--l1','heatmap__cell--l2','heatmap__cell--l3','heatmap__cell--l4'];
+  const seed = [3,1,2,0,4,3,1,0,2,1,3,4,2,1,0,3, 2,3,1,0,2,4,3,2,1,2,3,4,3,1,0,1, 0,2,3,1,2,3,4,1,0,1,2,3,4,2,1,0,
+                1,0,2,3,4,2,1,3,2,1,0,3,4,2,1,0, 2,3,4,1,0,2,3,1,4,2,3,2,1,3,2,4, 0,1,2,3,1,4,2,1,0,3,4,2,1,3,2,1,
+                3,4,2,1,2,3,1,0,2,4,3,2,1,3,2,4];
+  let i = 0;
+  for (let c = 0; c < 16; c++){
+    const col = document.createElement('div');
+    col.className = 'heatmap__col';
+    for (let r = 0; r < 7; r++){
+      const cell = document.createElement('div');
+      cell.className = 'heatmap__cell ' + (levels[seed[i++ % seed.length]] || '');
+      col.appendChild(cell);
+    }
+    root.appendChild(col);
+  }
+})();
+</script>
+
+</body>
+</html>

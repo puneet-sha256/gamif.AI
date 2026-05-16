@@ -13,6 +13,12 @@ import AlertTest from './components/AlertTest'
 import ConfirmTest from './components/ConfirmTest'
 import type { ProfileData, GoalsData } from './types'
 import './App.css'
+import './fierce/fierce.css'
+import { useFierceUI } from './fierce/useFierceUI'
+import FierceAuthScreen from './fierce/FierceAuthScreen'
+import FierceProfileSetup from './fierce/FierceProfileSetup'
+import FierceGoalsSetup from './fierce/FierceGoalsSetup'
+import FierceDashboard from './fierce/FierceDashboard'
 
 type OnboardingStep = 'auth' | 'profile' | 'goals' | 'dashboard'
 
@@ -20,8 +26,8 @@ function AppContent() {
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('auth')
   const [isInitializing, setIsInitializing] = useState(true)
   const { user, updateUser, isLoading, logout } = useAuth()
+  const fierce = useFierceUI()
 
-  // Helper function to determine onboarding completion status
   const getOnboardingStatus = (user: any): { step: OnboardingStep, isComplete: boolean } => {
     if (!user) return { step: 'auth', isComplete: false }
 
@@ -42,7 +48,6 @@ function AppContent() {
     }
   }
 
-  // Auto-login effect: Check if user is logged in and determine appropriate step
   useEffect(() => {
     const initializeApp = async () => {
       if (isLoading) {
@@ -63,7 +68,7 @@ function AppContent() {
     }
 
     initializeApp()
-  }, [user, isLoading]) // Remove currentStep from deps to avoid loops
+  }, [user, isLoading])
 
   const handleLogin = () => {
     // Don't manually set step here - let the useEffect handle it when user state updates
@@ -87,7 +92,6 @@ function AppContent() {
     await logout()
   }
 
-  // Show loading screen while initializing (but not during auth operations)
   if (isInitializing) {
     return <LoadingScreen />
   }
@@ -95,17 +99,21 @@ function AppContent() {
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 'auth':
-        return <AuthScreen onLogin={handleLogin} />
+        return fierce
+          ? <FierceAuthScreen onLogin={handleLogin} />
+          : <AuthScreen onLogin={handleLogin} />
       case 'profile':
-        return <ProfileSetup onComplete={handleProfileComplete} />
+        return fierce
+          ? <FierceProfileSetup onComplete={handleProfileComplete} />
+          : <ProfileSetup onComplete={handleProfileComplete} />
       case 'goals':
-        return <GoalsSetup onComplete={handleGoalsComplete} onBack={handleGoalsBack} />
+        return fierce
+          ? <FierceGoalsSetup onComplete={handleGoalsComplete} onBack={handleGoalsBack} />
+          : <GoalsSetup onComplete={handleGoalsComplete} onBack={handleGoalsBack} />
       case 'dashboard':
-        return (
-          <Dashboard
-            onLogout={handleLogout}
-          />
-        )
+        return fierce
+          ? <FierceDashboard onLogout={handleLogout} />
+          : <Dashboard onLogout={handleLogout} />
       default:
         return <div style={{ color: 'var(--text-primary)', padding: '20px', background: 'var(--bg-primary)' }}>Loading...</div>
     }
