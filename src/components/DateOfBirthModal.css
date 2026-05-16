@@ -1,0 +1,151 @@
+.dob-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
+.dob-modal-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.dob-modal-container {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: var(--shadow-xl);
+  transform: scale(0.95) translateY(-10px);
+  opacity: 0;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+}
+
+.dob-modal-container.visible {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.dob-modal-icon {
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.dob-modal-title {
+  margin: 0 0 12px 0;
+  text-align: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.dob-modal-message {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-align: center;
+  margin: 0 0 24px 0;
+}
+
+.dob-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dob-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dob-modal-label {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.dob-modal-optional {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-left: 4px;
+}
+
+.dob-modal-form input[type="date"],
+.dob-modal-form input[type="time"] {
+  width: 100%;
+  padding: 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 1rem;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.dob-modal-form input[type="date"]:focus,
+.dob-modal-form input[type="time"]:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+  background: var(--bg-input-focus);
+}
+
+.dob-modal-error {
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+}
+
+.dob-modal-button {
+  margin-top: 8px;
+  width: 100%;
+  padding: 14px;
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.dob-modal-button:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.dob-modal-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dob-modal-button.loading {
+  cursor: wait;
+}
