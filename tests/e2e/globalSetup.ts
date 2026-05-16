@@ -49,7 +49,7 @@ export default async function globalSetup() {
     createdAt: '2026-04-01T00:00:00.000Z',
     profileData: {
       name: 'Tour Tester',
-      age: 25,
+      dateOfBirth: '2001-01-01',
     },
     goalsData: {
       longTermGoals:

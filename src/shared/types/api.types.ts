@@ -55,7 +55,7 @@ export interface UpdateProfileRequest {
   sessionId: string;
   profile: {
     name?: string;
-    age?: number;
+    dateOfBirth?: string;
   };
 }
 
