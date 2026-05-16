@@ -25,9 +25,11 @@ function AppContent() {
   const getOnboardingStatus = (user: any): { step: OnboardingStep, isComplete: boolean } => {
     if (!user) return { step: 'auth', isComplete: false }
 
+    // Profile is "complete enough" to leave the ProfileSetup step once a name
+    // exists. Missing dateOfBirth is recovered via a modal on the Dashboard so
+    // existing users aren't sent back through full onboarding.
     const isProfileComplete = user.profileData &&
-      user.profileData.name?.trim() &&
-      user.profileData.age > 0
+      !!user.profileData.name?.trim()
 
     const isGoalsComplete = user.goalsData &&
       user.goalsData.longTermGoals?.trim() &&
