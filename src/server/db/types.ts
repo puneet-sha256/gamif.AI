@@ -69,7 +69,7 @@ export interface SessionDoc {
   userId: string
   createdAt: string
   lastAccess: string
-  ttl: number       // auto-expiry in seconds (86400 = 24h)
+  ttl: number       // auto-expiry in seconds (432000 = 5d)
 }
 
 // ─── Field-to-subdoc dispatch mapping ────────────────────────────────────────

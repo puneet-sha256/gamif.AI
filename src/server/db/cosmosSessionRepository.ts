@@ -2,10 +2,8 @@ import type { Container } from '@azure/cosmos'
 import type { Session } from '../../shared/types'
 import type { ISessionRepository } from './interfaces'
 import type { SessionDoc } from './types'
-import { getSessionsContainer } from './cosmosClient'
+import { getSessionsContainer, SESSION_TTL } from './cosmosClient'
 import { logger } from '../../utils/logger'
-
-const SESSION_TTL = 86400 // 24 hours
 
 export class CosmosSessionRepository implements ISessionRepository {
   private get container(): Container {
