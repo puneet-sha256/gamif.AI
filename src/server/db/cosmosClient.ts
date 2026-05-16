@@ -9,7 +9,7 @@ let sessionsContainer: Container | null = null
 const DATABASE_ID = process.env.COSMOS_DATABASE || 'gamifai-db'
 const USERS_CONTAINER = 'users'
 const SESSIONS_CONTAINER = 'sessions'
-const SESSION_TTL = 86400 // 24 hours in seconds
+export const SESSION_TTL = 5 * 24 * 60 * 60 // 5 days in seconds
 
 export async function initializeCosmos(): Promise<void> {
   const endpoint = process.env.COSMOS_ENDPOINT
