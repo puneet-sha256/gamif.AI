@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { validateDob, maxDobInputValue, composeDob } from '../utils/timeAlive'
+import { validateDob, composeDob } from '../utils/timeAlive'
+import DateOfBirthPicker from './DateOfBirthPicker'
 import './DateOfBirthModal.css'
 
 interface DateOfBirthModalProps {
@@ -54,17 +55,14 @@ const DateOfBirthModal: React.FC<DateOfBirthModalProps> = ({ isOpen, existingNam
           {error && <div className="dob-modal-error">{error}</div>}
 
           <div className="dob-modal-field">
-            <label htmlFor="dob-modal-date" className="dob-modal-label">
+            <label htmlFor="dob-modal-year" className="dob-modal-label">
               Date of Birth
             </label>
-            <input
-              id="dob-modal-date"
-              type="date"
+            <DateOfBirthPicker
+              idPrefix="dob-modal"
               value={birthDate}
-              max={maxDobInputValue()}
-              onChange={(e) => { setBirthDate(e.target.value); if (error) setError('') }}
+              onChange={(d) => { setBirthDate(d); if (error) setError('') }}
               required
-              autoFocus
             />
           </div>
 
