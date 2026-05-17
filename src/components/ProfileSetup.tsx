@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { validateDob, maxDobInputValue, composeDob } from '../utils/timeAlive'
+import { validateDob, composeDob } from '../utils/timeAlive'
+import DateOfBirthPicker from './DateOfBirthPicker'
 import type { ProfileData } from '../types'
 import './ProfileSetup.css'
 
@@ -99,30 +100,25 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
                 />
               </div>
 
-              <div className="input-row">
-                <div className="input-group">
-                  <label htmlFor="dateOfBirth">Date of Birth</label>
-                  <input
-                    type="date"
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    value={birthDate}
-                    onChange={(e) => { setBirthDate(e.target.value); if (error) setError('') }}
-                    max={maxDobInputValue()}
-                    required
-                  />
-                </div>
+              <div className="input-group">
+                <label htmlFor="dob-setup-year">Date of Birth</label>
+                <DateOfBirthPicker
+                  idPrefix="dob-setup"
+                  value={birthDate}
+                  onChange={(d) => { setBirthDate(d); if (error) setError('') }}
+                  required
+                />
+              </div>
 
-                <div className="input-group">
-                  <label htmlFor="timeOfBirth">Time of Birth <span className="optional-hint">(optional — defaults to midnight)</span></label>
-                  <input
-                    type="time"
-                    id="timeOfBirth"
-                    name="timeOfBirth"
-                    value={birthTime}
-                    onChange={(e) => { setBirthTime(e.target.value); if (error) setError('') }}
-                  />
-                </div>
+              <div className="input-group">
+                <label htmlFor="timeOfBirth">Time of Birth <span className="optional-hint">(optional — defaults to midnight)</span></label>
+                <input
+                  type="time"
+                  id="timeOfBirth"
+                  name="timeOfBirth"
+                  value={birthTime}
+                  onChange={(e) => { setBirthTime(e.target.value); if (error) setError('') }}
+                />
               </div>
             </div>
 

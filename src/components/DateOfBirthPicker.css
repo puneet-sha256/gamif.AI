@@ -1,0 +1,60 @@
+.dob-picker {
+  display: grid;
+  grid-template-columns: 1.2fr 1.4fr 0.9fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.dob-picker-select {
+  width: 100%;
+  padding: 14px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+                    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 28px;
+}
+
+.dob-picker-select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+  background-color: var(--bg-input-focus);
+}
+
+.dob-picker-select:invalid {
+  color: var(--text-muted);
+}
+
+.dob-picker-select option {
+  color: var(--text-primary);
+  background: var(--bg-input);
+}
+
+.dob-picker-select option[value=""][disabled] {
+  color: var(--text-muted);
+}
+
+@media (max-width: 480px) {
+  .dob-picker {
+    grid-template-columns: 1.2fr 1.4fr 0.9fr;
+    gap: 6px;
+  }
+
+  .dob-picker-select {
+    padding: 12px 8px;
+    padding-right: 24px;
+    font-size: 16px; /* prevent iOS zoom on focus */
+  }
+}
