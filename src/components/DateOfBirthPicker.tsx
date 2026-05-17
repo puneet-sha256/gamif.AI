@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './DateOfBirthPicker.css'
 
 interface DateOfBirthPickerProps {
@@ -31,13 +31,38 @@ function pad(n: string): string {
   return n.padStart(2, '0')
 }
 
+function compose(year: string, month: string, day: string): string {
+  if (!year || !month || !day) return ''
+  return `${year}-${pad(month)}-${pad(day)}`
+}
+
 const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
   value,
   onChange,
   idPrefix = 'dob',
   required = false,
 }) => {
-  const { year, month, day } = splitDate(value)
+  const initial = splitDate(value)
+  const [year, setYear] = useState(initial.year)
+  const [month, setMonth] = useState(initial.month)
+  const [day, setDay] = useState(initial.day)
+
+  // Sync from prop only when the external value is a complete date that
+  // differs from our internal composition (e.g., a form reset).
+  useEffect(() => {
+    if (compose(year, month, day) === value) return
+    const parts = splitDate(value)
+    if (parts.year && parts.month && parts.day) {
+      setYear(parts.year)
+      setMonth(parts.month)
+      setDay(parts.day)
+    } else if (!value) {
+      setYear('')
+      setMonth('')
+      setDay('')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value])
 
   const years = useMemo(() => {
     const currentYear = new Date().getFullYear()
@@ -53,23 +78,14 @@ const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
     [year, month]
   )
 
-  const emit = (nextYear: string, nextMonth: string, nextDay: string) => {
-    if (!nextYear || !nextMonth || !nextDay) {
-      onChange('')
-      return
-    }
-    const clampedDay = Math.min(Number(nextDay), daysInMonth(Number(nextYear), Number(nextMonth)))
-    onChange(`${nextYear}-${pad(nextMonth)}-${pad(String(clampedDay))}`)
-  }
-
-  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    emit(e.target.value, month, day)
-  }
-  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    emit(year, e.target.value, day)
-  }
-  const handleDayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    emit(year, month, e.target.value)
+  const update = (nextYear: string, nextMonth: string, nextDay: string) => {
+    // Clamp day to the month's actual length when year/month changes.
+    const cap = daysInMonth(Number(nextYear), Number(nextMonth))
+    const clampedDay = nextDay && Number(nextDay) > cap ? String(cap) : nextDay
+    setYear(nextYear)
+    setMonth(nextMonth)
+    setDay(clampedDay)
+    onChange(compose(nextYear, nextMonth, clampedDay))
   }
 
   return (
@@ -78,7 +94,7 @@ const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
         id={`${idPrefix}-year`}
         className="dob-picker-select dob-picker-year"
         value={year}
-        onChange={handleYearChange}
+        onChange={(e) => update(e.target.value, month, day)}
         required={required}
         aria-label="Year of birth"
       >
@@ -92,7 +108,7 @@ const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
         id={`${idPrefix}-month`}
         className="dob-picker-select dob-picker-month"
         value={month}
-        onChange={handleMonthChange}
+        onChange={(e) => update(year, e.target.value, day)}
         required={required}
         aria-label="Month of birth"
       >
@@ -106,7 +122,7 @@ const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
         id={`${idPrefix}-day`}
         className="dob-picker-select dob-picker-day"
         value={day}
-        onChange={handleDayChange}
+        onChange={(e) => update(year, month, e.target.value)}
         required={required}
         aria-label="Day of birth"
       >
