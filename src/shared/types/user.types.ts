@@ -1,3 +1,5 @@
+import type { CatalogData } from './catalog.types'
+
 // Core user-related interfaces
 export interface ProfileData {
   name: string
@@ -149,6 +151,7 @@ export interface User {
   unclaimedRewards?: UnclaimedRewards // Pending rewards from daily activities
   activityHistory?: ActivityHistory // Historical daily XP data for heatmap
   taskHistory?: TaskHistory // Detailed task history for each date
+  catalog?: CatalogData // Per-user rewards calibration catalog (Milestone 1B+)
 }
 
 export interface UserRegistration {

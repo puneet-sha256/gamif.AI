@@ -6,9 +6,16 @@ import {
   createErrorResponse,
   ErrorMessages
 } from '../utils/responseHelpers'
-import type { GoalsData, ProfileData, UnclaimedReward, CompletedTask } from '../../types'
+import type { GoalsData, ProfileData, UnclaimedReward, CompletedTask, IntakeAnswer, IntakeCorrection, CatalogSignal, CategoryDefaults } from '../../types'
 import { AIPromptType } from '../config/aiConfigs'
 import { calculateRewardsFromAnalysis } from '../utils/rewardCalculation'
+import {
+  generatePersonalCatalog,
+  applyCorrectionsToCatalog,
+  buildIntakeSummary,
+  buildKnownTagsListing,
+  loadSeedCatalog,
+} from '../utils/catalogGenerator'
 import { logger } from '../../utils/logger'
 
 // Generate tasks using Azure AI
@@ -359,6 +366,239 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
     }
   } catch (error) {
     logger.error('Activity analysis error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// ─── Intake Calibration (Milestone 1B) ─────────────────────────────────────
+
+// Step 1 of intake: generate the 12 calibration cards from the user's existing goals.
+export async function generateIntakeQuestions(req: Request, res: Response) {
+  try {
+    const { sessionId } = req.body
+
+    if (!sessionId) {
+      return res.status(400).json(createErrorResponse('Session ID is required'))
+    }
+
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    const longTermGoals = user.goalsData?.longTermGoals?.trim()
+    if (!longTermGoals) {
+      return res.status(400).json(createErrorResponse(
+        'No goals set. Please complete goal setup before starting calibration.'
+      ))
+    }
+
+    logger.custom('🎯', `Generating intake questions for user: ${user.username}`)
+
+    const inputData = {
+      long_term_goals: longTermGoals,
+      category_meanings: {
+        Strength: 'physical, health, discipline',
+        Intelligence: 'learning, problem-solving, career development',
+        Charisma: 'communication, social, confidence'
+      }
+    }
+
+    const result = await azureAIService.generateCompletion(
+      AIPromptType.INTAKE_QUESTION_GENERATION,
+      JSON.stringify(inputData, null, 2)
+    )
+
+    if (!result.success || !result.data) {
+      logger.error('Intake question generation failed:', result.error)
+      return res.status(500).json(createErrorResponse(
+        result.error || 'Intake question generation failed'
+      ))
+    }
+
+    let parsed: { cards?: unknown[] } | null = null
+    try {
+      parsed = JSON.parse(result.data.content)
+    } catch (parseErr) {
+      const jsonMatch = result.data.content.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        try {
+          parsed = JSON.parse(jsonMatch[0])
+        } catch (fallbackErr) {
+          logger.error('Failed to parse intake questions JSON (fallback):', fallbackErr)
+        }
+      } else {
+        logger.error('Failed to parse intake questions JSON:', parseErr)
+      }
+    }
+
+    if (!parsed?.cards || !Array.isArray(parsed.cards)) {
+      return res.status(500).json(createErrorResponse('Invalid response from question generator'))
+    }
+
+    await updateSessionLastAccess(sessionId)
+    logger.success(`Generated ${parsed.cards.length} intake cards`)
+
+    res.json(createSuccessResponse(
+      'Intake questions generated',
+      { cards: parsed.cards },
+      undefined,
+      undefined,
+      undefined,
+      { processingTime: result.processingTimeMs, agentUsed: 'azure-openai-foundry' }
+    ))
+  } catch (error) {
+    logger.error('Intake question generation error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Step 2 of intake: extract structured signals from answers, generate the personal catalog,
+// persist it, and return a summary for the user to review.
+export async function submitIntake(req: Request, res: Response) {
+  try {
+    const { sessionId, answers } = req.body as { sessionId?: string; answers?: IntakeAnswer[] }
+
+    if (!sessionId || !answers || !Array.isArray(answers)) {
+      return res.status(400).json(createErrorResponse(
+        'Session ID and answers array are required'
+      ))
+    }
+
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    logger.custom('🎯', `Processing intake answers for user: ${user.username} (${answers.length} answers)`)
+
+    // Build extraction input — answers + known tags listing for AI grounding
+    const seed = loadSeedCatalog()
+    const extractionInput = {
+      answers,
+      known_tags: buildKnownTagsListing(seed)
+    }
+
+    const extractionResult = await azureAIService.generateCompletion(
+      AIPromptType.INTAKE_EXTRACTION,
+      JSON.stringify(extractionInput, null, 2)
+    )
+
+    if (!extractionResult.success || !extractionResult.data) {
+      logger.error('Intake extraction failed:', extractionResult.error)
+      return res.status(500).json(createErrorResponse(
+        extractionResult.error || 'Intake extraction failed'
+      ))
+    }
+
+    // Parse extraction response
+    let parsed: { catalog_signals?: CatalogSignal[]; category_defaults?: CategoryDefaults } | null = null
+    try {
+      parsed = JSON.parse(extractionResult.data.content)
+    } catch (parseErr) {
+      const jsonMatch = extractionResult.data.content.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        try { parsed = JSON.parse(jsonMatch[0]) } catch { /* swallow */ }
+      }
+      if (!parsed) {
+        logger.error('Failed to parse extraction JSON:', parseErr)
+      }
+    }
+
+    if (!parsed?.catalog_signals || !parsed?.category_defaults) {
+      return res.status(500).json(createErrorResponse('Invalid response from extraction agent'))
+    }
+
+    // Build personal catalog (pure code, deterministic)
+    const catalog = generatePersonalCatalog(
+      parsed.catalog_signals,
+      parsed.category_defaults,
+      answers,
+      seed
+    )
+
+    // Persist catalog to user record
+    await updateUser(user.id, { catalog })
+    logger.success(`Personal catalog written for ${user.username} (${Object.keys(catalog.rows).length} rows)`)
+
+    const summary = buildIntakeSummary(catalog, seed)
+    await updateSessionLastAccess(sessionId)
+
+    res.json(createSuccessResponse(
+      'Intake submitted; catalog generated',
+      { catalog, summary },
+      undefined,
+      undefined,
+      undefined,
+      { processingTime: extractionResult.processingTimeMs, agentUsed: 'azure-openai-foundry' }
+    ))
+  } catch (error) {
+    logger.error('Intake submission error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Step 3 of intake: apply user corrections from the summary review and lock in the catalog.
+export async function confirmIntake(req: Request, res: Response) {
+  try {
+    const { sessionId, corrections } = req.body as {
+      sessionId?: string
+      corrections?: IntakeCorrection[]
+    }
+
+    if (!sessionId) {
+      return res.status(400).json(createErrorResponse('Session ID is required'))
+    }
+
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    if (!user.catalog) {
+      return res.status(400).json(createErrorResponse(
+        'No catalog to confirm. Submit intake first.'
+      ))
+    }
+
+    const applied = corrections && corrections.length > 0
+      ? applyCorrectionsToCatalog(user.catalog, corrections)
+      : user.catalog
+
+    if (corrections && corrections.length > 0) {
+      await updateUser(user.id, { catalog: applied })
+      logger.success(`Applied ${corrections.length} corrections to catalog for ${user.username}`)
+    } else {
+      logger.custom('🎯', `Intake confirmed with no corrections for ${user.username}`)
+    }
+
+    await updateSessionLastAccess(sessionId)
+
+    res.json(createSuccessResponse(
+      'Intake confirmed',
+      { catalog: applied },
+      undefined,
+      undefined,
+      undefined,
+      { agentUsed: 'azure-openai-foundry' }
+    ))
+  } catch (error) {
+    logger.error('Intake confirmation error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }

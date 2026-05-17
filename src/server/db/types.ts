@@ -7,7 +7,8 @@ import type {
   InventoryItem,
   UnclaimedRewards,
   ActivityHistory,
-  TaskHistory
+  TaskHistory,
+  CatalogData
 } from '../../shared/types'
 
 // ─── Cosmos sub-document types ───────────────────────────────────────────────
@@ -58,8 +59,21 @@ export interface RewardsSubDoc {
   unclaimedRewards?: UnclaimedRewards
 }
 
-export type SubDoc = ProfileSubDoc | TasksSubDoc | ShopSubDoc | HistorySubDoc | RewardsSubDoc
-export type SubDocType = 'profile' | 'tasks' | 'shop' | 'history' | 'rewards'
+export interface CatalogSubDoc {
+  id: 'catalog'
+  type: 'catalog'
+  userId: string
+  catalog?: CatalogData
+}
+
+export type SubDoc =
+  | ProfileSubDoc
+  | TasksSubDoc
+  | ShopSubDoc
+  | HistorySubDoc
+  | RewardsSubDoc
+  | CatalogSubDoc
+export type SubDocType = 'profile' | 'tasks' | 'shop' | 'history' | 'rewards' | 'catalog'
 
 // ─── Session document ────────────────────────────────────────────────────────
 
@@ -99,4 +113,7 @@ export const FIELD_TO_SUBDOC: Record<string, SubDocType> = {
 
   // rewards sub-doc
   unclaimedRewards: 'rewards',
+
+  // catalog sub-doc (rewards calibration)
+  catalog: 'catalog',
 }

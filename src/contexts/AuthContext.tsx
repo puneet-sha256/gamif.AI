@@ -271,7 +271,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Refresh user's generated tasks and update user state
   const refreshUserTasks = async (): Promise<void> => {
     if (!user) return
-    
+
     try {
       // Fetch fresh user data to get updated tasks
       const freshUser = await userDatabase.getCurrentUser()
@@ -280,6 +280,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error('❌ AuthContext: Error refreshing user tasks:', error)
+    }
+  }
+
+  // Refresh the full user record (used after operations that touch fields beyond tasks,
+  // e.g. catalog creation post-intake)
+  const refreshUser = async (): Promise<void> => {
+    if (!user) return
+
+    try {
+      const freshUser = await userDatabase.getCurrentUser()
+      if (freshUser) {
+        setUser(freshUser)
+      }
+    } catch (error) {
+      console.error('❌ AuthContext: Error refreshing user:', error)
     }
   }
 
@@ -539,6 +554,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     saveProfileData,
     saveGoalsData,
     getUserTasks,
+    refreshUser,
     refreshUserTasks,
     editGeneratedTask,
     deleteGeneratedTask,

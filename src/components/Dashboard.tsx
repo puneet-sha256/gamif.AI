@@ -15,6 +15,7 @@ import RewardClaimModal from './RewardClaimModal'
 import TaskHistoryModal from './TaskHistoryModal'
 import ActivityHeatmap from './ActivityHeatmap'
 import OnboardingTour from './OnboardingTour'
+import IntakeCalibration from './IntakeCalibration'
 import { ONBOARDING_TOUR_STEPS } from './onboardingTourSteps'
 import {
   mapGeneratedTasksToTaskItems,
@@ -38,7 +39,7 @@ interface DashboardProps {
 type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
-  const { user, logout, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, buyShopItem, useInventoryItem, updateUser, refreshUserTasks } = useAuth()
+  const { user, logout, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, buyShopItem, useInventoryItem, updateUser, refreshUser, refreshUserTasks } = useAuth()
   const { showSuccess, showError, showWarning, showInfo } = useAlert()
   const { showConfirm } = useConfirm()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
@@ -1378,8 +1379,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
   }
 
+  // Rewards calibration intake — block dashboard until the user has a personal catalog.
+  // The overlay sits above everything; refreshUser fetches the updated user (now with catalog)
+  // and the overlay unmounts naturally.
+  const showIntake = !!user && !user.catalog
+
   return (
     <div className="dashboard-container">
+      {showIntake && <IntakeCalibration onComplete={refreshUser} />}
       <div className="dashboard-header" data-tour="header-greeting">
         <div className="dashboard-logo">
           <h1>GAMIF.AI</h1>

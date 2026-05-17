@@ -16,6 +16,8 @@ export const AZURE_OPENAI_CONFIG = {
 export const AIPromptType = {
   TASK_GENERATION: 'task-generation',
   ACTIVITY_ANALYSIS: 'activity-analysis',
+  INTAKE_QUESTION_GENERATION: 'intake-question-generation',
+  INTAKE_EXTRACTION: 'intake-extraction',
 } as const;
 
 export type AIPromptType = typeof AIPromptType[keyof typeof AIPromptType];
@@ -61,6 +63,24 @@ export const AI_CONFIGS: Record<AIPromptType, AIPromptConfig> = {
     modelName: 'gpt-4o',
     temperature: 0.2,
     maxTokens: 2048,
+    responseFormat: 'json'
+  },
+  [AIPromptType.INTAKE_QUESTION_GENERATION]: {
+    promptFile: 'intake-question-generation.prompt.md',
+    deployment: 'daily-task-agent',
+    apiVersion: '2024-04-01-preview',
+    modelName: 'gpt-4o-mini',
+    temperature: 0.3,
+    maxTokens: 3072,
+    responseFormat: 'json'
+  },
+  [AIPromptType.INTAKE_EXTRACTION]: {
+    promptFile: 'intake-extraction.prompt.md',
+    deployment: 'gpt-4o',
+    apiVersion: '2024-12-01-preview',
+    modelName: 'gpt-4o',
+    temperature: 0,
+    maxTokens: 3072,
     responseFormat: 'json'
   },
 };
