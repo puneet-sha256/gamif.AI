@@ -303,6 +303,46 @@ export function buildKnownTagsListing(seed?: SeedCatalog) {
   }))
 }
 
+// Listing of the signatures present in a user's personal catalog. Used by
+// the activity-extraction prompt to encourage the model to pick existing tags.
+export function buildUserKnownTagsListing(catalog: CatalogData, seed?: SeedCatalog) {
+  const s = seed ?? loadSeedCatalog()
+  return Object.values(catalog.rows).map(row => {
+    const template = s.templates.find(t => t.id === row.id)
+    return {
+      tag: row.tag,
+      category: row.category,
+      modifier: row.modifier,
+      modifier_dimension: row.modifier_dimension,
+      unit: row.unit,
+      description: template?.description ?? '',
+    }
+  })
+}
+
+// ─── Lookup + insert for v2 reward calculation ───────────────────────────────
+
+export function getRowBySignature(catalog: CatalogData, signature: string): CatalogRow | undefined {
+  return catalog.rows[signature]
+}
+
+// Returns a new CatalogData with the given row inserted under its signature.
+// Caller is responsible for persisting via updateUser({ catalog: <result> }).
+export function addAutoAddedRow(catalog: CatalogData, row: CatalogRow): CatalogData {
+  return {
+    ...catalog,
+    rows: { ...catalog.rows, [row.id]: row },
+    lastUpdated: new Date().toISOString(),
+  }
+}
+
+// Picks a small set of seed templates from the given category as anchors
+// for the catalog-miss valuation prompt.
+export function pickAnchorRows(seed: SeedCatalog, category: Category, count = 3): SeedTemplate[] {
+  const sameCategory = seed.templates.filter(t => t.category === category)
+  return sameCategory.slice(0, count)
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function round2(n: number): number {

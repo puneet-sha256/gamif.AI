@@ -1,7 +1,10 @@
 import React, { useState } from 'react'
 import './RewardClaimModal.css'
-import type { UnclaimedRewards } from '../shared/types/user.types'
+import type { UnclaimedRewards, CatalogVote } from '../shared/types/user.types'
 import { soundEffects } from '../utils/soundEffects'
+import { feedbackService } from '../client/services/feedbackService'
+import { userDatabase } from '../client/services/fileUserDatabase'
+import { useAlert } from '../contexts/AlertContext'
 
 interface RewardClaimModalProps {
   isOpen: boolean
@@ -21,7 +24,10 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
   isClaiming
 }) => {
   const [claimingIndex, setClaimingIndex] = useState<number | null>(null)
-  
+  // Per-row feedback state: maps signature → selected vote (or 'sending').
+  const [feedbackState, setFeedbackState] = useState<Record<string, CatalogVote | 'sending'>>({})
+  const { showError, showSuccess } = useAlert()
+
   if (!isOpen) return null
 
   const handleOverlayClick = (e: React.MouseEvent) => {
@@ -64,7 +70,12 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
     const labels: { [key: string]: string } = {
       'exact': 'Exact Match',
       'similar': 'Similar Match',
-      'goal-aligned': 'Goal Aligned'
+      'goal-aligned': 'Goal Aligned',
+      // v2 tiers
+      'goal-exact': 'Goal — exact',
+      'goal-similar': 'Goal — similar',
+      'category-aligned': 'Category-aligned',
+      'unrelated': 'Unrelated',
     }
     return labels[matchType] || matchType
   }
@@ -73,9 +84,42 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
     const icons: { [key: string]: string } = {
       'exact': '✅',
       'similar': '🔄',
-      'goal-aligned': '🎯'
+      'goal-aligned': '🎯',
+      // v2 tiers
+      'goal-exact': '✅',
+      'goal-similar': '🔄',
+      'category-aligned': '◐',
     }
     return icons[matchType] || '•'
+  }
+
+  const handleFeedback = async (signature: string | undefined, vote: CatalogVote) => {
+    if (!signature) return
+    const sessionId = userDatabase.getSessionId()
+    if (!sessionId) {
+      showError('Session expired. Please log in again.')
+      return
+    }
+    setFeedbackState(prev => ({ ...prev, [signature]: 'sending' }))
+    try {
+      await feedbackService.submitFeedback(sessionId, signature, vote)
+      setFeedbackState(prev => ({ ...prev, [signature]: vote }))
+      showSuccess(
+        vote === 'up'
+          ? 'Thanks — we\'ll keep this rate stable.'
+          : vote === 'over'
+            ? 'Thanks — we\'ll reduce the reward for future activities like this.'
+            : 'Thanks — we\'ll increase the reward for future activities like this.'
+      )
+    } catch (err) {
+      console.error('Feedback submit failed:', err)
+      showError('Couldn\'t save your feedback. Please try again.')
+      setFeedbackState(prev => {
+        const next = { ...prev }
+        delete next[signature]
+        return next
+      })
+    }
   }
 
   const hasActivities = unclaimedRewards?.activities && unclaimedRewards.activities.length > 0
@@ -142,10 +186,46 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
                           <span className="reward-value">+{activity.shardsEarned.toFixed(2)}</span>
                         </div>
                       </div>
+
+                      {activity.rateBreakdown && activity.tier && activity.tierMultiplier !== undefined && (
+                        <div className="reward-breakdown">
+                          <span className="reward-breakdown-label">
+                            {activity.rateBreakdown.unit === 'event'
+                              ? `flat ${activity.rateBreakdown.rate}`
+                              : `${activity.rateBreakdown.rate} × ${activity.rateBreakdown.value} ${activity.rateBreakdown.unit === 'time' ? 'min' : 'units'}`}
+                            {' '}× {activity.tierMultiplier} ({activity.tier})
+                          </span>
+                        </div>
+                      )}
+
+                      {activity.signature && (
+                        <div className="reward-feedback">
+                          <span className="reward-feedback-label">How does this reward feel?</span>
+                          <div className="reward-feedback-chips">
+                            {(['up', 'over', 'under'] as CatalogVote[]).map(vote => {
+                              const current = feedbackState[activity.signature!]
+                              const selected = current === vote
+                              const sending = current === 'sending'
+                              const disabled = isClaiming || claimingIndex !== null || sending || current !== undefined
+                              const label = vote === 'up' ? '👍 Feels right' : vote === 'over' ? '🔽 Too much' : '🔼 Too little'
+                              return (
+                                <button
+                                  key={vote}
+                                  className={`reward-feedback-chip ${selected ? 'selected' : ''} ${sending ? 'sending' : ''}`}
+                                  onClick={() => handleFeedback(activity.signature, vote)}
+                                  disabled={disabled}
+                                >
+                                  {sending && current === vote ? '…' : label}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    
+
                     <div className="activity-claim-action">
-                      <button 
+                      <button
                         className="activity-claim-btn"
                         onClick={() => handleIndividualClaim(index)}
                         disabled={isClaiming || claimingIndex !== null}
