@@ -559,7 +559,7 @@ export async function submitIntake(req: Request, res: Response) {
     }
 
     // Parse extraction response
-    let parsed: { catalog_signals?: CatalogSignal[]; category_defaults?: CategoryDefaults } | null = null
+    let parsed: { catalog_signals?: CatalogSignal[]; category_defaults?: CategoryDefaults; goal_tags?: string[] } | null = null
     try {
       parsed = JSON.parse(extractionResult.data.content)
     } catch (parseErr) {
@@ -576,12 +576,18 @@ export async function submitIntake(req: Request, res: Response) {
       return res.status(500).json(createErrorResponse('Invalid response from extraction agent'))
     }
 
+    // Normalise goal_tags (optional, may be missing on older prompt outputs).
+    const goalTags = Array.isArray(parsed.goal_tags)
+      ? Array.from(new Set(parsed.goal_tags.filter(t => typeof t === 'string' && t.length > 0)))
+      : []
+
     // Build personal catalog (pure code, deterministic)
     const catalog = generatePersonalCatalog(
       parsed.catalog_signals,
       parsed.category_defaults,
       answers,
-      seed
+      seed,
+      goalTags
     )
 
     // Persist catalog to user record

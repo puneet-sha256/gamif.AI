@@ -112,6 +112,12 @@ export interface CatalogCalibration {
   rawAnswers: IntakeAnswer[]
   extractedSignals: CatalogSignal[]
   categoryDefaults: CategoryDefaults
+  // Tags from known_tags that the user's stated goals directly advance.
+  // Used by the reward tier classifier to distinguish "in a goal category"
+  // (loose) from "directly aligned with a stated goal" (tight). Optional
+  // for backward-compat with catalogs created before this field existed —
+  // missing/empty → classifier falls back to category-level check.
+  goalTags?: string[]
   corrections?: IntakeCorrection[]
   completedAt: string                 // ISO timestamp
 }

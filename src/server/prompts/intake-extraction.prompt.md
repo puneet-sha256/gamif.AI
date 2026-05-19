@@ -108,9 +108,26 @@ Return ONLY this JSON structure:
     "Strength": 1-5,
     "Intelligence": 1-5,
     "Charisma": 1-5
-  }
+  },
+  "goal_tags": ["string", "..."]
 }
 ```
+
+---
+
+### THE goal_tags FIELD
+
+`goal_tags` is a flat, deduplicated list of `tag` identifiers from `known_tags` that **directly advance one of the user's stated long-term goals.** The downstream reward classifier uses this to grant a "goal-aligned" multiplier (1.0×) instead of "category-aligned" (0.80×) when the user later logs activities matching these tags.
+
+Selection criteria:
+
+1. **Only include tags that directly serve a stated goal.** If a user's goal is *"learn JavaScript and Python"*, include `problem_solving`, `focused_study`, `skill_practice` — NOT `creative_work` or `journal_reflection`, even though those are also Intelligence-category.
+2. **Use only the `tag` part of the catalog id, not the full signature.** Output `"workout_session"`, not `"workout_session|Strength|moderate"`.
+3. **Be specific, not exhaustive.** If a goal is *"build muscle"*, include `workout_session`, `workout_attempted`, `cardio_session` — but NOT `cold_exposure` (discipline, not muscle-building).
+4. **Dedupe across goals.** If multiple goals all serve `focused_study`, list it once.
+5. **Skip categories that have no stated goals.** If the user has no Charisma goals, don't include any Charisma tags.
+
+If the user has stated goals you cannot map to any known tag, leave the array empty rather than guessing.
 
 ---
 
@@ -205,11 +222,18 @@ Return ONLY this JSON structure:
     "Strength": 3,
     "Intelligence": 3,
     "Charisma": 4
-  }
+  },
+  "goal_tags": [
+    "presentation",
+    "conversation_initiation",
+    "feedback_exchange"
+  ]
 }
 ```
 
 Note: in this example, `category_defaults.Strength` came from the catch-all "light activity" answer (option `light` → middling baseline of 3 because activity isn't a focus area). `Charisma` default is 4 because the user expressed broad discomfort. `Intelligence` is 3 as a neutral baseline since no Intelligence catch-all was in this trimmed example.
+
+`goal_tags` lists only the Charisma tags this user's communication goal directly advances. Activities like `mentorship`, `active_listening`, and `substantive_conversation` are Charisma-category but don't directly serve "improve communication for leadership" — so they're excluded. Future logs of those activities will be `category-aligned` (0.80×), while logs of `presentation` or `conversation_initiation` will be `goal-aligned` (1.0×).
 
 ---
 

@@ -101,7 +101,8 @@ export function classifyTier(
   extractedTag: string,
   extractedCategory: Category,
   generatedTasks: GeneratedTasks | undefined,
-  goalCategories: Set<Category>
+  goalCategories: Set<Category>,
+  goalTags?: Set<string>
 ): { tier: RewardTier; multiplier: number } {
   // 1. Exact match against any planned task today
   const plannedSignatures = collectPlannedSignatures(generatedTasks)
@@ -115,13 +116,29 @@ export function classifyTier(
     return { tier: 'goal-similar', multiplier: TIER_MULTIPLIER['goal-similar'] }
   }
 
-  // 3. Category appears in user's goal categories (from intake signals)
+  const knownCategory =
+    extractedCategory === 'Strength' ||
+    extractedCategory === 'Intelligence' ||
+    extractedCategory === 'Charisma'
+
+  // 3a. Tag-level goal alignment (preferred path, when catalog has goal_tags).
+  if (goalTags && goalTags.size > 0) {
+    if (goalTags.has(extractedTag)) {
+      return { tier: 'goal-aligned', multiplier: TIER_MULTIPLIER['goal-aligned'] }
+    }
+    return knownCategory
+      ? { tier: 'category-aligned', multiplier: TIER_MULTIPLIER['category-aligned'] }
+      : { tier: 'unrelated', multiplier: 0 }
+  }
+
+  // 3b. Backward-compat fallback: catalog has no goal_tags (older intakes).
+  // Use category-level membership to decide goal- vs category-aligned.
   if (goalCategories.has(extractedCategory)) {
     return { tier: 'goal-aligned', multiplier: TIER_MULTIPLIER['goal-aligned'] }
   }
 
   // 4. Recognised activity category but not goal-aligned
-  if (extractedCategory === 'Strength' || extractedCategory === 'Intelligence' || extractedCategory === 'Charisma') {
+  if (knownCategory) {
     return { tier: 'category-aligned', multiplier: TIER_MULTIPLIER['category-aligned'] }
   }
 
@@ -371,6 +388,11 @@ export async function computeRewardsFromExtraction(
   const goalCategories = new Set<Category>(
     user.catalog.calibration.extractedSignals.map(s => s.category)
   )
+  // Tag-level goal mapping from intake (when present). Empty / undefined means
+  // the catalog predates this field — classifyTier falls back to category check.
+  const goalTags = user.catalog.calibration.goalTags && user.catalog.calibration.goalTags.length > 0
+    ? new Set<string>(user.catalog.calibration.goalTags)
+    : undefined
 
   const rewards: RewardV2[] = []
   const skipped: SkippedV2[] = []
@@ -396,7 +418,8 @@ export async function computeRewardsFromExtraction(
       act.tag,
       act.category,
       user.generatedTasks,
-      goalCategories
+      goalCategories,
+      goalTags
     )
 
     if (tier === 'unrelated') {

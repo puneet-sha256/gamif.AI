@@ -187,7 +187,8 @@ export function generatePersonalCatalog(
   signals: CatalogSignal[],
   categoryDefaults: CategoryDefaults,
   rawAnswers: IntakeAnswer[],
-  seed?: SeedCatalog
+  seed?: SeedCatalog,
+  goalTags?: string[]
 ): CatalogData {
   const s = seed ?? loadSeedCatalog()
   const now = new Date().toISOString()
@@ -204,6 +205,7 @@ export function generatePersonalCatalog(
       rawAnswers,
       extractedSignals: signals,
       categoryDefaults,
+      goalTags: goalTags && goalTags.length > 0 ? goalTags : undefined,
       completedAt: now,
     },
     seedVersion: s.version,
