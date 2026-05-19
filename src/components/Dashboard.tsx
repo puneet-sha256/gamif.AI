@@ -16,6 +16,8 @@ import TaskHistoryModal from './TaskHistoryModal'
 import ActivityHeatmap from './ActivityHeatmap'
 import OnboardingTour from './OnboardingTour'
 import IntakeCalibration from './IntakeCalibration'
+import TimeAliveCounter from './TimeAliveCounter'
+import DateOfBirthModal from './DateOfBirthModal'
 import { ONBOARDING_TOUR_STEPS } from './onboardingTourSteps'
 import {
   mapGeneratedTasksToTaskItems,
@@ -762,10 +764,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                   <span className="label">Player Name:</span>
                   <span className="value">{profileData.name}</span>
                 </div>
-                <div className="profile-item">
-                  <span className="label">Age:</span>
-                  <span className="value">{profileData.age} years</span>
-                </div>
+                {profileData.dateOfBirth && (
+                  <div className="profile-item">
+                    <span className="label">Time Alive:</span>
+                    <span className="value">
+                      <TimeAliveCounter dateOfBirth={profileData.dateOfBirth} />
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -1482,6 +1488,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         onTabChange={setActiveTab}
         onComplete={() => closeTour(true)}
         onSkip={() => closeTour(true)}
+      />
+
+      {/* DOB capture for users created before this field existed */}
+      <DateOfBirthModal
+        isOpen={!!profileData?.name && !profileData?.dateOfBirth}
+        existingName={profileData?.name || ''}
       />
     </div>
   )

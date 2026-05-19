@@ -1,0 +1,42 @@
+.time-alive-counter {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: 'Orbitron', 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-primary);
+  letter-spacing: 0.5px;
+}
+
+.time-alive-counter--invalid {
+  color: var(--text-muted);
+  font-family: inherit;
+}
+
+.time-alive-unit {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.time-alive-value {
+  font-weight: 700;
+  font-size: 1.05em;
+}
+
+.time-alive-label {
+  color: var(--text-muted);
+  font-size: 0.75em;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.time-alive-unit--seconds .time-alive-value {
+  color: var(--accent-primary);
+  animation: time-alive-pulse 1s ease-in-out infinite;
+}
+
+@keyframes time-alive-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}

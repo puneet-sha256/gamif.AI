@@ -3,7 +3,7 @@ import type { CatalogData } from './catalog.types'
 // Core user-related interfaces
 export interface ProfileData {
   name: string
-  age: number
+  dateOfBirth: string // ISO date 'YYYY-MM-DD'
 }
 
 export interface GoalsData {

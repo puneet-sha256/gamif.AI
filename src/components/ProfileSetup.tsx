@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { validateDob, composeDob } from '../utils/timeAlive'
+import DateOfBirthPicker from './DateOfBirthPicker'
 import type { ProfileData } from '../types'
 import './ProfileSetup.css'
 
@@ -8,48 +10,39 @@ interface ProfileSetupProps {
 }
 
 const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
-  const [formData, setFormData] = useState<ProfileData>({
-    name: '',
-    age: 18
-  })
+  const [name, setName] = useState('')
+  const [birthDate, setBirthDate] = useState('')
+  const [birthTime, setBirthTime] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
   const { saveProfileData } = useAuth()
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'age' ? Number(value) : value
-    }))
-    if (error) {
-      setError('')
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Validation
-    if (!formData.name.trim()) {
+
+    if (!name.trim()) {
       setError('Player name is required')
       return
     }
-    
-    if (formData.age < 13 || formData.age > 100) {
-      setError('Age must be between 13 and 100')
+
+    const composed = composeDob(birthDate, birthTime)
+    const dobValidation = validateDob(composed)
+    if (!dobValidation.ok) {
+      setError(dobValidation.error || 'Invalid date of birth')
       return
     }
-    
+
+    const profileData: ProfileData = { name: name.trim(), dateOfBirth: composed }
+
     setIsSubmitting(true)
     setError('')
-    
+
     try {
-      const success = await saveProfileData(formData)
-      
+      const success = await saveProfileData(profileData)
+
       if (success) {
-        onComplete(formData)
+        onComplete(profileData)
       } else {
         setError('Failed to save profile. Please try again.')
       }
@@ -66,7 +59,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
       <div className="profile-setup-background">
         <div className="shadows"></div>
       </div>
-      
+
       <div className="profile-setup-content">
         <div className="profile-setup-card">
           <div className="setup-header">
@@ -91,15 +84,15 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
 
             <div className="form-section">
               <h3>Personal Information</h3>
-              
+
               <div className="input-group">
                 <label htmlFor="name">Player Name</label>
                 <input
                   type="text"
                   id="name"
                   name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
+                  value={name}
+                  onChange={(e) => { setName(e.target.value); if (error) setError('') }}
                   placeholder="Enter your player name"
                   required
                   minLength={2}
@@ -108,22 +101,29 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
               </div>
 
               <div className="input-group">
-                <label htmlFor="age">Age</label>
-                <input
-                  type="number"
-                  id="age"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleInputChange}
-                  min="13"
-                  max="100"
+                <label htmlFor="dob-setup-year">Date of Birth</label>
+                <DateOfBirthPicker
+                  idPrefix="dob-setup"
+                  value={birthDate}
+                  onChange={(d) => { setBirthDate(d); if (error) setError('') }}
                   required
+                />
+              </div>
+
+              <div className="input-group">
+                <label htmlFor="timeOfBirth">Time of Birth <span className="optional-hint">(optional — defaults to midnight)</span></label>
+                <input
+                  type="time"
+                  id="timeOfBirth"
+                  name="timeOfBirth"
+                  value={birthTime}
+                  onChange={(e) => { setBirthTime(e.target.value); if (error) setError('') }}
                 />
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className={`setup-button ${isSubmitting ? 'loading' : ''}`}
               disabled={isSubmitting}
             >
