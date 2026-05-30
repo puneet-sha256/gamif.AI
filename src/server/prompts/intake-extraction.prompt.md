@@ -117,17 +117,31 @@ Return ONLY this JSON structure:
 
 ### THE goal_tags FIELD
 
-`goal_tags` is a flat, deduplicated list of `tag` identifiers from `known_tags` that **directly advance one of the user's stated long-term goals.** The downstream reward classifier uses this to grant a "goal-aligned" multiplier (1.0×) instead of "category-aligned" (0.80×) when the user later logs activities matching these tags.
+`goal_tags` is a flat, deduplicated list of `tag` identifiers from `known_tags` that **reasonably advance one of the user's stated long-term goals.** The downstream reward classifier uses this to grant a "goal-aligned" multiplier (1.0×) instead of "category-aligned" (0.80×) when the user later logs activities matching these tags.
+
+**Err on the side of inclusion when in doubt.** "Reasonably advances" is broader than "is the canonical activity for that goal" — reading about Python *advances* learning Python, even if the user wrote the goal as just "Learn Python". Practicing presentations *advances* communication skills, even if the user wrote "improve leadership communication". Cardio *advances* "build muscle" indirectly through fitness, even if the user mainly meant lifting.
 
 Selection criteria:
 
-1. **Only include tags that directly serve a stated goal.** If a user's goal is *"learn JavaScript and Python"*, include `problem_solving`, `focused_study`, `skill_practice` — NOT `creative_work` or `journal_reflection`, even though those are also Intelligence-category.
-2. **Use only the `tag` part of the catalog id, not the full signature.** Output `"workout_session"`, not `"workout_session|Strength|moderate"`.
-3. **Be specific, not exhaustive.** If a goal is *"build muscle"*, include `workout_session`, `workout_attempted`, `cardio_session` — but NOT `cold_exposure` (discipline, not muscle-building).
-4. **Dedupe across goals.** If multiple goals all serve `focused_study`, list it once.
-5. **Skip categories that have no stated goals.** If the user has no Charisma goals, don't include any Charisma tags.
+1. **Include every tag whose described activity could plausibly help with a stated goal.** Use the catalog row's description to judge. If the description matches an activity that *would* help the user practice or progress toward their goal, include the tag — even if the activity isn't the most direct.
 
-If the user has stated goals you cannot map to any known tag, leave the array empty rather than guessing.
+   *Examples of inclusive mapping:*
+   - Goal "learn JavaScript and Python" → include all of: `problem_solving`, `focused_study`, `skill_practice`, `reading_session`, `educational_content`, `writing_session`. Any active engagement with technical material advances learning a programming language.
+   - Goal "build muscle and get fit" → include all of: `workout_session`, `workout_attempted`, `cardio_session`, `mobility_work`, `sports_play`, `walk`. All advance fitness/strength to varying degrees.
+   - Goal "improve communication for leadership" → include all of: `conversation_initiation`, `presentation`, `presentation_prep`, `substantive_conversation`, `difficult_conversation`, `feedback_exchange`, `networking_event`, `mentorship`, `active_listening`. Communication skills are practiced through many forms.
+
+2. **Exclude only tags that genuinely don't help the stated goals.** *Examples of correct exclusion:*
+   - "Learn programming" goal: exclude `creative_work` (art/music, not technical), `journal_reflection` (introspection, not learning programming).
+   - "Build muscle" goal: exclude `cold_exposure` (discipline, not muscle), `nutrition_discipline` (helpful but not muscle activity itself), `early_wake` (routine, not exercise).
+   - "Improve communication" goal: don't add Strength/Intelligence tags unless a goal also touches those categories.
+
+3. **Use only the `tag` part of the catalog id, not the full signature.** Output `"workout_session"`, not `"workout_session|Strength|moderate"`.
+
+4. **Dedupe across goals.** If multiple goals all serve `focused_study`, list it once.
+
+5. **Skip whole categories that have no stated goals at all.** If the user has zero Charisma goals, don't include any Charisma tags. But within a category that DOES have a goal, be generous — see rule 1.
+
+If the user has stated goals you cannot map to any known tag at all, leave the array empty rather than guessing.
 
 ---
 
@@ -225,15 +239,21 @@ If the user has stated goals you cannot map to any known tag, leave the array em
   },
   "goal_tags": [
     "presentation",
+    "presentation_prep",
     "conversation_initiation",
-    "feedback_exchange"
+    "substantive_conversation",
+    "difficult_conversation",
+    "feedback_exchange",
+    "networking_event",
+    "mentorship",
+    "active_listening"
   ]
 }
 ```
 
 Note: in this example, `category_defaults.Strength` came from the catch-all "light activity" answer (option `light` → middling baseline of 3 because activity isn't a focus area). `Charisma` default is 4 because the user expressed broad discomfort. `Intelligence` is 3 as a neutral baseline since no Intelligence catch-all was in this trimmed example.
 
-`goal_tags` lists only the Charisma tags this user's communication goal directly advances. Activities like `mentorship`, `active_listening`, and `substantive_conversation` are Charisma-category but don't directly serve "improve communication for leadership" — so they're excluded. Future logs of those activities will be `category-aligned` (0.80×), while logs of `presentation` or `conversation_initiation` will be `goal-aligned` (1.0×).
+`goal_tags` lists every Charisma tag whose activity could reasonably advance "improve communication for leadership" — presentations (and rehearsals), starting conversations, having substantive or difficult conversations, exchanging feedback, networking, mentoring, listening actively. Each of these is a form of communication practice. The classifier will grant the 1.0× goal-aligned bonus to all of these activities when the user logs them later. Only `Strength` and `Intelligence` tags are excluded entirely (no goals in those categories in this trimmed example).
 
 ---
 
