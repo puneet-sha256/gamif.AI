@@ -13,6 +13,7 @@ You will receive a JSON object:
 ```json
 {
   "daily_log": "string (user's free-form description of what they did)",
+  "long_term_goals": "string (the user's stated long-term goals)",
   "known_tags": [
     {
       "tag": "string",
@@ -27,6 +28,8 @@ You will receive a JSON object:
 ```
 
 `known_tags` is the catalog the user's reward system understands. **Prefer these tags whenever possible.** Only propose a new `(tag, modifier)` if the activity doesn't fit any known tag at all — the system will value novel signatures on its own.
+
+`long_term_goals` is what the user said they're working toward. You'll use this to decide whether each activity brings them closer to those goals (see the `goal_advancement` field below).
 
 ---
 
@@ -78,11 +81,35 @@ Return ONLY this JSON structure:
       "value_source": "stated|inferred|default",
       "completed": boolean,
       "confidence": "high|partial|low",
+      "goal_advancement": "advances|category-only|neither",
       "notes": "string (brief reasoning, ≤ 1 sentence)"
     }
   ]
 }
 ```
+
+---
+
+### THE goal_advancement FIELD (PER-ACTIVITY GOAL JUDGMENT)
+
+For each activity, judge how it relates to the user's `long_term_goals`:
+
+- **`"advances"`** — this activity moves the user closer to a stated goal. The downstream system grants the goal-aligned reward multiplier (1.0×).
+  - *Examples*: User's goal is "Learn JavaScript and Python" → reading an article *about Python*, solving leetcode problems, watching a programming course = `"advances"`.
+  - *Examples*: User's goal is "Build muscle" → workout, cardio session, mobility work = `"advances"`.
+  - *Examples*: User's goal is "Improve communication for leadership" → presentation, networking event, difficult conversation, even practicing in front of the mirror = `"advances"`.
+  - **Key rule**: Look at the activity's actual content, not just its category. "Read for 20 min" alone is unclear; "Read a 20-min article on Python" clearly advances a programming goal.
+
+- **`"category-only"`** — this activity is self-improvement in the same attribute category (Strength / Intelligence / Charisma) as one of the user's goals, but doesn't actually advance any stated goal.
+  - *Examples*: User has a "learn programming" goal → reading a sci-fi novel = `"category-only"` (Intelligence, but not advancing programming). Doing pottery = `"category-only"` (Intelligence, but not advancing programming).
+  - *Examples*: User has a "build muscle" goal → restoring a car in the garage = `"category-only"` (physical, but not muscle-building).
+  - The downstream system grants the category-aligned reward multiplier (0.80×).
+
+- **`"neither"`** — the activity isn't self-improvement at all, or its category isn't even one the user has goals in. The downstream system skips it (no reward).
+  - *Examples*: "Drank 6 beers", "Watched 4 hours of TV", "Argued with my brother for no good reason."
+  - *Examples*: User has only Intelligence and Strength goals → a Charisma activity like "had coffee with a friend" might still be `"category-only"` (improving social skills) or `"neither"` depending on context. Use your judgment.
+
+**Be honest, not lenient.** The reward system relies on you giving accurate judgments here. Don't mark casual reading as `"advances"` just because the user has *some* Intelligence goal — only if the reading materially serves that specific goal.
 
 ---
 
@@ -92,11 +119,13 @@ Return ONLY this JSON structure:
 
 ```json
 {
-  "daily_log": "Today I did a 40-min workout, solved 2 medium leetcode problems, and presented our quarterly results to the leadership team.",
+  "daily_log": "Today I did a 40-min workout, solved 2 medium leetcode problems, presented our quarterly results to the leadership team, and read a sci-fi novel for 30 minutes.",
+  "long_term_goals": "Build muscle and improve cardiovascular health. Learn JavaScript and Python to advance my programming career. Improve communication skills for leadership roles.",
   "known_tags": [
     { "tag": "workout_session", "category": "Strength", "modifier": "moderate", "unit": "time", "modifier_dimension": "intensity", "description": "General-purpose physical workout at moderate intensity" },
     { "tag": "problem_solving", "category": "Intelligence", "modifier": "moderate", "unit": "count", "modifier_dimension": "difficulty", "description": "Moderate problem solved" },
-    { "tag": "presentation", "category": "Charisma", "modifier": "unfamiliar_audience", "unit": "event", "modifier_dimension": "audience_size", "description": "Presented to people you don't know personally — leadership, external, public" }
+    { "tag": "presentation", "category": "Charisma", "modifier": "unfamiliar_audience", "unit": "event", "modifier_dimension": "audience_size", "description": "Presented to people you don't know personally — leadership, external, public" },
+    { "tag": "reading_session", "category": "Intelligence", "modifier": "moderate", "unit": "time", "modifier_dimension": "focus", "description": "Sustained reading — book, long article, paper" }
   ]
 }
 ```
@@ -116,7 +145,8 @@ Return ONLY this JSON structure:
       "value_source": "stated",
       "completed": true,
       "confidence": "high",
-      "notes": "Duration stated; default to moderate intensity (no explicit qualifier)"
+      "goal_advancement": "advances",
+      "notes": "Duration stated; default to moderate intensity. Advances the muscle/cardio goal."
     },
     {
       "name": "2 medium leetcode problems",
@@ -128,7 +158,8 @@ Return ONLY this JSON structure:
       "value_source": "stated",
       "completed": true,
       "confidence": "high",
-      "notes": "Count and difficulty stated explicitly"
+      "goal_advancement": "advances",
+      "notes": "Count and difficulty stated. Programming practice → advances the JavaScript/Python goal."
     },
     {
       "name": "presented quarterly results to leadership",
@@ -140,11 +171,52 @@ Return ONLY this JSON structure:
       "value_source": "stated",
       "completed": true,
       "confidence": "high",
-      "notes": "Presentation to leadership team — unfamiliar_audience tier"
+      "goal_advancement": "advances",
+      "notes": "Leadership presentation — directly advances the communication-for-leadership goal."
+    },
+    {
+      "name": "read a sci-fi novel for 30 minutes",
+      "tag": "reading_session",
+      "category": "Intelligence",
+      "modifier": "moderate",
+      "unit": "time",
+      "value": 30,
+      "value_source": "stated",
+      "completed": true,
+      "confidence": "high",
+      "goal_advancement": "category-only",
+      "notes": "Reading is Intelligence-category but a sci-fi novel doesn't advance programming goals."
     }
   ]
 }
 ```
+
+**Example of goal-advancing reading (same tag, different content):**
+
+Input log: `"Read a 20-min article about Python async patterns."`
+Same `long_term_goals` as above.
+
+```json
+{
+  "activities": [
+    {
+      "name": "Read a 20-min article about Python async patterns",
+      "tag": "reading_session",
+      "category": "Intelligence",
+      "modifier": "moderate",
+      "unit": "time",
+      "value": 20,
+      "value_source": "stated",
+      "completed": true,
+      "confidence": "high",
+      "goal_advancement": "advances",
+      "notes": "Reading material is explicitly about Python — directly serves the programming learning goal."
+    }
+  ]
+}
+```
+
+This is the key insight: same `tag` (`reading_session`), opposite `goal_advancement` — the content of the reading material is what decides.
 
 **Example of inferred values:**
 
@@ -163,7 +235,8 @@ Input: `"I worked out today and read some stuff for work."`
       "value_source": "inferred",
       "completed": true,
       "confidence": "partial",
-      "notes": "No duration stated; defaulted to 30 min"
+      "goal_advancement": "advances",
+      "notes": "No duration stated; defaulted to 30 min. User has a fitness goal so this advances it."
     },
     {
       "name": "read some stuff for work",
@@ -175,7 +248,8 @@ Input: `"I worked out today and read some stuff for work."`
       "value_source": "default",
       "completed": true,
       "confidence": "low",
-      "notes": "Vague — 'some stuff' — defaulted to 30 min moderate reading"
+      "goal_advancement": "category-only",
+      "notes": "Reading for work, no signal it relates to programming goal specifically."
     }
   ]
 }
@@ -198,7 +272,8 @@ Input: `"Spent 90 minutes on a really hard leetcode problem but couldn't crack i
       "value_source": "stated",
       "completed": false,
       "confidence": "high",
-      "notes": "User explicitly didn't solve — switched to effort-pair tag"
+      "goal_advancement": "advances",
+      "notes": "Unsuccessful attempt — effort-pair tag. Programming practice still advances the JS/Python goal."
     }
   ]
 }
@@ -212,5 +287,6 @@ Input: `"Spent 90 minutes on a really hard leetcode problem but couldn't crack i
 2. **DO NOT** invent activities. Every output entry must map to something the user actually said they did.
 3. **DO** map specific phrasings ("leetcode", "duolingo", "yoga flow") to generic catalog tags (`problem_solving`, `skill_practice`, `mobility_work`) using semantic reasoning.
 4. **DO** prefer existing `known_tags` over proposing new ones. Only propose new `tag` + `modifier` strings when no known tag is even close.
-5. **DO** return valid JSON. No markdown, no preamble.
-6. Same input MUST produce the same output (called with `temperature=0`).
+5. **DO** judge `goal_advancement` per activity using the content/context, not just the category. A sci-fi novel and a Python textbook are both `reading_session` but different `goal_advancement`.
+6. **DO** return valid JSON. No markdown, no preamble.
+7. Same input MUST produce the same output (called with `temperature=0`).

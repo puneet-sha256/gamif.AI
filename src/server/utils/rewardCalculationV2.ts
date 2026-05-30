@@ -44,6 +44,12 @@ export interface ExtractedActivity {
   value_source: 'stated' | 'inferred' | 'default'
   completed: boolean
   confidence: 'high' | 'partial' | 'low'
+  // Per-activity goal judgment from the extraction AI:
+  //   'advances'      → activity advances a stated goal → goal-aligned tier (1.0x)
+  //   'category-only' → in a goal category but doesn't advance → category-aligned (0.80x)
+  //   'neither'       → not self-improvement / wrong category → unrelated (skipped)
+  // Optional for backward-compat with older extractions that didn't include it.
+  goal_advancement?: 'advances' | 'category-only' | 'neither'
   notes: string
 }
 
@@ -104,15 +110,16 @@ export function classifyTier(
   extractedCategory: Category,
   generatedTasks: GeneratedTasks | undefined,
   goalCategories: Set<Category>,
-  goalTags?: Set<string>
+  goalTags?: Set<string>,
+  goalAdvancement?: 'advances' | 'category-only' | 'neither'
 ): { tier: RewardTier; multiplier: number } {
-  // 1. Exact match against any planned task today
+  // 1. Exact match against any planned task today — pure code, takes precedence
   const plannedSignatures = collectPlannedSignatures(generatedTasks)
   if (plannedSignatures.has(signature)) {
     return { tier: 'goal-exact', multiplier: TIER_MULTIPLIER['goal-exact'] }
   }
 
-  // 2. Same tag+category as a planned task (modifier differs)
+  // 2. Same tag+category as a planned task (modifier differs) — also pure code
   const plannedTagCats = collectPlannedTagCats(generatedTasks)
   if (plannedTagCats.has(`${extractedTag}|${extractedCategory}`)) {
     return { tier: 'goal-similar', multiplier: TIER_MULTIPLIER['goal-similar'] }
@@ -123,7 +130,23 @@ export function classifyTier(
     extractedCategory === 'Intelligence' ||
     extractedCategory === 'Charisma'
 
-  // 3a. Tag-level goal alignment (preferred path, when catalog has goal_tags).
+  // 3. Preferred: per-activity AI judgment (content-aware — distinguishes
+  //    "read a Python article" from "read a sci-fi novel" even though both
+  //    are reading_session).
+  if (goalAdvancement) {
+    if (goalAdvancement === 'advances') {
+      return { tier: 'goal-aligned', multiplier: TIER_MULTIPLIER['goal-aligned'] }
+    }
+    if (goalAdvancement === 'category-only') {
+      return knownCategory
+        ? { tier: 'category-aligned', multiplier: TIER_MULTIPLIER['category-aligned'] }
+        : { tier: 'unrelated', multiplier: 0 }
+    }
+    // 'neither' → unrelated regardless of category
+    return { tier: 'unrelated', multiplier: 0 }
+  }
+
+  // 4. Fallback: catalog-level goal_tags (intake-time judgment).
   if (goalTags && goalTags.size > 0) {
     if (goalTags.has(extractedTag)) {
       return { tier: 'goal-aligned', multiplier: TIER_MULTIPLIER['goal-aligned'] }
@@ -133,18 +156,17 @@ export function classifyTier(
       : { tier: 'unrelated', multiplier: 0 }
   }
 
-  // 3b. Backward-compat fallback: catalog has no goal_tags (older intakes).
-  // Use category-level membership to decide goal- vs category-aligned.
+  // 5. Oldest fallback: category-level membership (for catalogs predating goal_tags).
   if (goalCategories.has(extractedCategory)) {
     return { tier: 'goal-aligned', multiplier: TIER_MULTIPLIER['goal-aligned'] }
   }
 
-  // 4. Recognised activity category but not goal-aligned
+  // 6. Recognised activity category but no goal info
   if (knownCategory) {
     return { tier: 'category-aligned', multiplier: TIER_MULTIPLIER['category-aligned'] }
   }
 
-  // 5. Unknown — skip
+  // 7. Unknown — skip
   return { tier: 'unrelated', multiplier: 0 }
 }
 
@@ -413,7 +435,8 @@ export async function computeRewardsFromExtraction(
       act.category,
       user.generatedTasks,
       goalCategories,
-      goalTags
+      goalTags,
+      act.goal_advancement
     )
 
     if (tier === 'unrelated') {

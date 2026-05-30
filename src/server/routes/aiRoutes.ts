@@ -219,6 +219,7 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
     // ─── Step 1: Extraction ──────────────────────────────────────────────
     const extractionInput = {
       daily_log: dailyActivity,
+      long_term_goals: user.goalsData?.longTermGoals ?? '',
       known_tags: buildUserKnownTagsListing(user.catalog),
     }
 
