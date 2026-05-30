@@ -52,15 +52,17 @@ For each distinct activity the user mentions:
    - `count` unit → `value` is number of items completed (extract from "2 problems", "3 conversations")
    - `event` unit → `value` is 1 (event happened) or higher if user did the event multiple times
 
-4. **Detect outcome.** Set `completed: true` for successful completion. Set `completed: false` if the user explicitly says they tried but didn't finish — in that case, switch to the paired effort tag if one exists (e.g. `problem_solving_attempt` instead of `problem_solving`).
+4. **Detect outcome.** Set `completed: true` for successful completion. Set `completed: false` ONLY if the user actively engaged with the activity but didn't finish it — *"tried but couldn't crack it"*, *"got 80% of the way through"*, *"made progress but ran out of steam"*. In that case, switch to the paired effort tag if one exists (e.g. `problem_solving_attempt` instead of `problem_solving`).
 
 5. **Flag inferred values.** If the user didn't state the value explicitly, set `value_source: "inferred"` and use a sensible default (e.g. 30 min for an unspecified workout). If you had to guess heavily, set `value_source: "default"`.
 
 6. **Confidence flag.** Set `confidence: "high"` when the activity, tag, modifier, and value are all clear from the text. Set `"partial"` when one field had to be inferred but you're confident in the rest. Set `"low"` when multiple fields are ambiguous.
 
-7. **Past-tense only.** Skip aspirational statements ("I plan to study tonight"), future tense, and negations ("I didn't work out"). Only extract activities the user actually did.
+7. **Past-tense only.** Skip aspirational statements (*"I plan to study tonight"*, *"Going to work out later"*) and future tense. Only extract activities the user actually did.
 
-8. **Trivial / off-topic activities → skip.** "Walked to the kitchen", "Drank a beer", "Watched TV for hours" → not self-improvement → omit. Don't add reward-worthy activities the user didn't mention.
+8. **Negation / non-occurrence → skip entirely.** Statements like *"I didn't work out today"*, *"didn't manage to read"*, *"never got around to it"*, *"ran out of time to study"* mean the activity **did not happen** — the user did NOT engage with it at all. Do NOT extract these as effort-pair attempts. The `*_attempt` tags are only for activities the user *actively engaged with* and didn't finish — not for activities they never started. If in doubt, ask: did the user spend any real time engaging with this? If no → skip.
+
+9. **Trivial / off-topic activities → skip.** "Walked to the kitchen", "Drank a beer", "Watched TV for hours" → not self-improvement → omit. Don't add reward-worthy activities the user didn't mention.
 
 ---
 

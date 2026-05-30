@@ -426,6 +426,18 @@ export async function computeRewardsFromExtraction(
   }
 
   for (const act of activities) {
+    // Belt-and-braces: skip activities the AI emitted with no actual engagement
+    // (e.g. interpreting "I didn't work out" as workout_attempted with value=0).
+    // No engagement → no entry in unclaimed rewards.
+    if (!Number.isFinite(act.value) || act.value <= 0) {
+      skipped.push({
+        activityName: act.name,
+        reason: 'No engagement (value <= 0)',
+        notes: act.notes,
+      })
+      continue
+    }
+
     const signature = `${act.tag}|${act.category}|${act.modifier}`
 
     // Tier classification
