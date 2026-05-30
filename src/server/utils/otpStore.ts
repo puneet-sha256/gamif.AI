@@ -11,6 +11,12 @@ interface OtpEntry {
 const OTP_EXPIRY_MS = 5 * 60 * 1000 // 5 minutes
 const CLEANUP_INTERVAL_MS = 60 * 1000 // Clean up every 1 minute
 
+// E2E test mode: when process.env.E2E_TEST_MODE === 'true', accept this code as
+// a "skeleton key" alongside the real OTP. The OTP entry must still exist
+// (i.e. sendOtp must have been called for the email), so this only bypasses
+// the inbox round-trip — not the registration request flow itself.
+const E2E_BYPASS_OTP = '000000'
+
 // In-memory OTP store keyed by lowercase email
 const otpStore = new Map<string, OtpEntry>()
 
@@ -59,9 +65,13 @@ export function verifyOtp(
     return { valid: false, reason: 'expired' }
   }
 
-  if (entry.otp !== otp) {
+  const isE2EBypass = process.env.E2E_TEST_MODE === 'true' && otp === E2E_BYPASS_OTP
+  if (entry.otp !== otp && !isE2EBypass) {
     logger.custom('❌', `OTP mismatch for ${key}`)
     return { valid: false, reason: 'invalid' }
+  }
+  if (isE2EBypass) {
+    logger.custom('🧪', `[E2E] OTP bypass accepted for ${key}`)
   }
 
   // Valid OTP — remove from store and return registration data
