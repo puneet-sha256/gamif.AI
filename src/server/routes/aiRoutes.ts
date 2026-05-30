@@ -258,10 +258,9 @@ export async function analyzeDailyActivity(req: Request, res: Response) {
     logger.custom('📊', `Extracted ${extracted.activities.length} activities`)
 
     // ─── Step 2: Compute rewards via catalog ─────────────────────────────
-    const todayActivity = user.activityHistory?.dailyActivities.find(a => a.date === activityDate)
     let computation: Awaited<ReturnType<typeof computeRewardsFromExtraction>>
     try {
-      computation = await computeRewardsFromExtraction(extracted.activities, user, todayActivity)
+      computation = await computeRewardsFromExtraction(extracted.activities, user)
     } catch (computeErr) {
       logger.error('Reward computation failed:', computeErr)
       return res.status(500).json(createErrorResponse(

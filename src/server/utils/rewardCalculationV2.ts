@@ -20,7 +20,6 @@ import type {
   RewardRateBreakdown,
   GeneratedTasks,
   CatalogUnit,
-  DailyActivity,
 } from '../../shared/types'
 import {
   loadSeedCatalog,
@@ -83,7 +82,10 @@ export interface RewardComputationResult {
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const CATEGORY_DAILY_XP_CAP = 80
+// Per-entry caps (soft_cap_min on time-based rows, daily_cap on count/event rows)
+// already prevent single-activity gaming. We deliberately do NOT impose a
+// per-category daily XP cap — it caused legitimate cross-tag activity to pay 0
+// once the cap was hit, which felt punishing for active users.
 const INFERRED_EFFORT_PENALTY = 0.85
 
 const TIER_MULTIPLIER: Record<RewardTier, number> = {
@@ -375,8 +377,7 @@ function computeBaseReward(row: CatalogRow, value: number): BaseReward {
 
 export async function computeRewardsFromExtraction(
   activities: ExtractedActivity[],
-  user: User,
-  todayActivity?: DailyActivity
+  user: User
 ): Promise<RewardComputationResult> {
   if (!user.catalog) {
     throw new Error('User has no catalog. Cannot compute v2 rewards.')
@@ -400,13 +401,6 @@ export async function computeRewardsFromExtraction(
     Strength: { xp: 0, shards: 0 },
     Intelligence: { xp: 0, shards: 0 },
     Charisma: { xp: 0, shards: 0 },
-  }
-
-  // Per-category XP already earned today (pre-existing dailyActivities entry)
-  const todayCategoryXP: Record<Category, number> = {
-    Strength: todayActivity?.strength ?? 0,
-    Intelligence: todayActivity?.intelligence ?? 0,
-    Charisma: todayActivity?.charisma ?? 0,
   }
 
   for (const act of activities) {
@@ -464,16 +458,8 @@ export async function computeRewardsFromExtraction(
       shards *= INFERRED_EFFORT_PENALTY
     }
 
-    // Per-category daily cap (80 XP). Scale down if this would exceed.
-    const currentCategoryTotal = todayCategoryXP[act.category] + categoryBreakdown[act.category].xp
-    const remaining = Math.max(0, CATEGORY_DAILY_XP_CAP - currentCategoryTotal)
-    let categoryCapped = false
-    if (xp > remaining) {
-      const scale = remaining / xp
-      xp *= scale
-      shards *= scale
-      categoryCapped = true
-    }
+    // No per-category daily cap. Per-entry caps (soft_cap_min for time-based
+    // rows, daily_cap on count/event rows) already limit single-activity gaming.
 
     xp = Math.floor(xp)
     shards = round2(shards)
@@ -491,7 +477,7 @@ export async function computeRewardsFromExtraction(
       shardsEarned: shards,
       rateBreakdown: base.rateBreakdown,
       inferredEffortApplied,
-      capped: base.capped || categoryCapped,
+      capped: base.capped,
       notes: act.notes,
     })
 
