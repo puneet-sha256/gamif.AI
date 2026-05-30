@@ -1,4 +1,5 @@
-import type { User } from './user.types'
+import type { User, CatalogVote } from './user.types'
+import type { CatalogRow } from './catalog.types'
 
 // API Request Types
 export interface RegisterRequest {
@@ -239,5 +240,19 @@ export interface AnalyzeDailyActivityResponse extends ApiSuccessResponse {
     rewards: RewardCalculationResult | null; // Calculated rewards
     rawResponse: string; // The raw AI response for debugging
     processingTime?: number;
+  };
+}
+
+// ─── Catalog feedback (Milestone 1D) ───────────────────────────────────────
+
+export interface SubmitFeedbackRequest {
+  sessionId: string;
+  signature: string;  // tag|category|modifier of the row to nudge
+  vote: CatalogVote;  // 'up' | 'over' | 'under'
+}
+
+export interface SubmitFeedbackResponse extends ApiSuccessResponse {
+  data: {
+    row: CatalogRow;  // updated catalog row
   };
 }

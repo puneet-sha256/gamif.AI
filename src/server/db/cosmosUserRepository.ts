@@ -1,7 +1,7 @@
 import type { Container, JSONObject } from '@azure/cosmos'
 import type { User, GeneratedTasks } from '../../shared/types'
 import type { IUserRepository } from './interfaces'
-import type { SubDoc, SubDocType, ProfileSubDoc, TasksSubDoc, ShopSubDoc, HistorySubDoc, RewardsSubDoc } from './types'
+import type { SubDoc, SubDocType, ProfileSubDoc, TasksSubDoc, ShopSubDoc, HistorySubDoc, RewardsSubDoc, CatalogSubDoc } from './types'
 import { FIELD_TO_SUBDOC } from './types'
 import { getUsersContainer } from './cosmosClient'
 import { logger } from '../../utils/logger'
@@ -22,6 +22,7 @@ export class CosmosUserRepository implements IUserRepository {
     const shop = subDocs.find(d => d.type === 'shop') as ShopSubDoc | undefined
     const history = subDocs.find(d => d.type === 'history') as HistorySubDoc | undefined
     const rewards = subDocs.find(d => d.type === 'rewards') as RewardsSubDoc | undefined
+    const catalog = subDocs.find(d => d.type === 'catalog') as CatalogSubDoc | undefined
 
     return {
       id: profile.userId,
@@ -39,6 +40,7 @@ export class CosmosUserRepository implements IUserRepository {
       activityHistory: history?.activityHistory,
       taskHistory: history?.taskHistory,
       unclaimedRewards: rewards?.unclaimedRewards,
+      catalog: catalog?.catalog,
     }
   }
 
