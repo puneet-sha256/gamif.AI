@@ -30,7 +30,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev:full',
+    command: 'npm run dev:full:test',
     // Wait on the API server explicitly — dev:full starts both, but Vite (5173) often
     // becomes responsive before Express (3001), causing first-test "Network error" flakes.
     url: 'http://localhost:3001/api/health',

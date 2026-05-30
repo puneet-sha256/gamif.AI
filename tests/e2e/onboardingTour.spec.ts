@@ -1,5 +1,6 @@
 import { test, expect, Page } from '@playwright/test'
 import { TEST_USER } from './globalSetup'
+import { resetAllSeedUsers } from './helpers'
 
 const TOUR_TOTAL_STEPS = 13
 
@@ -21,6 +22,7 @@ async function clearTourFlag(page: Page) {
 
 test.describe('First-time user onboarding tour', () => {
   test.beforeEach(async ({ page }) => {
+    resetAllSeedUsers()
     await loginAsTestUser(page)
     // Ensure a fresh tour state for every test
     await clearTourFlag(page)

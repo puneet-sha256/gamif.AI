@@ -157,6 +157,13 @@ export async function sendOtp(req: Request, res: Response) {
     const hashedPassword = hashPassword(password)
     storeOtp(email, otp, username, hashedPassword)
 
+    // In E2E test mode, skip the actual email send. Tests use the magic OTP
+    // (000000) to verify — no email round-trip needed.
+    if (process.env.E2E_TEST_MODE === 'true') {
+      logger.custom('🧪', `[E2E] Skipping OTP email; use 000000 to verify ${email}`)
+      return res.json(createSuccessResponse(SuccessMessages.OTP_SENT))
+    }
+
     // Send OTP email
     const emailResult = await sendOtpEmail(email, otp)
 
