@@ -11,10 +11,17 @@ import {
   getCurrentUser, updateUserData, updateExperience, updateShards,
   getUserTasks, updateGeneratedTask, deleteGeneratedTask,
   addUserTask, addUserShopItem, deleteUserShopItem,
-  getUserShopItemsList, buyUserShopItem, useUserInventoryItem
+  getUserShopItemsList, buyUserShopItem, useUserInventoryItem,
+  submitCatalogFeedback
 } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
-import { generateTasks, analyzeDailyActivity } from './src/server/routes/aiRoutes'
+import {
+  generateTasks,
+  analyzeDailyActivity,
+  generateIntakeQuestions,
+  submitIntake,
+  confirmIntake
+} from './src/server/routes/aiRoutes'
 import { logger } from './src/utils/logger'
 
 const app = express()
@@ -110,6 +117,14 @@ app.patch('/api/user/shards', updateShards)
 // Azure AI routes
 app.post('/api/ai/generate-tasks', generateTasks)
 app.post('/api/ai/analyze-activity', analyzeDailyActivity)
+
+// Rewards calibration intake routes (Milestone 1B)
+app.post('/api/ai/intake/generate-questions', generateIntakeQuestions)
+app.post('/api/ai/intake/submit', submitIntake)
+app.post('/api/ai/intake/confirm', confirmIntake)
+
+// Catalog feedback (Milestone 1D)
+app.post('/api/user/catalog/feedback', submitCatalogFeedback)
 
 // -----------------------------
 //  Serve built frontend (Vite dist)

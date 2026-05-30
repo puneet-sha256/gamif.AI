@@ -531,6 +531,76 @@
 }
 
 /* ============================================
+   Reward Breakdown + Feedback (Milestone 1C/1D)
+   ============================================ */
+
+.reward-breakdown {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--bg-surface-subtle, rgba(255, 255, 255, 0.04));
+  border-radius: var(--radius-sm, 6px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.reward-breakdown-label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  letter-spacing: 0.2px;
+}
+
+.reward-feedback {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reward-feedback-label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.reward-feedback-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.reward-feedback-chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface-subtle, rgba(255, 255, 255, 0.04));
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-fast, 150ms ease), border-color var(--transition-fast, 150ms ease), opacity var(--transition-fast, 150ms ease);
+  font-family: inherit;
+}
+
+.reward-feedback-chip:not(:disabled):hover {
+  background: var(--bg-surface-hover, rgba(255, 255, 255, 0.08));
+  border-color: var(--border-hover, rgba(255, 255, 255, 0.18));
+}
+
+.reward-feedback-chip.selected {
+  background: rgba(99, 102, 241, 0.18);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.reward-feedback-chip.sending {
+  opacity: 0.6;
+}
+
+.reward-feedback-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ============================================
    Responsive — Small Mobile
    ============================================ */
 @media (max-width: 480px) {

@@ -15,6 +15,7 @@ export interface AuthContextType {
   saveProfileData: (profileData: ProfileData) => Promise<boolean>
   saveGoalsData: (goalsData: GoalsData) => Promise<boolean>
   getUserTasks: () => Promise<GeneratedTasks | null>
+  refreshUser: () => Promise<void>
   refreshUserTasks: () => Promise<void>
   editGeneratedTask: (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma', updates: { title?: string; description?: string; expected_duration_minutes?: number; xp?: number; shards?: number }) => Promise<boolean>
   deleteGeneratedTask: (taskId: string, category: 'Strength' | 'Intelligence' | 'Charisma') => Promise<boolean>

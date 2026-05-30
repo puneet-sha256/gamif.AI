@@ -1,5 +1,6 @@
 // Export all shared types from a single entry point
 export * from './user.types'
+export * from './catalog.types'
 export * from './auth.types'
 export * from './api.types'
 export * from './context.types'

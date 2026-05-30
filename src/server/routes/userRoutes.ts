@@ -25,14 +25,15 @@ import {
   ErrorMessages,
   SuccessMessages
 } from '../utils/responseHelpers'
-import type { UserStats } from '../../shared/types'
+import type { UserStats, CatalogVote } from '../../shared/types'
 import { logger } from '../../utils/logger'
 import { calculateActualLevel } from '../../utils/levelCalculation'
-import { 
+import {
   calculateStreaksFromHistory,
   getStreakMultipliers,
   updateStreakCache
 } from '../../utils/streakCalculation'
+import { applyFeedbackToRow } from '../utils/catalogFeedback'
 
 // Get current user by session
 export async function getCurrentUser(req: Request, res: Response) {
@@ -797,6 +798,75 @@ export async function useUserInventoryItem(req: Request, res: Response) {
 
   } catch (error) {
     logger.error('Use inventory item error:', error)
+    res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+// Submit user feedback on a catalog row (Milestone 1D).
+// Vote 'up' / 'over' / 'under' nudges the row's rate and adjusts stability_score.
+export async function submitCatalogFeedback(req: Request, res: Response) {
+  try {
+    const { sessionId, signature, vote } = req.body as {
+      sessionId?: string
+      signature?: string
+      vote?: CatalogVote
+    }
+
+    if (!sessionId || !signature || !vote) {
+      return res.status(400).json(createErrorResponse(
+        'sessionId, signature, and vote are required'
+      ))
+    }
+    if (vote !== 'up' && vote !== 'over' && vote !== 'under') {
+      return res.status(400).json(createErrorResponse(
+        'vote must be one of: up, over, under'
+      ))
+    }
+
+    const session = await findSessionById(sessionId)
+    if (!session) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    }
+
+    const user = await findUserById(session.userId)
+    if (!user) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    if (!user.catalog) {
+      return res.status(400).json(createErrorResponse(
+        'No catalog. Complete the rewards calibration intake first.'
+      ))
+    }
+
+    const row = user.catalog.rows[signature]
+    if (!row) {
+      return res.status(404).json(createErrorResponse(
+        `Catalog row not found for signature: ${signature}`
+      ))
+    }
+
+    const updatedRow = applyFeedbackToRow(row, vote)
+    const updatedCatalog = {
+      ...user.catalog,
+      rows: { ...user.catalog.rows, [signature]: updatedRow },
+      lastUpdated: new Date().toISOString(),
+    }
+
+    await updateUser(user.id, { catalog: updatedCatalog })
+    await updateSessionLastAccess(sessionId)
+    logger.success(`Catalog feedback applied: ${signature} ← ${vote}`)
+
+    res.json(createSuccessResponse(
+      'Feedback applied',
+      { row: updatedRow },
+      undefined,
+      undefined,
+      undefined,
+      { vote }
+    ))
+  } catch (error) {
+    logger.error('Submit feedback error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
