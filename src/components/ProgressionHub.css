@@ -1,0 +1,457 @@
+.progression-hub {
+  display: grid;
+  gap: 24px;
+}
+
+.progression-heading,
+.section-title-row,
+.campaign-meta,
+.boss-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.progression-heading h2,
+.progression-section h3,
+.campaign-card h3 {
+  margin: 4px 0 8px;
+}
+
+.progression-heading p,
+.campaign-card p,
+.progression-section p {
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.progression-kicker {
+  color: var(--accent-primary) !important;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.achievement-total {
+  min-width: 140px;
+  padding: 14px 18px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  text-align: center;
+}
+
+.achievement-total strong,
+.achievement-total span {
+  display: block;
+}
+
+.achievement-total strong {
+  color: var(--accent-primary);
+  font-size: 1.4rem;
+}
+
+.achievement-total span {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.campaign-card {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 24px;
+  padding: 28px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 45%, var(--border-default));
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(circle at 10% 20%, color-mix(in srgb, var(--accent-primary) 20%, transparent), transparent 40%),
+    var(--bg-surface);
+}
+
+.campaign-boss {
+  display: grid;
+  place-items: center;
+  min-height: 150px;
+  border-radius: var(--radius-xl);
+  background: var(--bg-surface-subtle);
+  font-size: 5rem;
+}
+
+.campaign-meta {
+  color: var(--accent-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.boss-health,
+.attribute-bar {
+  overflow: hidden;
+  background: var(--bg-surface-subtle);
+  border-radius: 999px;
+}
+
+.boss-health {
+  height: 14px;
+  margin: 20px 0 8px;
+}
+
+.boss-health span,
+.attribute-bar span {
+  display: block;
+  height: 100%;
+  background: var(--gradient-accent);
+  border-radius: inherit;
+}
+
+.boss-stats {
+  font-size: 0.82rem;
+}
+
+.boss-stats span {
+  color: var(--text-muted);
+}
+
+.progression-section {
+  padding: 24px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--bg-surface);
+}
+
+.insight-pill {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--accent-bg-subtle);
+  color: var(--accent-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.analytics-grid article {
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface-subtle);
+}
+
+.analytics-grid strong,
+.analytics-grid span {
+  display: block;
+}
+
+.analytics-grid strong {
+  font-size: 1.45rem;
+}
+
+.analytics-grid span {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.attribute-bars {
+  display: grid;
+  gap: 12px;
+}
+
+.attribute-bar-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 72px;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.8rem;
+}
+
+.attribute-bar {
+  height: 8px;
+}
+
+.attribute-bar-row strong {
+  text-align: right;
+}
+
+.achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.achievement-card {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  opacity: 0.65;
+}
+
+.achievement-card.unlocked {
+  border-color: color-mix(in srgb, var(--accent-primary) 55%, var(--border-default));
+  background: var(--accent-bg-subtle);
+  opacity: 1;
+}
+
+.achievement-icon {
+  filter: grayscale(1);
+  font-size: 2rem;
+}
+
+.achievement-card.unlocked .achievement-icon {
+  filter: none;
+}
+
+.achievement-card h4,
+.achievement-card p {
+  margin: 0 0 4px;
+}
+
+.achievement-card p,
+.achievement-card div > span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.feature-guide {
+  padding: 16px 20px;
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface-subtle);
+}
+
+.feature-guide summary {
+  cursor: pointer;
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.feature-guide p {
+  margin: 10px 0 0;
+  color: var(--text-muted);
+}
+
+.guild-counts {
+  display: flex;
+  gap: 8px;
+}
+
+.guild-counts span {
+  padding: 12px 14px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.guild-counts strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+}
+
+.guild-message {
+  padding: 12px 16px;
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-success) 12%, transparent);
+}
+
+.guild-message.error {
+  border-color: var(--color-error);
+  background: color-mix(in srgb, var(--color-error) 12%, transparent);
+}
+
+.guild-form {
+  display: grid;
+  gap: 7px;
+  margin: 18px 0;
+}
+
+.guild-form label {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.guild-form > div {
+  display: flex;
+  gap: 8px;
+}
+
+.guild-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 13px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.guild-form button,
+.invite-list button {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--accent-primary);
+  color: white;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.guild-form button:disabled,
+.invite-list button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.social-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.social-columns h4 {
+  margin: 0 0 10px;
+}
+
+.player-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.player-row,
+.party-roster article,
+.invite-list article {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-subtle);
+}
+
+.player-row > span:nth-child(2),
+.party-roster article div,
+.invite-list article div {
+  flex: 1;
+  min-width: 0;
+}
+
+.player-row strong,
+.player-row small,
+.party-roster strong,
+.party-roster small,
+.invite-list strong,
+.invite-list span {
+  display: block;
+}
+
+.player-row small,
+.party-roster small,
+.invite-list span,
+.empty-copy {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.player-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 50%;
+  background: var(--accent-bg-subtle);
+  color: var(--accent-primary);
+  font-weight: 800;
+}
+
+.secondary-action,
+.danger-action {
+  padding: 7px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.danger-action {
+  border-color: color-mix(in srgb, var(--color-error) 45%, var(--border-default));
+  color: var(--color-error);
+}
+
+.party-roster,
+.invite-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+@media (max-width: 900px) {
+  .analytics-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .campaign-card {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .campaign-boss {
+    min-height: 100px;
+  }
+
+  .progression-heading,
+  .section-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .achievement-total {
+    width: 100%;
+  }
+
+  .achievement-grid,
+  .analytics-grid,
+  .social-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .achievement-grid,
+  .analytics-grid,
+  .social-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .attribute-bar-row {
+    grid-template-columns: 82px 1fr 62px;
+  }
+
+  .guild-counts {
+    width: 100%;
+  }
+
+  .guild-counts span {
+    flex: 1;
+  }
+}

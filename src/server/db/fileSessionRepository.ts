@@ -8,6 +8,8 @@ const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(process.cwd(), '
 const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json')
 
 export class FileSessionRepository implements ISessionRepository {
+  private mutationQueue: Promise<void> = Promise.resolve()
+
   async initialize(): Promise<void> {
     if (!(await fs.pathExists(SESSIONS_FILE))) {
       logger.custom('📄', 'Creating sessions.json file...')
@@ -29,39 +31,52 @@ export class FileSessionRepository implements ISessionRepository {
   }
 
   private async saveSessions(sessions: Session[]): Promise<void> {
-    await fs.writeJson(SESSIONS_FILE, sessions, { spaces: 2 })
+    const tempFile = `${SESSIONS_FILE}.${process.pid}.tmp`
+    await fs.writeJson(tempFile, sessions, { spaces: 2 })
+    await fs.rename(tempFile, SESSIONS_FILE)
+  }
+
+  private mutateSessions<T>(mutation: (sessions: Session[]) => Promise<T> | T): Promise<T> {
+    const operation = this.mutationQueue.then(async () => {
+      const sessions = await this.loadSessions()
+      const result = await mutation(sessions)
+      await this.saveSessions(sessions)
+      return result
+    })
+    this.mutationQueue = operation.then(() => undefined, () => undefined)
+    return operation
   }
 
   async findById(sessionId: string): Promise<Session | undefined> {
+    await this.mutationQueue
     const sessions = await this.loadSessions()
     return sessions.find(session => session.sessionId === sessionId)
   }
 
   async create(userId: string, sessionId: string): Promise<Session> {
-    const sessions = await this.loadSessions()
-    const newSession: Session = {
-      userId,
-      sessionId,
-      createdAt: new Date().toISOString(),
-      lastAccess: new Date().toISOString(),
-    }
-    sessions.push(newSession)
-    await this.saveSessions(sessions)
-    return newSession
+    return this.mutateSessions(sessions => {
+      const newSession: Session = {
+        userId,
+        sessionId,
+        createdAt: new Date().toISOString(),
+        lastAccess: new Date().toISOString(),
+      }
+      sessions.push(newSession)
+      return newSession
+    })
   }
 
   async updateLastAccess(sessionId: string): Promise<void> {
-    const sessions = await this.loadSessions()
-    const session = sessions.find(s => s.sessionId === sessionId)
-    if (session) {
-      session.lastAccess = new Date().toISOString()
-      await this.saveSessions(sessions)
-    }
+    await this.mutateSessions(sessions => {
+      const session = sessions.find(s => s.sessionId === sessionId)
+      if (session) session.lastAccess = new Date().toISOString()
+    })
   }
 
   async remove(sessionId: string): Promise<void> {
-    const sessions = await this.loadSessions()
-    const filteredSessions = sessions.filter(session => session.sessionId !== sessionId)
-    await this.saveSessions(filteredSessions)
+    await this.mutateSessions(sessions => {
+      const index = sessions.findIndex(session => session.sessionId === sessionId)
+      if (index >= 0) sessions.splice(index, 1)
+    })
   }
 }

@@ -46,12 +46,13 @@ export const ONBOARDING_TOUR_STEPS: TourStep[] = [
   {
     key: 'tab-nav',
     tab: 'profile',
-    title: 'Four tabs',
+    title: 'Six tabs',
     body: (
       <>
         <strong>Profile</strong> for stats, <strong>Tasks</strong> for daily
         challenges, <strong>Inventory</strong> for what you own,{' '}
-        <strong>Shop</strong> for what you want.
+        <strong>Shop</strong> for what you want, <strong>Journey</strong> for
+        campaigns and insights, and <strong>Guild</strong> for allies and parties.
       </>
     ),
   },
@@ -147,6 +148,30 @@ export const ONBOARDING_TOUR_STEPS: TourStep[] = [
         Add real-world rewards (a movie night, new headphones, a coffee) to your
         wishlist with a shard price. Buy them when you've earned enough —
         purchased items live in Inventory, and consumables can be "used" there.
+      </>
+    ),
+  },
+  {
+    key: 'journey-hub',
+    tab: 'journey',
+    title: 'Journey, campaigns & achievements',
+    body: (
+      <>
+        Your claimed XP damages the current seasonal boss, powers your personal
+        analytics, and automatically unlocks badges for meaningful milestones.
+        Open <strong>How Journey works</strong> anytime for a refresher.
+      </>
+    ),
+  },
+  {
+    key: 'guild-hub',
+    tab: 'guild',
+    title: 'Guild, allies & parties',
+    body: (
+      <>
+        Follow players by username, create or join a party, and compare public
+        contribution without exposing private goals or activity. Party leaders
+        invite allies and can disband the group.
       </>
     ),
   },

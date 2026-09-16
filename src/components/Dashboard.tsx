@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useAlert } from '../contexts/AlertContext'
 import { useConfirm } from '../contexts/ConfirmContext'
 import ThemeToggle from './ThemeToggle'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import StatCard from './StatCard'
 import TaskItem from './TaskItem'
 import ShopItem from './ShopItem'
@@ -18,7 +18,10 @@ import OnboardingTour from './OnboardingTour'
 import IntakeCalibration from './IntakeCalibration'
 import TimeAliveCounter from './TimeAliveCounter'
 import DateOfBirthModal from './DateOfBirthModal'
+import JourneyHub from './JourneyHub'
+import CommunityHub from './CommunityHub'
 import { ONBOARDING_TOUR_STEPS } from './onboardingTourSteps'
+import { communityService, type CommunityState } from '../client/services/communityService'
 import {
   mapGeneratedTasksToTaskItems,
   groupMappedTasksByCategory,
@@ -38,13 +41,18 @@ interface DashboardProps {
   onLogout: () => void
 }
 
-type TabType = 'profile' | 'tasks' | 'inventory' | 'shop'
+type TabType = 'profile' | 'tasks' | 'inventory' | 'shop' | 'journey' | 'guild'
 
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const { user, logout, editGeneratedTask, deleteGeneratedTask, addUserTask, addShopItem, deleteShopItem, getShopItems, buyShopItem, useInventoryItem, updateUser, refreshUser, refreshUserTasks } = useAuth()
   const { showSuccess, showError, showWarning, showInfo } = useAlert()
   const { showConfirm } = useConfirm()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
+  const [communityState, setCommunityState] = useState<CommunityState>({
+    followers: [],
+    following: [],
+    partyInvites: [],
+  })
   const [showDailyInput, setShowDailyInput] = useState(false)
   const [dailyActivity, setDailyActivity] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
@@ -69,7 +77,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
   // Onboarding tour state — initialized lazily from localStorage based on userId.
-  const tourStorageKey = user?.id ? `gamifai_tour_completed_${user.id}` : null
+  const tourStorageKey = user?.id ? `gamifai_tour_completed_v2_${user.id}` : null
   const [showTour, setShowTour] = useState(false)
 
   useEffect(() => {
@@ -97,6 +105,23 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     setActiveTab('profile')
     setShowTour(true)
   }
+
+  const handleCommunityStateChange = useCallback((state: CommunityState) => {
+    setCommunityState(state)
+  }, [])
+
+  useEffect(() => {
+    const sessionId = userDatabase.getSessionId()
+    if (!user?.id || !sessionId) return
+
+    communityService.getState(sessionId)
+      .then(response => {
+        if (response.data) setCommunityState(response.data)
+      })
+      .catch(error => {
+        console.error('Dashboard: Failed to load community summary:', error)
+      })
+  }, [user?.id])
 
   // Track window resize for responsive chart
   useEffect(() => {
@@ -1380,6 +1405,25 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         return renderInventoryTab()
       case 'shop':
         return renderShopTab()
+      case 'journey':
+        return (
+          <JourneyHub
+            user={user}
+            socialCounts={{
+              followers: communityState.followers.length,
+              following: communityState.following.length,
+              partyMembers: communityState.party?.members.length || 0,
+            }}
+          />
+        )
+      case 'guild':
+        return (
+          <CommunityHub
+            currentUserId={user.id}
+            sessionId={userDatabase.getSessionId()}
+            onStateChange={handleCommunityStateChange}
+          />
+        )
       default:
         return renderProfileTab()
     }
@@ -1451,6 +1495,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           >
             <span className="tab-icon">🛒</span>
             Shop
+          </button>
+          <button
+            className={`nav-tab ${activeTab === 'journey' ? 'active' : ''}`}
+            onClick={() => setActiveTab('journey')}
+          >
+            <span className="tab-icon">🏆</span>
+            Journey
+          </button>
+          <button
+            className={`nav-tab ${activeTab === 'guild' ? 'active' : ''}`}
+            onClick={() => setActiveTab('guild')}
+          >
+            <span className="tab-icon">🛡️</span>
+            Guild
           </button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import express from 'express'
+import express, { type NextFunction, type Request, type Response } from 'express'
 import cors from 'cors'
 import path from 'path'
 import { initializeData, DATA_DIR } from './src/server/utils/dataOperations'
@@ -16,6 +16,15 @@ import {
 } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
 import {
+  acceptPartyInvite,
+  createParty,
+  followUser,
+  getCommunityState,
+  inviteToParty,
+  leaveParty,
+  unfollowUser
+} from './src/server/routes/communityRoutes'
+import {
   generateTasks,
   analyzeDailyActivity,
   generateIntakeQuestions,
@@ -26,6 +35,17 @@ import { logger } from './src/utils/logger'
 
 const app = express()
 const PORT = process.env.PORT || 3001
+let communityRequestQueue: Promise<unknown> = Promise.resolve()
+
+function serializeCommunityRequest<TRequest extends Request>(
+  handler: (req: TRequest, res: Response) => Promise<unknown>
+) {
+  return (req: TRequest, res: Response, next: NextFunction) => {
+    const operation = communityRequestQueue.then(() => handler(req, res))
+    communityRequestQueue = operation.catch(() => undefined)
+    void operation.catch(next)
+  }
+}
 
 // Get allowed origins from environment variable or use defaults
 const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -125,6 +145,15 @@ app.post('/api/ai/intake/confirm', confirmIntake)
 
 // Catalog feedback (Milestone 1D)
 app.post('/api/user/catalog/feedback', submitCatalogFeedback)
+
+// Community routes
+app.get('/api/community/:sessionId', serializeCommunityRequest(getCommunityState))
+app.post('/api/community/follow', serializeCommunityRequest(followUser))
+app.delete('/api/community/follow', serializeCommunityRequest(unfollowUser))
+app.post('/api/community/party/create', serializeCommunityRequest(createParty))
+app.post('/api/community/party/invite', serializeCommunityRequest(inviteToParty))
+app.post('/api/community/party/accept', serializeCommunityRequest(acceptPartyInvite))
+app.post('/api/community/party/leave', serializeCommunityRequest(leaveParty))
 
 // -----------------------------
 //  Serve built frontend (Vite dist)

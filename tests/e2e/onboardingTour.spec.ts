@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test'
 import { TEST_USER } from './globalSetup'
 
-const TOUR_TOTAL_STEPS = 13
+const TOUR_TOTAL_STEPS = 15
 
 async function loginAsTestUser(page: Page) {
   await page.goto('/')
@@ -15,7 +15,7 @@ async function loginAsTestUser(page: Page) {
 
 async function clearTourFlag(page: Page) {
   await page.evaluate((userId) => {
-    window.localStorage.removeItem(`gamifai_tour_completed_${userId}`)
+    window.localStorage.removeItem(`gamifai_tour_completed_v2_${userId}`)
   }, TEST_USER.id)
 }
 
@@ -28,7 +28,7 @@ test.describe('First-time user onboarding tour', () => {
     await expect(page.locator('.dashboard-container')).toBeVisible({ timeout: 30_000 })
   })
 
-  test('tour shows on first dashboard load and completes through all 13 steps', async ({ page }) => {
+  test('tour shows on first dashboard load and completes through all 15 steps', async ({ page }) => {
     const card = page.getByRole('dialog')
     await expect(card).toBeVisible({ timeout: 10_000 })
 
@@ -36,7 +36,7 @@ test.describe('First-time user onboarding tour', () => {
     await expect(card).toContainText(`Step 1 of ${TOUR_TOTAL_STEPS}`)
     await expect(card).toContainText('Welcome to Gamif.AI')
 
-    // Walk through to step 13
+    // Walk through to step 15
     for (let i = 2; i <= TOUR_TOTAL_STEPS; i++) {
       await page.getByRole('button', { name: 'Next' }).click()
       await expect(card).toContainText(`Step ${i} of ${TOUR_TOTAL_STEPS}`)
@@ -52,7 +52,7 @@ test.describe('First-time user onboarding tour', () => {
 
     // Persistence: localStorage flag should be set
     const flag = await page.evaluate(
-      (userId) => window.localStorage.getItem(`gamifai_tour_completed_${userId}`),
+      (userId) => window.localStorage.getItem(`gamifai_tour_completed_v2_${userId}`),
       TEST_USER.id
     )
     expect(flag).toBe('true')
@@ -92,6 +92,18 @@ test.describe('First-time user onboarding tour', () => {
     await expect(card).toContainText(`Step 13 of ${TOUR_TOTAL_STEPS}`)
     await expect(page.locator('.nav-tab.active')).toContainText('Shop')
     await expect(page.locator('[data-tour="shop-tab"]')).toBeVisible()
+
+    // Step 14 — Journey tab
+    await page.getByRole('button', { name: 'Next' }).click()
+    await expect(card).toContainText(`Step 14 of ${TOUR_TOTAL_STEPS}`)
+    await expect(page.locator('.nav-tab.active')).toContainText('Journey')
+    await expect(page.locator('[data-tour="journey-hub"]')).toBeVisible()
+
+    // Step 15 — Guild tab
+    await page.getByRole('button', { name: 'Next' }).click()
+    await expect(card).toContainText(`Step 15 of ${TOUR_TOTAL_STEPS}`)
+    await expect(page.locator('.nav-tab.active')).toContainText('Guild')
+    await expect(page.locator('[data-tour="guild-hub"]')).toBeVisible()
   })
 
   test('skip button dismisses tour and persists completion', async ({ page }) => {
@@ -102,7 +114,7 @@ test.describe('First-time user onboarding tour', () => {
     await expect(card).toBeHidden()
 
     const flag = await page.evaluate(
-      (userId) => window.localStorage.getItem(`gamifai_tour_completed_${userId}`),
+      (userId) => window.localStorage.getItem(`gamifai_tour_completed_v2_${userId}`),
       TEST_USER.id
     )
     expect(flag).toBe('true')

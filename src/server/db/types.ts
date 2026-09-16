@@ -8,7 +8,10 @@ import type {
   UnclaimedRewards,
   ActivityHistory,
   TaskHistory,
-  CatalogData
+  CatalogData,
+  CommunityUserSnapshot,
+  Party,
+  PartyInvite
 } from '../../shared/types'
 
 // ─── Cosmos sub-document types ───────────────────────────────────────────────
@@ -27,6 +30,10 @@ export interface ProfileSubDoc {
   profileData?: ProfileData
   goalsData?: GoalsData
   stats?: UserStats
+  following?: CommunityUserSnapshot[]
+  followers?: CommunityUserSnapshot[]
+  party?: Party
+  partyInvites?: PartyInvite[]
 }
 
 export interface TasksSubDoc {
@@ -99,6 +106,10 @@ export const FIELD_TO_SUBDOC: Record<string, SubDocType> = {
   profileData: 'profile',
   goalsData: 'profile',
   stats: 'profile',
+  following: 'profile',
+  followers: 'profile',
+  party: 'profile',
+  partyInvites: 'profile',
 
   // tasks sub-doc
   generatedTasks: 'tasks',
