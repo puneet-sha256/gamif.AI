@@ -764,6 +764,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     return <div>Loading user data...</div>
   }
 
+  const userLevel = calculateLevelProgress(user.stats?.experience || 0).actualLevel
+
   const renderProfileTab = () => (
     <div className="tab-content">
       <div className="profile-overview">
@@ -1417,6 +1419,26 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           />
         )
       case 'guild':
+        if (userLevel < 10) {
+          return (
+            <div className="tab-content progression-hub" data-tour="guild-hub">
+              <div className="feature-lock guild-feature-lock" role="status">
+                <span className="feature-lock-icon" aria-hidden="true">🔒</span>
+                <div>
+                  <p className="progression-kicker">GUILD LOCKED</p>
+                  <h2>Reach Level 10 to unlock Guilds</h2>
+                  <p>
+                    You are Level {userLevel}. Keep completing real-world quests
+                    to unlock followers, accountability partners, and parties.
+                  </p>
+                  <strong>
+                    {10 - userLevel} level{10 - userLevel === 1 ? '' : 's'} to go
+                  </strong>
+                </div>
+              </div>
+            </div>
+          )
+        }
         return (
           <CommunityHub
             currentUserId={user.id}
@@ -1506,8 +1528,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           <button
             className={`nav-tab ${activeTab === 'guild' ? 'active' : ''}`}
             onClick={() => setActiveTab('guild')}
+            aria-label={`Guild${userLevel < 10 ? ', unlocks at Level 10' : ''}`}
           >
-            <span className="tab-icon">🛡️</span>
+            <span className="tab-icon">
+              {userLevel < 10 ? '🔒' : '🛡️'}
+            </span>
             Guild
           </button>
         </div>
