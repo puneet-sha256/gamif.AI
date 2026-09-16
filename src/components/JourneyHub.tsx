@@ -4,6 +4,7 @@ import {
   getAchievements,
   getCurrentCampaign,
 } from '../utils/progressionInsights'
+import { calculateActualLevel } from '../utils/levelCalculation'
 import './ProgressionHub.css'
 
 interface JourneyHubProps {
@@ -19,6 +20,8 @@ const JourneyHub: React.FC<JourneyHubProps> = ({ user, socialCounts }) => {
   const analytics = calculateProgressAnalytics(user)
   const campaign = getCurrentCampaign(user)
   const achievements = getAchievements(user, socialCounts)
+  const level = calculateActualLevel(user.stats?.experience || 0)
+  const achievementsUnlocked = level >= 5
   const unlockedCount = achievements.filter(achievement => achievement.unlocked).length
   const bossProgress = Math.min(100, (campaign.personalDamage / campaign.targetXp) * 100)
   const categoryTotal = Object.values(analytics.categoryXp).reduce((sum, value) => sum + value, 0)
@@ -31,9 +34,16 @@ const JourneyHub: React.FC<JourneyHubProps> = ({ user, socialCounts }) => {
           <h2>Campaigns, achievements & insights</h2>
           <p>See what your effort is building and choose where to focus next.</p>
         </div>
-        <div className="achievement-total" aria-label={`${unlockedCount} achievements unlocked`}>
-          <strong>{unlockedCount}/{achievements.length}</strong>
-          <span>Badges unlocked</span>
+        <div
+          className="achievement-total"
+          aria-label={
+            achievementsUnlocked
+              ? `${unlockedCount} achievements unlocked`
+              : `Achievements unlock at Level 5. Current level ${level}`
+          }
+        >
+          <strong>{achievementsUnlocked ? `${unlockedCount}/${achievements.length}` : 'Level 5'}</strong>
+          <span>{achievementsUnlocked ? 'Badges unlocked' : 'Achievements unlock'}</span>
         </div>
       </div>
 
@@ -100,21 +110,35 @@ const JourneyHub: React.FC<JourneyHubProps> = ({ user, socialCounts }) => {
             <h3 id="achievements-title">Milestones worth remembering</h3>
           </div>
         </div>
-        <div className="achievement-grid">
-          {achievements.map(achievement => (
-            <article
-              className={`achievement-card ${achievement.unlocked ? 'unlocked' : ''}`}
-              key={achievement.id}
-            >
-              <span className="achievement-icon" aria-hidden="true">{achievement.icon}</span>
-              <div>
-                <h4>{achievement.title}</h4>
-                <p>{achievement.description}</p>
-                <span>{achievement.unlocked ? 'Unlocked' : `${achievement.progress}/${achievement.target}`}</span>
-              </div>
-            </article>
-          ))}
-        </div>
+        {achievementsUnlocked ? (
+          <div className="achievement-grid">
+            {achievements.map(achievement => (
+              <article
+                className={`achievement-card ${achievement.unlocked ? 'unlocked' : ''}`}
+                key={achievement.id}
+              >
+                <span className="achievement-icon" aria-hidden="true">{achievement.icon}</span>
+                <div>
+                  <h4>{achievement.title}</h4>
+                  <p>{achievement.description}</p>
+                  <span>{achievement.unlocked ? 'Unlocked' : `${achievement.progress}/${achievement.target}`}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="feature-lock" role="status">
+            <span className="feature-lock-icon" aria-hidden="true">🔒</span>
+            <div>
+              <h4>Reach Level 5 to unlock Achievements</h4>
+              <p>
+                You are Level {level}. Earn XP through daily activities to reveal
+                badges and start recording milestone unlocks.
+              </p>
+              <strong>{5 - level} level{5 - level === 1 ? '' : 's'} to go</strong>
+            </div>
+          </div>
+        )}
       </section>
 
       <details className="feature-guide">

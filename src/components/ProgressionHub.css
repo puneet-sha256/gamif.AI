@@ -239,6 +239,49 @@
   color: var(--text-muted);
 }
 
+.feature-lock {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 20px;
+  padding: 24px;
+  border: 1px dashed color-mix(in srgb, var(--accent-primary) 55%, var(--border-default));
+  border-radius: var(--radius-xl);
+  background: var(--accent-bg-subtle);
+}
+
+.feature-lock-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  font-size: 1.8rem;
+}
+
+.feature-lock h2,
+.feature-lock h4,
+.feature-lock p {
+  margin: 0 0 6px;
+}
+
+.feature-lock p {
+  color: var(--text-muted);
+}
+
+.feature-lock strong {
+  color: var(--accent-primary);
+  font-size: 0.82rem;
+}
+
+.guild-feature-lock {
+  min-height: 320px;
+  margin-top: 0;
+  justify-content: center;
+}
+
 .guild-counts {
   display: flex;
   gap: 8px;
@@ -406,6 +449,11 @@
 @media (max-width: 900px) {
   .analytics-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .feature-lock {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 

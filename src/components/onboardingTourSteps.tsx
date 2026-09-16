@@ -158,8 +158,9 @@ export const ONBOARDING_TOUR_STEPS: TourStep[] = [
     body: (
       <>
         Your claimed XP damages the current seasonal boss, powers your personal
-        analytics, and automatically unlocks badges for meaningful milestones.
-        Open <strong>How Journey works</strong> anytime for a refresher.
+        analytics, and unlocks badges for meaningful milestones once you reach
+        <strong> Level 5</strong>. Open <strong>How Journey works</strong> anytime
+        for a refresher.
       </>
     ),
   },
@@ -169,9 +170,9 @@ export const ONBOARDING_TOUR_STEPS: TourStep[] = [
     title: 'Guild, allies & parties',
     body: (
       <>
-        Follow players by username, create or join a party, and compare public
-        contribution without exposing private goals or activity. Party leaders
-        invite allies and can disband the group.
+        At <strong>Level 10</strong>, follow players by username, create or join a
+        party, and compare public contribution without exposing private goals or
+        activity. Until then, this tab shows your unlock progress.
       </>
     ),
   },

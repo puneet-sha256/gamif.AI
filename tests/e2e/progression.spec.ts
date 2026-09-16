@@ -35,6 +35,13 @@ const TARGET = {
   password: 'Progression123!',
 }
 
+const LEVEL_FIVE_PLAYER = {
+  id: 'level-five-player-id',
+  username: 'levelfiveplayer',
+  email: 'level-five@example.com',
+  password: 'Progression123!',
+}
+
 test.describe('Journey and Guild flows', () => {
   test.beforeEach(() => {
     const today = new Date().toISOString().split('T')[0]
@@ -47,11 +54,11 @@ test.describe('Journey and Guild flows', () => {
             'Build a consistent training practice, improve engineering depth, and develop confident leadership habits.',
         },
         stats: {
-          experience: 240,
+          experience: 900,
           shards: 20,
-          strength: 100,
-          intelligence: 80,
-          charisma: 60,
+          strength: 400,
+          intelligence: 300,
+          charisma: 200,
         },
         catalog: createDefaultCatalog(),
         generatedTasks: createGeneratedTasks(),
@@ -119,6 +126,23 @@ test.describe('Journey and Guild flows', () => {
         catalog: createDefaultCatalog(),
         generatedTasks: createGeneratedTasks(),
       },
+      {
+        ...LEVEL_FIVE_PLAYER,
+        profileData: { name: 'Level Five Player', dateOfBirth: '1990-12-03' },
+        goalsData: {
+          longTermGoals:
+            'Build dependable routines, improve technical skill, and communicate progress with confidence.',
+        },
+        stats: {
+          experience: 400,
+          shards: 5,
+          strength: 150,
+          intelligence: 150,
+          charisma: 100,
+        },
+        catalog: createDefaultCatalog(),
+        generatedTasks: createGeneratedTasks(),
+      },
     ])
   })
 
@@ -133,8 +157,40 @@ test.describe('Journey and Guild flows', () => {
     await expect(page.getByText('90 damage')).toBeVisible()
     await expect(page.getByRole('article').filter({ hasText: 'XP in 30 days' })).toContainText('90')
     await expect(page.getByText('First Step')).toBeVisible()
-    await expect(page.getByText('Unlocked', { exact: true })).toBeVisible()
+    await expect(page.getByText('Unlocked', { exact: true }).first()).toBeVisible()
     await expect(page.getByText('How Journey works')).toBeVisible()
+  })
+
+  test('shows unlock messages below the required levels', async ({ page }) => {
+    await suppressTour(page, TARGET.id)
+    await loginAs(page, TARGET)
+
+    await page.getByRole('button', { name: 'Journey' }).click()
+    await expect(page.getByRole('heading', {
+      name: 'Reach Level 5 to unlock Achievements',
+    })).toBeVisible()
+    await expect(page.getByText('4 levels to go')).toBeVisible()
+
+    await page.getByRole('button', { name: /Guild/ }).click()
+    await expect(page.getByRole('heading', {
+      name: 'Reach Level 10 to unlock Guilds',
+    })).toBeVisible()
+    await expect(page.getByText('9 levels to go')).toBeVisible()
+  })
+
+  test('unlocks achievements at level 5 while Guild remains locked', async ({ page }) => {
+    await suppressTour(page, LEVEL_FIVE_PLAYER.id)
+    await loginAs(page, LEVEL_FIVE_PLAYER)
+
+    await page.getByRole('button', { name: 'Journey' }).click()
+    await expect(page.getByText('First Step')).toBeVisible()
+    await expect(page.getByText('Reach Level 5 to unlock Achievements')).toHaveCount(0)
+
+    await page.getByRole('button', { name: /Guild/ }).click()
+    await expect(page.getByRole('heading', {
+      name: 'Reach Level 10 to unlock Guilds',
+    })).toBeVisible()
+    await expect(page.getByText('5 levels to go')).toBeVisible()
   })
 
   test('follows an ally, forms a party, invites them, and accepts the invite', async ({
