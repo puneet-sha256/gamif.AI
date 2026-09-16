@@ -9,6 +9,8 @@ const USERS_FILE = path.join(DATA_DIR, 'users.json')
 const BACKUP_DIR = path.join(DATA_DIR, 'backup')
 
 export class FileUserRepository implements IUserRepository {
+  private writeQueue: Promise<void> = Promise.resolve()
+
   async initialize(): Promise<void> {
     await fs.ensureDir(DATA_DIR)
     await fs.ensureDir(BACKUP_DIR)
@@ -32,13 +34,19 @@ export class FileUserRepository implements IUserRepository {
   }
 
   private async saveUsers(users: User[]): Promise<void> {
-    // Create backup
-    const timestamp = new Date().toISOString().split('T')[0]
-    const backupFile = path.join(BACKUP_DIR, `users_backup_${timestamp}.json`)
-    if (await fs.pathExists(USERS_FILE)) {
-      await fs.copy(USERS_FILE, backupFile)
-    }
-    await fs.writeJson(USERS_FILE, users, { spaces: 2 })
+    const snapshot = structuredClone(users)
+    const operation = this.writeQueue.then(async () => {
+      const timestamp = new Date().toISOString().split('T')[0]
+      const backupFile = path.join(BACKUP_DIR, `users_backup_${timestamp}.json`)
+      const tempFile = `${USERS_FILE}.${process.pid}.tmp`
+      if (await fs.pathExists(USERS_FILE)) {
+        await fs.copy(USERS_FILE, backupFile, { overwrite: true })
+      }
+      await fs.writeJson(tempFile, snapshot, { spaces: 2 })
+      await fs.rename(tempFile, USERS_FILE)
+    })
+    this.writeQueue = operation.catch(() => undefined)
+    await operation
   }
 
   // ─── Core CRUD ───────────────────────────────────────────────────────────

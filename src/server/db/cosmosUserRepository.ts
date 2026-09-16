@@ -34,6 +34,10 @@ export class CosmosUserRepository implements IUserRepository {
       profileData: profile.profileData,
       goalsData: profile.goalsData,
       stats: profile.stats,
+      following: profile.following,
+      followers: profile.followers,
+      party: profile.party,
+      partyInvites: profile.partyInvites,
       generatedTasks: tasks?.generatedTasks,
       shopItems: shop?.shopItems,
       inventory: shop?.inventory,
@@ -127,6 +131,10 @@ export class CosmosUserRepository implements IUserRepository {
       profileData: user.profileData,
       goalsData: user.goalsData,
       stats: user.stats,
+      following: user.following,
+      followers: user.followers,
+      party: user.party,
+      partyInvites: user.partyInvites,
     }
     operations.push({ operationType: 'Upsert', resourceBody: profileDoc as unknown as JSONObject })
 

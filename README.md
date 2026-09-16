@@ -18,6 +18,18 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 - **Persistent Rewards** - Rewards are saved until you're ready to claim them
 - **Batch Claiming** - Claim all pending rewards at once with a single click
 
+### 🛡️ **Guilds, Followers & Parties**
+- **Player Network** - Follow and unfollow players by exact username without exposing private goals or activity
+- **Party System** - Create a named party, invite allies, accept invitations, leave, or disband as leader
+- **Public Progress** - Party rosters share only player name, username, level, and XP contribution
+- **Cross-Device Persistence** - Social and party state works with file, Cosmos, and migration storage modes
+
+### 🏆 **Seasonal Progression**
+- **Seasonal Boss Campaigns** - Claimed XP deals damage to a quarterly themed boss
+- **Personal Analytics** - Track 30-day XP, active days, current streak, best day, and attribute balance
+- **Achievement Badges** - Automatically unlock milestones for activity, levels, balanced growth, followers, and parties
+- **Built-In Guidance** - Journey and Guild guides complement the expanded first-time onboarding tour
+
 ### 🔥 **Streak System & Multipliers**
 - **Category-Based Streaks** - Track separate streaks for Strength, Intelligence, and Charisma
 - **Daily Streak Requirements** - Earn 10+ XP in a category to maintain/increase its streak
@@ -39,7 +51,7 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 - **Progress Tracking** - Real-time level progression with experience bars
 
 ### 📊 **Advanced Dashboard**
-- **Tabbed Interface** - Profile, Tasks & Challenges, Inventory, and Shop sections
+- **Tabbed Interface** - Profile, Tasks, Inventory, Shop, Journey, and Guild sections
 - **Ring Chart Visualization** - Interactive SVG charts showing attribute distribution
 - **Level Progress Display** - Dynamic calculation using `xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50`
 - **Responsive Design** - Optimized for desktop, tablet, and mobile devices
@@ -552,6 +564,22 @@ Content-Type: application/json
   "goals": ["string"]
 }
 ```
+
+### **Community Endpoints**
+
+```http
+GET    /api/community/:sessionId
+POST   /api/community/follow
+DELETE /api/community/follow
+POST   /api/community/party/create
+POST   /api/community/party/invite
+POST   /api/community/party/accept
+POST   /api/community/party/leave
+```
+
+Community mutations authenticate with `sessionId` in the request body. Follow and
+invite actions also accept `username`; party creation accepts `name`; accepting an
+invitation accepts `inviteId`.
 
 ### **Experience Management Endpoints**
 

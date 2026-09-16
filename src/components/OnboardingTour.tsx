@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import type { ReactNode } from 'react'
 import './OnboardingTour.css'
 
-export type TourTabKey = 'profile' | 'tasks' | 'inventory' | 'shop'
+export type TourTabKey = 'profile' | 'tasks' | 'inventory' | 'shop' | 'journey' | 'guild'
 
 export interface TourStep {
   // The data-tour attribute value to anchor on. Empty string = centered modal (no anchor).

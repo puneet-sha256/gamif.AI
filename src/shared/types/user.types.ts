@@ -1,4 +1,5 @@
 import type { CatalogData } from './catalog.types'
+import type { CommunityUserSnapshot, Party, PartyInvite } from './community.types'
 
 // Core user-related interfaces
 export interface ProfileData {
@@ -187,6 +188,10 @@ export interface User {
   activityHistory?: ActivityHistory // Historical daily XP data for heatmap
   taskHistory?: TaskHistory // Detailed task history for each date
   catalog?: CatalogData // Per-user rewards calibration catalog (Milestone 1B+)
+  following?: CommunityUserSnapshot[]
+  followers?: CommunityUserSnapshot[]
+  party?: Party
+  partyInvites?: PartyInvite[]
 }
 
 export interface UserRegistration {
