@@ -20,6 +20,7 @@ import TimeAliveCounter from './TimeAliveCounter'
 import DateOfBirthModal from './DateOfBirthModal'
 import JourneyHub from './JourneyHub'
 import CommunityHub from './CommunityHub'
+import FeedbackModal from './FeedbackModal'
 import { ONBOARDING_TOUR_STEPS } from './onboardingTourSteps'
 import { communityService, type CommunityState } from '../client/services/communityService'
 import {
@@ -54,6 +55,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     partyInvites: [],
   })
   const [showDailyInput, setShowDailyInput] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
   const [dailyActivity, setDailyActivity] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [isLoadingTasks, setIsLoadingTasks] = useState(false)
@@ -109,6 +111,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const handleCommunityStateChange = useCallback((state: CommunityState) => {
     setCommunityState(state)
   }, [])
+  const closeFeedback = useCallback(() => setShowFeedback(false), [])
 
   useEffect(() => {
     const sessionId = userDatabase.getSessionId()
@@ -1482,6 +1485,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           <span data-tour="theme-toggle" className="theme-toggle-anchor">
             <ThemeToggle />
           </span>
+          <button
+            type="button"
+            className="feedback-button"
+            onClick={() => setShowFeedback(true)}
+            title="Report a bug or request a feature"
+            aria-label="Feedback"
+          >
+            <span aria-hidden="true">💬</span>
+            <span className="feedback-button-text">Feedback</span>
+          </button>
           <button className="logout-button" onClick={handleLogout}>
             Logout
           </button>
@@ -1577,6 +1590,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       <DateOfBirthModal
         isOpen={!!profileData?.name && !profileData?.dateOfBirth}
         existingName={profileData?.name || ''}
+      />
+
+      <FeedbackModal
+        isOpen={showFeedback}
+        sessionId={userDatabase.getSessionId()}
+        onClose={closeFeedback}
+        onSubmitted={showSuccess}
       />
     </div>
   )

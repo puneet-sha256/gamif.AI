@@ -22,7 +22,8 @@ export const ONBOARDING_TOUR_STEPS: TourStep[] = [
     body: (
       <>
         Everything happens here. Switch tabs at the top, claim rewards from the
-        header, or log out anytime.
+        header, send a bug report or feature request through Feedback, or log out
+        anytime.
       </>
     ),
   },

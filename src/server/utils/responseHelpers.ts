@@ -40,9 +40,15 @@ export function createErrorResponse(message: string, code?: string): ApiErrorRes
 }
 
 // Helper function to remove password from user object
-export function sanitizeUser(user: User): Omit<User, 'passwordHash'> {
-  const { passwordHash, ...userWithoutPassword } = user
-  return userWithoutPassword
+export function sanitizeUser(
+  user: User
+): Omit<User, 'passwordHash' | 'feedbackSubmissionTimestamps'> {
+  const {
+    passwordHash,
+    feedbackSubmissionTimestamps,
+    ...safeUser
+  } = user
+  return safeUser
 }
 
 // Common error messages

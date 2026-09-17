@@ -128,6 +128,24 @@
   transition: all var(--transition-fast);
 }
 
+.feedback-button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.feedback-button:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
 .logout-button:hover {
   background: var(--color-error-bg);
   border-color: var(--color-error);
@@ -2343,6 +2361,17 @@
 
 /* ── Small Mobile (600px) ── */
 @media (max-width: 600px) {
+  .feedback-button {
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .feedback-button-text {
+    display: none;
+  }
+
   .modal-content {
     width: 95%;
     max-height: 95vh;

@@ -24,6 +24,13 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 - **Public Progress** - Party rosters share only player name, username, level, and XP contribution
 - **Cross-Device Persistence** - Social and party state works with file, Cosmos, and migration storage modes
 
+### 💬 **User Feedback**
+- **Bug Reports** - Capture severity, category, reproduction steps, expected behavior, and actual behavior
+- **Feature Requests** - Capture the user problem, expected benefit, and an optional proposed solution
+- **Automatic Context** - Attach authenticated account context and non-sensitive browser diagnostics
+- **Reliable Delivery** - Send structured reports to the project owner through Azure Communication Services
+- **Abuse Protection** - Validate all fields server-side and limit submissions per user
+
 ### 🏆 **Seasonal Progression**
 - **Seasonal Boss Campaigns** - Claimed XP deals damage to a quarterly themed boss
 - **Personal Analytics** - Track 30-day XP, active days, current streak, best day, and attribute balance
@@ -580,6 +587,16 @@ POST   /api/community/party/leave
 Community mutations authenticate with `sessionId` in the request body. Follow and
 invite actions also accept `username`; party creation accepts `name`; accepting an
 invitation accepts `inviteId`.
+
+### **Feedback Endpoint**
+
+```http
+POST /api/feedback
+```
+
+Authenticated bug and feature submissions include structured report details and
+browser diagnostics. The destination address is stored as the
+`FEEDBACK_RECIPIENT_EMAIL` deployment secret and is never accepted from clients.
 
 ### **Experience Management Endpoints**
 

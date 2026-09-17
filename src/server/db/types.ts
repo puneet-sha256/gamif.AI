@@ -34,6 +34,7 @@ export interface ProfileSubDoc {
   followers?: CommunityUserSnapshot[]
   party?: Party
   partyInvites?: PartyInvite[]
+  feedbackSubmissionTimestamps?: string[]
 }
 
 export interface TasksSubDoc {
@@ -110,6 +111,7 @@ export const FIELD_TO_SUBDOC: Record<string, SubDocType> = {
   followers: 'profile',
   party: 'profile',
   partyInvites: 'profile',
+  feedbackSubmissionTimestamps: 'profile',
 
   // tasks sub-doc
   generatedTasks: 'tasks',

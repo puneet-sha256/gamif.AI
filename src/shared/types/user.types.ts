@@ -192,6 +192,7 @@ export interface User {
   followers?: CommunityUserSnapshot[]
   party?: Party
   partyInvites?: PartyInvite[]
+  feedbackSubmissionTimestamps?: string[]
 }
 
 export interface UserRegistration {

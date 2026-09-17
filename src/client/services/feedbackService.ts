@@ -5,13 +5,26 @@
  */
 
 import { apiClient } from './apiClient'
-import type { CatalogVote, CatalogRow } from '../../shared/types'
+import type {
+  CatalogVote,
+  CatalogRow,
+  FeedbackReceipt,
+  FeedbackSubmission,
+} from '../../shared/types'
 
 interface FeedbackResponse {
   row: CatalogRow
 }
 
 class FeedbackService {
+  async submitReport(feedback: FeedbackSubmission): Promise<FeedbackReceipt> {
+    const response = await apiClient.post<FeedbackReceipt>('/feedback', feedback)
+    if (!response.success || !response.data) {
+      throw new Error(response.message || response.error || 'Feedback submit failed')
+    }
+    return response.data
+  }
+
   async submitFeedback(
     sessionId: string,
     signature: string,
