@@ -77,3 +77,10 @@ jobs:
           app-name: app-gamif-ai
           slot-name: Production
           package: .
+
+      - name: Restart Azure Web App
+        run: |
+          resource_group=$(az webapp list --query "[?name=='app-gamif-ai'].resourceGroup | [0]" --output tsv)
+          az webapp restart \
+            --resource-group "$resource_group" \
+            --name app-gamif-ai
