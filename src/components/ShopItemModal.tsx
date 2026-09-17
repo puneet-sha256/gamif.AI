@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from 'react'
 import EmojiPicker from 'emoji-picker-react'
 import type { EmojiClickData } from 'emoji-picker-react'
 import './TaskModal.css' // Reuse the same styles
+import './ProductLink.css'
+import type { ProductMetadata } from '../shared/types'
+import { shopService } from '../client/services/shopService'
+import { userDatabase } from '../client/services/fileUserDatabase'
 
 interface ShopItemModalProps {
   isOpen: boolean
@@ -14,6 +18,7 @@ interface ShopItemModalProps {
     isConsumable?: boolean
     isKeyItem?: boolean
     allowMultiplePurchases?: boolean
+    sourceUrl?: string
   }) => Promise<void>
 }
 
@@ -31,6 +36,10 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [entryMode, setEntryMode] = useState<'link' | 'manual'>('link')
+  const [sourceUrl, setSourceUrl] = useState('')
+  const [productPreview, setProductPreview] = useState<ProductMetadata | null>(null)
+  const [isFetchingProduct, setIsFetchingProduct] = useState(false)
   const emojiPickerRef = useRef<HTMLDivElement>(null)
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -44,6 +53,10 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
       setAllowMultiplePurchases(false)
       setError('')
       setShowEmojiPicker(false)
+      setEntryMode('link')
+      setSourceUrl('')
+      setProductPreview(null)
+      setIsFetchingProduct(false)
     }
   }, [isOpen])
 
@@ -73,13 +86,38 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
     e.preventDefault()
     setError('')
 
-    // Validation
+    if (entryMode === 'link') {
+      if (!productPreview || productPreview.sourceUrl !== sourceUrl.trim()) {
+        setError('Fetch the latest product details before adding this item')
+        return
+      }
+      setIsSaving(true)
+      try {
+        await onSave({
+          title: productPreview.title,
+          description: productPreview.description,
+          price: productPreview.shardPrice,
+          image: productPreview.imageUrl,
+          sourceUrl: productPreview.sourceUrl,
+          isConsumable: itemType === 'consumable',
+          isKeyItem: itemType === 'key',
+          allowMultiplePurchases,
+        })
+        handleCancel()
+      } catch {
+        setError('Failed to add linked product. The retailer may be blocking price checks.')
+      } finally {
+        setIsSaving(false)
+      }
+      return
+    }
+
     if (!title.trim()) {
       setError('Item name cannot be empty')
       return
     }
 
-    const priceValue = parseInt(price)
+    const priceValue = Number(price)
 
     if (isNaN(priceValue) || priceValue < 0) {
       setError('Price must be a positive number')
@@ -117,7 +155,34 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
     setAllowMultiplePurchases(false)
     setError('')
     setShowEmojiPicker(false)
+    setSourceUrl('')
+    setProductPreview(null)
     onClose()
+  }
+
+  const handleFetchProduct = async () => {
+    const url = sourceUrl.trim()
+    if (!url) {
+      setError('Paste a product link first')
+      return
+    }
+    const sessionId = userDatabase.getSessionId()
+    if (!sessionId) {
+      setError('Your session has expired. Sign in again.')
+      return
+    }
+    setError('')
+    setProductPreview(null)
+    setIsFetchingProduct(true)
+    try {
+      const metadata = await shopService.previewProduct(sessionId, url)
+      setProductPreview(metadata)
+      setSourceUrl(metadata.sourceUrl)
+    } catch (fetchError) {
+      setError(fetchError instanceof Error ? fetchError.message : 'Could not read this product page')
+    } finally {
+      setIsFetchingProduct(false)
+    }
   }
 
   const handleEmojiClick = (emojiData: EmojiClickData) => {
@@ -142,6 +207,66 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
             </div>
           )}
 
+          <div className="shop-entry-tabs" role="group" aria-label="Wishlist item source">
+            <button type="button" className={entryMode === 'link' ? 'active' : ''} onClick={() => setEntryMode('link')}>
+              🔗 Product link
+            </button>
+            <button type="button" className={entryMode === 'manual' ? 'active' : ''} onClick={() => setEntryMode('manual')}>
+              ✍️ Manual item
+            </button>
+          </div>
+
+          {entryMode === 'link' && (
+            <>
+              <div className="form-group">
+                <label htmlFor="product-url">Amazon, Flipkart, Meesho, or product URL *</label>
+                <div className="product-url-row">
+                  <input
+                    id="product-url"
+                    type="url"
+                    value={sourceUrl}
+                    onChange={event => {
+                      setSourceUrl(event.target.value)
+                      setProductPreview(null)
+                    }}
+                    className="form-input"
+                    placeholder="https://www.amazon.in/..."
+                    maxLength={2000}
+                    disabled={isSaving || isFetchingProduct}
+                    required
+                    autoFocus
+                  />
+                  <button type="button" className="btn btn-secondary" disabled={isFetchingProduct || !sourceUrl.trim()} onClick={() => void handleFetchProduct()}>
+                    {isFetchingProduct ? 'Fetching…' : 'Fetch'}
+                  </button>
+                </div>
+              </div>
+
+              {productPreview && (
+                <article className="product-preview">
+                  {productPreview.imageUrl ? (
+                    <img src={productPreview.imageUrl} alt="" referrerPolicy="no-referrer" />
+                  ) : <span aria-hidden="true">🎁</span>}
+                  <div>
+                    <p>{productPreview.sourceName}</p>
+                    <h3>{productPreview.title}</h3>
+                    <strong>{productPreview.currency} {productPreview.price.toLocaleString()}</strong>
+                    <span>
+                      × {productPreview.shardRate} = {productPreview.shardPrice.toFixed(2)} 💎 shards
+                    </span>
+                  </div>
+                </article>
+              )}
+
+              <p className="product-link-note">
+                Price and title are checked again when you add the item. Some retailers
+                block automated access; switch to Manual item if fetching is unavailable.
+              </p>
+            </>
+          )}
+
+          {entryMode === 'manual' && (
+            <>
           <div className="form-group">
             <label htmlFor="item-title">Item Name *</label>
             <input
@@ -237,6 +362,8 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
             </div>
             <small className="form-hint">Use an emoji to represent this item</small>
           </div>
+            </>
+          )}
 
           <div className="form-group">
             <label htmlFor="item-type">Item Type</label>
@@ -285,7 +412,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
               className="btn btn-primary"
               disabled={isSaving}
             >
-              {isSaving ? 'Adding...' : 'Add Item'}
+              {isSaving ? 'Adding...' : entryMode === 'link' ? 'Add Linked Item' : 'Add Item'}
             </button>
           </div>
         </form>

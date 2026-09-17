@@ -475,6 +475,12 @@ export class CosmosUserRepository implements IUserRepository {
       isConsumable?: boolean
       isKeyItem?: boolean
       allowMultiplePurchases?: boolean
+      sourceUrl?: string
+      sourceName?: string
+      currency?: string
+      livePrice?: number
+      priceFetchedAt?: string
+      shardRate?: number
     }
   ): Promise<boolean> {
     logger.info(`Adding shop item for user: ${userId}`)
@@ -497,6 +503,12 @@ export class CosmosUserRepository implements IUserRepository {
       isConsumable: item.isConsumable || false,
       isKeyItem: item.isKeyItem || false,
       allowMultiplePurchases: item.allowMultiplePurchases || false,
+      sourceUrl: item.sourceUrl,
+      sourceName: item.sourceName,
+      currency: item.currency,
+      livePrice: item.livePrice,
+      priceFetchedAt: item.priceFetchedAt,
+      shardRate: item.shardRate,
     }
 
     shopDoc.shopItems.push(newItem)
@@ -524,6 +536,15 @@ export class CosmosUserRepository implements IUserRepository {
 
     await this.upsertSubDoc(shopDoc)
     logger.success('Shop item deleted successfully')
+    return true
+  }
+
+  async updateShopItem(userId: string, itemId: string, updates: Partial<import('../../shared/types').ShopItem>): Promise<boolean> {
+    const shopDoc = await this.readSubDoc<ShopSubDoc>(userId, 'shop')
+    const item = shopDoc?.shopItems?.find(entry => entry.id === itemId)
+    if (!shopDoc || !item) return false
+    Object.assign(item, updates, { id: item.id, createdAt: item.createdAt })
+    await this.upsertSubDoc(shopDoc)
     return true
   }
 
@@ -558,14 +579,6 @@ export class CosmosUserRepository implements IUserRepository {
       profileDoc.stats = { experience: 0, shards: 0, strength: 0, intelligence: 0, charisma: 0 }
     }
 
-    const currentShards = profileDoc.stats.shards || 0
-    if (currentShards < itemPrice) {
-      return {
-        success: false,
-        message: `Insufficient shards. You have ${currentShards} 💎, but need ${itemPrice} 💎`,
-      }
-    }
-
     let shopDoc = await this.readSubDoc<ShopSubDoc>(userId, 'shop')
     if (!shopDoc) {
       shopDoc = { id: 'shop', type: 'shop', userId, shopItems: [], inventory: [] }
@@ -576,6 +589,17 @@ export class CosmosUserRepository implements IUserRepository {
 
     if (!isWishlistItem && !itemDetails) {
       return { success: false, message: 'Invalid purchase request' }
+    }
+    const effectivePrice = isWishlistItem ? shopItem.price : itemPrice
+    if (!Number.isFinite(effectivePrice) || effectivePrice < 0) {
+      return { success: false, message: 'Invalid item price' }
+    }
+    const currentShards = profileDoc.stats.shards || 0
+    if (currentShards < effectivePrice) {
+      return {
+        success: false,
+        message: `Insufficient shards. You have ${currentShards} 💎, but need ${effectivePrice} 💎`,
+      }
     }
 
     const itemInfo = isWishlistItem
@@ -592,7 +616,7 @@ export class CosmosUserRepository implements IUserRepository {
         }
 
     // Deduct shards
-    profileDoc.stats.shards = currentShards - itemPrice
+    profileDoc.stats.shards = currentShards - effectivePrice
 
     // Remove from shop if single-purchase wishlist item
     if (isWishlistItem && shopDoc.shopItems && !shopItem?.allowMultiplePurchases) {
@@ -646,7 +670,7 @@ export class CosmosUserRepository implements IUserRepository {
     logger.success(`Shop item purchased successfully. New shard balance: ${profileDoc.stats.shards}`)
     return {
       success: true,
-      message: `Successfully purchased item for ${itemPrice} 💎. Remaining shards: ${profileDoc.stats.shards} 💎`,
+      message: `Successfully purchased item for ${effectivePrice} 💎. Remaining shards: ${profileDoc.stats.shards} 💎`,
     }
   }
 

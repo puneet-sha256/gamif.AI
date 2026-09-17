@@ -35,6 +35,7 @@ import type { GeneratedTask } from '../types'
 import { userDatabase } from '../client/services/fileUserDatabase'
 import { aiService } from '../client/services/aiService'
 import { userService } from '../client/services/userService'
+import { shopService } from '../client/services/shopService'
 import { apiClient } from '../client/services/apiClient'
 import { calculateLevelProgress } from '../utils/levelCalculation'
 import { calculateStreakMultiplier, formatMultiplier, calculateStreaksFromHistory, calculateDisplayStreaks } from '../utils/streakCalculation'
@@ -246,6 +247,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     description?: string
     price: number
     image?: string
+    sourceUrl?: string
   }) => {
     const success = await addShopItem(item)
     if (success) {
@@ -267,6 +269,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       if (!success) {
         showError('Failed to delete shop item. Please try again.')
       }
+    }
+  }
+
+  const handleRefreshLinkedItem = async (itemId: string): Promise<number | undefined> => {
+    const sessionId = userDatabase.getSessionId()
+    if (!sessionId) {
+      showError('Your session has expired. Please sign in again.')
+      return undefined
+    }
+    try {
+      const response = await shopService.refreshLinkedItem(sessionId, itemId)
+      const refreshedItem = response.data?.shopItems.find(item => item.id === itemId)
+      await refreshUser()
+      showSuccess('Product price and shard cost refreshed.')
+      return refreshedItem?.price
+    } catch (error) {
+      showError(error instanceof Error ? error.message : 'Could not refresh product price.')
+      return undefined
     }
   }
 
@@ -1262,7 +1282,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                     price={item.price}
                     userShards={user?.stats?.shards || 0}
                     isUserItem={true}
-                    onBuy={() => handleBuyShopItem(item.id, item.title, item.price, item.description, item.image, item.isConsumable, item.isKeyItem, item.allowMultiplePurchases)}
+                    sourceUrl={item.sourceUrl}
+                    sourceName={item.sourceName}
+                    currency={item.currency}
+                    livePrice={item.livePrice}
+                    priceFetchedAt={item.priceFetchedAt}
+                    onRefreshPrice={item.sourceUrl ? () => handleRefreshLinkedItem(item.id) : undefined}
+                    onBuy={(confirmedPrice) => handleBuyShopItem(item.id, item.title, confirmedPrice, item.description, item.image, item.isConsumable, item.isKeyItem, item.allowMultiplePurchases)}
                     onDelete={() => handleDeleteShopItem(item.id)}
                   />
                 ))}

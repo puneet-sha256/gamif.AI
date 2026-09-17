@@ -16,7 +16,8 @@ import {
   deleteShopItem,
   getUserShopItems,
   buyShopItem,
-  useInventoryItem
+  useInventoryItem,
+  updateShopItem
 } from '../utils/dataOperations'
 import {
   createSuccessResponse,
@@ -34,6 +35,7 @@ import {
   updateStreakCache
 } from '../../utils/streakCalculation'
 import { applyFeedbackToRow } from '../utils/catalogFeedback'
+import { fetchProductMetadata } from '../services/productMetadataService'
 
 // Get current user by session
 export async function getCurrentUser(req: Request, res: Response) {
@@ -549,17 +551,27 @@ export async function addUserTask(req: Request, res: Response) {
 // Add a shop item
 export async function addUserShopItem(req: Request, res: Response) {
   try {
-    const { sessionId, title, description, price, image, isConsumable, isKeyItem, allowMultiplePurchases } = req.body
+    const {
+      sessionId,
+      title,
+      description,
+      price,
+      image,
+      isConsumable,
+      isKeyItem,
+      allowMultiplePurchases,
+      sourceUrl,
+    } = req.body
 
     // Validate required fields
-    if (!sessionId || !title || price === undefined) {
+    if (!sessionId || (!sourceUrl && (!title || price === undefined))) {
       return res.status(400).json(createErrorResponse(
-        'Missing required fields: sessionId, title, and price are required'
+        'Provide a sessionId and either a product URL or manual title and price'
       ))
     }
 
     // Validate price is a positive number
-    if (typeof price !== 'number' || price < 0) {
+    if (!sourceUrl && (typeof price !== 'number' || price < 0)) {
       return res.status(400).json(createErrorResponse(
         'Price must be a non-negative number'
       ))
@@ -577,15 +589,33 @@ export async function addUserShopItem(req: Request, res: Response) {
       return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
     }
 
-    // Add the shop item
+    let linkedMetadata
+    if (sourceUrl) {
+      if (typeof sourceUrl !== 'string' || sourceUrl.length > 2000) {
+        return res.status(400).json(createErrorResponse('Product URL is invalid'))
+      }
+      try {
+        linkedMetadata = await fetchProductMetadata(sourceUrl)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Product details could not be retrieved'
+        return res.status(422).json(createErrorResponse(message))
+      }
+    }
+
     const success = await addShopItem(user.id, {
-      title,
-      description,
-      price,
-      image,
+      title: linkedMetadata?.title || String(title).trim(),
+      description: linkedMetadata?.description || description,
+      price: linkedMetadata?.shardPrice ?? price,
+      image: linkedMetadata?.imageUrl || image,
       isConsumable,
       isKeyItem,
-      allowMultiplePurchases
+      allowMultiplePurchases,
+      sourceUrl: linkedMetadata?.sourceUrl,
+      sourceName: linkedMetadata?.sourceName,
+      currency: linkedMetadata?.currency,
+      livePrice: linkedMetadata?.price,
+      priceFetchedAt: linkedMetadata?.fetchedAt,
+      shardRate: linkedMetadata?.shardRate,
     })
 
     if (!success) {
@@ -606,6 +636,50 @@ export async function addUserShopItem(req: Request, res: Response) {
   } catch (error) {
     logger.error('Add shop item error:', error)
     res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+export async function refreshLinkedShopItem(req: Request, res: Response) {
+  try {
+    const { sessionId, itemId } = req.body || {}
+    if (typeof sessionId !== 'string' || typeof itemId !== 'string') {
+      return res.status(400).json(createErrorResponse('sessionId and itemId are required'))
+    }
+    const session = await findSessionById(sessionId)
+    if (!session) return res.status(401).json(createErrorResponse(ErrorMessages.INVALID_SESSION))
+    const user = await findUserById(session.userId)
+    if (!user) return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    const item = user.shopItems?.find(entry => entry.id === itemId)
+    if (!item?.sourceUrl) {
+      return res.status(400).json(createErrorResponse('This wishlist item is not linked to a product page'))
+    }
+
+    let metadata
+    try {
+      metadata = await fetchProductMetadata(item.sourceUrl)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Product price could not be refreshed'
+      return res.status(422).json(createErrorResponse(message))
+    }
+    const success = await updateShopItem(user.id, item.id, {
+      title: metadata.title,
+      description: metadata.description || item.description,
+      image: metadata.imageUrl || item.image,
+      price: metadata.shardPrice,
+      sourceUrl: metadata.sourceUrl,
+      sourceName: metadata.sourceName,
+      currency: metadata.currency,
+      livePrice: metadata.price,
+      priceFetchedAt: metadata.fetchedAt,
+      shardRate: metadata.shardRate,
+    })
+    if (!success) return res.status(404).json(createErrorResponse('Wishlist item not found'))
+    await updateSessionLastAccess(sessionId)
+    const shopItems = await getUserShopItems(user.id)
+    return res.json(createSuccessResponse('Product price refreshed successfully', { shopItems }))
+  } catch (error) {
+    logger.error('Refresh linked shop item error:', error)
+    return res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }
 

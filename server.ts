@@ -12,10 +12,11 @@ import {
   getUserTasks, updateGeneratedTask, deleteGeneratedTask,
   addUserTask, addUserShopItem, deleteUserShopItem,
   getUserShopItemsList, buyUserShopItem, useUserInventoryItem,
-  submitCatalogFeedback
+  submitCatalogFeedback, refreshLinkedShopItem
 } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
 import { submitFeedback } from './src/server/routes/feedbackRoutes'
+import { previewProduct } from './src/server/routes/productRoutes'
 import {
   acceptPartyInvite,
   acceptFollowRequest,
@@ -99,7 +100,13 @@ app.use((req, res, next) => {
           content: '[REDACTED]',
           diagnostics: '[REDACTED]'
         }
-      : { ...req.body }
+      : req.path === '/api/product/preview' || req.path === '/api/user/shop/add'
+        ? {
+            ...req.body,
+            ...(req.body.url ? { url: '[REDACTED]' } : {}),
+            ...(req.body.sourceUrl ? { sourceUrl: '[REDACTED]' } : {}),
+          }
+        : { ...req.body }
     if (safeBody.password) safeBody.password = '[HIDDEN]'
     logger.custom('📥', 'Server: Request body:', safeBody)
   }
@@ -149,6 +156,7 @@ app.post('/api/user/shop/add', addUserShopItem)
 app.delete('/api/user/shop/delete', deleteUserShopItem)
 app.get('/api/user/shop/:sessionId', getUserShopItemsList)
 app.post('/api/user/shop/buy', buyUserShopItem)
+app.post('/api/user/shop/refresh-price', refreshLinkedShopItem)
 
 // Inventory routes
 app.post('/api/user/inventory/use', useUserInventoryItem)
@@ -169,6 +177,7 @@ app.post('/api/ai/intake/confirm', confirmIntake)
 // Catalog feedback (Milestone 1D)
 app.post('/api/user/catalog/feedback', submitCatalogFeedback)
 app.post('/api/feedback', serializeFeedbackRequest(submitFeedback))
+app.post('/api/product/preview', previewProduct)
 
 // Community routes
 app.get('/api/community/:sessionId', serializeCommunityRequest(getCommunityState))

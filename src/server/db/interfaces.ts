@@ -53,9 +53,16 @@ export interface IUserRepository {
       isConsumable?: boolean
       isKeyItem?: boolean
       allowMultiplePurchases?: boolean
+      sourceUrl?: string
+      sourceName?: string
+      currency?: string
+      livePrice?: number
+      priceFetchedAt?: string
+      shardRate?: number
     }
   ): Promise<boolean>
   deleteShopItem(userId: string, itemId: string): Promise<boolean>
+  updateShopItem(userId: string, itemId: string, updates: Partial<import('../../shared/types').ShopItem>): Promise<boolean>
   getUserShopItems(userId: string): Promise<import('../../shared/types').ShopItem[] | null>
   buyShopItem(
     userId: string,

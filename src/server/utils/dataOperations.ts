@@ -123,6 +123,12 @@ export async function addShopItem(
     isConsumable?: boolean
     isKeyItem?: boolean
     allowMultiplePurchases?: boolean
+    sourceUrl?: string
+    sourceName?: string
+    currency?: string
+    livePrice?: number
+    priceFetchedAt?: string
+    shardRate?: number
   }
 ): Promise<boolean> {
   return getUserRepository().addShopItem(userId, item)
@@ -130,6 +136,14 @@ export async function addShopItem(
 
 export async function deleteShopItem(userId: string, itemId: string): Promise<boolean> {
   return getUserRepository().deleteShopItem(userId, itemId)
+}
+
+export async function updateShopItem(
+  userId: string,
+  itemId: string,
+  updates: Partial<import('../../shared/types').ShopItem>
+): Promise<boolean> {
+  return getUserRepository().updateShopItem(userId, itemId, updates)
 }
 
 export async function getUserShopItems(userId: string) {
