@@ -1,5 +1,7 @@
 import type { User, Session, GeneratedTasks, GeneratedTask } from '../../shared/types'
 
+export type UserMutation = (user: User) => Partial<User>
+
 // ─── User Repository Interface ──────────────────────────────────────────────
 // All data access for user data goes through this interface.
 // Implementations: FileUserRepository, CosmosUserRepository, MigratingUserRepository
@@ -12,6 +14,7 @@ export interface IUserRepository {
   searchUsers(query: string, limit: number): Promise<User[]>
   createUser(user: User): Promise<void>
   updateUser(userId: string, updates: Partial<User>): Promise<User | null>
+  mutateUser(userId: string, mutation: UserMutation): Promise<User | null>
 
   // Generated tasks
   getUserGeneratedTasks(userId: string): Promise<GeneratedTasks | null>

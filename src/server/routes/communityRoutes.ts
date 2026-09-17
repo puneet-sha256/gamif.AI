@@ -3,7 +3,10 @@ import { v4 as uuidv4 } from 'uuid'
 import type {
   CommunityState,
   CommunitySearchResult,
+  CommunityIdentity,
   CommunityUserSnapshot,
+  FollowRequest,
+  FollowRequestActionRequest,
   AcceptPartyInviteRequest,
   CommunitySessionRequest,
   CreatePartyRequest,
@@ -21,6 +24,7 @@ import {
   findUserByUsername,
   updateSessionLastAccess,
   updateUser,
+  mutateUser,
   searchUsers,
 } from '../utils/dataOperations'
 import {
@@ -53,6 +57,29 @@ function publicSnapshot(user: User): CommunityUserSnapshot {
     name: user.profileData?.name || user.username,
     level: calculateActualLevel(experienceFor(user)),
     experience: experienceFor(user),
+    attributes: {
+      strength: user.stats?.strength || 0,
+      intelligence: user.stats?.intelligence || 0,
+      charisma: user.stats?.charisma || 0,
+    },
+    activeDays: (user.activityHistory?.dailyActivities || [])
+      .filter(activity => activity.total > 0).length,
+    memberSince: user.createdAt,
+  }
+}
+
+function identitySnapshot(user: User): CommunityIdentity {
+  return {
+    id: user.id,
+    username: user.username,
+    name: user.profileData?.name || user.username,
+  }
+}
+
+function followRequestSnapshot(user: User, requestedAt: string): FollowRequest {
+  return {
+    ...identitySnapshot(user),
+    requestedAt,
   }
 }
 
@@ -94,11 +121,48 @@ function isAuthError(
   return 'status' in result
 }
 
-async function refreshedSnapshots(
+async function refreshedFollowing(
+  owner: User,
   snapshots: CommunityUserSnapshot[] | undefined
 ): Promise<CommunityUserSnapshot[]> {
   const users = await Promise.all((snapshots || []).map(snapshot => findUserById(snapshot.id)))
-  return users.filter((user): user is User => !!user).map(publicSnapshot)
+  return users
+    .filter((user): user is User =>
+      !!user && (user.followers || []).some(follower => follower.id === owner.id)
+    )
+    .map(publicSnapshot)
+}
+
+async function refreshedFollowers(
+  owner: User,
+  snapshots: CommunityIdentity[] | undefined
+): Promise<CommunityIdentity[]> {
+  const users = await Promise.all((snapshots || []).map(snapshot => findUserById(snapshot.id)))
+  return users
+    .filter((user): user is User =>
+      !!user && (user.following || []).some(followed => followed.id === owner.id)
+    )
+    .map(identitySnapshot)
+}
+
+async function refreshFollowRequests(
+  user: User,
+  direction: 'received' | 'sent'
+): Promise<FollowRequest[]> {
+  const requests = direction === 'received'
+    ? user.receivedFollowRequests || []
+    : user.sentFollowRequests || []
+  const refreshed = await Promise.all(requests.map(async request => {
+    const counterpart = await findUserById(request.id)
+    if (!counterpart) return undefined
+    const reciprocal = direction === 'received'
+      ? counterpart.sentFollowRequests?.some(item => item.id === user.id)
+      : counterpart.receivedFollowRequests?.some(item => item.id === user.id)
+    return reciprocal
+      ? followRequestSnapshot(counterpart, request.requestedAt)
+      : undefined
+  }))
+  return refreshed.filter((request): request is FollowRequest => !!request)
 }
 
 async function canonicalParty(party: Party): Promise<Party> {
@@ -139,9 +203,17 @@ async function refreshInvites(user: User): Promise<PartyInvite[]> {
 }
 
 async function buildCommunityState(user: User): Promise<CommunityState> {
-  const [following, followers, partyInvites] = await Promise.all([
-    refreshedSnapshots(user.following),
-    refreshedSnapshots(user.followers),
+  const [
+    following,
+    followers,
+    receivedFollowRequests,
+    sentFollowRequests,
+    partyInvites,
+  ] = await Promise.all([
+    refreshedFollowing(user, user.following),
+    refreshedFollowers(user, user.followers),
+    refreshFollowRequests(user, 'received'),
+    refreshFollowRequests(user, 'sent'),
     refreshInvites(user),
   ])
 
@@ -164,15 +236,25 @@ async function buildCommunityState(user: User): Promise<CommunityState> {
   if (
     JSON.stringify(following) !== JSON.stringify(user.following || [])
     || JSON.stringify(followers) !== JSON.stringify(user.followers || [])
+    || JSON.stringify(receivedFollowRequests) !== JSON.stringify(user.receivedFollowRequests || [])
+    || JSON.stringify(sentFollowRequests) !== JSON.stringify(user.sentFollowRequests || [])
     || JSON.stringify(partyInvites) !== JSON.stringify(user.partyInvites || [])
   ) {
-    await updateUser(user.id, { following, followers, partyInvites })
+    await updateUser(user.id, {
+      following,
+      followers,
+      receivedFollowRequests,
+      sentFollowRequests,
+      partyInvites,
+    })
   }
 
   return {
     user: publicSnapshot(user),
     following,
     followers,
+    receivedFollowRequests,
+    sentFollowRequests,
     party,
     partyInvites,
   }
@@ -180,6 +262,12 @@ async function buildCommunityState(user: User): Promise<CommunityState> {
 
 function sendAuthError(res: Response, result: { status: number; message: string }) {
   return res.status(result.status).json(createErrorResponse(result.message))
+}
+
+function requireGuildAccess(user: User, res: Response): boolean {
+  if (calculateActualLevel(experienceFor(user)) >= 10) return true
+  res.status(403).json(createErrorResponse('Guild features unlock at Level 10'))
+  return false
 }
 
 export async function getCommunityState(req: Request<{ sessionId: string }>, res: Response) {
@@ -202,24 +290,29 @@ export async function searchCommunityUsers(
   try {
     const auth = await authenticate(req.params.sessionId)
     if (isAuthError(auth)) return sendAuthError(res, auth)
+    if (!requireGuildAccess(auth.user, res)) return
     if (!validString(req.query.q, 40) || req.query.q.trim().length < 2) {
       return res.status(400).json(createErrorResponse(
         'Search query must be between 2 and 40 characters'
       ))
     }
 
-    const matches = await searchUsers(req.query.q.trim(), 16)
+    const matches = (await searchUsers(req.query.q.trim(), 24))
+      .filter(user => calculateActualLevel(experienceFor(user)) >= 10)
     const followingIds = new Set((auth.user.following || []).map(user => user.id))
     const followerIds = new Set((auth.user.followers || []).map(user => user.id))
+    const sentRequestIds = new Set((auth.user.sentFollowRequests || []).map(user => user.id))
+    const receivedRequestIds = new Set((auth.user.receivedFollowRequests || []).map(user => user.id))
     const results: CommunitySearchResult[] = matches
       .filter(user => user.id !== auth.user.id)
       .map(user => ({
         id: user.id,
         username: user.username,
         name: user.profileData?.name || user.username,
-        level: calculateActualLevel(experienceFor(user)),
         isFollowing: followingIds.has(user.id),
         followsYou: followerIds.has(user.id),
+        requestSent: sentRequestIds.has(user.id),
+        requestReceived: receivedRequestIds.has(user.id),
       }))
       .slice(0, 8)
 
@@ -234,6 +327,7 @@ export async function followUser(req: Request<object, object, FollowUserRequest>
   try {
     const auth = await authenticate(req.body?.sessionId)
     if (isAuthError(auth)) return sendAuthError(res, auth)
+    if (!requireGuildAccess(auth.user, res)) return
     if (!validString(req.body?.username)) {
       return res.status(400).json(createErrorResponse('A valid username is required'))
     }
@@ -243,23 +337,58 @@ export async function followUser(req: Request<object, object, FollowUserRequest>
     if (target.id === auth.user.id) {
       return res.status(400).json(createErrorResponse('Users cannot follow themselves'))
     }
-
-    const alreadyFollowing = (auth.user.following || []).some(user => user.id === target.id)
-    if (!alreadyFollowing) {
-      await updateUser(auth.user.id, {
-        following: [...(auth.user.following || []), publicSnapshot(target)],
-      })
-    }
-    if (!(target.followers || []).some(user => user.id === auth.user.id)) {
-      await updateUser(target.id, {
-        followers: [...(target.followers || []), publicSnapshot(auth.user)],
-      })
+    if (calculateActualLevel(experienceFor(target)) < 10) {
+      return res.status(409).json(createErrorResponse(
+        'This player has not unlocked Guild features yet'
+      ))
     }
 
+    if ((auth.user.following || []).some(user => user.id === target.id)) {
+      const state = await buildCommunityState(auth.user)
+      return res.json(createSuccessResponse('Already following user', state))
+    }
+
+    const requestedAt = new Date().toISOString()
+    let createdRequest = false
+    const updatedSender = await mutateUser(auth.user.id, current => {
+      createdRequest = !(current.sentFollowRequests || [])
+        .some(request => request.id === target.id)
+      return createdRequest
+        ? {
+            sentFollowRequests: [
+              ...(current.sentFollowRequests || []),
+              followRequestSnapshot(target, requestedAt),
+            ],
+          }
+        : {}
+    })
+    if (!updatedSender) {
+      return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+    if (createdRequest) {
+      try {
+        const updatedTarget = await mutateUser(target.id, current => ({
+          receivedFollowRequests: (current.receivedFollowRequests || [])
+            .some(request => request.id === auth.user.id)
+            ? current.receivedFollowRequests
+            : [
+                ...(current.receivedFollowRequests || []),
+                followRequestSnapshot(auth.user, requestedAt),
+              ],
+        }))
+        if (!updatedTarget) throw new Error('Target disappeared while sending request')
+      } catch (error) {
+        await mutateUser(auth.user.id, current => ({
+          sentFollowRequests: (current.sentFollowRequests || [])
+            .filter(request => request.id !== target.id),
+        }))
+        throw error
+      }
+    }
     const current = await findUserById(auth.user.id)
     const state = await buildCommunityState(current || auth.user)
     return res.json(createSuccessResponse(
-      alreadyFollowing ? 'Already following user' : 'User followed successfully',
+      createdRequest ? 'Follow request sent successfully' : 'Follow request already pending',
       state
     ))
   } catch (error) {
@@ -268,10 +397,149 @@ export async function followUser(req: Request<object, object, FollowUserRequest>
   }
 }
 
+export async function acceptFollowRequest(
+    req: Request<object, object, FollowRequestActionRequest>,
+    res: Response
+  ) {
+    try {
+      const auth = await authenticate(req.body?.sessionId)
+      if (isAuthError(auth)) return sendAuthError(res, auth)
+      if (!requireGuildAccess(auth.user, res)) return
+      if (!validString(req.body?.userId)) {
+        return res.status(400).json(createErrorResponse('A valid userId is required'))
+      }
+
+      const requesterId = req.body.userId.trim()
+      const request = (auth.user.receivedFollowRequests || [])
+        .find(item => item.id === requesterId)
+      if (!request) {
+        return res.status(404).json(createErrorResponse('Follow request not found'))
+      }
+      const requester = await findUserById(requesterId)
+      if (!requester) {
+        return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+      }
+
+      let accepted = false
+      const recipient = await mutateUser(auth.user.id, current => {
+        accepted = (current.receivedFollowRequests || [])
+          .some(item => item.id === requester.id)
+        return accepted
+          ? {
+              followers: [
+                ...(current.followers || []).filter(user => user.id !== requester.id),
+                identitySnapshot(requester),
+              ],
+              receivedFollowRequests: (current.receivedFollowRequests || [])
+                .filter(item => item.id !== requester.id),
+            }
+          : {}
+      })
+      if (!recipient || !accepted) {
+        return res.status(404).json(createErrorResponse('Follow request not found'))
+      }
+
+      try {
+        const updatedRequester = await mutateUser(requester.id, current => ({
+          following: [
+            ...(current.following || []).filter(user => user.id !== auth.user.id),
+            publicSnapshot(recipient),
+          ],
+          sentFollowRequests: (current.sentFollowRequests || [])
+            .filter(item => item.id !== auth.user.id),
+        }))
+        if (!updatedRequester) throw new Error('Requester disappeared during acceptance')
+      } catch (error) {
+        await mutateUser(auth.user.id, current => ({
+          followers: (current.followers || []).filter(user => user.id !== requester.id),
+          receivedFollowRequests: (current.receivedFollowRequests || [])
+            .some(item => item.id === requester.id)
+            ? current.receivedFollowRequests
+            : [...(current.receivedFollowRequests || []), request],
+        }))
+        throw error
+      }
+
+      const current = await findUserById(auth.user.id)
+      const state = await buildCommunityState(current || auth.user)
+      return res.json(createSuccessResponse('Follow request accepted', state))
+    } catch (error) {
+      logger.error('Accept follow request error:', error)
+      return res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+    }
+  }
+
+export async function declineFollowRequest(
+    req: Request<object, object, FollowRequestActionRequest>,
+    res: Response
+  ) {
+    try {
+      const auth = await authenticate(req.body?.sessionId)
+      if (isAuthError(auth)) return sendAuthError(res, auth)
+      if (!requireGuildAccess(auth.user, res)) return
+      if (!validString(req.body?.userId)) {
+        return res.status(400).json(createErrorResponse('A valid userId is required'))
+      }
+      const requesterId = req.body.userId.trim()
+      const requester = await findUserById(requesterId)
+      if (requester) {
+        await mutateUser(requester.id, current => ({
+          sentFollowRequests: (current.sentFollowRequests || [])
+            .filter(item => item.id !== auth.user.id),
+        }))
+      }
+      await mutateUser(auth.user.id, current => ({
+        receivedFollowRequests: (current.receivedFollowRequests || [])
+          .filter(item => item.id !== requesterId),
+      }))
+
+      const current = await findUserById(auth.user.id)
+      const state = await buildCommunityState(current || auth.user)
+      return res.json(createSuccessResponse('Follow request declined', state))
+    } catch (error) {
+      logger.error('Decline follow request error:', error)
+      return res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+    }
+  }
+
+export async function cancelFollowRequest(
+    req: Request<object, object, FollowRequestActionRequest>,
+    res: Response
+  ) {
+    try {
+      const auth = await authenticate(req.body?.sessionId)
+      if (isAuthError(auth)) return sendAuthError(res, auth)
+      if (!requireGuildAccess(auth.user, res)) return
+      if (!validString(req.body?.userId)) {
+        return res.status(400).json(createErrorResponse('A valid userId is required'))
+      }
+      const targetId = req.body.userId.trim()
+      const target = await findUserById(targetId)
+      if (target) {
+        await mutateUser(target.id, current => ({
+          receivedFollowRequests: (current.receivedFollowRequests || [])
+            .filter(item => item.id !== auth.user.id),
+        }))
+      }
+      await mutateUser(auth.user.id, current => ({
+        sentFollowRequests: (current.sentFollowRequests || [])
+          .filter(item => item.id !== targetId),
+      }))
+
+      const current = await findUserById(auth.user.id)
+      const state = await buildCommunityState(current || auth.user)
+      return res.json(createSuccessResponse('Follow request canceled', state))
+    } catch (error) {
+      logger.error('Cancel follow request error:', error)
+      return res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+    }
+}
+
 export async function unfollowUser(req: Request<object, object, UnfollowUserRequest>, res: Response) {
   try {
     const auth = await authenticate(req.body?.sessionId)
     if (isAuthError(auth)) return sendAuthError(res, auth)
+    if (!requireGuildAccess(auth.user, res)) return
     if (!validString(req.body?.username) && !validString(req.body?.userId)) {
       return res.status(400).json(createErrorResponse('A valid username or userId is required'))
     }
@@ -286,12 +554,12 @@ export async function unfollowUser(req: Request<object, object, UnfollowUserRequ
       return res.status(400).json(createErrorResponse('Users cannot unfollow themselves'))
     }
 
-    await updateUser(auth.user.id, {
-      following: (auth.user.following || []).filter(user => user.id !== target.id),
-    })
-    await updateUser(target.id, {
-      followers: (target.followers || []).filter(user => user.id !== auth.user.id),
-    })
+    await mutateUser(auth.user.id, current => ({
+      following: (current.following || []).filter(user => user.id !== target.id),
+    }))
+    await mutateUser(target.id, current => ({
+      followers: (current.followers || []).filter(user => user.id !== auth.user.id),
+    }))
 
     const current = await findUserById(auth.user.id)
     const state = await buildCommunityState(current || auth.user)
@@ -306,6 +574,7 @@ export async function createParty(req: Request<object, object, CreatePartyReques
   try {
     const auth = await authenticate(req.body?.sessionId)
     if (isAuthError(auth)) return sendAuthError(res, auth)
+    if (!requireGuildAccess(auth.user, res)) return
     if (!validString(req.body?.name, 40)) {
       return res.status(400).json(createErrorResponse('Party name must be between 2 and 40 characters'))
     }
@@ -340,6 +609,7 @@ export async function inviteToParty(req: Request<object, object, InviteToPartyRe
   try {
     const auth = await authenticate(req.body?.sessionId)
     if (isAuthError(auth)) return sendAuthError(res, auth)
+    if (!requireGuildAccess(auth.user, res)) return
     if (!validString(req.body?.username)) {
       return res.status(400).json(createErrorResponse('A valid username is required'))
     }
@@ -351,6 +621,11 @@ export async function inviteToParty(req: Request<object, object, InviteToPartyRe
     if (!target) return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
     if (target.id === auth.user.id) {
       return res.status(400).json(createErrorResponse('Party owners cannot invite themselves'))
+    }
+    if (calculateActualLevel(experienceFor(target)) < 10) {
+      return res.status(409).json(createErrorResponse(
+        'This player has not unlocked Guild features yet'
+      ))
     }
     if (target.party) {
       return res.status(409).json(createErrorResponse('Target user already belongs to a party'))
@@ -385,6 +660,7 @@ export async function acceptPartyInvite(req: Request<object, object, AcceptParty
   try {
     const auth = await authenticate(req.body?.sessionId)
     if (isAuthError(auth)) return sendAuthError(res, auth)
+    if (!requireGuildAccess(auth.user, res)) return
     if (!validString(req.body?.partyId) && !validString(req.body?.inviteId)) {
       return res.status(400).json(createErrorResponse('A valid partyId or inviteId is required'))
     }
@@ -435,6 +711,7 @@ export async function leaveParty(req: Request<object, object, CommunitySessionRe
   try {
     const auth = await authenticate(req.body?.sessionId)
     if (isAuthError(auth)) return sendAuthError(res, auth)
+    if (!requireGuildAccess(auth.user, res)) return
     if (!auth.user.party) {
       return res.status(409).json(createErrorResponse('User does not belong to a party'))
     }

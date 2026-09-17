@@ -2,6 +2,7 @@ import { apiClient } from './apiClient'
 import type {
   CommunityState as SharedCommunityState,
   CommunityUserSnapshot,
+  CommunityIdentity,
   CommunitySearchResult,
   Party as SharedParty,
   PartyInvite as SharedPartyInvite,
@@ -9,6 +10,7 @@ import type {
 } from '../../shared/types'
 
 export type PublicPlayer = CommunityUserSnapshot
+export type FollowerIdentity = CommunityIdentity
 export type PartyMember = PartyMemberSnapshot
 export type Party = SharedParty
 export type PartyInvite = SharedPartyInvite
@@ -31,6 +33,18 @@ class CommunityService {
 
   follow(sessionId: string, username: string) {
     return apiClient.post<CommunityState>('/community/follow', { sessionId, username })
+  }
+
+  acceptFollowRequest(sessionId: string, userId: string) {
+    return apiClient.post<CommunityState>('/community/follow-request/accept', { sessionId, userId })
+  }
+
+  declineFollowRequest(sessionId: string, userId: string) {
+    return apiClient.post<CommunityState>('/community/follow-request/decline', { sessionId, userId })
+  }
+
+  cancelFollowRequest(sessionId: string, userId: string) {
+    return apiClient.post<CommunityState>('/community/follow-request/cancel', { sessionId, userId })
   }
 
   unfollow(sessionId: string, userId: string) {

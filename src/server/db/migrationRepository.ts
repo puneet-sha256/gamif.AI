@@ -1,5 +1,5 @@
 import type { User, Session, GeneratedTasks } from '../../shared/types'
-import type { IUserRepository, ISessionRepository } from './interfaces'
+import type { IUserRepository, ISessionRepository, UserMutation } from './interfaces'
 import { logger } from '../../utils/logger'
 import { rankUserSearchResults } from '../utils/userSearch'
 
@@ -89,6 +89,14 @@ export class MigratingUserRepository implements IUserRepository {
       return this.cosmos.updateUser(userId, updates)
     }
     return this.file.updateUser(userId, updates)
+  }
+
+  async mutateUser(userId: string, mutation: UserMutation): Promise<User | null> {
+    await this.findById(userId)
+    if (await this.isInCosmos(userId)) {
+      return this.cosmos.mutateUser(userId, mutation)
+    }
+    return this.file.mutateUser(userId, mutation)
   }
 
   async getUserGeneratedTasks(userId: string): Promise<GeneratedTasks | null> {

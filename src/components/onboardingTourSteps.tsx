@@ -171,10 +171,10 @@ export const ONBOARDING_TOUR_STEPS: TourStep[] = [
     title: 'Guild, allies & parties',
     body: (
       <>
-        At <strong>Level 10</strong>, search players by name or username, follow
-        them back, create or join a
-        party, and compare public contribution without exposing private goals or
-        activity. Until then, this tab shows your unlock progress.
+        At <strong>Level 10</strong>, search players by name or username and send
+        a private follow request. Accepted followers can see limited progress
+        stats, while goals and activity stay private. Guild notifications let you
+        accept or decline requests, follow back, and form parties.
       </>
     ),
   },

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   communityService,
   type CommunityState,
+  type FollowerIdentity,
   type PlayerSearchResult,
   type PublicPlayer,
 } from '../client/services/communityService'
@@ -16,6 +17,8 @@ interface CommunityHubProps {
 const EMPTY_STATE: CommunityState = {
   followers: [],
   following: [],
+  receivedFollowRequests: [],
+  sentFollowRequests: [],
   partyInvites: [],
 }
 
@@ -110,35 +113,70 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
 
   const renderPlayer = (
     player: PublicPlayer,
-    action: 'unfollow' | 'follow-back' | 'none' = 'none'
+    action: 'unfollow' | 'none' = 'none'
   ) => (
-    <li className="player-row" key={player.id}>
-      <span className="player-avatar" aria-hidden="true">
-        {(player.name || player.username).slice(0, 1).toUpperCase()}
-      </span>
-      <span>
-        <strong>{player.name || player.username}</strong>
-        <small>@{player.username} · Level {player.level}</small>
-      </span>
-      {action !== 'none' && (
-        <button
-          type="button"
-          className="secondary-action"
-          disabled={isWorking}
-          onClick={() => void runAction(
-            () => action === 'unfollow'
-              ? communityService.unfollow(sessionId!, player.id)
-              : communityService.follow(sessionId!, player.username),
-            action === 'unfollow'
-              ? `Unfollowed @${player.username}.`
-              : `You followed @${player.username} back.`
-          )}
-        >
-          {action === 'unfollow' ? 'Unfollow' : 'Follow back'}
-        </button>
-      )}
+    <li className="connection-card" key={player.id}>
+      <div className="player-row">
+        <span className="player-avatar" aria-hidden="true">
+          {(player.name || player.username).slice(0, 1).toUpperCase()}
+        </span>
+        <span>
+          <strong>{player.name || player.username}</strong>
+          <small>@{player.username} · Level {player.level}</small>
+        </span>
+        {action !== 'none' && (
+          <button
+            type="button"
+            className="secondary-action"
+            disabled={isWorking}
+            onClick={() => void runAction(
+              () => communityService.unfollow(sessionId!, player.id),
+              `Unfollowed @${player.username}.`
+            )}
+          >
+            Unfollow
+          </button>
+        )}
+      </div>
+      <div className="connection-profile-stats" aria-label={`${player.name} shared profile`}>
+        <span><strong>{player.experience.toLocaleString()}</strong> XP</span>
+        <span><strong>{player.activeDays}</strong> active days</span>
+        <span><strong>{player.attributes.strength}</strong> Strength</span>
+        <span><strong>{player.attributes.intelligence}</strong> Intelligence</span>
+        <span><strong>{player.attributes.charisma}</strong> Charisma</span>
+        <span>Joined {new Date(player.memberSince).toLocaleDateString()}</span>
+      </div>
     </li>
   )
+
+  const renderFollower = (player: FollowerIdentity) => {
+    const isFollowing = state.following.some(followed => followed.id === player.id)
+    const requestPending = state.sentFollowRequests.some(request => request.id === player.id)
+    return (
+      <li className="player-row" key={player.id}>
+        <span className="player-avatar" aria-hidden="true">
+          {(player.name || player.username).slice(0, 1).toUpperCase()}
+        </span>
+        <span>
+          <strong>{player.name || player.username}</strong>
+          <small>@{player.username}</small>
+        </span>
+        {!isFollowing && (
+          <button
+            type="button"
+            className="secondary-action"
+            disabled={isWorking || requestPending}
+            onClick={() => void runAction(
+              () => communityService.follow(sessionId!, player.username),
+              `Follow request sent to @${player.username}.`
+            )}
+          >
+            {requestPending ? 'Request sent' : 'Follow back'}
+          </button>
+        )}
+      </li>
+    )
+  }
 
   const isPartyOwner = state.party?.ownerId === currentUserId
 
@@ -160,6 +198,84 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
         <div className={`guild-message ${error ? 'error' : ''}`} role="status">
           {error || message}
         </div>
+      )}
+
+      {state.receivedFollowRequests.length > 0 && (
+        <section className="progression-section follow-request-section" aria-labelledby="follow-requests-title">
+          <div className="section-title-row">
+            <div>
+              <p className="progression-kicker">NOTIFICATIONS</p>
+              <h3 id="follow-requests-title">
+                Follow requests <span className="request-count">{state.receivedFollowRequests.length}</span>
+              </h3>
+            </div>
+          </div>
+          <div className="follow-request-list">
+            {state.receivedFollowRequests.map(request => (
+              <article key={request.id}>
+                <span className="player-avatar" aria-hidden="true">
+                  {(request.name || request.username).slice(0, 1).toUpperCase()}
+                </span>
+                <div>
+                  <strong>{request.name}</strong>
+                  <small>@{request.username} wants to follow you</small>
+                </div>
+                <button
+                  type="button"
+                  disabled={isWorking}
+                  onClick={() => void runAction(
+                    () => communityService.acceptFollowRequest(sessionId!, request.id),
+                    `Accepted @${request.username}'s follow request.`
+                  )}
+                >
+                  Accept
+                </button>
+                <button
+                  type="button"
+                  className="secondary-action"
+                  disabled={isWorking}
+                  onClick={() => void runAction(
+                    () => communityService.declineFollowRequest(sessionId!, request.id),
+                    `Declined @${request.username}'s follow request.`
+                  )}
+                >
+                  Decline
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {state.sentFollowRequests.length > 0 && (
+        <section className="progression-section" aria-labelledby="sent-requests-title">
+          <p className="progression-kicker">PENDING</p>
+          <h3 id="sent-requests-title">Sent follow requests</h3>
+          <div className="follow-request-list">
+            {state.sentFollowRequests.map(request => (
+              <article key={request.id}>
+                <span className="player-avatar" aria-hidden="true">
+                  {(request.name || request.username).slice(0, 1).toUpperCase()}
+                </span>
+                <div>
+                  <strong>{request.name}</strong>
+                  <small>@{request.username} · Awaiting approval</small>
+                </div>
+                <button
+                  type="button"
+                  className="secondary-action"
+                  disabled={isWorking}
+                  onClick={() => void runAction(
+                    () => communityService.cancelFollowRequest(sessionId!, request.id),
+                    `Canceled request to @${request.username}.`
+                  )}
+                >
+                  Cancel request
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
       )}
 
       <section className="progression-section" aria-labelledby="find-allies-title">
@@ -202,23 +318,40 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
                       <span>
                         <strong>{player.name || player.username}</strong>
                         <small>
-                          @{player.username} · Level {player.level}
+                          @{player.username}
                           {player.followsYou ? ' · Follows you' : ''}
+                          {player.requestSent ? ' · Request pending' : ''}
                         </small>
                       </span>
                       <button
                         type="button"
-                        disabled={isWorking || player.isFollowing}
-                        aria-label={player.isFollowing ? `Following @${player.username}` : `Follow @${player.username}`}
+                        disabled={isWorking || player.isFollowing || player.requestSent || player.requestReceived}
+                        aria-label={
+                          player.isFollowing
+                            ? `Following @${player.username}`
+                            : player.requestSent
+                              ? `Request pending for @${player.username}`
+                              : player.requestReceived
+                                ? `Review request from @${player.username}`
+                                : `Send follow request to @${player.username}`
+                        }
                         onClick={() => {
-                          if (!sessionId || player.isFollowing) return
+                          if (!sessionId || player.isFollowing || player.requestSent || player.requestReceived) return
                           void runAction(
                             () => communityService.follow(sessionId, player.username),
-                            `Now following @${player.username}.`
+                            `Follow request sent to @${player.username}.`
                           ).then(() => setUsername(''))
                         }}
                       >
-                        {player.isFollowing ? 'Following' : player.followsYou ? 'Follow back' : 'Follow'}
+                        {player.isFollowing
+                          ? 'Following'
+                          : player.requestSent
+                            ? 'Requested'
+                            : player.requestReceived
+                              ? 'Review request'
+                              : player.followsYou
+                                ? 'Follow back'
+                                : 'Request'}
                       </button>
                     </div>
                   ))}
@@ -239,10 +372,7 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
             <h4>Followers</h4>
             {state.followers.length ? (
               <ul className="player-list">
-                {state.followers.map(player => renderPlayer(
-                  player,
-                  state.following.some(followed => followed.id === player.id) ? 'none' : 'follow-back'
-                ))}
+                {state.followers.map(renderFollower)}
               </ul>
             ) : <p className="empty-copy">Your future allies will appear here.</p>}
           </div>

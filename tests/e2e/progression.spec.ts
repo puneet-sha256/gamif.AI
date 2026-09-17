@@ -35,6 +35,13 @@ const TARGET = {
   password: 'Progression123!',
 }
 
+const LOW_LEVEL_PLAYER = {
+  id: 'low-level-player-id',
+  username: 'lowlevelplayer',
+  email: 'low-level@example.com',
+  password: 'Progression123!',
+}
+
 const LEVEL_FIVE_PLAYER = {
   id: 'level-five-player-id',
   username: 'levelfiveplayer',
@@ -83,11 +90,11 @@ test.describe('Journey and Guild flows', () => {
             'Stay active, learn deliberately, and support friends while building sustainable personal routines.',
         },
         stats: {
-          experience: 150,
+          experience: 900,
           shards: 10,
-          strength: 50,
-          intelligence: 50,
-          charisma: 50,
+          strength: 300,
+          intelligence: 300,
+          charisma: 300,
         },
         catalog: createDefaultCatalog(),
         generatedTasks: createGeneratedTasks(),
@@ -100,11 +107,11 @@ test.describe('Journey and Guild flows', () => {
             'Build reliable health routines, improve technical judgment, and encourage a small group of accountability partners.',
         },
         stats: {
-          experience: 120,
+          experience: 900,
           shards: 5,
-          strength: 40,
-          intelligence: 40,
-          charisma: 40,
+          strength: 300,
+          intelligence: 300,
+          charisma: 300,
         },
         catalog: createDefaultCatalog(),
         generatedTasks: createGeneratedTasks(),
@@ -115,6 +122,23 @@ test.describe('Journey and Guild flows', () => {
         goalsData: {
           longTermGoals:
             'Train steadily, keep learning, and build supportive connections with people pursuing meaningful personal goals.',
+        },
+        stats: {
+          experience: 900,
+          shards: 5,
+          strength: 300,
+          intelligence: 300,
+          charisma: 300,
+        },
+        catalog: createDefaultCatalog(),
+        generatedTasks: createGeneratedTasks(),
+      },
+      {
+        ...LOW_LEVEL_PLAYER,
+        profileData: { name: 'Low Level Player', dateOfBirth: '1991-02-14' },
+        goalsData: {
+          longTermGoals:
+            'Train steadily, keep learning, and build supportive connections after unlocking the Guild.',
         },
         stats: {
           experience: 90,
@@ -161,9 +185,9 @@ test.describe('Journey and Guild flows', () => {
     await expect(page.getByText('How Journey works')).toBeVisible()
   })
 
-  test('shows unlock messages below the required levels', async ({ page }) => {
-    await suppressTour(page, TARGET.id)
-    await loginAs(page, TARGET)
+  test('shows unlock messages and blocks Guild APIs below level 10', async ({ page, request }) => {
+    await suppressTour(page, LOW_LEVEL_PLAYER.id)
+    await loginAs(page, LOW_LEVEL_PLAYER)
 
     await page.getByRole('button', { name: 'Journey' }).click()
     await expect(page.getByRole('heading', {
@@ -176,6 +200,19 @@ test.describe('Journey and Guild flows', () => {
       name: 'Reach Level 10 to unlock Guilds',
     })).toBeVisible()
     await expect(page.getByText('9 levels to go')).toBeVisible()
+
+    const loginResponse = await request.post('http://localhost:3001/api/login', {
+      data: { email: LOW_LEVEL_PLAYER.email, password: LOW_LEVEL_PLAYER.password },
+    })
+    const login = await loginResponse.json()
+    const searchResponse = await request.get(
+      `http://localhost:3001/api/community/search/${login.sessionId}?q=progression`
+    )
+    expect(searchResponse.status()).toBe(403)
+    const followResponse = await request.post('http://localhost:3001/api/community/follow', {
+      data: { sessionId: login.sessionId, username: LEADER.username },
+    })
+    expect(followResponse.status()).toBe(403)
   })
 
   test('unlocks achievements at level 5 while Guild remains locked', async ({ page }) => {
@@ -199,14 +236,34 @@ test.describe('Journey and Guild flows', () => {
   }) => {
     await suppressTour(page, LEADER.id)
     await loginAs(page, LEADER)
-    await page.getByRole('button', { name: 'Guild' }).click()
+    await page.getByRole('button', { name: 'Guild', exact: true }).click()
 
     await page.locator('#follow-username').fill('Progression All')
     const results = page.locator('.player-search-results')
     await expect(results).toContainText('Progression Ally')
-    await expect(results).toContainText(`@${ALLY.username} · Level 2`)
-    await page.getByRole('button', { name: `Follow @${ALLY.username}` }).click()
-    await expect(page.getByText(`@${ALLY.username} · Level 2`)).toBeVisible()
+    await expect(results).toContainText(`@${ALLY.username}`)
+    await expect(results).not.toContainText('Level 2')
+    await page.getByRole('button', { name: `Send follow request to @${ALLY.username}` }).click()
+    await expect(page.getByText(`@${ALLY.username} · Awaiting approval`)).toBeVisible()
+    await expect(page.locator('.guild-counts')).toContainText('0 Following')
+
+    const loginResponse = await request.post('http://localhost:3001/api/login', {
+      data: { email: ALLY.email, password: ALLY.password },
+    })
+    expect(loginResponse.ok()).toBeTruthy()
+    const loginBody = await loginResponse.json()
+    const allyCommunityResponse = await request.get(
+      `http://localhost:3001/api/community/${loginBody.sessionId}`
+    )
+    const allyCommunity = await allyCommunityResponse.json()
+    expect(allyCommunity.data.receivedFollowRequests).toHaveLength(1)
+    expect(allyCommunity.data.followers).toHaveLength(0)
+
+    const acceptFollowResponse = await request.post(
+      'http://localhost:3001/api/community/follow-request/accept',
+      { data: { sessionId: loginBody.sessionId, userId: LEADER.id } }
+    )
+    expect(acceptFollowResponse.ok()).toBeTruthy()
 
     await page.locator('#party-name').fill('Night Raiders')
     await page.getByRole('button', { name: 'Create', exact: true }).click()
@@ -215,12 +272,6 @@ test.describe('Journey and Guild flows', () => {
     await page.locator('#party-invite-username').fill(ALLY.username)
     await page.getByRole('button', { name: 'Invite', exact: true }).click()
     await expect(page.getByText(`Invitation sent to @${ALLY.username}.`)).toBeVisible()
-
-    const loginResponse = await request.post('http://localhost:3001/api/login', {
-      data: { email: ALLY.email, password: ALLY.password },
-    })
-    expect(loginResponse.ok()).toBeTruthy()
-    const loginBody = await loginResponse.json()
 
     const communityResponse = await request.get(
       `http://localhost:3001/api/community/${loginBody.sessionId}`
@@ -236,8 +287,12 @@ test.describe('Journey and Guild flows', () => {
     expect(acceptResponse.ok()).toBeTruthy()
 
     await page.reload()
-    await page.getByRole('button', { name: 'Guild' }).click()
-    await expect(page.getByText('@progressionally · 150 XP')).toBeVisible()
+    await page.getByRole('button', { name: 'Guild', exact: true }).click()
+    await expect(page.getByText('@progressionally · Level 10')).toBeVisible()
+    const sharedProfile = page.getByLabel('Progression Ally shared profile')
+    await expect(sharedProfile).toContainText('900 XP')
+    await expect(sharedProfile).toContainText('300 Strength')
+    await expect(sharedProfile).toContainText('0 active days')
     await expect(page.locator('.guild-counts')).toContainText('1 Following')
     await expect(page.getByText('How Guild works')).toBeVisible()
   })
@@ -255,15 +310,61 @@ test.describe('Journey and Guild flows', () => {
 
     await suppressTour(page, LEADER.id)
     await loginAs(page, LEADER)
-    await page.getByRole('button', { name: 'Guild' }).click()
+    await expect(page.getByRole('button', {
+      name: 'Guild notifications, 1 pending',
+    })).toBeVisible()
+    await page.getByRole('button', { name: 'Guild notifications, 1 pending' }).click()
+    await expect(page.getByText('@progressionally wants to follow you')).toBeVisible()
+    await page.getByRole('button', { name: 'Accept', exact: true }).click()
 
     const followersColumn = page.locator('.social-columns > div').nth(1)
     await expect(followersColumn).toContainText('Progression Ally')
+    await expect(followersColumn.getByLabel('Progression Ally shared profile')).toHaveCount(0)
     await followersColumn.getByRole('button', { name: 'Follow back' }).click()
 
-    await expect(page.getByText(`You followed @${ALLY.username} back.`)).toBeVisible()
+    await expect(page.getByText(`Follow request sent to @${ALLY.username}.`)).toBeVisible()
+    await expect(page.locator('.guild-counts')).toContainText('0 Following')
+    await expect(page.getByText(`@${ALLY.username} · Awaiting approval`)).toBeVisible()
+
+    const acceptBackResponse = await request.post(
+      'http://localhost:3001/api/community/follow-request/accept',
+      { data: { sessionId: allyLogin.sessionId, userId: LEADER.id } }
+    )
+    expect(acceptBackResponse.ok()).toBeTruthy()
+    await page.reload()
+    await page.getByRole('button', { name: 'Guild', exact: true }).click()
     await expect(page.locator('.guild-counts')).toContainText('1 Following')
-    await expect(followersColumn.getByRole('button', { name: 'Follow back' })).toHaveCount(0)
+  })
+
+  test('declines incoming requests and cancels outgoing requests', async ({ page, request }) => {
+    const allyLoginResponse = await request.post('http://localhost:3001/api/login', {
+      data: { email: ALLY.email, password: ALLY.password },
+    })
+    const allyLogin = await allyLoginResponse.json()
+    await request.post('http://localhost:3001/api/community/follow', {
+      data: { sessionId: allyLogin.sessionId, username: LEADER.username },
+    })
+
+    await suppressTour(page, LEADER.id)
+    await loginAs(page, LEADER)
+    await page.getByRole('button', { name: 'Guild notifications, 1 pending' }).click()
+    await page.getByRole('button', { name: 'Decline' }).click()
+    await expect(page.getByText('Follow requests')).toHaveCount(0)
+    await expect(page.locator('.guild-counts')).toContainText('0 Followers')
+
+    await page.locator('#follow-username').fill('Progression Ally')
+    await page.getByRole('button', {
+      name: `Send follow request to @${ALLY.username}`,
+    }).click()
+    await expect(page.getByText(`@${ALLY.username} · Awaiting approval`)).toBeVisible()
+    await page.getByRole('button', { name: 'Cancel request' }).click()
+    await expect(page.getByText('Sent follow requests')).toHaveCount(0)
+
+    const allyStateResponse = await request.get(
+      `http://localhost:3001/api/community/${allyLogin.sessionId}`
+    )
+    const allyState = await allyStateResponse.json()
+    expect(allyState.data.receivedFollowRequests).toHaveLength(0)
   })
 
   test('preserves concurrent follows and party joins', async ({ request }) => {
@@ -296,7 +397,23 @@ test.describe('Journey and Guild flows', () => {
       `http://localhost:3001/api/community/${targetSession}`
     )
     const targetState = await targetStateResponse.json()
-    expect(targetState.data.followers).toHaveLength(2)
+    expect(targetState.data.receivedFollowRequests).toHaveLength(2)
+    expect(targetState.data.followers).toHaveLength(0)
+
+    const acceptFollowResponses = await Promise.all([
+      request.post('http://localhost:3001/api/community/follow-request/accept', {
+        data: { sessionId: targetSession, userId: LEADER.id },
+      }),
+      request.post('http://localhost:3001/api/community/follow-request/accept', {
+        data: { sessionId: targetSession, userId: SCOUT.id },
+      }),
+    ])
+    expect(acceptFollowResponses.every(response => response.ok())).toBeTruthy()
+    const acceptedTargetStateResponse = await request.get(
+      `http://localhost:3001/api/community/${targetSession}`
+    )
+    const acceptedTargetState = await acceptedTargetStateResponse.json()
+    expect(acceptedTargetState.data.followers).toHaveLength(2)
 
     const createResponse = await request.post(
       'http://localhost:3001/api/community/party/create',

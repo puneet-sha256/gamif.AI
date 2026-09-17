@@ -52,6 +52,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const [communityState, setCommunityState] = useState<CommunityState>({
     followers: [],
     following: [],
+    receivedFollowRequests: [],
+    sentFollowRequests: [],
     partyInvites: [],
   })
   const [showDailyInput, setShowDailyInput] = useState(false)
@@ -1485,6 +1487,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           <span data-tour="theme-toggle" className="theme-toggle-anchor">
             <ThemeToggle />
           </span>
+          {userLevel >= 10 && (
+            <button
+              type="button"
+              className={`guild-notification-button ${communityState.receivedFollowRequests.length ? 'has-notifications' : ''}`}
+              onClick={() => setActiveTab('guild')}
+              aria-label={`Guild notifications, ${communityState.receivedFollowRequests.length} pending`}
+              title="Guild notifications"
+            >
+              <span aria-hidden="true">🔔</span>
+              {communityState.receivedFollowRequests.length > 0 && (
+                <span className="guild-notification-count">
+                  {communityState.receivedFollowRequests.length}
+                </span>
+              )}
+            </button>
+          )}
           <button
             type="button"
             className="feedback-button"
