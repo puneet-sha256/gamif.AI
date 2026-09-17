@@ -503,9 +503,15 @@ xp_for_level(n) = 100 + Math.floor((n - 1) / 10) * 50
 | `npm run dev` | Start frontend development server |
 | `npm run server` | Start backend API server |
 | `npm run build` | Build for production |
+| `npm run test:e2e` | Run the complete desktop and mobile E2E suite |
+| `npm run test:release` | Build and run all E2E tests required before deployment |
 | `npm run preview` | Preview production build |
 | `npm run lint` | Run ESLint |
 | `npm run dev:full` | Run frontend and backend concurrently |
+
+The Azure deployment job depends on a successful `test:release` run. A failed
+E2E case blocks production deployment and uploads Playwright traces/screenshots
+as workflow artifacts for diagnosis.
 
 ## 🌐 API Documentation
 
