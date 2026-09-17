@@ -475,6 +475,11 @@
   color: var(--text-primary);
 }
 
+.connection-actions {
+  display: flex;
+  gap: 7px;
+}
+
 .follow-request-section {
   border-color: color-mix(in srgb, var(--accent-primary) 55%, var(--border-default));
 }

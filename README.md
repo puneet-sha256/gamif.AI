@@ -21,6 +21,7 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 ### 🛡️ **Guilds, Followers & Parties**
 - **Private Player Network** - Search identity-only results, send follow requests, and reveal limited progress profiles only after the recipient accepts
 - **Follow Notifications** - Accept or decline incoming requests, cancel outgoing requests, and request to follow accepted followers back
+- **Connected Profiles** - Open accepted connections in a profile view with level, attributes, XP momentum, streaks, active days, and a recent XP timeline
 - **Party System** - Create a named party, invite allies, accept invitations, leave, or disband as leader
 - **Public Progress** - Party rosters share only player name, username, level, and XP contribution
 - **Cross-Device Persistence** - Social and party state works with file, Cosmos, and migration storage modes

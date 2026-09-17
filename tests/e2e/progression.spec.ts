@@ -98,6 +98,16 @@ test.describe('Journey and Guild flows', () => {
         },
         catalog: createDefaultCatalog(),
         generatedTasks: createGeneratedTasks(),
+        activityHistory: {
+          dailyActivities: [{
+            date: today,
+            strength: 20,
+            intelligence: 20,
+            charisma: 20,
+            total: 60,
+          }],
+          lastUpdated: new Date().toISOString(),
+        },
       },
       {
         ...SCOUT,
@@ -292,9 +302,27 @@ test.describe('Journey and Guild flows', () => {
     const sharedProfile = page.getByLabel('Progression Ally shared profile')
     await expect(sharedProfile).toContainText('900 XP')
     await expect(sharedProfile).toContainText('300 Strength')
-    await expect(sharedProfile).toContainText('0 active days')
+    await expect(sharedProfile).toContainText('1 active days')
     await expect(page.locator('.guild-counts')).toContainText('1 Following')
     await expect(page.getByText('How Guild works')).toBeVisible()
+
+    await page.getByRole('button', { name: 'View profile' }).click()
+    await expect(page.locator('#player-profile-title')).toHaveText('Progression Ally')
+    await expect(page.getByRole('button', { name: 'Close player profile' })).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(page.getByRole('button', { name: 'Close player profile' })).toBeFocused()
+    await expect(page.getByText('30-day XP').locator('..')).toContainText('60')
+    await expect(page.getByLabel('Recent XP timeline')).toContainText('60')
+    await expect(page.getByText('Goals, email, rewards, inventory, and detailed activity descriptions remain private.')).toBeVisible()
+    await page.getByRole('button', { name: 'Close player profile' }).click()
+
+    await page.getByRole('button', { name: 'Unfollow' }).click()
+    await expect(page.locator('.guild-counts')).toContainText('0 Following')
+    await page.locator('#follow-username').fill('Progression Ally')
+    await expect(page.locator('.player-search-results')).toContainText('Progression Ally')
+    await expect(page.getByRole('button', {
+      name: `Send follow request to @${ALLY.username}`,
+    })).toBeVisible()
   })
 
   test('lets a player follow a follower back', async ({ page, request }) => {
@@ -310,12 +338,19 @@ test.describe('Journey and Guild flows', () => {
 
     await suppressTour(page, LEADER.id)
     await loginAs(page, LEADER)
+    await page.getByRole('button', { name: 'Guild', exact: true }).click()
     await expect(page.getByRole('button', {
       name: 'Guild notifications, 1 pending',
     })).toBeVisible()
     await page.getByRole('button', { name: 'Guild notifications, 1 pending' }).click()
-    await expect(page.getByText('@progressionally wants to follow you')).toBeVisible()
-    await page.getByRole('button', { name: 'Accept', exact: true }).click()
+    const requestDialog = page.getByRole('dialog', { name: 'Follow requests' })
+    await expect(requestDialog.getByText('@progressionally wants to follow you')).toBeVisible()
+    await expect(requestDialog.getByRole('button', { name: 'Close follow requests' })).toBeFocused()
+    await page.keyboard.press('Shift+Tab')
+    await expect(requestDialog.getByRole('button', { name: 'Decline' })).toBeFocused()
+    await requestDialog.getByRole('button', { name: 'Accept', exact: true }).click()
+    await expect(page.locator('.follow-request-section')).toHaveCount(0)
+    await expect(page.locator('.guild-counts')).toContainText('1 Followers')
 
     const followersColumn = page.locator('.social-columns > div').nth(1)
     await expect(followersColumn).toContainText('Progression Ally')
@@ -349,7 +384,8 @@ test.describe('Journey and Guild flows', () => {
     await loginAs(page, LEADER)
     await page.getByRole('button', { name: 'Guild notifications, 1 pending' }).click()
     await page.getByRole('button', { name: 'Decline' }).click()
-    await expect(page.getByText('Follow requests')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Guild', exact: true }).click()
+    await expect(page.locator('.follow-request-section')).toHaveCount(0)
     await expect(page.locator('.guild-counts')).toContainText('0 Followers')
 
     await page.locator('#follow-username').fill('Progression Ally')
@@ -365,6 +401,41 @@ test.describe('Journey and Guild flows', () => {
     )
     const allyState = await allyStateResponse.json()
     expect(allyState.data.receivedFollowRequests).toHaveLength(0)
+  })
+
+  test('lets a lower-level recipient review a request without unlocking Guild', async ({
+    page,
+    request,
+  }) => {
+    const leaderLoginResponse = await request.post('http://localhost:3001/api/login', {
+      data: { email: LEADER.email, password: LEADER.password },
+    })
+    const leaderLogin = await leaderLoginResponse.json()
+    const requestResponse = await request.post('http://localhost:3001/api/community/follow', {
+      data: { sessionId: leaderLogin.sessionId, username: LOW_LEVEL_PLAYER.username },
+    })
+    expect(requestResponse.ok()).toBeTruthy()
+
+    await suppressTour(page, LOW_LEVEL_PLAYER.id)
+    await loginAs(page, LOW_LEVEL_PLAYER)
+    await page.getByRole('button', { name: 'Guild notifications, 1 pending' }).click()
+    await expect(page.getByText('@progressionleader wants to follow you')).toBeVisible()
+    await page.getByRole('button', { name: 'Accept', exact: true }).click()
+
+    await page.getByRole('button', { name: /Guild, unlocks at Level 10/ }).click()
+    await expect(page.getByRole('heading', {
+      name: 'Reach Level 10 to unlock Guilds',
+    })).toBeVisible()
+
+    const leaderStateResponse = await request.get(
+      `http://localhost:3001/api/community/${leaderLogin.sessionId}`
+    )
+    const leaderState = await leaderStateResponse.json()
+    expect(leaderState.data.following).toHaveLength(1)
+    expect(leaderState.data.following[0]).toMatchObject({
+      username: LOW_LEVEL_PLAYER.username,
+      level: 1,
+    })
   })
 
   test('preserves concurrent follows and party joins', async ({ request }) => {

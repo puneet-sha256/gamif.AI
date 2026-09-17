@@ -51,6 +51,24 @@ function experienceFor(user: User): number {
 }
 
 function publicSnapshot(user: User): CommunityUserSnapshot {
+  const activities = [...(user.activityHistory?.dailyActivities || [])]
+    .filter(activity => activity.total > 0)
+    .sort((left, right) => left.date.localeCompare(right.date))
+  const now = new Date()
+  const cutoff = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+  cutoff.setUTCDate(cutoff.getUTCDate() - 29)
+  const cutoffDate = cutoff.toISOString().split('T')[0]
+  const activeDates = new Set(activities.map(activity => activity.date))
+  const cursor = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+  if (!activeDates.has(cursor.toISOString().split('T')[0])) {
+    cursor.setUTCDate(cursor.getUTCDate() - 1)
+  }
+  let currentStreak = 0
+  while (activeDates.has(cursor.toISOString().split('T')[0])) {
+    currentStreak += 1
+    cursor.setUTCDate(cursor.getUTCDate() - 1)
+  }
+
   return {
     id: user.id,
     username: user.username,
@@ -65,6 +83,15 @@ function publicSnapshot(user: User): CommunityUserSnapshot {
     activeDays: (user.activityHistory?.dailyActivities || [])
       .filter(activity => activity.total > 0).length,
     memberSince: user.createdAt,
+    last30DaysXp: activities
+      .filter(activity => activity.date >= cutoffDate)
+      .reduce((sum, activity) => sum + activity.total, 0),
+    bestDayXp: activities.reduce((best, activity) => Math.max(best, activity.total), 0),
+    currentStreak,
+    recentActivity: activities.slice(-14).map(activity => ({
+      date: activity.date,
+      total: activity.total,
+    })),
   }
 }
 
@@ -86,7 +113,8 @@ function followRequestSnapshot(user: User, requestedAt: string): FollowRequest {
 function partyMemberSnapshot(user: User, joinedAt = new Date().toISOString()): PartyMemberSnapshot {
   const experience = experienceFor(user)
   return {
-    ...publicSnapshot(user),
+    ...identitySnapshot(user),
+    level: calculateActualLevel(experience),
     joinedAt,
     contributionXp: experience,
   }
@@ -297,8 +325,7 @@ export async function searchCommunityUsers(
       ))
     }
 
-    const matches = (await searchUsers(req.query.q.trim(), 24))
-      .filter(user => calculateActualLevel(experienceFor(user)) >= 10)
+    const matches = await searchUsers(req.query.q.trim(), 24)
     const followingIds = new Set((auth.user.following || []).map(user => user.id))
     const followerIds = new Set((auth.user.followers || []).map(user => user.id))
     const sentRequestIds = new Set((auth.user.sentFollowRequests || []).map(user => user.id))
@@ -336,11 +363,6 @@ export async function followUser(req: Request<object, object, FollowUserRequest>
     if (!target) return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
     if (target.id === auth.user.id) {
       return res.status(400).json(createErrorResponse('Users cannot follow themselves'))
-    }
-    if (calculateActualLevel(experienceFor(target)) < 10) {
-      return res.status(409).json(createErrorResponse(
-        'This player has not unlocked Guild features yet'
-      ))
     }
 
     if ((auth.user.following || []).some(user => user.id === target.id)) {
@@ -404,7 +426,6 @@ export async function acceptFollowRequest(
     try {
       const auth = await authenticate(req.body?.sessionId)
       if (isAuthError(auth)) return sendAuthError(res, auth)
-      if (!requireGuildAccess(auth.user, res)) return
       if (!validString(req.body?.userId)) {
         return res.status(400).json(createErrorResponse('A valid userId is required'))
       }
@@ -476,7 +497,6 @@ export async function declineFollowRequest(
     try {
       const auth = await authenticate(req.body?.sessionId)
       if (isAuthError(auth)) return sendAuthError(res, auth)
-      if (!requireGuildAccess(auth.user, res)) return
       if (!validString(req.body?.userId)) {
         return res.status(400).json(createErrorResponse('A valid userId is required'))
       }
