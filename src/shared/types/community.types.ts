@@ -36,6 +36,15 @@ export interface CommunityState {
   partyInvites: PartyInvite[]
 }
 
+export interface CommunitySearchResult {
+  id: string
+  username: string
+  name: string
+  level: number
+  isFollowing: boolean
+  followsYou: boolean
+}
+
 export interface CommunitySessionRequest {
   sessionId: string
 }

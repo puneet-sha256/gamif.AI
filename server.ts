@@ -21,6 +21,7 @@ import {
   createParty,
   followUser,
   getCommunityState,
+  searchCommunityUsers,
   inviteToParty,
   leaveParty,
   unfollowUser
@@ -168,6 +169,7 @@ app.post('/api/feedback', serializeFeedbackRequest(submitFeedback))
 
 // Community routes
 app.get('/api/community/:sessionId', serializeCommunityRequest(getCommunityState))
+app.get('/api/community/search/:sessionId', searchCommunityUsers)
 app.post('/api/community/follow', serializeCommunityRequest(followUser))
 app.delete('/api/community/follow', serializeCommunityRequest(unfollowUser))
 app.post('/api/community/party/create', serializeCommunityRequest(createParty))

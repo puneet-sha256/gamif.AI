@@ -31,6 +31,10 @@ export async function findUserByUsername(username: string): Promise<User | undef
   return getUserRepository().findByUsername(username)
 }
 
+export async function searchUsers(query: string, limit = 8): Promise<User[]> {
+  return getUserRepository().searchUsers(query, limit)
+}
+
 export async function findUserById(id: string): Promise<User | undefined> {
   return getUserRepository().findById(id)
 }

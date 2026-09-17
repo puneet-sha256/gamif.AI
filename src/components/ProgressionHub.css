@@ -341,6 +341,75 @@
   color: var(--text-primary);
 }
 
+.player-search-control {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.player-search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 20;
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.24);
+}
+
+.player-search-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.player-search-result:last-child {
+  border-bottom: 0;
+}
+
+.player-search-result > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+
+.player-search-result strong,
+.player-search-result small {
+  display: block;
+}
+
+.player-search-result small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.player-search-result button {
+  padding: 7px 10px;
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  background: var(--accent-bg-subtle);
+  color: var(--accent-primary);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.player-search-result button:disabled {
+  border-color: var(--border-default);
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.player-search-status {
+  padding: 14px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
 .guild-form button,
 .invite-list button {
   padding: 10px 16px;

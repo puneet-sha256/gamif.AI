@@ -9,6 +9,7 @@ export interface IUserRepository {
   findById(userId: string): Promise<User | undefined>
   findByEmail(email: string): Promise<User | undefined>
   findByUsername(username: string): Promise<User | undefined>
+  searchUsers(query: string, limit: number): Promise<User[]>
   createUser(user: User): Promise<void>
   updateUser(userId: string, updates: Partial<User>): Promise<User | null>
 

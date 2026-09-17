@@ -3,6 +3,7 @@ import path from 'path'
 import type { User, GeneratedTasks } from '../../shared/types'
 import type { IUserRepository } from './interfaces'
 import { logger } from '../../utils/logger'
+import { rankUserSearchResults } from '../utils/userSearch'
 
 const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(process.cwd(), 'data'))
 const USERS_FILE = path.join(DATA_DIR, 'users.json')
@@ -64,6 +65,19 @@ export class FileUserRepository implements IUserRepository {
   async findByUsername(username: string): Promise<User | undefined> {
     const users = await this.loadUsers()
     return users.find(user => user.username.toLowerCase() === username.toLowerCase())
+  }
+
+  async searchUsers(query: string, limit: number): Promise<User[]> {
+    const normalized = query.trim().toLowerCase()
+    const users = await this.loadUsers()
+    return rankUserSearchResults(
+      users.filter(user =>
+        user.username.toLowerCase().includes(normalized)
+        || user.profileData?.name?.toLowerCase().includes(normalized)
+      ),
+      normalized,
+      limit
+    )
   }
 
   async createUser(user: User): Promise<void> {
