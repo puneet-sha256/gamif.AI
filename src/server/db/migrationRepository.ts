@@ -168,6 +168,12 @@ export class MigratingUserRepository implements IUserRepository {
       isConsumable?: boolean
       isKeyItem?: boolean
       allowMultiplePurchases?: boolean
+      sourceUrl?: string
+      sourceName?: string
+      currency?: string
+      livePrice?: number
+      priceFetchedAt?: string
+      shardRate?: number
     }
   ): Promise<boolean> {
     await this.findById(userId)
@@ -182,7 +188,14 @@ export class MigratingUserRepository implements IUserRepository {
     if (await this.isInCosmos(userId)) {
       return this.cosmos.deleteShopItem(userId, itemId)
     }
+
     return this.file.deleteShopItem(userId, itemId)
+  }
+
+  async updateShopItem(userId: string, itemId: string, updates: Partial<import('../../shared/types').ShopItem>): Promise<boolean> {
+    await this.findById(userId)
+    if (await this.isInCosmos(userId)) return this.cosmos.updateShopItem(userId, itemId, updates)
+    return this.file.updateShopItem(userId, itemId, updates)
   }
 
   async getUserShopItems(userId: string) {

@@ -4,6 +4,7 @@
  */
 
 import { apiClient, type ApiResponse } from './apiClient'
+import type { ProductMetadata, ShopItem } from '../../shared/types'
 
 export interface NewShopItemData {
   title: string
@@ -13,9 +14,25 @@ export interface NewShopItemData {
   isConsumable?: boolean
   isKeyItem?: boolean
   allowMultiplePurchases?: boolean
+  sourceUrl?: string
 }
 
 class ShopService {
+  async previewProduct(sessionId: string, url: string): Promise<ProductMetadata> {
+    const response = await apiClient.post<ProductMetadata>('/product/preview', { sessionId, url })
+    if (!response.success || !response.data) {
+      throw new Error(response.message || response.error || 'Product preview failed')
+    }
+    return response.data
+  }
+
+  async refreshLinkedItem(
+    sessionId: string,
+    itemId: string
+  ): Promise<ApiResponse<{ shopItems: ShopItem[] }>> {
+    return apiClient.post<{ shopItems: ShopItem[] }>('/user/shop/refresh-price', { sessionId, itemId })
+  }
+
   /**
    * Add a new shop item
    */

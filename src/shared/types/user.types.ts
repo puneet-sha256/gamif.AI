@@ -58,6 +58,12 @@ export interface ShopItem {
   isConsumable?: boolean // Whether the item is consumable (can be used once)
   isKeyItem?: boolean // Whether the item is a key item (cannot be consumed)
   allowMultiplePurchases?: boolean // Whether the item can be purchased multiple times (remains in shop after purchase)
+  sourceUrl?: string
+  sourceName?: string
+  currency?: string
+  livePrice?: number
+  priceFetchedAt?: string
+  shardRate?: number
 }
 
 // Inventory item structure for purchased items

@@ -260,6 +260,12 @@ export class FileUserRepository implements IUserRepository {
       isConsumable?: boolean
       isKeyItem?: boolean
       allowMultiplePurchases?: boolean
+      sourceUrl?: string
+      sourceName?: string
+      currency?: string
+      livePrice?: number
+      priceFetchedAt?: string
+      shardRate?: number
     }
   ): Promise<boolean> {
     logger.info(`Adding shop item for user: ${userId}`)
@@ -283,6 +289,12 @@ export class FileUserRepository implements IUserRepository {
       isConsumable: item.isConsumable || false,
       isKeyItem: item.isKeyItem || false,
       allowMultiplePurchases: item.allowMultiplePurchases || false,
+      sourceUrl: item.sourceUrl,
+      sourceName: item.sourceName,
+      currency: item.currency,
+      livePrice: item.livePrice,
+      priceFetchedAt: item.priceFetchedAt,
+      shardRate: item.shardRate,
     }
 
     user.shopItems.push(newItem)
@@ -311,6 +323,16 @@ export class FileUserRepository implements IUserRepository {
 
     await this.saveUsers(users)
     logger.success('Shop item deleted successfully')
+    return true
+  }
+
+  async updateShopItem(userId: string, itemId: string, updates: Partial<import('../../shared/types').ShopItem>): Promise<boolean> {
+    const users = await this.loadUsers()
+    const user = users.find(entry => entry.id === userId)
+    const item = user?.shopItems?.find(entry => entry.id === itemId)
+    if (!item) return false
+    Object.assign(item, updates, { id: item.id, createdAt: item.createdAt })
+    await this.saveUsers(users)
     return true
   }
 
@@ -345,19 +367,22 @@ export class FileUserRepository implements IUserRepository {
       user.stats = { experience: 0, shards: 0, strength: 0, intelligence: 0, charisma: 0 }
     }
 
-    const currentShards = user.stats.shards || 0
-    if (currentShards < itemPrice) {
-      return {
-        success: false,
-        message: `Insufficient shards. You have ${currentShards} 💎, but need ${itemPrice} 💎`,
-      }
-    }
-
     const shopItem = user.shopItems?.find(item => item.id === itemId)
     const isWishlistItem = !!shopItem
 
     if (!isWishlistItem && !itemDetails) {
       return { success: false, message: 'Invalid purchase request' }
+    }
+    const effectivePrice = isWishlistItem ? shopItem.price : itemPrice
+    if (!Number.isFinite(effectivePrice) || effectivePrice < 0) {
+      return { success: false, message: 'Invalid item price' }
+    }
+    const currentShards = user.stats.shards || 0
+    if (currentShards < effectivePrice) {
+      return {
+        success: false,
+        message: `Insufficient shards. You have ${currentShards} 💎, but need ${effectivePrice} 💎`,
+      }
     }
 
     const itemInfo = isWishlistItem
@@ -373,7 +398,7 @@ export class FileUserRepository implements IUserRepository {
           allowMultiplePurchases: itemDetails?.allowMultiplePurchases || false,
         }
 
-    user.stats.shards = currentShards - itemPrice
+    user.stats.shards = currentShards - effectivePrice
 
     if (isWishlistItem && user.shopItems && !shopItem?.allowMultiplePurchases) {
       user.shopItems = user.shopItems.filter(item => item.id !== itemId)
@@ -408,7 +433,7 @@ export class FileUserRepository implements IUserRepository {
     logger.success(`Shop item purchased successfully. New shard balance: ${user.stats.shards}`)
     return {
       success: true,
-      message: `Successfully purchased item for ${itemPrice} 💎. Remaining shards: ${user.stats.shards} 💎`,
+      message: `Successfully purchased item for ${effectivePrice} 💎. Remaining shards: ${user.stats.shards} 💎`,
     }
   }
 

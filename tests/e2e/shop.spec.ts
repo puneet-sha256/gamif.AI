@@ -6,6 +6,7 @@ import {
   loginAs,
   seedUsers,
   suppressTour,
+  successResponse,
 } from './fixtures'
 
 test.describe('Shop and inventory flows', () => {
@@ -72,5 +73,164 @@ test.describe('Shop and inventory flows', () => {
     await page.locator('.confirm-container .confirm-btn-primary').click()
 
     await expect(page.getByText('Your Inventory is Empty')).toBeVisible({ timeout: 15_000 })
+  })
+
+  test('creates a linked wishlist item from fetched product details', async ({ page }) => {
+    let submittedBody: Record<string, unknown> | undefined
+    await page.route('**/api/product/preview', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(successResponse({
+          message: 'Product details retrieved successfully',
+          data: {
+            title: 'Noise Cancelling Headphones',
+            description: 'Wireless over-ear headphones',
+            imageUrl: 'https://images.example.com/headphones.jpg',
+            price: 2499,
+            currency: 'INR',
+            sourceUrl: 'https://www.amazon.in/example-headphones',
+            sourceName: 'Amazon',
+            fetchedAt: '2026-09-17T12:00:00.000Z',
+            shardRate: 0.1,
+            shardPrice: 249.9,
+          },
+        })),
+      })
+    })
+    await page.route('**/api/user/shop/add', async route => {
+      submittedBody = JSON.parse(route.request().postData() || '{}')
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(successResponse({
+          message: 'Shop item added successfully',
+          data: { shopItems: [] },
+        })),
+      })
+    })
+
+    await suppressTour(page, SHOP_USER.id)
+    await loginAs(page, SHOP_USER)
+    await page.getByRole('button', { name: /Shop/ }).click()
+    await page.getByRole('button', { name: '➕ Add Item' }).click()
+
+    await page.getByLabel('Amazon, Flipkart, Meesho, or product URL *').fill(
+      'https://www.amazon.in/example-headphones'
+    )
+    await page.getByRole('button', { name: 'Fetch' }).click()
+
+    await expect(page.getByText('Noise Cancelling Headphones')).toBeVisible()
+    await expect(page.getByText('INR 2,499')).toBeVisible()
+    await expect(page.getByText('× 0.1 = 249.90 💎 shards')).toBeVisible()
+    await page.getByRole('button', { name: 'Add Linked Item' }).click()
+
+    expect(submittedBody).toMatchObject({
+      sourceUrl: 'https://www.amazon.in/example-headphones',
+      title: 'Noise Cancelling Headphones',
+      price: 249.9,
+    })
+    await expect(page.getByRole('heading', { name: 'Add Shop Item' })).toHaveCount(0)
+  })
+
+  test('renders linked product details and refreshes its price', async ({ page }) => {
+    seedUsers([
+      {
+        ...SHOP_USER,
+        profileData: { name: 'Shop Tester', dateOfBirth: '1994-07-14' },
+        goalsData: {
+          longTermGoals:
+            'Stay active, keep learning deeply, and reward consistent progress with meaningful treats and consumable boosts.',
+        },
+        stats: {
+          experience: 20,
+          shards: 500,
+          strength: 10,
+          intelligence: 5,
+          charisma: 5,
+        },
+        catalog: createDefaultCatalog(),
+        generatedTasks: createGeneratedTasks(),
+        shopItems: [{
+          id: 'linked-headphones',
+          title: 'Linked Headphones',
+          description: 'Fetched product',
+          price: 249.9,
+          image: 'https://images.example.com/headphones.jpg',
+          createdAt: '2026-09-17T12:00:00.000Z',
+          sourceUrl: 'https://www.amazon.in/example-headphones',
+          sourceName: 'Amazon',
+          currency: 'INR',
+          livePrice: 2499,
+          priceFetchedAt: '2026-09-17T12:00:00.000Z',
+          shardRate: 0.1,
+        }],
+      },
+    ])
+    let refreshCalls = 0
+    await page.route('**/api/user/shop/refresh-price', async route => {
+      refreshCalls += 1
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(successResponse({
+          message: 'Product price refreshed successfully',
+          data: { shopItems: [] },
+        })),
+      })
+    })
+
+    await suppressTour(page, SHOP_USER.id)
+    await loginAs(page, SHOP_USER)
+    await page.getByRole('button', { name: /Shop/ }).click()
+
+    await expect(page.getByText('Linked Headphones')).toBeVisible()
+    await expect(page.getByRole('link', { name: 'View on Amazon ↗' })).toHaveAttribute(
+      'href',
+      'https://www.amazon.in/example-headphones'
+    )
+    await expect(page.getByText(/INR 2,499/)).toBeVisible()
+    await page.getByTitle('Refresh price for Linked Headphones').click()
+    await expect.poll(() => refreshCalls).toBe(1)
+  })
+
+  test('keeps manual wishlist entry and rejects private product URLs', async ({ page, request }) => {
+    await suppressTour(page, SHOP_USER.id)
+    await loginAs(page, SHOP_USER)
+    await page.getByRole('button', { name: /Shop/ }).click()
+    await page.getByRole('button', { name: '➕ Add Item' }).click()
+    await page.getByRole('button', { name: '✍️ Manual item' }).click()
+    await expect(page.getByLabel('Item Name *')).toBeVisible()
+    await expect(page.getByLabel('Price (Shards) *')).toBeVisible()
+
+    const loginResponse = await request.post('http://localhost:3001/api/login', {
+      data: { email: SHOP_USER.email, password: SHOP_USER.password },
+    })
+    const login = await loginResponse.json()
+    const privateUrlResponse = await request.post('http://localhost:3001/api/product/preview', {
+      data: { sessionId: login.sessionId, url: 'http://127.0.0.1:3001/api/health' },
+    })
+    expect(privateUrlResponse.status()).toBe(422)
+  })
+
+  test('uses the stored wishlist cost instead of a client-supplied price', async ({ request }) => {
+    const loginResponse = await request.post('http://localhost:3001/api/login', {
+      data: { email: SHOP_USER.email, password: SHOP_USER.password },
+    })
+    const login = await loginResponse.json()
+    const buyResponse = await request.post('http://localhost:3001/api/user/shop/buy', {
+      data: {
+        sessionId: login.sessionId,
+        itemId: 'focus-potion',
+        itemPrice: 1,
+      },
+    })
+    expect(buyResponse.ok()).toBeTruthy()
+
+    const userResponse = await request.get(
+      `http://localhost:3001/api/user/session/${login.sessionId}`
+    )
+    const current = await userResponse.json()
+    expect(current.user.stats.shards).toBe(35)
   })
 })

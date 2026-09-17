@@ -390,6 +390,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     description?: string
     price: number
     image?: string
+    sourceUrl?: string
   }): Promise<boolean> => {
     
     if (!user) {
