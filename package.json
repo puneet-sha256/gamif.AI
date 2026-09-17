@@ -17,6 +17,7 @@
     "build": "npm run build:server && npm run copy:prompts && npm run copy:data && npm run build:client",
     "start": "node build/server.js",
     "test:e2e": "playwright test",
+    "test:release": "npm run build && npm run test:e2e",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed"
   },
