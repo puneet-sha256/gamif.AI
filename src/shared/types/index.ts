@@ -5,6 +5,7 @@ export * from './auth.types'
 export * from './api.types'
 export * from './context.types'
 export * from './community.types'
+export * from './feedback.types'
 
 // Re-export commonly used types for convenience
 export type { User, ProfileData, GoalsData, UserStats } from './user.types'

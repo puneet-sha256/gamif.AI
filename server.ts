@@ -15,6 +15,7 @@ import {
   submitCatalogFeedback
 } from './src/server/routes/userRoutes'
 import { healthCheck } from './src/server/routes/healthRoutes'
+import { submitFeedback } from './src/server/routes/feedbackRoutes'
 import {
   acceptPartyInvite,
   createParty,
@@ -36,6 +37,7 @@ import { logger } from './src/utils/logger'
 const app = express()
 const PORT = process.env.PORT || 3001
 let communityRequestQueue: Promise<unknown> = Promise.resolve()
+let feedbackRequestQueue: Promise<unknown> = Promise.resolve()
 
 function serializeCommunityRequest<TRequest extends Request>(
   handler: (req: TRequest, res: Response) => Promise<unknown>
@@ -43,6 +45,16 @@ function serializeCommunityRequest<TRequest extends Request>(
   return (req: TRequest, res: Response, next: NextFunction) => {
     const operation = communityRequestQueue.then(() => handler(req, res))
     communityRequestQueue = operation.catch(() => undefined)
+    void operation.catch(next)
+  }
+}
+
+function serializeFeedbackRequest<TRequest extends Request>(
+  handler: (req: TRequest, res: Response) => Promise<unknown>
+) {
+  return (req: TRequest, res: Response, next: NextFunction) => {
+    const operation = feedbackRequestQueue.then(() => handler(req, res))
+    feedbackRequestQueue = operation.catch(() => undefined)
     void operation.catch(next)
   }
 }
@@ -76,7 +88,14 @@ app.use((req, res, next) => {
   logger.custom('🌐', `Server: ${timestamp} - ${req.method} ${req.path}`)
 
   if (req.body && Object.keys(req.body).length > 0) {
-    const safeBody = { ...req.body }
+    const safeBody = req.path === '/api/feedback'
+      ? {
+          type: req.body.type,
+          category: req.body.category,
+          content: '[REDACTED]',
+          diagnostics: '[REDACTED]'
+        }
+      : { ...req.body }
     if (safeBody.password) safeBody.password = '[HIDDEN]'
     logger.custom('📥', 'Server: Request body:', safeBody)
   }
@@ -145,6 +164,7 @@ app.post('/api/ai/intake/confirm', confirmIntake)
 
 // Catalog feedback (Milestone 1D)
 app.post('/api/user/catalog/feedback', submitCatalogFeedback)
+app.post('/api/feedback', serializeFeedbackRequest(submitFeedback))
 
 // Community routes
 app.get('/api/community/:sessionId', serializeCommunityRequest(getCommunityState))
