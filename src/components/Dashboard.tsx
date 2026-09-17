@@ -21,6 +21,7 @@ import DateOfBirthModal from './DateOfBirthModal'
 import JourneyHub from './JourneyHub'
 import CommunityHub from './CommunityHub'
 import FeedbackModal from './FeedbackModal'
+import FollowRequestsModal from './FollowRequestsModal'
 import { ONBOARDING_TOUR_STEPS } from './onboardingTourSteps'
 import { communityService, type CommunityState } from '../client/services/communityService'
 import {
@@ -58,6 +59,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   })
   const [showDailyInput, setShowDailyInput] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
+  const [showFollowRequests, setShowFollowRequests] = useState(false)
   const [dailyActivity, setDailyActivity] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [isLoadingTasks, setIsLoadingTasks] = useState(false)
@@ -114,6 +116,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     setCommunityState(state)
   }, [])
   const closeFeedback = useCallback(() => setShowFeedback(false), [])
+  const closeFollowRequests = useCallback(() => setShowFollowRequests(false), [])
 
   useEffect(() => {
     const sessionId = userDatabase.getSessionId()
@@ -1448,6 +1451,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           <CommunityHub
             currentUserId={user.id}
             sessionId={userDatabase.getSessionId()}
+            communityState={communityState}
             onStateChange={handleCommunityStateChange}
           />
         )
@@ -1487,11 +1491,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           <span data-tour="theme-toggle" className="theme-toggle-anchor">
             <ThemeToggle />
           </span>
-          {userLevel >= 10 && (
+          {(userLevel >= 10 || communityState.receivedFollowRequests.length > 0) && (
             <button
               type="button"
               className={`guild-notification-button ${communityState.receivedFollowRequests.length ? 'has-notifications' : ''}`}
-              onClick={() => setActiveTab('guild')}
+              onClick={() => setShowFollowRequests(true)}
               aria-label={`Guild notifications, ${communityState.receivedFollowRequests.length} pending`}
               title="Guild notifications"
             >
@@ -1615,6 +1619,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         sessionId={userDatabase.getSessionId()}
         onClose={closeFeedback}
         onSubmitted={showSuccess}
+      />
+
+      <FollowRequestsModal
+        isOpen={showFollowRequests}
+        sessionId={userDatabase.getSessionId()}
+        requests={communityState.receivedFollowRequests}
+        onClose={closeFollowRequests}
+        onUpdated={handleCommunityStateChange}
       />
     </div>
   )

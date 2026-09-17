@@ -3,6 +3,7 @@ import path from 'path'
 import type { Session } from '../../shared/types'
 import type { ISessionRepository } from './interfaces'
 import { logger } from '../../utils/logger'
+import { atomicWriteJson } from './atomicJsonWrite'
 
 const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(process.cwd(), 'data'))
 const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json')
@@ -31,9 +32,7 @@ export class FileSessionRepository implements ISessionRepository {
   }
 
   private async saveSessions(sessions: Session[]): Promise<void> {
-    const tempFile = `${SESSIONS_FILE}.${process.pid}.tmp`
-    await fs.writeJson(tempFile, sessions, { spaces: 2 })
-    await fs.rename(tempFile, SESSIONS_FILE)
+    await atomicWriteJson(SESSIONS_FILE, sessions)
   }
 
   private mutateSessions<T>(mutation: (sessions: Session[]) => Promise<T> | T): Promise<T> {

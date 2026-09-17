@@ -7,10 +7,12 @@ import {
   type PublicPlayer,
 } from '../client/services/communityService'
 import './ProgressionHub.css'
+import PlayerProfileModal from './PlayerProfileModal'
 
 interface CommunityHubProps {
   currentUserId: string
   sessionId: string | null
+  communityState: CommunityState
   onStateChange: (state: CommunityState) => void
 }
 
@@ -25,9 +27,10 @@ const EMPTY_STATE: CommunityState = {
 const CommunityHub: React.FC<CommunityHubProps> = ({
   currentUserId,
   sessionId,
+  communityState,
   onStateChange,
 }) => {
-  const [state, setState] = useState<CommunityState>(EMPTY_STATE)
+  const [state, setState] = useState<CommunityState>(communityState || EMPTY_STATE)
   const [username, setUsername] = useState('')
   const [partyName, setPartyName] = useState('')
   const [partyInviteUsername, setPartyInviteUsername] = useState('')
@@ -36,6 +39,8 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
   const [isWorking, setIsWorking] = useState(false)
   const [searchResults, setSearchResults] = useState<PlayerSearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [selectedProfile, setSelectedProfile] = useState<PublicPlayer | null>(null)
+  const closeProfile = useCallback(() => setSelectedProfile(null), [])
 
   const applyState = useCallback((nextState?: CommunityState) => {
     const resolved = nextState || EMPTY_STATE
@@ -56,6 +61,10 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
   useEffect(() => {
     void loadState()
   }, [loadState])
+
+  useEffect(() => {
+    setState(communityState)
+  }, [communityState])
 
   useEffect(() => {
     const query = username.trim()
@@ -124,6 +133,14 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
           <strong>{player.name || player.username}</strong>
           <small>@{player.username} · Level {player.level}</small>
         </span>
+        <div className="connection-actions">
+          <button
+            type="button"
+            className="secondary-action"
+            onClick={() => setSelectedProfile(player)}
+          >
+            View profile
+          </button>
         {action !== 'none' && (
           <button
             type="button"
@@ -137,6 +154,7 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
             Unfollow
           </button>
         )}
+        </div>
       </div>
       <div className="connection-profile-stats" aria-label={`${player.name} shared profile`}>
         <span><strong>{player.experience.toLocaleString()}</strong> XP</span>
@@ -504,11 +522,16 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
       <details className="feature-guide">
         <summary>How Guild works</summary>
         <p>
-          Following is one-way: it lets you build a circle without exposing private
-          goals or activity. Party leaders can invite members by username. Your party
-          only sees public name, level, and XP contribution.
+          Follow requests must be accepted before progress is shared. Open an accepted
+          profile for level, attributes, momentum, and recent XP; goals and detailed
+          activity remain private. Party leaders can invite members by username.
         </p>
       </details>
+
+      <PlayerProfileModal
+        player={selectedProfile}
+        onClose={closeProfile}
+      />
     </div>
   )
 }

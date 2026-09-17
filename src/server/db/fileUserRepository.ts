@@ -4,6 +4,7 @@ import type { User, GeneratedTasks } from '../../shared/types'
 import type { IUserRepository, UserMutation } from './interfaces'
 import { logger } from '../../utils/logger'
 import { rankUserSearchResults } from '../utils/userSearch'
+import { atomicWriteJson } from './atomicJsonWrite'
 
 const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(process.cwd(), 'data'))
 const USERS_FILE = path.join(DATA_DIR, 'users.json')
@@ -40,12 +41,10 @@ export class FileUserRepository implements IUserRepository {
     const operation = this.writeQueue.then(async () => {
       const timestamp = new Date().toISOString().split('T')[0]
       const backupFile = path.join(BACKUP_DIR, `users_backup_${timestamp}.json`)
-      const tempFile = `${USERS_FILE}.${process.pid}.tmp`
       if (await fs.pathExists(USERS_FILE)) {
         await fs.copy(USERS_FILE, backupFile, { overwrite: true })
       }
-      await fs.writeJson(tempFile, snapshot, { spaces: 2 })
-      await fs.rename(tempFile, USERS_FILE)
+      await atomicWriteJson(USERS_FILE, snapshot)
     })
     this.writeQueue = operation.catch(() => undefined)
     await operation

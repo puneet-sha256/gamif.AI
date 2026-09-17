@@ -11,6 +11,13 @@ export interface CommunityUserSnapshot {
   }
   activeDays: number
   memberSince: string
+  last30DaysXp: number
+  bestDayXp: number
+  currentStreak: number
+  recentActivity: Array<{
+    date: string
+    total: number
+  }>
 }
 
 export interface CommunityIdentity {
@@ -23,7 +30,11 @@ export interface FollowRequest extends CommunityIdentity {
   requestedAt: string
 }
 
-export interface PartyMemberSnapshot extends CommunityUserSnapshot {
+export interface PartyMemberSnapshot {
+  id: string
+  username: string
+  name: string
+  level: number
   joinedAt: string
   contributionXp: number
 }
