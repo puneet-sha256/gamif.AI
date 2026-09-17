@@ -2,6 +2,7 @@ import type { Request, Response } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 import type {
   CommunityState,
+  CommunitySearchResult,
   CommunityUserSnapshot,
   AcceptPartyInviteRequest,
   CommunitySessionRequest,
@@ -20,6 +21,7 @@ import {
   findUserByUsername,
   updateSessionLastAccess,
   updateUser,
+  searchUsers,
 } from '../utils/dataOperations'
 import {
   createErrorResponse,
@@ -189,6 +191,41 @@ export async function getCommunityState(req: Request<{ sessionId: string }>, res
     return res.json(createSuccessResponse('Community state retrieved successfully', state))
   } catch (error) {
     logger.error('Get community state error:', error)
+    return res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
+  }
+}
+
+export async function searchCommunityUsers(
+  req: Request<{ sessionId: string }, object, object, { q?: string }>,
+  res: Response
+) {
+  try {
+    const auth = await authenticate(req.params.sessionId)
+    if (isAuthError(auth)) return sendAuthError(res, auth)
+    if (!validString(req.query.q, 40) || req.query.q.trim().length < 2) {
+      return res.status(400).json(createErrorResponse(
+        'Search query must be between 2 and 40 characters'
+      ))
+    }
+
+    const matches = await searchUsers(req.query.q.trim(), 16)
+    const followingIds = new Set((auth.user.following || []).map(user => user.id))
+    const followerIds = new Set((auth.user.followers || []).map(user => user.id))
+    const results: CommunitySearchResult[] = matches
+      .filter(user => user.id !== auth.user.id)
+      .map(user => ({
+        id: user.id,
+        username: user.username,
+        name: user.profileData?.name || user.username,
+        level: calculateActualLevel(experienceFor(user)),
+        isFollowing: followingIds.has(user.id),
+        followsYou: followerIds.has(user.id),
+      }))
+      .slice(0, 8)
+
+    return res.json(createSuccessResponse('Matching players retrieved successfully', results))
+  } catch (error) {
+    logger.error('Search community users error:', error)
     return res.status(500).json(createErrorResponse(ErrorMessages.INTERNAL_ERROR))
   }
 }

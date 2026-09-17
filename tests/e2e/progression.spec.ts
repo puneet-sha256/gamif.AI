@@ -201,8 +201,11 @@ test.describe('Journey and Guild flows', () => {
     await loginAs(page, LEADER)
     await page.getByRole('button', { name: 'Guild' }).click()
 
-    await page.locator('#follow-username').fill(ALLY.username)
-    await page.getByRole('button', { name: 'Follow', exact: true }).click()
+    await page.locator('#follow-username').fill('Progression All')
+    const results = page.locator('.player-search-results')
+    await expect(results).toContainText('Progression Ally')
+    await expect(results).toContainText(`@${ALLY.username} · Level 2`)
+    await page.getByRole('button', { name: `Follow @${ALLY.username}` }).click()
     await expect(page.getByText(`@${ALLY.username} · Level 2`)).toBeVisible()
 
     await page.locator('#party-name').fill('Night Raiders')
@@ -237,6 +240,30 @@ test.describe('Journey and Guild flows', () => {
     await expect(page.getByText('@progressionally · 150 XP')).toBeVisible()
     await expect(page.locator('.guild-counts')).toContainText('1 Following')
     await expect(page.getByText('How Guild works')).toBeVisible()
+  })
+
+  test('lets a player follow a follower back', async ({ page, request }) => {
+    const allyLoginResponse = await request.post('http://localhost:3001/api/login', {
+      data: { email: ALLY.email, password: ALLY.password },
+    })
+    expect(allyLoginResponse.ok()).toBeTruthy()
+    const allyLogin = await allyLoginResponse.json()
+    const followResponse = await request.post('http://localhost:3001/api/community/follow', {
+      data: { sessionId: allyLogin.sessionId, username: LEADER.username },
+    })
+    expect(followResponse.ok()).toBeTruthy()
+
+    await suppressTour(page, LEADER.id)
+    await loginAs(page, LEADER)
+    await page.getByRole('button', { name: 'Guild' }).click()
+
+    const followersColumn = page.locator('.social-columns > div').nth(1)
+    await expect(followersColumn).toContainText('Progression Ally')
+    await followersColumn.getByRole('button', { name: 'Follow back' }).click()
+
+    await expect(page.getByText(`You followed @${ALLY.username} back.`)).toBeVisible()
+    await expect(page.locator('.guild-counts')).toContainText('1 Following')
+    await expect(followersColumn.getByRole('button', { name: 'Follow back' })).toHaveCount(0)
   })
 
   test('preserves concurrent follows and party joins', async ({ request }) => {

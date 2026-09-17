@@ -5,6 +5,7 @@ import type { SubDoc, SubDocType, ProfileSubDoc, TasksSubDoc, ShopSubDoc, Histor
 import { FIELD_TO_SUBDOC } from './types'
 import { getUsersContainer } from './cosmosClient'
 import { logger } from '../../utils/logger'
+import { rankUserSearchResults } from '../utils/userSearch'
 
 export class CosmosUserRepository implements IUserRepository {
   private get container(): Container {
@@ -112,6 +113,30 @@ export class CosmosUserRepository implements IUserRepository {
     if (resources.length === 0) return undefined
     const profile = resources[0]
     return this.findById(profile.userId)
+  }
+
+  async searchUsers(query: string, limit: number): Promise<User[]> {
+    const normalized = query.trim().toLowerCase()
+    const { resources } = await this.container.items
+      .query<ProfileSubDoc>({
+        query: `
+          SELECT TOP 32 * FROM c
+          WHERE c.type = "profile"
+            AND (
+              CONTAINS(LOWER(c.username), @query)
+              OR CONTAINS(LOWER(c.profileData.name), @query)
+            )
+        `,
+        parameters: [{ name: '@query', value: normalized }],
+      })
+      .fetchAll()
+
+    const users = await Promise.all(resources.map(profile => this.findById(profile.userId)))
+    return rankUserSearchResults(
+      users.filter((user): user is User => !!user),
+      normalized,
+      limit
+    )
   }
 
   async createUser(user: User): Promise<void> {

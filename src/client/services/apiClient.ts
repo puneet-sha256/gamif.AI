@@ -95,8 +95,9 @@ class ApiClient {
   /**
    * GET request
    */
-  async get<T>(endpoint: string): Promise<ApiResponse<T>> {
+  async get<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
+      ...options,
       method: 'GET',
     })
   }

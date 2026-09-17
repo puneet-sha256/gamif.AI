@@ -19,7 +19,7 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 - **Batch Claiming** - Claim all pending rewards at once with a single click
 
 ### 🛡️ **Guilds, Followers & Parties**
-- **Player Network** - Follow and unfollow players by exact username without exposing private goals or activity
+- **Player Network** - Search public profiles by name or username, follow matching players, and follow followers back without exposing private goals or activity
 - **Party System** - Create a named party, invite allies, accept invitations, leave, or disband as leader
 - **Public Progress** - Party rosters share only player name, username, level, and XP contribution
 - **Cross-Device Persistence** - Social and party state works with file, Cosmos, and migration storage modes

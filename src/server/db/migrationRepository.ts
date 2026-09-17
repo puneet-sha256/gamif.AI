@@ -1,6 +1,7 @@
 import type { User, Session, GeneratedTasks } from '../../shared/types'
 import type { IUserRepository, ISessionRepository } from './interfaces'
 import { logger } from '../../utils/logger'
+import { rankUserSearchResults } from '../utils/userSearch'
 
 // ─── Migrating User Repository ──────────────────────────────────────────────
 // Checks Cosmos first; falls back to file; migrates on first access.
@@ -57,6 +58,18 @@ export class MigratingUserRepository implements IUserRepository {
       () => this.cosmos.findByUsername(username),
       () => this.file.findByUsername(username)
     )
+  }
+
+  async searchUsers(query: string, limit: number): Promise<User[]> {
+    const [cosmosUsers, fileUsers] = await Promise.all([
+      this.cosmos.searchUsers(query, limit),
+      this.file.searchUsers(query, limit),
+    ])
+    const users = new Map<string, User>()
+    for (const user of [...cosmosUsers, ...fileUsers]) {
+      if (!users.has(user.id)) users.set(user.id, user)
+    }
+    return rankUserSearchResults(Array.from(users.values()), query, limit)
   }
 
   /** Check if user exists in Cosmos (i.e. migration succeeded). */

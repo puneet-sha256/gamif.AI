@@ -2,6 +2,7 @@ import { apiClient } from './apiClient'
 import type {
   CommunityState as SharedCommunityState,
   CommunityUserSnapshot,
+  CommunitySearchResult,
   Party as SharedParty,
   PartyInvite as SharedPartyInvite,
   PartyMemberSnapshot,
@@ -14,10 +15,18 @@ export type PartyInvite = SharedPartyInvite
 export type CommunityState = Omit<SharedCommunityState, 'user'> & {
   user?: CommunityUserSnapshot
 }
+export type PlayerSearchResult = CommunitySearchResult
 
 class CommunityService {
   getState(sessionId: string) {
     return apiClient.get<CommunityState>(`/community/${encodeURIComponent(sessionId)}`)
+  }
+
+  search(sessionId: string, query: string, signal?: AbortSignal) {
+    return apiClient.get<PlayerSearchResult[]>(
+      `/community/search/${encodeURIComponent(sessionId)}?q=${encodeURIComponent(query)}`,
+      { signal }
+    )
   }
 
   follow(sessionId: string, username: string) {

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   communityService,
   type CommunityState,
+  type PlayerSearchResult,
   type PublicPlayer,
 } from '../client/services/communityService'
 import './ProgressionHub.css'
@@ -30,6 +31,8 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [isWorking, setIsWorking] = useState(false)
+  const [searchResults, setSearchResults] = useState<PlayerSearchResult[]>([])
+  const [isSearching, setIsSearching] = useState(false)
 
   const applyState = useCallback((nextState?: CommunityState) => {
     const resolved = nextState || EMPTY_STATE
@@ -50,6 +53,38 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
   useEffect(() => {
     void loadState()
   }, [loadState])
+
+  useEffect(() => {
+    const query = username.trim()
+    if (!sessionId || query.length < 2) {
+      setSearchResults([])
+      setIsSearching(false)
+      return
+    }
+
+    let active = true
+    const controller = new AbortController()
+    setIsSearching(true)
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await communityService.search(sessionId, query, controller.signal)
+        if (active) setSearchResults(response.data || [])
+      } catch (searchError) {
+        if (active) {
+          setSearchResults([])
+          setError(searchError instanceof Error ? searchError.message : 'Player search failed.')
+        }
+      } finally {
+        if (active) setIsSearching(false)
+      }
+    }, 250)
+
+    return () => {
+      active = false
+      controller.abort()
+      window.clearTimeout(timer)
+    }
+  }, [sessionId, username, state.followers, state.following])
 
   const runAction = async (
     action: () => Promise<{ data?: CommunityState; message?: string }>,
@@ -73,7 +108,10 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
     }
   }
 
-  const renderPlayer = (player: PublicPlayer, canUnfollow = false) => (
+  const renderPlayer = (
+    player: PublicPlayer,
+    action: 'unfollow' | 'follow-back' | 'none' = 'none'
+  ) => (
     <li className="player-row" key={player.id}>
       <span className="player-avatar" aria-hidden="true">
         {(player.name || player.username).slice(0, 1).toUpperCase()}
@@ -82,17 +120,21 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
         <strong>{player.name || player.username}</strong>
         <small>@{player.username} · Level {player.level}</small>
       </span>
-      {canUnfollow && (
+      {action !== 'none' && (
         <button
           type="button"
           className="secondary-action"
           disabled={isWorking}
           onClick={() => void runAction(
-            () => communityService.unfollow(sessionId!, player.id),
-            `Unfollowed @${player.username}.`
+            () => action === 'unfollow'
+              ? communityService.unfollow(sessionId!, player.id)
+              : communityService.follow(sessionId!, player.username),
+            action === 'unfollow'
+              ? `Unfollowed @${player.username}.`
+              : `You followed @${player.username} back.`
           )}
         >
-          Unfollow
+          {action === 'unfollow' ? 'Unfollow' : 'Follow back'}
         </button>
       )}
     </li>
@@ -127,43 +169,81 @@ const CommunityHub: React.FC<CommunityHubProps> = ({
             <h3 id="find-allies-title">Find an ally</h3>
           </div>
         </div>
-        <form
-          className="guild-form"
-          onSubmit={event => {
-            event.preventDefault()
-            const nextUsername = username.trim()
-            if (!nextUsername || !sessionId) return
-            void runAction(
-              () => communityService.follow(sessionId, nextUsername),
-              `Now following @${nextUsername}.`
-            ).then(() => setUsername(''))
-          }}
-        >
-          <label htmlFor="follow-username">Exact username</label>
+        <div className="guild-form">
+          <label htmlFor="follow-username">Search by player name or username</label>
           <div>
-            <input
-              id="follow-username"
-              value={username}
-              maxLength={40}
-              autoComplete="off"
-              placeholder="player_name"
-              onChange={event => setUsername(event.target.value)}
-            />
-            <button type="submit" disabled={isWorking || !username.trim()}>Follow</button>
+            <div className="player-search-control">
+              <input
+                id="follow-username"
+                value={username}
+                maxLength={40}
+                autoComplete="off"
+                placeholder="Start typing a name..."
+                aria-controls="player-search-results"
+                aria-expanded={username.trim().length >= 2}
+                onChange={event => setUsername(event.target.value)}
+              />
+              {username.trim().length >= 2 && (
+                <div
+                  id="player-search-results"
+                  className="player-search-results"
+                  aria-label="Matching players"
+                  aria-live="polite"
+                >
+                  {isSearching && <div className="player-search-status">Searching players...</div>}
+                  {!isSearching && searchResults.length === 0 && (
+                    <div className="player-search-status">No matching players found.</div>
+                  )}
+                  {!isSearching && searchResults.map(player => (
+                    <div className="player-search-result" key={player.id}>
+                      <span className="player-avatar" aria-hidden="true">
+                        {(player.name || player.username).slice(0, 1).toUpperCase()}
+                      </span>
+                      <span>
+                        <strong>{player.name || player.username}</strong>
+                        <small>
+                          @{player.username} · Level {player.level}
+                          {player.followsYou ? ' · Follows you' : ''}
+                        </small>
+                      </span>
+                      <button
+                        type="button"
+                        disabled={isWorking || player.isFollowing}
+                        aria-label={player.isFollowing ? `Following @${player.username}` : `Follow @${player.username}`}
+                        onClick={() => {
+                          if (!sessionId || player.isFollowing) return
+                          void runAction(
+                            () => communityService.follow(sessionId, player.username),
+                            `Now following @${player.username}.`
+                          ).then(() => setUsername(''))
+                        }}
+                      >
+                        {player.isFollowing ? 'Following' : player.followsYou ? 'Follow back' : 'Follow'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </form>
+        </div>
 
         <div className="social-columns">
           <div>
             <h4>Following</h4>
             {state.following.length ? (
-              <ul className="player-list">{state.following.map(player => renderPlayer(player, true))}</ul>
+              <ul className="player-list">{state.following.map(player => renderPlayer(player, 'unfollow'))}</ul>
             ) : <p className="empty-copy">Follow someone to start your network.</p>}
           </div>
           <div>
             <h4>Followers</h4>
             {state.followers.length ? (
-              <ul className="player-list">{state.followers.map(player => renderPlayer(player))}</ul>
+              <ul className="player-list">
+                {state.followers.map(player => renderPlayer(
+                  player,
+                  state.following.some(followed => followed.id === player.id) ? 'none' : 'follow-back'
+                ))}
+              </ul>
             ) : <p className="empty-copy">Your future allies will appear here.</p>}
           </div>
         </div>

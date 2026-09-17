@@ -260,10 +260,8 @@ export async function loginAs(page: Page, user: TestUserCredentials) {
 }
 
 export async function fillOtpInputs(page: Page, otp: string) {
-  const digits = otp.split('')
-  for (let i = 0; i < digits.length; i++) {
-    await page.locator('.otp-input').nth(i).fill(digits[i])
-  }
+  await page.locator('.otp-input').first().click()
+  await page.keyboard.type(otp, { delay: 30 })
 }
 
 export async function dismissTourIfPresent(page: Page) {

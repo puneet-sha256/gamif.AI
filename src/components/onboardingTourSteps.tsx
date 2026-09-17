@@ -171,7 +171,8 @@ export const ONBOARDING_TOUR_STEPS: TourStep[] = [
     title: 'Guild, allies & parties',
     body: (
       <>
-        At <strong>Level 10</strong>, follow players by username, create or join a
+        At <strong>Level 10</strong>, search players by name or username, follow
+        them back, create or join a
         party, and compare public contribution without exposing private goals or
         activity. Until then, this tab shows your unlock progress.
       </>
