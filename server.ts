@@ -18,9 +18,12 @@ import { healthCheck } from './src/server/routes/healthRoutes'
 import { submitFeedback } from './src/server/routes/feedbackRoutes'
 import {
   acceptPartyInvite,
+  acceptFollowRequest,
+  cancelFollowRequest,
   createParty,
   followUser,
   getCommunityState,
+  declineFollowRequest,
   searchCommunityUsers,
   inviteToParty,
   leaveParty,
@@ -171,6 +174,9 @@ app.post('/api/feedback', serializeFeedbackRequest(submitFeedback))
 app.get('/api/community/:sessionId', serializeCommunityRequest(getCommunityState))
 app.get('/api/community/search/:sessionId', searchCommunityUsers)
 app.post('/api/community/follow', serializeCommunityRequest(followUser))
+app.post('/api/community/follow-request/accept', serializeCommunityRequest(acceptFollowRequest))
+app.post('/api/community/follow-request/decline', serializeCommunityRequest(declineFollowRequest))
+app.post('/api/community/follow-request/cancel', serializeCommunityRequest(cancelFollowRequest))
 app.delete('/api/community/follow', serializeCommunityRequest(unfollowUser))
 app.post('/api/community/party/create', serializeCommunityRequest(createParty))
 app.post('/api/community/party/invite', serializeCommunityRequest(inviteToParty))

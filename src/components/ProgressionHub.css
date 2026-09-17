@@ -445,6 +445,92 @@
   list-style: none;
 }
 
+.connection-card {
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface-subtle);
+}
+
+.connection-card .player-row {
+  border: 0;
+  border-radius: 0;
+}
+
+.connection-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--border-default);
+  background: var(--bg-surface);
+}
+
+.connection-profile-stats span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.connection-profile-stats strong {
+  color: var(--text-primary);
+}
+
+.follow-request-section {
+  border-color: color-mix(in srgb, var(--accent-primary) 55%, var(--border-default));
+}
+
+.request-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--accent-primary);
+  color: white;
+  font-size: 0.75rem;
+}
+
+.follow-request-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.follow-request-list article {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-subtle);
+}
+
+.follow-request-list article > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.follow-request-list strong,
+.follow-request-list small {
+  display: block;
+}
+
+.follow-request-list small {
+  color: var(--text-muted);
+}
+
+.follow-request-list button:not(.secondary-action) {
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--accent-primary);
+  color: white;
+  cursor: pointer;
+  font-weight: 700;
+}
+
 .player-row,
 .party-roster article,
 .invite-list article {
@@ -570,5 +656,14 @@
 
   .guild-counts span {
     flex: 1;
+  }
+
+  .connection-profile-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .follow-request-list article {
+    align-items: stretch;
+    flex-wrap: wrap;
   }
 }

@@ -2,6 +2,7 @@ import path from 'path'
 import type { User, Session, GeneratedTasks } from '../../shared/types'
 import { logger } from '../../utils/logger'
 import { initializeDatabase, getUserRepository, getSessionRepository } from '../db'
+import type { UserMutation } from '../db/interfaces'
 
 // ─── Legacy exports for backwards compat ────────────────────────────────────
 export const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(process.cwd(), 'data'))
@@ -45,6 +46,10 @@ export async function createUser(user: User): Promise<void> {
 
 export async function updateUser(userId: string, updates: Partial<User>): Promise<User | null> {
   return getUserRepository().updateUser(userId, updates)
+}
+
+export async function mutateUser(userId: string, mutation: UserMutation): Promise<User | null> {
+  return getUserRepository().mutateUser(userId, mutation)
 }
 
 // ─── Session operations ─────────────────────────────────────────────────────

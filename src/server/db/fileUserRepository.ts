@@ -1,7 +1,7 @@
 import fs from 'fs-extra'
 import path from 'path'
 import type { User, GeneratedTasks } from '../../shared/types'
-import type { IUserRepository } from './interfaces'
+import type { IUserRepository, UserMutation } from './interfaces'
 import { logger } from '../../utils/logger'
 import { rankUserSearchResults } from '../utils/userSearch'
 
@@ -11,6 +11,7 @@ const BACKUP_DIR = path.join(DATA_DIR, 'backup')
 
 export class FileUserRepository implements IUserRepository {
   private writeQueue: Promise<void> = Promise.resolve()
+  private userMutationQueue: Promise<unknown> = Promise.resolve()
 
   async initialize(): Promise<void> {
     await fs.ensureDir(DATA_DIR)
@@ -87,23 +88,28 @@ export class FileUserRepository implements IUserRepository {
   }
 
   async updateUser(userId: string, updates: Partial<User>): Promise<User | null> {
-    const users = await this.loadUsers()
-    const userIndex = users.findIndex(user => user.id === userId)
+    return this.mutateUser(userId, () => updates)
+  }
 
-    if (userIndex === -1) return null
+  async mutateUser(userId: string, mutation: UserMutation): Promise<User | null> {
+    const operation = this.userMutationQueue.then(async () => {
+      const users = await this.loadUsers()
+      const userIndex = users.findIndex(user => user.id === userId)
+      if (userIndex === -1) return null
 
-    const updatedUser = { ...users[userIndex], ...updates }
-
-    // Remove properties that are explicitly set to null or undefined
-    Object.keys(updates).forEach(key => {
-      if (updates[key as keyof User] === null || updates[key as keyof User] === undefined) {
-        delete updatedUser[key as keyof User]
-      }
+      const updates = mutation(structuredClone(users[userIndex]))
+      const updatedUser = { ...users[userIndex], ...updates }
+      Object.keys(updates).forEach(key => {
+        if (updates[key as keyof User] === null || updates[key as keyof User] === undefined) {
+          delete updatedUser[key as keyof User]
+        }
+      })
+      users[userIndex] = updatedUser
+      await this.saveUsers(users)
+      return updatedUser
     })
-
-    users[userIndex] = updatedUser
-    await this.saveUsers(users)
-    return users[userIndex]
+    this.userMutationQueue = operation.catch(() => undefined)
+    return operation
   }
 
   // ─── Generated tasks ────────────────────────────────────────────────────

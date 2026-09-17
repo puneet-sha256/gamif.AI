@@ -4,6 +4,23 @@ export interface CommunityUserSnapshot {
   name: string
   level: number
   experience: number
+  attributes: {
+    strength: number
+    intelligence: number
+    charisma: number
+  }
+  activeDays: number
+  memberSince: string
+}
+
+export interface CommunityIdentity {
+  id: string
+  username: string
+  name: string
+}
+
+export interface FollowRequest extends CommunityIdentity {
+  requestedAt: string
 }
 
 export interface PartyMemberSnapshot extends CommunityUserSnapshot {
@@ -31,7 +48,9 @@ export interface PartyInvite {
 export interface CommunityState {
   user: CommunityUserSnapshot
   following: CommunityUserSnapshot[]
-  followers: CommunityUserSnapshot[]
+  followers: CommunityIdentity[]
+  receivedFollowRequests: FollowRequest[]
+  sentFollowRequests: FollowRequest[]
   party?: Party
   partyInvites: PartyInvite[]
 }
@@ -40,9 +59,10 @@ export interface CommunitySearchResult {
   id: string
   username: string
   name: string
-  level: number
   isFollowing: boolean
   followsYou: boolean
+  requestSent: boolean
+  requestReceived: boolean
 }
 
 export interface CommunitySessionRequest {
@@ -56,6 +76,10 @@ export interface FollowUserRequest extends CommunitySessionRequest {
 export interface UnfollowUserRequest extends CommunitySessionRequest {
   username?: string
   userId?: string
+}
+
+export interface FollowRequestActionRequest extends CommunitySessionRequest {
+  userId: string
 }
 
 export interface CreatePartyRequest extends CommunitySessionRequest {

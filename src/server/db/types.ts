@@ -10,6 +10,8 @@ import type {
   TaskHistory,
   CatalogData,
   CommunityUserSnapshot,
+  CommunityIdentity,
+  FollowRequest,
   Party,
   PartyInvite
 } from '../../shared/types'
@@ -31,7 +33,9 @@ export interface ProfileSubDoc {
   goalsData?: GoalsData
   stats?: UserStats
   following?: CommunityUserSnapshot[]
-  followers?: CommunityUserSnapshot[]
+  followers?: CommunityIdentity[]
+  receivedFollowRequests?: FollowRequest[]
+  sentFollowRequests?: FollowRequest[]
   party?: Party
   partyInvites?: PartyInvite[]
   feedbackSubmissionTimestamps?: string[]
@@ -109,6 +113,8 @@ export const FIELD_TO_SUBDOC: Record<string, SubDocType> = {
   stats: 'profile',
   following: 'profile',
   followers: 'profile',
+  receivedFollowRequests: 'profile',
+  sentFollowRequests: 'profile',
   party: 'profile',
   partyInvites: 'profile',
   feedbackSubmissionTimestamps: 'profile',

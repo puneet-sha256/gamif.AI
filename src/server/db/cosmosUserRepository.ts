@@ -1,6 +1,6 @@
 import type { Container, JSONObject } from '@azure/cosmos'
 import type { User, GeneratedTasks } from '../../shared/types'
-import type { IUserRepository } from './interfaces'
+import type { IUserRepository, UserMutation } from './interfaces'
 import type { SubDoc, SubDocType, ProfileSubDoc, TasksSubDoc, ShopSubDoc, HistorySubDoc, RewardsSubDoc, CatalogSubDoc } from './types'
 import { FIELD_TO_SUBDOC } from './types'
 import { getUsersContainer } from './cosmosClient'
@@ -37,6 +37,8 @@ export class CosmosUserRepository implements IUserRepository {
       stats: profile.stats,
       following: profile.following,
       followers: profile.followers,
+      receivedFollowRequests: profile.receivedFollowRequests,
+      sentFollowRequests: profile.sentFollowRequests,
       party: profile.party,
       partyInvites: profile.partyInvites,
       feedbackSubmissionTimestamps: profile.feedbackSubmissionTimestamps,
@@ -159,6 +161,8 @@ export class CosmosUserRepository implements IUserRepository {
       stats: user.stats,
       following: user.following,
       followers: user.followers,
+      receivedFollowRequests: user.receivedFollowRequests,
+      sentFollowRequests: user.sentFollowRequests,
       party: user.party,
       partyInvites: user.partyInvites,
       feedbackSubmissionTimestamps: user.feedbackSubmissionTimestamps,
@@ -268,6 +272,59 @@ export class CosmosUserRepository implements IUserRepository {
 
     // Return the fully assembled user
     return (await this.findById(userId)) ?? null
+  }
+
+  async mutateUser(userId: string, mutation: UserMutation): Promise<User | null> {
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const subDocs = await this.readPartition(userId)
+      const user = this.assembleUser(subDocs)
+      const profile = subDocs.find(doc => doc.type === 'profile') as
+        | (ProfileSubDoc & {
+            _etag?: string
+            _rid?: string
+            _self?: string
+            _attachments?: string
+            _ts?: number
+          })
+        | undefined
+      if (!user || !profile) return null
+
+      const updates = mutation(user)
+      for (const field of Object.keys(updates)) {
+        if (FIELD_TO_SUBDOC[field] !== 'profile') {
+          throw new Error(`Atomic user mutation only supports profile fields: ${field}`)
+        }
+      }
+
+      const {
+        _etag,
+        _rid: _ignoredRid,
+        _self: _ignoredSelf,
+        _attachments: _ignoredAttachments,
+        _ts: _ignoredTimestamp,
+        ...cleanProfile
+      } = profile
+      const merged: Record<string, unknown> = { ...cleanProfile }
+      for (const [field, value] of Object.entries(updates)) {
+        if (value === null || value === undefined) delete merged[field]
+        else merged[field] = value
+      }
+
+      try {
+        await this.container.item('profile', userId).replace(
+          merged as JSONObject,
+          _etag
+            ? { accessCondition: { type: 'IfMatch', condition: _etag } }
+            : undefined
+        )
+        return (await this.findById(userId)) ?? null
+      } catch (error: unknown) {
+        const conflict = error as { code?: number; statusCode?: number }
+        if ((conflict.code === 412 || conflict.statusCode === 412) && attempt < 4) continue
+        throw error
+      }
+    }
+    throw new Error(`Could not update user ${userId} after concurrent changes`)
   }
 
   // ─── Generated tasks ────────────────────────────────────────────────────
