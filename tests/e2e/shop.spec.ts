@@ -248,21 +248,23 @@ test.describe('Shop and inventory flows', () => {
     await page.getByRole('button', { name: /Shop/ }).click()
     await page.getByRole('button', { name: '➕ Add Item' }).click()
     await page.getByLabel('Paste product link or full shared message *').fill(
-      'https://www.meesho.com/blocked-product/p/abc123'
+      'https://www.meesho.com/s/p/h9jvva?utm_source=share_example'
     )
     await page.getByRole('button', { name: 'Fetch' }).click()
     await expect(page.getByText(/keep this link and enter the details manually/i)).toBeVisible()
     await page.getByRole('button', { name: 'Keep link and enter details manually' }).click()
     await expect(page.getByText(/Product link saved/)).toBeVisible()
 
+    await expect(page.getByLabel('Item Name *')).toHaveValue('Meesho product h9jvva')
     await page.getByLabel('Item Name *').fill('Blocked Meesho Product')
-    await page.getByLabel('Price (Shards) *').fill('42')
+    await page.getByLabel('Current product price (₹) *').fill('420')
+    await expect(page.getByText('₹420 × 0.1 = 42.00 💎 shards')).toBeVisible()
     await page.getByRole('button', { name: 'Add Item', exact: true }).click()
 
     expect(submittedBody).toMatchObject({
       title: 'Blocked Meesho Product',
       price: 42,
-      referenceUrl: 'https://www.meesho.com/blocked-product/p/abc123',
+      referenceUrl: 'https://www.meesho.com/s/p/h9jvva?utm_source=share_example',
     })
   })
 

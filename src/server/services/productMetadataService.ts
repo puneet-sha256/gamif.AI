@@ -553,6 +553,15 @@ export async function fetchProductMetadata(rawUrl: string): Promise<ProductMetad
     const fallbackUrl = (await validatePublicUrl(context.url)).url
     const fallback = metadataFromShare(context, fallbackUrl)
     if (fallback) return fallback
+    if (
+      fallbackUrl.hostname.toLowerCase().includes('meesho.')
+      && /\/s\/p\/[a-z0-9]+/i.test(fallbackUrl.pathname)
+    ) {
+      throw new Error(
+        'Meesho blocks automatic details for this app share link. '
+        + 'Open it in Meesho, then enter the visible ₹ price to convert it to shards.'
+      )
+    }
     throw error
   }
   return parseProductDocument(html, finalUrl.toString(), rawUrl)

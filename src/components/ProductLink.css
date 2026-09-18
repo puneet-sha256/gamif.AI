@@ -89,6 +89,13 @@
   font-size: 0.78rem;
 }
 
+.fallback-conversion {
+  display: block;
+  margin-top: -10px;
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
 .product-preview strong {
   color: var(--accent-primary);
 }
