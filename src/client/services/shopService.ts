@@ -15,6 +15,7 @@ export interface NewShopItemData {
   isKeyItem?: boolean
   allowMultiplePurchases?: boolean
   sourceUrl?: string
+  referenceUrl?: string
 }
 
 class ShopService {

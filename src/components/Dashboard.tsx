@@ -248,6 +248,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     price: number
     image?: string
     sourceUrl?: string
+    referenceUrl?: string
   }) => {
     const success = await addShopItem(item)
     if (success) {
@@ -1287,6 +1288,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                     currency={item.currency}
                     livePrice={item.livePrice}
                     priceFetchedAt={item.priceFetchedAt}
+                    priceSource={item.priceSource}
                     onRefreshPrice={item.sourceUrl ? () => handleRefreshLinkedItem(item.id) : undefined}
                     onBuy={(confirmedPrice) => handleBuyShopItem(item.id, item.title, confirmedPrice, item.description, item.image, item.isConsumable, item.isKeyItem, item.allowMultiplePurchases)}
                     onDelete={() => handleDeleteShopItem(item.id)}

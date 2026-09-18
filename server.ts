@@ -105,6 +105,7 @@ app.use((req, res, next) => {
             ...req.body,
             ...(req.body.url ? { url: '[REDACTED]' } : {}),
             ...(req.body.sourceUrl ? { sourceUrl: '[REDACTED]' } : {}),
+            ...(req.body.referenceUrl ? { referenceUrl: '[REDACTED]' } : {}),
           }
         : { ...req.body }
     if (safeBody.password) safeBody.password = '[HIDDEN]'

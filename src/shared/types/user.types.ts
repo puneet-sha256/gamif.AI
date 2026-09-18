@@ -64,6 +64,7 @@ export interface ShopItem {
   livePrice?: number
   priceFetchedAt?: string
   shardRate?: number
+  priceSource?: 'live' | 'manual'
 }
 
 // Inventory item structure for purchased items

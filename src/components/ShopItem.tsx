@@ -17,6 +17,7 @@ interface ShopItemProps {
   currency?: string
   livePrice?: number
   priceFetchedAt?: string
+  priceSource?: 'live' | 'manual'
   onRefreshPrice?: () => Promise<number | undefined>
 }
 
@@ -35,6 +36,7 @@ const ShopItem: React.FC<ShopItemProps> = ({
   currency,
   livePrice,
   priceFetchedAt,
+  priceSource,
   onRefreshPrice,
 }) => {
   const { showConfirm } = useConfirm()
@@ -44,7 +46,7 @@ const ShopItem: React.FC<ShopItemProps> = ({
   const handleBuyClick = async () => {
     if (!sourceUrl && !canAfford) return
     let currentPrice = price
-    if (sourceUrl && onRefreshPrice) {
+    if (sourceUrl && priceSource === 'live' && onRefreshPrice) {
       setIsRefreshing(true)
       try {
         const refreshedPrice = await onRefreshPrice()

@@ -266,6 +266,7 @@ export class FileUserRepository implements IUserRepository {
       livePrice?: number
       priceFetchedAt?: string
       shardRate?: number
+      priceSource?: 'live' | 'manual'
     }
   ): Promise<boolean> {
     logger.info(`Adding shop item for user: ${userId}`)
@@ -295,6 +296,7 @@ export class FileUserRepository implements IUserRepository {
       livePrice: item.livePrice,
       priceFetchedAt: item.priceFetchedAt,
       shardRate: item.shardRate,
+      priceSource: item.priceSource,
     }
 
     user.shopItems.push(newItem)
