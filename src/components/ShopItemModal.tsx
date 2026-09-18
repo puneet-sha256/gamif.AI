@@ -120,12 +120,15 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
       return
     }
 
-    const priceValue = Number(price)
+    const retailPriceValue = Number(price)
 
-    if (isNaN(priceValue) || priceValue < 0) {
+    if (isNaN(retailPriceValue) || retailPriceValue < 0) {
       setError('Price must be a positive number')
       return
     }
+    const priceValue = fallbackReferenceUrl
+      ? Number((retailPriceValue * 0.1).toFixed(2))
+      : retailPriceValue
 
     setIsSaving(true)
 
@@ -188,6 +191,10 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
       const extractedUrl = sourceUrl.match(/https?:\/\/[^\s<>"']+/i)?.[0]
         ?.replace(/[),.;!?]+$/, '') || ''
       setFallbackReferenceUrl(extractedUrl)
+      if (/meesho\.com\/s\/p\//i.test(extractedUrl)) {
+        const shareId = extractedUrl.match(/\/s\/p\/([a-z0-9]+)/i)?.[1]
+        setTitle(`Meesho product${shareId ? ` ${shareId}` : ''}`)
+      }
       setError(
         (fetchError instanceof Error ? fetchError.message : 'Could not read this product page')
         + (extractedUrl ? ' You can keep this link and enter the details manually.' : '')
@@ -323,18 +330,25 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
           </div>
 
           <div className="form-group">
-            <label htmlFor="item-price">Price (Shards) *</label>
+            <label htmlFor="item-price">
+              {fallbackReferenceUrl ? 'Current product price (₹) *' : 'Price (Shards) *'}
+            </label>
             <input
               id="item-price"
               type="number"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               className="form-input"
-              placeholder="0"
+              placeholder={fallbackReferenceUrl ? 'e.g., 349' : '0'}
               min="0"
               disabled={isSaving}
             />
           </div>
+          {fallbackReferenceUrl && Number(price) >= 0 && price !== '' && (
+            <small className="fallback-conversion">
+              ₹{Number(price).toLocaleString()} × 0.1 = {(Number(price) * 0.1).toFixed(2)} 💎 shards
+            </small>
+          )}
 
           <div className="form-group">
             <label htmlFor="item-image">Emoji/Icon (Optional)</label>
