@@ -15,6 +15,55 @@ const DEFAULT_SHARD_RATES: Record<string, number> = {
   GBP: 11.5,
 }
 
+interface ShareContext {
+  url: string
+  title?: string
+  price?: number
+  currency?: string
+}
+
+function shareContext(value: string): ShareContext {
+  const url = value.match(/https?:\/\/[^\s<>"']+/i)?.[0]
+    ?.replace(/[),.;!?]+$/, '')
+    || value.trim()
+  const priceMatch = value.match(/(?:₹|INR\s*)([\d,]+(?:\.\d{1,2})?)/i)
+    || value.match(/(?:US\$|\$|USD\s*)([\d,]+(?:\.\d{1,2})?)/i)
+    || value.match(/(?:€|EUR\s*)([\d,.]+)/i)
+    || value.match(/(?:£|GBP\s*)([\d,.]+)/i)
+  const currency = priceMatch
+    ? /₹|INR/i.test(priceMatch[0])
+      ? 'INR'
+      : /€|EUR/i.test(priceMatch[0])
+        ? 'EUR'
+        : /£|GBP/i.test(priceMatch[0])
+          ? 'GBP'
+          : 'USD'
+    : undefined
+  const titleCandidates = value
+    .replace(url, ' ')
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line =>
+      line.length >= 3
+      && !/(?:best\s+)?price|₹|INR|USD|EUR|GBP/i.test(line)
+      && !/^(?:check\s+out\s+this\s+product|check\s+(?:this|it)\s+out|take\s+a\s+look\s+at(?:\s+this)?|found\s+this)(?:\s+(?:on|at)\s+(?:amazon|flipkart|meesho))?!?$/i.test(line)
+    )
+    .map(line => line
+      .replace(/^(?:check\s+out\s+this\s+product|check\s+(?:this|it)\s+out|take\s+a\s+look\s+at(?:\s+this)?|found\s+this)\s*/i, '')
+      .replace(/\s+(?:on|at)\s+(?:amazon|flipkart|meesho)!?.*$/i, '')
+      .replace(/^[-:–—\s]+|[-:–—\s]+$/g, '')
+    )
+  const title = titleCandidates.find(candidate =>
+    candidate.length >= 3 && !/^(?:product|item|deal|this product)$/i.test(candidate)
+  )
+  return {
+    url,
+    title: title?.slice(0, 200),
+    price: priceMatch ? parsePrice(priceMatch[1]) : undefined,
+    currency,
+  }
+}
+
 function decodeHtml(value: string): string {
   return value
     .replaceAll('&amp;', '&')
@@ -26,15 +75,15 @@ function decodeHtml(value: string): string {
     .trim()
 }
 
-function isPrivateIp(address: string): boolean {
+export function isPrivateIpAddress(address: string): boolean {
   const mapped = address.toLowerCase().match(/^::ffff:(.+)$/)?.[1]
   if (mapped) {
-    if (net.isIPv4(mapped)) return isPrivateIp(mapped)
+    if (net.isIPv4(mapped)) return isPrivateIpAddress(mapped)
     const hex = mapped.match(/^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/)
     if (hex) {
       const high = Number.parseInt(hex[1], 16)
       const low = Number.parseInt(hex[2], 16)
-      return isPrivateIp([
+      return isPrivateIpAddress([
         high >> 8,
         high & 255,
         low >> 8,
@@ -44,13 +93,17 @@ function isPrivateIp(address: string): boolean {
     return true
   }
   if (net.isIPv4(address)) {
-    const [a, b] = address.split('.').map(Number)
+    const [a, b, c] = address.split('.').map(Number)
     return a === 10
       || a === 127
       || a === 0
       || (a === 169 && b === 254)
       || (a === 172 && b >= 16 && b <= 31)
       || (a === 192 && b === 168)
+      || (a === 192 && b === 0 && c === 0)
+      || (a === 198 && (b === 18 || b === 19))
+      || (a === 198 && b === 51 && c === 100)
+      || (a === 203 && b === 0 && c === 113)
       || (a === 100 && b >= 64 && b <= 127)
       || a >= 224
   }
@@ -63,20 +116,29 @@ function isPrivateIp(address: string): boolean {
     || normalized.startsWith('fe9')
     || normalized.startsWith('fea')
     || normalized.startsWith('feb')
+    || normalized.startsWith('fec')
+    || normalized.startsWith('fed')
+    || normalized.startsWith('fee')
+    || normalized.startsWith('fef')
     || normalized.startsWith('ff')
     || normalized.startsWith('2001:db8:')
+    || normalized.startsWith('2001:10:')
+    || normalized.startsWith('2001:20:')
+    || normalized.startsWith('64:ff9b:1:')
 }
 
 interface ValidatedTarget {
   url: URL
-  address: string
-  family: 4 | 6
+  addresses: Array<{ address: string; family: 4 | 6 }>
 }
 
 async function validatePublicUrl(rawUrl: string): Promise<ValidatedTarget> {
+  const sharedUrl = rawUrl.match(/https?:\/\/[^\s<>"']+/i)?.[0]
+    ?.replace(/[),.;!?]+$/, '')
+  const candidate = sharedUrl || rawUrl.trim()
   let url: URL
   try {
-    url = new URL(rawUrl)
+    url = new URL(candidate)
   } catch {
     throw new Error('Enter a valid product URL')
   }
@@ -91,14 +153,17 @@ async function validatePublicUrl(rawUrl: string): Promise<ValidatedTarget> {
     throw new Error('Local product URLs are not supported')
   }
   const addresses = await dns.lookup(hostname, { all: true })
-  if (!addresses.length || addresses.some(result => isPrivateIp(result.address))) {
+  if (!addresses.length || addresses.some(result => isPrivateIpAddress(result.address))) {
     throw new Error('This product URL does not resolve to a public website')
   }
-  const selected = addresses[0]
-  if (selected.family !== 4 && selected.family !== 6) {
+  const supported = addresses.filter(
+    (result): result is { address: string; family: 4 | 6 } =>
+      result.family === 4 || result.family === 6
+  )
+  if (!supported.length) {
     throw new Error('Product website returned an unsupported network address')
   }
-  return { url, address: selected.address, family: selected.family }
+  return { url, addresses: supported }
 }
 
 async function readLimitedHtml(response: IncomingMessage): Promise<string> {
@@ -117,27 +182,50 @@ async function readLimitedHtml(response: IncomingMessage): Promise<string> {
 
 function requestPinned(target: ValidatedTarget): Promise<IncomingMessage> {
   const transport = target.url.protocol === 'https:' ? https : http
-  return new Promise((resolve, reject) => {
-    const request = transport.get(target.url, {
-      family: target.family,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; GamifAI-Wishlist/1.0; +https://app-gamif-ai.azurewebsites.net)',
-        Accept: 'text/html,application/xhtml+xml',
-        'Accept-Language': 'en-IN,en;q=0.9',
-      },
-      lookup: (_hostname, options, callback) => {
-        if (options.all) {
-          callback(null, [{ address: target.address, family: target.family }])
-        } else {
-          callback(null, target.address, target.family)
-        }
-      },
-      servername: target.url.hostname,
-      timeout: FETCH_TIMEOUT_MS,
-    }, resolve)
-    request.on('timeout', () => request.destroy(new Error('Product page timed out')))
-    request.on('error', reject)
-  })
+  const headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-IN,en-US;q=0.9,en;q=0.8',
+    'Cache-Control': 'no-cache',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Upgrade-Insecure-Requests': '1',
+  }
+
+  return (async () => {
+    let lastError: unknown
+    const deadline = Date.now() + FETCH_TIMEOUT_MS
+    for (const targetAddress of target.addresses) {
+      const timeout = deadline - Date.now()
+      if (timeout <= 0) break
+      try {
+        return await new Promise<IncomingMessage>((resolve, reject) => {
+          const request = transport.get(target.url, {
+            family: targetAddress.family,
+            headers,
+            lookup: (_hostname, options, callback) => {
+              if (options.all) {
+                callback(null, [{
+                  address: targetAddress.address,
+                  family: targetAddress.family,
+                }])
+              } else {
+                callback(null, targetAddress.address, targetAddress.family)
+              }
+            },
+            servername: target.url.hostname,
+            timeout,
+          }, resolve)
+          request.on('timeout', () => request.destroy(new Error('Product page timed out')))
+          request.on('error', reject)
+        })
+      } catch (error) {
+        lastError = error
+      }
+    }
+    throw lastError instanceof Error ? lastError : new Error('Product website could not be reached')
+  })()
 }
 
 async function fetchProductHtml(rawUrl: string): Promise<{ html: string; finalUrl: URL }> {
@@ -220,8 +308,36 @@ function firstString(value: unknown): string | undefined {
 function parsePrice(value: unknown): number | undefined {
   if (typeof value === 'number' && Number.isFinite(value) && value >= 0) return value
   if (typeof value !== 'string') return undefined
-  const normalized = value.replace(/[^\d.,-]/g, '').replace(/,(?=\d{3}(?:\D|$))/g, '')
-  const parsed = Number(normalized.replace(',', '.'))
+  let normalized = value.replace(/[^\d.,-]/g, '')
+  const commaCount = (normalized.match(/,/g) || []).length
+  const dotCount = (normalized.match(/\./g) || []).length
+  const lastComma = normalized.lastIndexOf(',')
+  const lastDot = normalized.lastIndexOf('.')
+  if (commaCount && dotCount) {
+    const decimalSeparator = lastComma > lastDot ? ',' : '.'
+    const groupingSeparator = decimalSeparator === ',' ? '.' : ','
+    normalized = normalized.replaceAll(groupingSeparator, '')
+    if (decimalSeparator === ',') normalized = normalized.replace(',', '.')
+  } else if (commaCount || dotCount) {
+    const separator = commaCount ? ',' : '.'
+    const count = commaCount || dotCount
+    const decimalDigits = normalized.length - normalized.lastIndexOf(separator) - 1
+    if (count > 1) {
+      if (decimalDigits === 2) {
+        const last = normalized.lastIndexOf(separator)
+        normalized = normalized.slice(0, last).replaceAll(separator, '')
+          + '.'
+          + normalized.slice(last + 1)
+      } else {
+        normalized = normalized.replaceAll(separator, '')
+      }
+    } else if (decimalDigits <= 2) {
+      if (separator === ',') normalized = normalized.replace(',', '.')
+    } else {
+      normalized = normalized.replace(separator, '')
+    }
+  }
+  const parsed = Number(normalized)
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined
 }
 
@@ -246,34 +362,145 @@ function configuredShardRates(): Record<string, number> {
 }
 
 function sourceName(url: URL): string {
+  const hostname = url.hostname.toLowerCase()
+  if (hostname === 'amzn.in' || hostname.includes('amazon.')) return 'Amazon'
+  if (hostname === 'dl.flipkart.com' || hostname.includes('flipkart.')) return 'Flipkart'
+  if (hostname.includes('meesho.')) return 'Meesho'
+  if (hostname.includes('myntra.')) return 'Myntra'
+  if (hostname.includes('ajio.')) return 'AJIO'
   return url.hostname.replace(/^www\./, '').split('.')[0]
     .replace(/(^\w|[-_]\w)/g, value => value.replace(/[-_]/, '').toUpperCase())
 }
 
-export async function fetchProductMetadata(rawUrl: string): Promise<ProductMetadata> {
-  const { html, finalUrl } = await fetchProductHtml(rawUrl)
+export function extractProductUrl(value: string): string | undefined {
+  const context = shareContext(value)
+  try {
+    const url = new URL(context.url)
+    return ['http:', 'https:'].includes(url.protocol) ? url.toString() : undefined
+  } catch {
+    return undefined
+  }
+}
+
+export function productSourceName(value: string): string | undefined {
+  const url = extractProductUrl(value)
+  return url ? sourceName(new URL(url)) : undefined
+}
+
+function tagContentById(html: string, id: string): string | undefined {
+  const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = html.match(new RegExp(
+    `<[^>]+id=["']${escaped}["'][^>]*>([\\s\\S]{0,2000}?)<\\/[^>]+>`,
+    'i'
+  ))
+  return match?.[1] ? decodeHtml(match[1].replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim() : undefined
+}
+
+function amazonImage(html: string): string | undefined {
+  const tag = html.match(/<img[^>]+id=["']landingImage["'][^>]*>/i)?.[0]
+    || html.match(/<img[^>]+data-a-image-name=["']landingImage["'][^>]*>/i)?.[0]
+  if (!tag) return undefined
+  return tag.match(/data-old-hires=["']([^"']+)["']/i)?.[1]
+    || tag.match(/src=["']([^"']+)["']/i)?.[1]
+}
+
+function retailerSpecificMetadata(html: string, url: URL) {
+  const hostname = url.hostname.toLowerCase()
+  if (hostname.includes('amazon.')) {
+    const corePrice = html.match(
+      /id=["']corePrice[^"']*["'][\s\S]{0,12000}?class=["']a-offscreen["']>([^<]+)</i
+    )?.[1]
+    return {
+      title: tagContentById(html, 'productTitle'),
+      image: amazonImage(html),
+      price: parsePrice(corePrice),
+      currency: corePrice?.includes('₹') ? 'INR' : undefined,
+    }
+  }
+  if (hostname.includes('flipkart.')) {
+    const pricePatterns = [
+      /"sellingPrice"\s*:\s*(?:\{[^{}]{0,300}?"amount"\s*:\s*)?(\d+(?:\.\d+)?)/i,
+      /"finalPrice"\s*:\s*(?:\{[^{}]{0,300}?"amount"\s*:\s*)?(\d+(?:\.\d+)?)/i,
+      /"special_price"\s*:\s*"?([\d,.]+)"?/i,
+      /₹\s*([\d,]+(?:\.\d{1,2})?)/,
+    ]
+    const price = pricePatterns
+      .map(pattern => parsePrice(html.match(pattern)?.[1]))
+      .find(value => value !== undefined)
+    return {
+      title: undefined,
+      image: undefined,
+      price,
+      currency: price !== undefined ? 'INR' : undefined,
+    }
+  }
+  return {}
+}
+
+function metadataFromShare(context: ShareContext, finalUrl: URL): ProductMetadata | undefined {
+  if (context.price === undefined || !context.currency) return undefined
+  const shardRate = configuredShardRates()[context.currency]
+  if (!shardRate) return undefined
+  return {
+    title: context.title || `${sourceName(finalUrl)} wishlist product`,
+    price: context.price,
+    currency: context.currency,
+    sourceUrl: finalUrl.toString(),
+    sourceName: sourceName(finalUrl),
+    fetchedAt: new Date().toISOString(),
+    shardRate,
+    shardPrice: Number((context.price * shardRate).toFixed(2)),
+  }
+}
+
+export function parseSharedProductText(value: string): ProductMetadata | undefined {
+  const context = shareContext(value)
+  try {
+    return metadataFromShare(context, new URL(context.url))
+  } catch {
+    return undefined
+  }
+}
+
+export function parseProductDocument(
+  html: string,
+  finalUrlValue: string,
+  originalInput = finalUrlValue
+): ProductMetadata {
+  const finalUrl = new URL(finalUrlValue)
+  const context = shareContext(originalInput)
   const product = jsonLdProduct(html) || {}
   const offers = offersFromProduct(product)
+  const retailerMetadata = retailerSpecificMetadata(html, finalUrl)
   const title = firstString(product.name)
     || metaContent(html, 'og:title')
     || metaContent(html, 'twitter:title')
+    || retailerMetadata.title
     || decodeHtml(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || '')
   const image = firstString(product.image)
     || metaContent(html, 'og:image')
     || metaContent(html, 'twitter:image')
+    || retailerMetadata.image
   const price = parsePrice(offers.price)
     ?? parsePrice(offers.lowPrice)
     ?? parsePrice(metaContent(html, 'product:price:amount'))
     ?? parsePrice(metaContent(html, 'og:price:amount'))
+    ?? retailerMetadata.price
+    ?? context.price
   const currency = String(
     offers.priceCurrency
     || metaContent(html, 'product:price:currency')
     || metaContent(html, 'og:price:currency')
+    || retailerMetadata.currency
+    || context.currency
     || ''
   ).toUpperCase()
   if (!title) throw new Error('Could not find a product title on this page')
   if (price === undefined || !currency) {
-    throw new Error('Could not find a current price and currency. Use manual entry for this retailer.')
+    throw new Error(
+      `Could not read the current price from ${sourceName(finalUrl)}. `
+      + 'Paste the full shared message if it includes a price, or use Manual item.'
+    )
   }
   const shardRate = configuredShardRates()[currency]
   if (!shardRate) {
@@ -302,4 +529,31 @@ export async function fetchProductMetadata(rawUrl: string): Promise<ProductMetad
     shardRate,
     shardPrice: Number((price * shardRate).toFixed(2)),
   }
+}
+
+export async function fetchProductMetadata(rawUrl: string): Promise<ProductMetadata> {
+  const context = shareContext(rawUrl)
+  const contextUrl = new URL(context.url)
+  const contextHost = contextUrl.hostname.toLowerCase()
+  if (
+    context.price !== undefined
+    && context.title
+    && (contextHost.includes('meesho.') || contextHost === 'dl.flipkart.com')
+  ) {
+    const shared = metadataFromShare(context, contextUrl)
+    if (shared) return shared
+  }
+  let html: string
+  let finalUrl: URL
+  try {
+    const fetched = await fetchProductHtml(context.url)
+    html = fetched.html
+    finalUrl = fetched.finalUrl
+  } catch (error) {
+    const fallbackUrl = (await validatePublicUrl(context.url)).url
+    const fallback = metadataFromShare(context, fallbackUrl)
+    if (fallback) return fallback
+    throw error
+  }
+  return parseProductDocument(html, finalUrl.toString(), rawUrl)
 }

@@ -7,7 +7,7 @@ import { logger } from '../../utils/logger'
 export async function previewProduct(req: Request, res: Response) {
   try {
     const { sessionId, url } = req.body || {}
-    if (typeof sessionId !== 'string' || typeof url !== 'string' || url.length > 2000) {
+    if (typeof sessionId !== 'string' || typeof url !== 'string' || url.length > 5000) {
       return res.status(400).json(createErrorResponse('A valid sessionId and product URL are required'))
     }
     const session = await findSessionById(sessionId)

@@ -19,6 +19,7 @@ interface ShopItemModalProps {
     isKeyItem?: boolean
     allowMultiplePurchases?: boolean
     sourceUrl?: string
+    referenceUrl?: string
   }) => Promise<void>
 }
 
@@ -40,6 +41,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
   const [sourceUrl, setSourceUrl] = useState('')
   const [productPreview, setProductPreview] = useState<ProductMetadata | null>(null)
   const [isFetchingProduct, setIsFetchingProduct] = useState(false)
+  const [fallbackReferenceUrl, setFallbackReferenceUrl] = useState('')
   const emojiPickerRef = useRef<HTMLDivElement>(null)
   const emojiButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -57,6 +59,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
       setSourceUrl('')
       setProductPreview(null)
       setIsFetchingProduct(false)
+      setFallbackReferenceUrl('')
     }
   }, [isOpen])
 
@@ -134,7 +137,8 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
         image: image.trim() || undefined,
         isConsumable: itemType === 'consumable',
         isKeyItem: itemType === 'key',
-        allowMultiplePurchases: allowMultiplePurchases
+        allowMultiplePurchases,
+        referenceUrl: fallbackReferenceUrl || undefined,
       }
       
       await onSave(saveData)
@@ -157,6 +161,7 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
     setShowEmojiPicker(false)
     setSourceUrl('')
     setProductPreview(null)
+    setFallbackReferenceUrl('')
     onClose()
   }
 
@@ -178,8 +183,15 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
       const metadata = await shopService.previewProduct(sessionId, url)
       setProductPreview(metadata)
       setSourceUrl(metadata.sourceUrl)
+      setFallbackReferenceUrl('')
     } catch (fetchError) {
-      setError(fetchError instanceof Error ? fetchError.message : 'Could not read this product page')
+      const extractedUrl = sourceUrl.match(/https?:\/\/[^\s<>"']+/i)?.[0]
+        ?.replace(/[),.;!?]+$/, '') || ''
+      setFallbackReferenceUrl(extractedUrl)
+      setError(
+        (fetchError instanceof Error ? fetchError.message : 'Could not read this product page')
+        + (extractedUrl ? ' You can keep this link and enter the details manually.' : '')
+      )
     } finally {
       setIsFetchingProduct(false)
     }
@@ -219,19 +231,20 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
           {entryMode === 'link' && (
             <>
               <div className="form-group">
-                <label htmlFor="product-url">Amazon, Flipkart, Meesho, or product URL *</label>
+                <label htmlFor="product-url">Paste product link or full shared message *</label>
                 <div className="product-url-row">
                   <input
                     id="product-url"
-                    type="url"
+                    type="text"
                     value={sourceUrl}
                     onChange={event => {
                       setSourceUrl(event.target.value)
                       setProductPreview(null)
+                      setFallbackReferenceUrl('')
                     }}
                     className="form-input"
                     placeholder="https://www.amazon.in/..."
-                    maxLength={2000}
+                    maxLength={5000}
                     disabled={isSaving || isFetchingProduct}
                     required
                     autoFocus
@@ -262,11 +275,26 @@ const ShopItemModal: React.FC<ShopItemModalProps> = ({
                 Price and title are checked again when you add the item. Some retailers
                 block automated access; switch to Manual item if fetching is unavailable.
               </p>
+              {fallbackReferenceUrl && (
+                <button
+                  type="button"
+                  className="use-manual-link"
+                  onClick={() => setEntryMode('manual')}
+                >
+                  Keep link and enter details manually
+                </button>
+              )}
             </>
           )}
 
           {entryMode === 'manual' && (
             <>
+          {fallbackReferenceUrl && (
+            <p className="manual-link-saved">
+              🔗 Product link saved. Enter title and shard price manually; you can
+              retry live price refresh from the wishlist later.
+            </p>
+          )}
           <div className="form-group">
             <label htmlFor="item-title">Item Name *</label>
             <input

@@ -19,7 +19,7 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 - **Batch Claiming** - Claim all pending rewards at once with a single click
 
 ### 🔗 **Linked Wishlist Products**
-- **Retailer Links** - Add products from Amazon, Flipkart, Meesho, or another public product page
+- **Retailer Links & Share Text** - Paste a URL or the full text copied from Amazon, Flipkart, Meesho, or another shopping app
 - **Automatic Metadata** - Read title, image, current currency price, and retailer from JSON-LD/Open Graph metadata
 - **Shard Conversion** - Convert retailer price to shards with a visible server-controlled rate (default INR rate: ₹10 = 1 shard)
 - **Price Refresh** - Recheck a linked product and update its current price and shard cost
@@ -28,6 +28,10 @@ A **React TypeScript web application** inspired by the "Solo Leveling" anime/man
 Shard conversion rates can be overridden with `SHOP_SHARD_RATES`, using
 comma-separated `CURRENCY:RATE` pairs such as `INR:0.1,USD:8.5`. Linked products
 refresh their retailer price before purchase; the stored server price is authoritative.
+Amazon short links are expanded and parsed directly. Flipkart/Meesho share messages
+that include a title and price work even when the retailer blocks server access.
+Link-only blocked or sold-out pages preserve the URL and offer manual completion
+instead of inventing a price.
 
 ### 🛡️ **Guilds, Followers & Parties**
 - **Private Player Network** - Search identity-only results, send follow requests, and reveal limited progress profiles only after the recipient accepts

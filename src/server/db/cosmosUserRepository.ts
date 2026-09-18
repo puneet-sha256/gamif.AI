@@ -481,6 +481,7 @@ export class CosmosUserRepository implements IUserRepository {
       livePrice?: number
       priceFetchedAt?: string
       shardRate?: number
+      priceSource?: 'live' | 'manual'
     }
   ): Promise<boolean> {
     logger.info(`Adding shop item for user: ${userId}`)
@@ -509,6 +510,7 @@ export class CosmosUserRepository implements IUserRepository {
       livePrice: item.livePrice,
       priceFetchedAt: item.priceFetchedAt,
       shardRate: item.shardRate,
+      priceSource: item.priceSource,
     }
 
     shopDoc.shopItems.push(newItem)

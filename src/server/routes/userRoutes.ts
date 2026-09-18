@@ -35,7 +35,11 @@ import {
   updateStreakCache
 } from '../../utils/streakCalculation'
 import { applyFeedbackToRow } from '../utils/catalogFeedback'
-import { fetchProductMetadata } from '../services/productMetadataService'
+import {
+  extractProductUrl,
+  fetchProductMetadata,
+  productSourceName,
+} from '../services/productMetadataService'
 
 // Get current user by session
 export async function getCurrentUser(req: Request, res: Response) {
@@ -561,6 +565,7 @@ export async function addUserShopItem(req: Request, res: Response) {
       isKeyItem,
       allowMultiplePurchases,
       sourceUrl,
+      referenceUrl,
     } = req.body
 
     // Validate required fields
@@ -601,6 +606,12 @@ export async function addUserShopItem(req: Request, res: Response) {
         return res.status(422).json(createErrorResponse(message))
       }
     }
+    const manualReferenceUrl = !linkedMetadata && referenceUrl
+      ? extractProductUrl(referenceUrl)
+      : undefined
+    if (referenceUrl && !manualReferenceUrl) {
+      return res.status(400).json(createErrorResponse('Reference product URL is invalid'))
+    }
 
     const success = await addShopItem(user.id, {
       title: linkedMetadata?.title || String(title).trim(),
@@ -610,12 +621,14 @@ export async function addUserShopItem(req: Request, res: Response) {
       isConsumable,
       isKeyItem,
       allowMultiplePurchases,
-      sourceUrl: linkedMetadata?.sourceUrl,
-      sourceName: linkedMetadata?.sourceName,
+      sourceUrl: linkedMetadata?.sourceUrl || manualReferenceUrl,
+      sourceName: linkedMetadata?.sourceName
+        || (manualReferenceUrl ? productSourceName(manualReferenceUrl) : undefined),
       currency: linkedMetadata?.currency,
       livePrice: linkedMetadata?.price,
       priceFetchedAt: linkedMetadata?.fetchedAt,
       shardRate: linkedMetadata?.shardRate,
+      priceSource: linkedMetadata ? 'live' : manualReferenceUrl ? 'manual' : undefined,
     })
 
     if (!success) {
@@ -672,6 +685,7 @@ export async function refreshLinkedShopItem(req: Request, res: Response) {
       livePrice: metadata.price,
       priceFetchedAt: metadata.fetchedAt,
       shardRate: metadata.shardRate,
+      priceSource: 'live',
     })
     if (!success) return res.status(404).json(createErrorResponse('Wishlist item not found'))
     await updateSessionLastAccess(sessionId)
@@ -796,6 +810,34 @@ export async function buyUserShopItem(req: Request, res: Response) {
     const user = await findUserById(session.userId)
     if (!user) {
       return res.status(404).json(createErrorResponse(ErrorMessages.USER_NOT_FOUND))
+    }
+
+    const linkedItem = user.shopItems?.find(item => item.id === itemId)
+    if (linkedItem?.sourceUrl && linkedItem.priceSource === 'live') {
+      try {
+        const metadata = await fetchProductMetadata(linkedItem.sourceUrl)
+        const refreshed = await updateShopItem(user.id, linkedItem.id, {
+          title: metadata.title,
+          description: metadata.description || linkedItem.description,
+          image: metadata.imageUrl || linkedItem.image,
+          price: metadata.shardPrice,
+          sourceUrl: metadata.sourceUrl,
+          sourceName: metadata.sourceName,
+          currency: metadata.currency,
+          livePrice: metadata.price,
+          priceFetchedAt: metadata.fetchedAt,
+          shardRate: metadata.shardRate,
+          priceSource: 'live',
+        })
+        if (!refreshed) {
+          return res.status(404).json(createErrorResponse('Wishlist item not found'))
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Current product price could not be verified'
+        return res.status(422).json(createErrorResponse(
+          `Purchase paused because the current retailer price could not be verified: ${message}`
+        ))
+      }
     }
 
     // Buy the shop item (itemDetails is optional for built-in shop items)

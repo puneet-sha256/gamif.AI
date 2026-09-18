@@ -59,6 +59,7 @@ export interface IUserRepository {
       livePrice?: number
       priceFetchedAt?: string
       shardRate?: number
+      priceSource?: 'live' | 'manual'
     }
   ): Promise<boolean>
   deleteShopItem(userId: string, itemId: string): Promise<boolean>

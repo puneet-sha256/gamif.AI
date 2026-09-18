@@ -129,6 +129,7 @@ export async function addShopItem(
     livePrice?: number
     priceFetchedAt?: string
     shardRate?: number
+    priceSource?: 'live' | 'manual'
   }
 ): Promise<boolean> {
   return getUserRepository().addShopItem(userId, item)

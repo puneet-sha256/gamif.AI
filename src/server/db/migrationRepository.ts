@@ -174,6 +174,7 @@ export class MigratingUserRepository implements IUserRepository {
       livePrice?: number
       priceFetchedAt?: string
       shardRate?: number
+      priceSource?: 'live' | 'manual'
     }
   ): Promise<boolean> {
     await this.findById(userId)
