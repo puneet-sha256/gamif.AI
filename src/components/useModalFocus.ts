@@ -12,7 +12,13 @@ export function useModalFocus(
 
   useEffect(() => {
     if (!isOpen) return
-    const opener = document.activeElement as HTMLElement | null
+    const activeElement = document.activeElement as HTMLElement | null
+    const fallbackTrigger = document.getElementById('account-menu-trigger')
+    const opener = activeElement?.closest('.account-menu__popover')
+      ? fallbackTrigger
+      : activeElement && activeElement !== document.body
+      ? activeElement
+      : fallbackTrigger
     const background = document.querySelectorAll<HTMLElement>(
       '.dashboard-header, .dashboard-navigation, .dashboard-content'
     )

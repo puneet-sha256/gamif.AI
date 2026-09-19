@@ -64,8 +64,8 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
         <div className="profile-setup-card">
           <div className="setup-header">
             <div className="setup-logo">
-              <h1>PLAYER REGISTRATION</h1>
-              <div className="subtitle">Complete Your Profile</div>
+              <h1>PROFILE SETUP</h1>
+              <div className="subtitle">Tell us who you are</div>
             </div>
             <div className="progress-indicator">
               <div className="progress-bar">
@@ -86,14 +86,14 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
               <h3>Personal Information</h3>
 
               <div className="input-group">
-                <label htmlFor="name">Player Name</label>
+                <label htmlFor="name">Display name</label>
                 <input
                   type="text"
                   id="name"
                   name="name"
                   value={name}
                   onChange={(e) => { setName(e.target.value); if (error) setError('') }}
-                  placeholder="Enter your player name"
+                  placeholder="How should we address you?"
                   required
                   minLength={2}
                   maxLength={50}
@@ -130,7 +130,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
               {isSubmitting ? (
                 <span className="loading-spinner"></span>
               ) : (
-                'Continue to Goals Setup'
+                'Continue to goals'
               )}
             </button>
           </form>

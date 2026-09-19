@@ -113,6 +113,15 @@
   padding: 16px 16px 12px;
 }
 
+.onboarding-tour__card--mobile-top {
+  top: calc(env(safe-area-inset-top, 0px) + 76px);
+  bottom: auto;
+}
+
+.onboarding-tour__card--mobile-bottom {
+  top: auto;
+}
+
 .onboarding-tour__card--mobile::before {
   display: none;
 }
@@ -312,6 +321,11 @@
     bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
     padding: 14px 14px 10px;
     border-radius: 14px;
+  }
+
+  .onboarding-tour__card--mobile-top {
+    top: calc(env(safe-area-inset-top, 0px) + 68px);
+    bottom: auto;
   }
 
   .onboarding-tour__title {

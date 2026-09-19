@@ -2,7 +2,6 @@ import './Dashboard.css'
 import { useAuth } from '../contexts/AuthContext'
 import { useAlert } from '../contexts/AlertContext'
 import { useConfirm } from '../contexts/ConfirmContext'
-import ThemeToggle from './ThemeToggle'
 import { useCallback, useEffect, useState } from 'react'
 import StatCard from './StatCard'
 import TaskItem from './TaskItem'
@@ -22,6 +21,8 @@ import JourneyHub from './JourneyHub'
 import CommunityHub from './CommunityHub'
 import FeedbackModal from './FeedbackModal'
 import FollowRequestsModal from './FollowRequestsModal'
+import SystemIcon from './SystemIcon'
+import AccountMenu from './AccountMenu'
 import { ONBOARDING_TOUR_STEPS } from './onboardingTourSteps'
 import { communityService, type CommunityState } from '../client/services/communityService'
 import {
@@ -798,16 +799,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const renderProfileTab = () => (
     <div className="tab-content">
       <div className="profile-overview">
-        <h2>Player Profile</h2>
-        <p>Your journey in the development realm continues...</p>
-        <button
-          type="button"
-          className="tour-relaunch-link"
-          onClick={relaunchTour}
-          aria-label="Replay the onboarding tour"
-        >
-          <span aria-hidden="true">🧭</span> Show tour
-        </button>
+        <p className="section-eyebrow">PERSONAL COMMAND CENTER</p>
+        <h2>Progress overview</h2>
+        <p>Your growth, consistency, and recent activity at a glance.</p>
       </div>
       
       <div className="profile-content">
@@ -860,7 +854,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
           {/* Streak Multipliers Section */}
           <div className="streak-multipliers-section" data-tour="streak-multipliers">
-            <h3 className="streak-section-title">🔥 Streak Multipliers</h3>
+            <h3 className="streak-section-title">Streak multipliers</h3>
             <div className="streak-cards">
               {(() => {
                 // Calculate display streaks (consecutive days with any XP) and multiplier streaks (10+ XP)
@@ -1093,7 +1087,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           
           <div className="no-tasks-message">
             <div className="no-tasks-content">
-              <h3>🎯 No Tasks Generated Yet</h3>
+              <h3>No tasks generated yet</h3>
               <p>Complete your profile and goals setup to get personalized daily tasks!</p>
               <button 
                 onClick={() => refreshUserTasks()}
@@ -1106,7 +1100,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                     Thinking...
                   </>
                 ) : (
-                  <>🔄 Refresh Tasks</>
+                  <>Refresh tasks</>
                 )}
               </button>
             </div>
@@ -1124,7 +1118,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         <div className="tasks-header" data-tour="tasks-tab">
           <div className="tasks-header-content">
             <h2>Tasks</h2>
-            <p>Complete your personalized AI-generated tasks to earn experience and shards</p>
+            <p>Focused actions generated from your goals. Complete the work, then log what actually happened.</p>
           </div>
           <div className="tasks-header-actions">
             <button
@@ -1132,7 +1126,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               onClick={() => setShowDailyInput(true)}
               data-tour="log-activity-btn"
             >
-              <span className="btn-icon">🤖</span>
               <span className="btn-text">Log Daily Activities</span>
             </button>
             <button
@@ -1142,7 +1135,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               }}
               className="add-task-btn"
             >
-              ➕ Add Task
+              Add task
             </button>
           </div>
         </div>
@@ -1151,7 +1144,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           {/* Strength Tasks */}
           {groupedTasks.Strength.length > 0 && (
             <div className="task-section">
-              <h3>{TASK_CATEGORIES.Strength.icon} Strength Tasks</h3>
+              <h3>Strength tasks</h3>
               <div className="task-list">
                 {groupedTasks.Strength.map((task: MappedTaskItem) => (
                   <TaskItem
@@ -1175,7 +1168,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           {/* Intelligence Tasks */}
           {groupedTasks.Intelligence.length > 0 && (
             <div className="task-section">
-              <h3>{TASK_CATEGORIES.Intelligence.icon} Intelligence Tasks</h3>
+              <h3>Intelligence tasks</h3>
               <div className="task-list">
                 {groupedTasks.Intelligence.map((task: MappedTaskItem) => (
                   <TaskItem
@@ -1199,7 +1192,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           {/* Charisma Tasks */}
           {groupedTasks.Charisma.length > 0 && (
             <div className="task-section">
-              <h3>{TASK_CATEGORIES.Charisma.icon} Charisma Tasks</h3>
+              <h3>Charisma tasks</h3>
               <div className="task-list">
                 {groupedTasks.Charisma.map((task: MappedTaskItem) => (
                   <TaskItem
@@ -1252,7 +1245,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         <div className="shop-header" data-tour="shop-tab">
           <div className="shop-header-content">
             <h2>Shop</h2>
-            <p>Spend your shards on rewards and upgrades</p>
+            <p>A deliberate reward list funded by the consistency you build.</p>
           </div>
           <div className="shop-header-actions">
             <div className="currency-display">
@@ -1262,7 +1255,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               onClick={() => setShowShopItemModal(true)}
               className="add-task-btn"
             >
-              ➕ Add Item
+              Add item
             </button>
           </div>
         </div>
@@ -1271,7 +1264,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           {/* User's Custom Items */}
           {userShopItems.length > 0 ? (
             <div className="shop-section">
-              <h3>🎯 My Wish List</h3>
+              <h3>My wishlist</h3>
               <div className="shop-items">
                 {userShopItems.map((item) => (
                   <ShopItem
@@ -1299,8 +1292,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           ) : (
             <div className="no-tasks-message">
               <div className="no-tasks-content">
-                <h3>🛒 Your Shop is Empty</h3>
-                <p>Click the "➕ Add Item" button above to add items to your wish list!</p>
+                <h3>Your wishlist is empty</h3>
+                <p>Add a deliberate reward manually or paste a product link to get started.</p>
               </div>
             </div>
           )}
@@ -1502,23 +1495,19 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           <div className="subtitle">Life Operating System</div>
         </div>
         <div className="user-info">
-          {profileData && (
-            <span className="welcome-text">Welcome, {profileData.name}!</span>
-          )}
           <button
             className={`unclaimed-rewards-button ${user?.unclaimedRewards && user.unclaimedRewards.activities.length > 0 ? 'has-rewards' : ''}`}
             onClick={() => setShowRewardClaimModal(true)}
             data-tour="unclaimed-rewards"
+            aria-label={`Unclaimed Rewards, ${user?.unclaimedRewards?.activities.length || 0} pending`}
+            title="Unclaimed Rewards"
           >
-            <span className="reward-icon">🎁</span>
+            <span className="reward-icon"><SystemIcon name="rewards" size={17} /></span>
             <span className="reward-text">Unclaimed Rewards</span>
             {user?.unclaimedRewards && user.unclaimedRewards.activities.length > 0 && (
               <span className="reward-badge">{user.unclaimedRewards.activities.length}</span>
             )}
           </button>
-          <span data-tour="theme-toggle" className="theme-toggle-anchor">
-            <ThemeToggle />
-          </span>
           {(userLevel >= 10 || communityState.receivedFollowRequests.length > 0) && (
             <button
               type="button"
@@ -1527,7 +1516,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               aria-label={`Guild notifications, ${communityState.receivedFollowRequests.length} pending`}
               title="Guild notifications"
             >
-              <span aria-hidden="true">🔔</span>
+              <span aria-hidden="true"><SystemIcon name="notifications" size={17} /></span>
               {communityState.receivedFollowRequests.length > 0 && (
                 <span className="guild-notification-count">
                   {communityState.receivedFollowRequests.length}
@@ -1535,19 +1524,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               )}
             </button>
           )}
-          <button
-            type="button"
-            className="feedback-button"
-            onClick={() => setShowFeedback(true)}
-            title="Report a bug or request a feature"
-            aria-label="Feedback"
-          >
-            <span aria-hidden="true">💬</span>
-            <span className="feedback-button-text">Feedback</span>
-          </button>
-          <button className="logout-button" onClick={handleLogout}>
-            Logout
-          </button>
+          <AccountMenu
+            name={profileData?.name || user.username}
+            username={user.username}
+            onFeedback={() => setShowFeedback(true)}
+            onReplayTour={relaunchTour}
+            onLogout={handleLogout}
+          />
         </div>
       </div>
       
@@ -1557,35 +1540,35 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             className={`nav-tab ${activeTab === 'profile' ? 'active' : ''}`}
             onClick={() => setActiveTab('profile')}
           >
-            <span className="tab-icon">👤</span>
+            <span className="tab-icon"><SystemIcon name="profile" /></span>
             Profile
           </button>
           <button 
             className={`nav-tab ${activeTab === 'tasks' ? 'active' : ''}`}
             onClick={() => setActiveTab('tasks')}
           >
-            <span className="tab-icon">📋</span>
+            <span className="tab-icon"><SystemIcon name="tasks" /></span>
             Tasks
           </button>
           <button 
             className={`nav-tab ${activeTab === 'inventory' ? 'active' : ''}`}
             onClick={() => setActiveTab('inventory')}
           >
-            <span className="tab-icon">🎒</span>
+            <span className="tab-icon"><SystemIcon name="inventory" /></span>
             Inventory
           </button>
           <button 
             className={`nav-tab ${activeTab === 'shop' ? 'active' : ''}`}
             onClick={() => setActiveTab('shop')}
           >
-            <span className="tab-icon">🛒</span>
+            <span className="tab-icon"><SystemIcon name="shop" /></span>
             Shop
           </button>
           <button
             className={`nav-tab ${activeTab === 'journey' ? 'active' : ''}`}
             onClick={() => setActiveTab('journey')}
           >
-            <span className="tab-icon">🏆</span>
+            <span className="tab-icon"><SystemIcon name="journey" /></span>
             Journey
           </button>
           <button
@@ -1594,7 +1577,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             aria-label={`Guild${userLevel < 10 ? ', unlocks at Level 10' : ''}`}
           >
             <span className="tab-icon">
-              {userLevel < 10 ? '🔒' : '🛡️'}
+              <SystemIcon name="guild" />
             </span>
             Guild
           </button>

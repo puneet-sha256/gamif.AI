@@ -8,6 +8,11 @@ import {
 } from './fixtures'
 
 test.describe('Feedback flows', () => {
+  async function openFeedback(page: import('@playwright/test').Page) {
+    await page.getByRole('button', { name: 'Open account menu' }).click()
+    await page.getByRole('menuitem', { name: /Send feedback/ }).click()
+  }
+
   test.beforeEach(() => {
     seedDefaultAppUser(AUTH_USER, {
       profileData: {
@@ -36,7 +41,7 @@ test.describe('Feedback flows', () => {
 
     await suppressTour(page, AUTH_USER.id)
     await loginAs(page, AUTH_USER)
-    await page.getByRole('button', { name: 'Feedback' }).click()
+    await openFeedback(page)
 
     await expect(page.getByRole('heading', {
       name: 'Report a bug or request a feature',
@@ -93,11 +98,11 @@ test.describe('Feedback flows', () => {
 
     await suppressTour(page, AUTH_USER.id)
     await loginAs(page, AUTH_USER)
-    await page.getByRole('button', { name: 'Feedback' }).click()
+    await openFeedback(page)
     await page.keyboard.press('Escape')
     await expect(page.getByRole('dialog')).toHaveCount(0)
-    await expect(page.getByRole('button', { name: 'Feedback' })).toBeFocused()
-    await page.getByRole('button', { name: 'Feedback' }).click()
+    await expect(page.getByRole('button', { name: 'Open account menu' })).toBeFocused()
+    await openFeedback(page)
     await page.getByRole('button', { name: '✨ Feature request' }).click()
 
     await expect(page.getByLabel('Severity *')).toHaveCount(0)

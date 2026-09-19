@@ -106,6 +106,168 @@ test.describe('First-time user onboarding tour', () => {
     await expect(page.locator('[data-tour="guild-hub"]')).toBeVisible()
   })
 
+  test('keeps the highlighted navigation visible and renders SVG tab icons', async ({ page }) => {
+    await expect(page.locator('.nav-tab svg')).toHaveCount(6)
+
+    const card = page.getByRole('dialog')
+    for (let step = 2; step <= 5; step++) {
+      await page.getByRole('button', { name: 'Next' }).click()
+      await expect(card).toContainText(`Step ${step} of ${TOUR_TOTAL_STEPS}`)
+    }
+
+    await expect(page.locator('[data-tour="tab-nav"]')).toBeVisible()
+    await expect.poll(async () => {
+      const ringBox = await page.locator('.onboarding-tour__ring').boundingBox()
+      const navigationBox = await page.locator('[data-tour="tab-nav"]').boundingBox()
+      if (!ringBox || !navigationBox) return false
+      return (
+        Math.abs(ringBox.x - Math.max(0, navigationBox.x - 8)) < 2
+        && Math.abs(ringBox.y - Math.max(0, navigationBox.y - 8)) < 2
+        && Math.abs(ringBox.width - (navigationBox.width + 16)) < 2
+      )
+    }).toBe(true)
+
+    const viewport = page.viewportSize()
+    if (viewport && viewport.width < 768) {
+      const cardBox = await card.boundingBox()
+      const navigationBox = await page.locator('[data-tour="tab-nav"]').boundingBox()
+      expect(cardBox).not.toBeNull()
+      expect(navigationBox).not.toBeNull()
+
+      const overlaps = !(
+        cardBox!.x + cardBox!.width <= navigationBox!.x
+        || navigationBox!.x + navigationBox!.width <= cardBox!.x
+        || cardBox!.y + cardBox!.height <= navigationBox!.y
+        || navigationBox!.y + navigationBox!.height <= cardBox!.y
+      )
+      expect(overlaps).toBe(false)
+      expect(cardBox!.y).toBeLessThan(navigationBox!.y)
+    }
+  })
+
+  test('fits all navigation and header actions at 320px', async ({ page }) => {
+    await page.getByRole('button', { name: 'Skip tour' }).click()
+    await page.setViewportSize({ width: 320, height: 720 })
+
+    const viewportWidth = await page.evaluate(() => window.innerWidth)
+    const tabs = page.locator('.nav-tab')
+    await expect(tabs).toHaveCount(6)
+    for (let index = 0; index < 6; index++) {
+      const box = await tabs.nth(index).boundingBox()
+      expect(box).not.toBeNull()
+      expect(box!.x).toBeGreaterThanOrEqual(0)
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewportWidth)
+      await expect(tabs.nth(index).locator('svg')).toBeVisible()
+    }
+
+    for (const buttonName of [
+      /Unclaimed Rewards/,
+      /Guild notifications/,
+      'Open account menu',
+    ]) {
+      const button = page.getByRole('button', { name: buttonName })
+      if (await button.count()) {
+        const box = await button.boundingBox()
+        expect(box).not.toBeNull()
+        expect(box!.x).toBeGreaterThanOrEqual(0)
+        expect(box!.x + box!.width).toBeLessThanOrEqual(viewportWidth)
+      }
+    }
+
+    const headerControls = [
+      page.getByRole('button', { name: /Unclaimed Rewards/ }),
+      page.getByRole('button', { name: /Guild notifications/ }),
+      page.getByRole('button', { name: 'Open account menu' }),
+    ]
+    const visibleControlBoxes = []
+    for (const control of headerControls) {
+      if (await control.count()) {
+        const box = await control.boundingBox()
+        if (box) visibleControlBoxes.push(box)
+      }
+    }
+    const firstControl = visibleControlBoxes[0]
+    for (const box of visibleControlBoxes.slice(1)) {
+      expect(Math.abs(box.y - firstControl.y)).toBeLessThanOrEqual(1)
+      expect(Math.abs(box.height - firstControl.height)).toBeLessThanOrEqual(1)
+    }
+    for (const control of headerControls.slice(0, 2)) {
+      if (await control.count()) {
+        const buttonBox = await control.boundingBox()
+        const iconBox = await control.locator('svg').boundingBox()
+        expect(buttonBox).not.toBeNull()
+        expect(iconBox).not.toBeNull()
+        const buttonCenterY = buttonBox!.y + buttonBox!.height / 2
+        const iconCenterY = iconBox!.y + iconBox!.height / 2
+        expect(Math.abs(iconCenterY - buttonCenterY)).toBeLessThanOrEqual(1)
+      }
+    }
+    const avatarBox = await page.locator('.account-menu__avatar').boundingBox()
+    const accountButtonBox = await page.getByRole('button', { name: 'Open account menu' }).boundingBox()
+    expect(avatarBox).not.toBeNull()
+    expect(accountButtonBox).not.toBeNull()
+    expect(Math.abs(avatarBox!.y - accountButtonBox!.y)).toBeLessThanOrEqual(1)
+    expect(Math.abs(avatarBox!.height - accountButtonBox!.height)).toBeLessThanOrEqual(1)
+
+    await page.getByRole('button', { name: 'Open account menu' }).click()
+    const menuAvatar = page.locator('.account-menu__identity > .account-menu__avatar')
+    await expect(menuAvatar).toBeVisible()
+    const menuAvatarStyles = await menuAvatar.evaluate(element => {
+      const styles = window.getComputedStyle(element)
+      return {
+        display: styles.display,
+        marginTop: styles.marginTop,
+        fontSize: Number.parseFloat(styles.fontSize),
+        color: styles.color,
+      }
+    })
+    expect(menuAvatarStyles.display).toBe('grid')
+    expect(menuAvatarStyles.marginTop).toBe('0px')
+    expect(menuAvatarStyles.fontSize).toBeGreaterThan(0)
+    expect(menuAvatarStyles.color).toBe('rgb(255, 255, 255)')
+    await page.getByRole('button', { name: 'Open account menu' }).click()
+
+    const badges = page.locator('.reward-badge, .guild-notification-count')
+    for (let index = 0; index < await badges.count(); index++) {
+      const badgeBox = await badges.nth(index).boundingBox()
+      const buttonBox = await badges.nth(index).locator('xpath=..').boundingBox()
+      expect(badgeBox).not.toBeNull()
+      expect(buttonBox).not.toBeNull()
+      expect(badgeBox!.x).toBeGreaterThanOrEqual(buttonBox!.x)
+      expect(badgeBox!.y).toBeGreaterThanOrEqual(buttonBox!.y)
+      expect(badgeBox!.x + badgeBox!.width).toBeLessThanOrEqual(buttonBox!.x + buttonBox!.width)
+      expect(badgeBox!.y + badgeBox!.height).toBeLessThanOrEqual(buttonBox!.y + buttonBox!.height)
+    }
+
+    await page.getByRole('button', { name: /Unclaimed Rewards/ }).click()
+    const rewardModal = page.locator('.reward-modal-content')
+    await expect(rewardModal).toBeVisible()
+    const modalBox = await rewardModal.boundingBox()
+    const viewportHeight = await page.evaluate(() => window.innerHeight)
+    expect(modalBox).not.toBeNull()
+    expect(modalBox!.x).toBeGreaterThanOrEqual(16)
+    expect(modalBox!.y).toBeGreaterThanOrEqual(16)
+    expect(modalBox!.x + modalBox!.width).toBeLessThanOrEqual(viewportWidth - 16)
+    expect(modalBox!.y + modalBox!.height).toBeLessThanOrEqual(viewportHeight - 16)
+
+    await page.getByRole('button', { name: 'Close unclaimed rewards' }).click()
+    await page.locator('.nav-tab').filter({ hasText: 'Tasks' }).click()
+    const taskHeaderPadding = await page.locator('.tasks-header').evaluate(element => {
+      const styles = window.getComputedStyle(element)
+      return {
+        top: Number.parseFloat(styles.paddingTop),
+        right: Number.parseFloat(styles.paddingRight),
+        bottom: Number.parseFloat(styles.paddingBottom),
+        left: Number.parseFloat(styles.paddingLeft),
+      }
+    })
+    for (const padding of Object.values(taskHeaderPadding)) {
+      expect(padding).toBeGreaterThanOrEqual(16)
+    }
+
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewportWidth)
+  })
+
   test('skip button dismisses tour and persists completion', async ({ page }) => {
     const card = page.getByRole('dialog')
     await expect(card).toBeVisible({ timeout: 10_000 })
@@ -148,8 +310,9 @@ test.describe('First-time user onboarding tour', () => {
     await page.getByRole('button', { name: 'Skip tour' }).click()
     await expect(page.getByRole('dialog')).toBeHidden()
 
-    // Click the "Show tour" relaunch link from the Profile tab
-    await page.getByRole('button', { name: /Replay the onboarding tour/i }).click()
+    // Reopen the guide from the account menu
+    await page.getByRole('button', { name: 'Open account menu' }).click()
+    await page.getByRole('menuitem', { name: /Replay the onboarding tour/i }).click()
 
     const card = page.getByRole('dialog')
     await expect(card).toBeVisible()

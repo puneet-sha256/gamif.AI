@@ -217,6 +217,24 @@ test.describe('Daily activity analysis flow', () => {
 
     await page.getByRole('button', { name: 'Claim All Rewards' }).click()
 
+    const successAlert = page.locator('.alert-container.success')
+    await expect(successAlert).toBeVisible()
+    const alertAppearance = await successAlert.evaluate(element => {
+      const probe = document.createElement('div')
+      probe.style.background = getComputedStyle(document.documentElement)
+        .getPropertyValue('--bg-elevated')
+      document.body.appendChild(probe)
+      const expectedBackground = getComputedStyle(probe).backgroundColor
+      probe.remove()
+      const styles = getComputedStyle(element)
+      return {
+        hasOpaqueSurface: styles.backgroundColor === expectedBackground,
+        opacity: styles.opacity,
+      }
+    })
+    expect(alertAppearance.hasOpaqueSurface).toBe(true)
+    expect(alertAppearance.opacity).toBe('1')
+
     await expect(page.locator('.reward-badge')).toHaveCount(0, { timeout: 15_000 })
     if (await page.locator('.alert-close').isVisible().catch(() => false)) {
       await page.locator('.alert-close').click()

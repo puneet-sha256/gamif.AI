@@ -463,6 +463,21 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
       </div>
 
       <div className="auth-content">
+        <aside className="auth-intro" aria-label="About Gamif.AI">
+          <div className="auth-intro-mark">G/A</div>
+          <p className="auth-eyebrow">PERSONAL OPERATING SYSTEM</p>
+          <h2>Build discipline.<br />Measure progress.</h2>
+          <p className="auth-intro-copy">
+            Turn deliberate real-world action into a clear progression system,
+            without losing sight of what the work is for.
+          </p>
+          <ul>
+            <li><span>01</span> AI-generated actions grounded in your goals</li>
+            <li><span>02</span> Evidence-based XP, streaks, and analytics</li>
+            <li><span>03</span> Rewards and accountability you control</li>
+          </ul>
+          <p className="auth-intro-note">Private by default · Designed for consistency</p>
+        </aside>
         <div className="auth-card">
           <div className="auth-header">
             <div className="solo-leveling-logo">

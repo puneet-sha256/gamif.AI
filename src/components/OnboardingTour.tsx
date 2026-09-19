@@ -140,6 +140,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({
     if (!isOpen) return
     let frame1 = 0
     let frame2 = 0
+    measureAnchor()
     frame1 = requestAnimationFrame(() => {
       frame2 = requestAnimationFrame(measureAnchor)
     })
@@ -238,6 +239,9 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({
   const cardStyle = isMobile
     ? undefined
     : { top: `${cardPos.top}px`, left: `${cardPos.left}px` }
+  const mobileDock = anchorRect && anchorRect.top > window.innerHeight * 0.52
+    ? 'top'
+    : 'bottom'
 
   return (
     <div className="onboarding-tour" role="presentation">
@@ -291,7 +295,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({
         ref={cardRef}
         className={`onboarding-tour__card onboarding-tour__card--${
           isMobile ? 'mobile' : cardPos.placement
-        }`}
+        } ${isMobile ? `onboarding-tour__card--mobile-${mobileDock}` : ''}`}
         style={cardStyle}
         role="dialog"
         aria-modal="true"

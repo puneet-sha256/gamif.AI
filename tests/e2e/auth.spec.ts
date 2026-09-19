@@ -179,7 +179,8 @@ test.describe('Authentication flows', () => {
     await loginAs(page, AUTH_USER)
     await expect(page.locator('.dashboard-container')).toBeVisible()
 
-    await page.getByRole('button', { name: 'Logout' }).click()
+    await page.getByRole('button', { name: 'Open account menu' }).click()
+    await page.getByRole('menuitem', { name: /Log out/ }).click()
 
     await expect(page.locator('input#email')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Enter System' })).toBeVisible()
