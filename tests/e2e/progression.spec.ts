@@ -276,7 +276,10 @@ test.describe('Journey and Guild flows', () => {
     expect(acceptFollowResponse.ok()).toBeTruthy()
 
     await page.locator('#party-name').fill('Night Raiders')
-    await page.getByRole('button', { name: 'Create', exact: true }).click()
+    const createPartyButton = page.getByRole('button', { name: 'Create', exact: true })
+    await expect(createPartyButton).toBeVisible()
+    await expect(createPartyButton).toBeEnabled()
+    await page.locator('#party-name').press('Enter')
     await expect(page.getByRole('heading', { name: 'Night Raiders' })).toBeVisible()
 
     await page.locator('#party-invite-username').fill(ALLY.username)
