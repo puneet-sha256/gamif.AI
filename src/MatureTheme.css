@@ -1294,7 +1294,7 @@ button {
 
   .dashboard-content {
     width: auto;
-    padding: 24px 16px 30px;
+    padding: 24px 16px calc(92px + env(safe-area-inset-bottom));
   }
 
   .profile-overview,
