@@ -84,8 +84,8 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
         <div className="goals-setup-card">
           <div className="setup-header">
             <div className="setup-logo">
-              <h1>ATTRIBUTE GOALS</h1>
-              <div className="subtitle">Define Your Development Objectives</div>
+              <h1>GOAL SETUP</h1>
+              <div className="subtitle">Describe what you want to change</div>
             </div>
             <div className="progress-indicator">
               <div className="progress-bar">
@@ -96,7 +96,7 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
           </div>
 
           <div className="goals-description">
-            <p>Describe your specific goals for each attribute. Our AI system will create personalized tasks to help you achieve these objectives.</p>
+            <p>Give us one clear view of the outcomes you want. We use this context to propose practical actions across health, learning, work, and relationships.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="goals-form">
@@ -108,7 +108,6 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
             
             {taskGenerationStatus && (
               <div className="status-message">
-                <div className="status-icon">🤖</div>
                 <div className="status-text">{taskGenerationStatus}</div>
               </div>
             )}
@@ -116,28 +115,20 @@ const GoalsSetup: React.FC<GoalsSetupProps> = ({ onComplete, onBack }) => {
             <div className="goals-section">
               <div className="goals-group">
                 <div className="goals-header">
-                  <div className="goals-icon">🎯</div>
                   <div className="goals-info">
-                    <h3>Long-Term Goals</h3>
-                    <p>Describe your comprehensive development objectives across all areas of life</p>
+                    <h3>Your long-term direction</h3>
+                    <p>Be specific about outcomes, constraints, and why each change matters to you.</p>
                   </div>
+                </div>
+                <div className="goal-prompts" aria-label="Goal areas to consider">
+                  <span>Health & energy</span>
+                  <span>Learning & craft</span>
+                  <span>Career & projects</span>
+                  <span>Relationships & communication</span>
                 </div>
                 <div className="goal-input-container">
                   <textarea
-                    placeholder="Describe your long-term goals in detail. Feel free to use bullet points to organize your thoughts. Consider areas like:
-• Physical fitness and health
-• Learning and skill development
-• Career and professional growth
-• Social and interpersonal skills
-• Personal projects and hobbies
-• Financial objectives
-• Mental and emotional well-being
-
-Example: 
-• Build muscle mass and improve cardiovascular health through consistent gym routine
-• Learn JavaScript and Python to advance my programming career
-• Develop better communication skills for leadership roles
-• Start a side business in digital marketing"
+                    placeholder="Example: Build a sustainable strength routine three days a week; deepen my TypeScript skills through deliberate projects; and become more confident presenting ideas to groups."
                     value={formData.longTermGoals}
                     onChange={(e) => handleTextChange(e.target.value)}
                     className="goal-textarea"
@@ -171,10 +162,10 @@ Example:
                 {isSubmitting ? (
                   <div className="loading-content">
                     <span className="loading-spinner"></span>
-                    <span>Generating AI Tasks...</span>
+                    <span>Preparing personalisation...</span>
                   </div>
                 ) : (
-                  'Complete Setup & Generate Tasks'
+                  'Continue to personalisation'
                 )}
               </button>
             </div>

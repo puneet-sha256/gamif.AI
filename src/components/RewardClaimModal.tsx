@@ -133,6 +133,7 @@ const RewardClaimModal: React.FC<RewardClaimModalProps> = ({
             className="reward-modal-close"
             onClick={onClose}
             disabled={isClaiming || claimingIndex !== null}
+            aria-label="Close unclaimed rewards"
           >
             ✕
           </button>

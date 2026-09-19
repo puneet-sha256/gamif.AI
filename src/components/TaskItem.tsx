@@ -91,7 +91,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
               onClick={handleComplete}
               title="Complete task"
             >
-              ✓
+              Done
             </button>
           )}
           {onEdit && (
@@ -100,7 +100,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
               onClick={handleEdit}
               title="Edit task"
             >
-              ✏️
+              Edit
             </button>
           )}
           {onDelete && (
@@ -109,7 +109,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
               onClick={handleDelete}
               title="Delete task"
             >
-              🗑️
+              Delete
             </button>
           )}
         </div>

@@ -41,8 +41,13 @@ export const ONBOARDING_TOUR_STEPS: TourStep[] = [
   {
     key: 'theme-toggle',
     tab: 'profile',
-    title: 'Theme toggle',
-    body: <>Switch between light and dark themes. Your choice persists across sessions.</>,
+    title: 'Account & preferences',
+    body: (
+      <>
+        Open your profile menu for appearance, feedback, this guide, and a clear
+        sign-out action. Your theme choice persists across sessions.
+      </>
+    ),
   },
   {
     key: 'tab-nav',

@@ -60,7 +60,7 @@ test.describe('Shop and inventory flows', () => {
     await page.locator('.confirm-container .confirm-btn-primary').click()
 
     await expect(page.getByText('35.00 💎 Shards')).toBeVisible({ timeout: 15_000 })
-    await expect(page.getByText('Your Shop is Empty')).toBeVisible()
+    await expect(page.getByText('Your wishlist is empty')).toBeVisible()
     if (await page.locator('.alert-close').isVisible().catch(() => false)) {
       await page.locator('.alert-close').click()
     }
@@ -116,7 +116,7 @@ test.describe('Shop and inventory flows', () => {
     await suppressTour(page, SHOP_USER.id)
     await loginAs(page, SHOP_USER)
     await page.getByRole('button', { name: /Shop/ }).click()
-    await page.getByRole('button', { name: '➕ Add Item' }).click()
+    await page.getByRole('button', { name: 'Add item' }).click()
 
     await page.getByLabel('Paste product link or full shared message *').fill([
       'Noise Cancelling Headphones',
@@ -204,7 +204,7 @@ test.describe('Shop and inventory flows', () => {
     await suppressTour(page, SHOP_USER.id)
     await loginAs(page, SHOP_USER)
     await page.getByRole('button', { name: /Shop/ }).click()
-    await page.getByRole('button', { name: '➕ Add Item' }).click()
+    await page.getByRole('button', { name: 'Add item' }).click()
     await page.getByRole('button', { name: '✍️ Manual item' }).click()
     await expect(page.getByLabel('Item Name *')).toBeVisible()
     await expect(page.getByLabel('Price (Shards) *')).toBeVisible()
@@ -246,7 +246,7 @@ test.describe('Shop and inventory flows', () => {
     await suppressTour(page, SHOP_USER.id)
     await loginAs(page, SHOP_USER)
     await page.getByRole('button', { name: /Shop/ }).click()
-    await page.getByRole('button', { name: '➕ Add Item' }).click()
+    await page.getByRole('button', { name: 'Add item' }).click()
     await page.getByLabel('Paste product link or full shared message *').fill(
       'https://www.meesho.com/s/p/h9jvva?utm_source=share_example'
     )
@@ -261,7 +261,7 @@ test.describe('Shop and inventory flows', () => {
     await expect(page.getByText('₹420 × 0.1 = 42.00 💎 shards')).toBeVisible()
     await page.getByRole('button', { name: 'Add Item', exact: true }).click()
 
-    expect(submittedBody).toMatchObject({
+    await expect.poll(() => submittedBody).toMatchObject({
       title: 'Blocked Meesho Product',
       price: 42,
       referenceUrl: 'https://www.meesho.com/s/p/h9jvva?utm_source=share_example',

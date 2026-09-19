@@ -52,12 +52,18 @@ const Alert: React.FC<AlertProps> = ({ message, type = 'info', onClose, duration
 
   return (
     <div className={`alert-overlay ${isVisible ? 'visible' : ''}`} onClick={handleClose}>
-      <div className={`alert-container ${type} ${isVisible ? 'visible' : ''}`} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`alert-container ${type} ${isVisible ? 'visible' : ''}`}
+        onClick={(e) => e.stopPropagation()}
+        role="alertdialog"
+        aria-modal="true"
+        aria-describedby="alert-message"
+      >
         <div className="alert-icon">
           {getIcon()}
         </div>
         <div className="alert-content">
-          <p className="alert-message">{message}</p>
+          <p id="alert-message" className="alert-message">{message}</p>
         </div>
         <button className="alert-close" onClick={handleClose} aria-label="Close">
           ✕

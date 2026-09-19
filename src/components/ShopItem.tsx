@@ -110,7 +110,7 @@ const ShopItem: React.FC<ShopItemProps> = ({
             onClick={onDelete}
             title="Delete item"
           >
-            🗑️
+            Remove
           </button>
         )}
         {sourceUrl && onRefreshPrice && (

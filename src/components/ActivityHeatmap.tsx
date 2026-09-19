@@ -218,21 +218,21 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ activityHistory, onCe
           onClick={() => setSelectedCategory('Strength')}
           style={{ '--filter-color': CATEGORY_COLORS.Strength } as React.CSSProperties}
         >
-          💪 Strength
+          Strength
         </button>
         <button
           className={`filter-btn ${selectedCategory === 'Intelligence' ? 'active' : ''}`}
           onClick={() => setSelectedCategory('Intelligence')}
           style={{ '--filter-color': CATEGORY_COLORS.Intelligence } as React.CSSProperties}
         >
-          🧠 Intelligence
+          Intelligence
         </button>
         <button
           className={`filter-btn ${selectedCategory === 'Charisma' ? 'active' : ''}`}
           onClick={() => setSelectedCategory('Charisma')}
           style={{ '--filter-color': CATEGORY_COLORS.Charisma } as React.CSSProperties}
         >
-          ✨ Charisma
+          Charisma
         </button>
       </div>
 

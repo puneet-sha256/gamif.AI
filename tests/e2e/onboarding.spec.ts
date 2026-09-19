@@ -161,16 +161,16 @@ test.describe('Onboarding flow', () => {
 
     await loginAs(page, ONBOARDING_USER)
 
-    await expect(page.getByText('PLAYER REGISTRATION')).toBeVisible()
+    await expect(page.getByText('PROFILE SETUP')).toBeVisible()
     await page.locator('input#name').fill('Fresh Hero')
     await page.locator('#dob-setup-year').selectOption('1999')
     await page.locator('#dob-setup-month').selectOption('08')
     await page.locator('#dob-setup-day').selectOption('16')
-    await page.getByRole('button', { name: 'Continue to Goals Setup' }).click()
+    await page.getByRole('button', { name: 'Continue to goals' }).click()
 
-    await expect(page.getByText('ATTRIBUTE GOALS')).toBeVisible()
+    await expect(page.getByText('GOAL SETUP')).toBeVisible()
 
-    const submitButton = page.getByRole('button', { name: 'Complete Setup & Generate Tasks' })
+    const submitButton = page.getByRole('button', { name: 'Continue to personalisation' })
     await page.locator('textarea.goal-textarea').fill(' '.repeat(60))
     await expect(submitButton).toBeDisabled()
 
