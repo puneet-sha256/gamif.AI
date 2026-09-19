@@ -160,6 +160,13 @@ test.describe('First-time user onboarding tour', () => {
       await expect(tabs.nth(index).locator('svg')).toBeVisible()
     }
 
+    const bottomNavigationBox = await page.locator('.dashboard-navigation').boundingBox()
+    const contentBottomPadding = await page.locator('.dashboard-content').evaluate(element =>
+      Number.parseFloat(window.getComputedStyle(element).paddingBottom)
+    )
+    expect(bottomNavigationBox).not.toBeNull()
+    expect(contentBottomPadding).toBeGreaterThanOrEqual(bottomNavigationBox!.height + 16)
+
     for (const buttonName of [
       /Unclaimed Rewards/,
       /Guild notifications/,
